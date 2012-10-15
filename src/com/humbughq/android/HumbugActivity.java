@@ -65,11 +65,17 @@ public class HumbugActivity extends Activity {
             e1.printStackTrace();
         }
 
+        TextView senderName = new TextView(this);
+        senderName.setWidth(100);
+        senderName.setGravity(Gravity.CENTER_HORIZONTAL);
+        senderName.setText(message.getSender());
+        
         TextView contentView = new TextView(this);
         String content = message.getContent().replaceAll("\\<.*?>","");
         contentView.setText(content);
         contentView.setPadding(10, 0, 10, 10);
         leftTile.addView(gravatar);
+        leftTile.addView(senderName);
         rightTile.addView(contentView);
         
         return tile;

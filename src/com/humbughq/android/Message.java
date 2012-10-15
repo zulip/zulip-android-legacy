@@ -14,7 +14,7 @@ public class Message {
     private String subject;
     
     public Message (JSONObject message) throws JSONException {
-        this.sender = message.getString("sender_name");
+        this.setSender(message.getString("sender_name"));
         this.setDisplayRecipient(message.getString("display_recipient"));
         if (message.getString("type").equals("stream")) {
             this.setType(Message.STREAM_MESSAGE);
@@ -59,5 +59,13 @@ public class Message {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String getSender() {
+        return sender;
+    }
+
+    public void setSender(String sender) {
+        this.sender = sender;
     }
 }
