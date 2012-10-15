@@ -13,7 +13,15 @@ public class Message {
     private String content;
     private String subject;
     
+    public Message () {
+        // Default constructor
+    }
     public Message (JSONObject message) throws JSONException {
+        this.populate(message);
+    }
+    
+    public void populate(JSONObject message) throws JSONException {
+        
         this.setSender(message.getString("sender_name"));
         this.setDisplayRecipient(message.getString("display_recipient"));
         if (message.getString("type").equals("stream")) {
