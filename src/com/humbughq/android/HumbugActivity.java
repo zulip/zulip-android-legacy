@@ -3,9 +3,11 @@ package com.humbughq.android;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import android.app.Activity;
 import android.content.res.AssetManager;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -21,6 +23,7 @@ public class HumbugActivity extends Activity {
     LinearLayout tilepanel;
 
     ArrayList<Message> messages;
+    HashMap<String, Bitmap> profile_pictures;
 
     public LinearLayout renderStreamMessage(Message message) {
         LinearLayout tile = new LinearLayout(this);
@@ -48,18 +51,24 @@ public class HumbugActivity extends Activity {
         rightTile.addView(instance);
 
         AssetManager am = getAssets();
-        ImageView gravatar = new ImageView(this);
 
-        BufferedInputStream buf;
-        try {
-            // TODO don't use a static file
-            buf = new BufferedInputStream(am.open("sample.png"));
-            gravatar.setImageBitmap(BitmapFactory.decodeStream(buf));
-        } catch (IOException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+        ImageView gravatarView = new ImageView(this);
+        Bitmap gravatar = profile_pictures.get(message.getSenderEmail());
+
+        if (gravatar == null) {
+            BufferedInputStream buf;
+            try {
+                // TODO don't use a static file
+                buf = new BufferedInputStream(am.open("sample.png"));
+                gravatar = BitmapFactory.decodeStream(buf);
+                profile_pictures.put(message.getSenderEmail(), gravatar);
+            } catch (IOException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
         }
 
+        gravatarView.setImageBitmap(gravatar);
         TextView senderName = new TextView(this);
         senderName.setWidth(100);
         senderName.setGravity(Gravity.CENTER_HORIZONTAL);
@@ -69,7 +78,7 @@ public class HumbugActivity extends Activity {
         String content = message.getContent().replaceAll("\\<.*?>", "");
         contentView.setText(content);
         contentView.setPadding(10, 0, 10, 10);
-        leftTile.addView(gravatar);
+        leftTile.addView(gravatarView);
         leftTile.addView(senderName);
         rightTile.addView(contentView);
 
@@ -82,6 +91,7 @@ public class HumbugActivity extends Activity {
         super.onCreate(savedInstanceState);
         Log.i("funny", "starting...");
         messages = new ArrayList<Message>();
+        this.profile_pictures = new HashMap<String, Bitmap>();
 
         setContentView(R.layout.main);
         tilepanel = (LinearLayout) findViewById(R.id.tilepanel);
