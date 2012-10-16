@@ -48,6 +48,9 @@ class AsyncPoller extends AsyncTask<String, String, String> {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+
+        httpclient.close();
+
         return responseString;
     }
 
