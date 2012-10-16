@@ -31,6 +31,11 @@ class AsyncPoller extends HumbugAsyncWebGet {
             Log.e("json", "parsing error");
             e.printStackTrace();
         }
-        new AsyncPoller(this.that).execute(HumbugActivity.SERVER_URI);
+        if (this.that.suspended) {
+            Log.i("poll", "suspended, dying");
+            return;
+        }
+        this.that.current_poll = new AsyncPoller(this.that);
+        this.that.current_poll.execute(HumbugActivity.SERVER_URI);
     }
 }

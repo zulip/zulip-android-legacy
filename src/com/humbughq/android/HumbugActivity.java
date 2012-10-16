@@ -20,6 +20,10 @@ public class HumbugActivity extends Activity {
     ArrayList<Message> messages;
     HashMap<String, Bitmap> profile_pictures;
 
+    AsyncPoller current_poll;
+
+    boolean suspended = false;
+
     public LinearLayout renderStreamMessage(Message message) {
         LinearLayout tile = new LinearLayout(this);
 
@@ -71,8 +75,22 @@ public class HumbugActivity extends Activity {
         setContentView(R.layout.main);
         tilepanel = (LinearLayout) findViewById(R.id.tilepanel);
 
-        AsyncPoller foo = new AsyncPoller(this);
-        foo.execute(HumbugActivity.SERVER_URI);
+        this.current_poll = new AsyncPoller(this);
+        this.current_poll.execute(HumbugActivity.SERVER_URI);
 
+    }
+
+    public void onPause() {
+        super.onPause();
+        Log.i("status", "suspend");
+        this.suspended = true;
+    }
+
+    public void onResume() {
+        super.onResume();
+        Log.i("status", "resume");
+        this.suspended = false;
+        this.current_poll = new AsyncPoller(this);
+        this.current_poll.execute(HumbugActivity.SERVER_URI);
     }
 }
