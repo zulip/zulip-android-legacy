@@ -4,5 +4,8 @@
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
+	<classpathentry kind="lib" path="/usr/share/java/commons-codec.jar"/>
+	<classpathentry kind="lib" path="/usr/share/java/commons-io.jar"/>
+	<classpathentry kind="lib" path="/usr/share/java/commons-lang.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
