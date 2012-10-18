@@ -23,8 +23,7 @@ public class Message {
     }
 
     public void populate(JSONObject message) throws JSONException {
-
-        this.setSender(message.getString("sender_name"));
+        this.setSender(message.getString("sender_full_name"));
         this.setSenderEmail(message.getString("sender_email"));
         this.setDisplayRecipient(message.getString("display_recipient"));
         if (message.getString("type").equals("stream")) {

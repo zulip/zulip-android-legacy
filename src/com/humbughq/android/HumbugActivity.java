@@ -45,6 +45,8 @@ public class HumbugActivity extends Activity {
 
     String api_key;
 
+    String email;
+
     protected LinearLayout renderStreamMessage(Message message) {
         LinearLayout tile = new LinearLayout(this);
 
@@ -141,6 +143,7 @@ public class HumbugActivity extends Activity {
             response.getEntity().writeTo(out);
             out.close();
             api_key = out.toString();
+            email = username;
             Log.i("login", "Logged in as " + api_key);
 
         } catch (UnsupportedEncodingException e) {
@@ -170,7 +173,7 @@ public class HumbugActivity extends Activity {
         tilepanel = (LinearLayout) findViewById(R.id.tilepanel);
 
         this.current_poll = new AsyncPoller(this);
-        this.current_poll.execute(HumbugActivity.SERVER_URI);
+        this.current_poll.execute();
 
     }
 

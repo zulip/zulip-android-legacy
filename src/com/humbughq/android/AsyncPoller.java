@@ -2,13 +2,18 @@ package com.humbughq.android;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.util.Log;
 
-class AsyncPoller extends HumbugAsyncWebGet {
+class AsyncPoller extends HumbugAsyncPushTask {
 
     public AsyncPoller(HumbugActivity humbugActivity) {
         super(humbugActivity);
+    }
+
+    public final void execute() {
+        this.execute("api/v1/get_messages");
     }
 
     @Override
@@ -16,7 +21,8 @@ class AsyncPoller extends HumbugAsyncWebGet {
         super.onPostExecute(result);
 
         try {
-            JSONArray objects = new JSONArray(result);
+            JSONObject response = new JSONObject(result);
+            JSONArray objects = response.getJSONArray("messages");
             for (int i = 0; i < objects.length(); i++) {
                 Log.i("json-iter", "" + i);
                 Message message = new Message(objects.getJSONObject(i));
@@ -36,6 +42,6 @@ class AsyncPoller extends HumbugAsyncWebGet {
             return;
         }
         this.that.current_poll = new AsyncPoller(this.that);
-        this.that.current_poll.execute(HumbugActivity.SERVER_URI);
+        this.that.current_poll.execute();
     }
 }
