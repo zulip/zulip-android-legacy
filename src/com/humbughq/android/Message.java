@@ -1,5 +1,7 @@
 package com.humbughq.android;
 
+import java.util.Date;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -13,6 +15,7 @@ public class Message {
     private String content;
     private String subject;
     private String senderEmail;
+    private Date curDateTime;
 
     public Message() {
         // Default constructor
@@ -37,6 +40,8 @@ public class Message {
         } else {
             this.setSubject(null);
         }
+
+        this.setCurDateTime(new Date(message.getInt("timestamp")));
     }
 
     public int getType() {
@@ -85,5 +90,13 @@ public class Message {
 
     public void setSenderEmail(String senderEmail) {
         this.senderEmail = senderEmail;
+    }
+
+    public Date getCurDateTime() {
+        return curDateTime;
+    }
+
+    public void setCurDateTime(Date curDateTime) {
+        this.curDateTime = curDateTime;
     }
 }
