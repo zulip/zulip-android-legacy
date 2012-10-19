@@ -38,40 +38,39 @@ public class HumbugActivity extends Activity {
 
     protected LinearLayout renderStreamMessage(Message message) {
         LinearLayout tile = new LinearLayout(this);
+        tile.setOrientation(LinearLayout.VERTICAL);
 
-        LinearLayout leftTile = new LinearLayout(this);
-        leftTile.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout envelopeTile = new LinearLayout(this);
+        envelopeTile.setOrientation(LinearLayout.HORIZONTAL);
 
-        LinearLayout rightTile = new LinearLayout(this);
-        rightTile.setOrientation(LinearLayout.VERTICAL);
-
-        tile.addView(leftTile);
-        tile.addView(rightTile);
+        tile.addView(envelopeTile);
 
         TextView stream2 = new TextView(this);
         stream2.setText(message.getDisplayRecipient());
         stream2.setTypeface(Typeface.DEFAULT_BOLD);
         stream2.setGravity(Gravity.CENTER_HORIZONTAL);
-        stream2.setPadding(10, 10, 10, 10);
+        stream2.setPadding(10, 10, 10, 5);
 
         TextView instance = new TextView(this);
         instance.setText(message.getSubject());
-        instance.setPadding(10, 10, 10, 10);
+        instance.setPadding(10, 0, 10, 10);
 
-        leftTile.addView(stream2);
-        rightTile.addView(instance);
+        envelopeTile.addView(stream2);
+        envelopeTile.addView(instance);
 
         TextView senderName = new TextView(this);
-        senderName.setWidth(100);
-        senderName.setGravity(Gravity.CENTER_HORIZONTAL);
+
         senderName.setText(message.getSender());
+        senderName.setPadding(10, 10, 10, 10);
+
+        tile.addView(senderName);
 
         TextView contentView = new TextView(this);
         String content = message.getContent().replaceAll("\\<.*?>", "");
         contentView.setText(content);
         contentView.setPadding(10, 0, 10, 10);
-        leftTile.addView(senderName);
-        rightTile.addView(contentView);
+
+        tile.addView(contentView);
 
         return tile;
     }
