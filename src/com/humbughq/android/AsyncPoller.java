@@ -16,6 +16,12 @@ class AsyncPoller extends HumbugAsyncPushTask {
         this.execute("api/v1/get_messages");
     }
 
+    public final void execute(int first, int last) {
+        this.setProperty("first", first + "");
+        this.setProperty("last", last + "");
+        this.execute("api/v1/get_messages");
+    }
+
     @Override
     protected void onPostExecute(String result) {
         super.onPostExecute(result);

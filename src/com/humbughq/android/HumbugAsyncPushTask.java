@@ -22,28 +22,32 @@ import android.util.Log;
 class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
 
     HumbugActivity that;
-
-    public static final String USER_AGENT = "HumbugMobile 1.0";
+    List<NameValuePair> nameValuePairs;
 
     public HumbugAsyncPushTask(HumbugActivity humbugActivity) {
         that = humbugActivity;
+        nameValuePairs = new ArrayList<NameValuePair>();
+    }
+
+    public void setProperty(String key, String value) {
+        this.nameValuePairs.add(new BasicNameValuePair(key, value));
     }
 
     protected String doInBackground(String... api_path) {
         AndroidHttpClient httpclient = AndroidHttpClient
-                .newInstance(HumbugAsyncPushTask.USER_AGENT);
+                .newInstance(HumbugActivity.USER_AGENT);
         HttpResponse response;
         String responseString = null;
         try {
             HttpPost httppost = new HttpPost(HumbugActivity.SERVER_URI
                     + api_path[0]);
             Log.i("welp", HumbugActivity.SERVER_URI + api_path[0]);
-            // Add your data
-            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+
             nameValuePairs.add(new BasicNameValuePair("api-key",
                     this.that.api_key));
             nameValuePairs
                     .add(new BasicNameValuePair("email", this.that.email));
+
             httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
             HttpConnectionParams.setSoTimeout(httppost.getParams(),

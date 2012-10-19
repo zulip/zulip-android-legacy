@@ -1,21 +1,7 @@
 package com.humbughq.android;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
@@ -30,7 +16,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class HumbugActivity extends Activity {
-    public static final String SERVER_URI = "http://10.0.2.2:8000/";
+    public static final String SERVER_URI = "https://app.humbughq.com/";
+    public static final String USER_AGENT = "HumbugMobile 1.0";
 
     LinearLayout tilepanel;
 
@@ -46,6 +33,8 @@ public class HumbugActivity extends Activity {
     String api_key;
 
     String email;
+
+    HumbugActivity that = this; // self-ref
 
     protected LinearLayout renderStreamMessage(Message message) {
         LinearLayout tile = new LinearLayout(this);
@@ -100,68 +89,14 @@ public class HumbugActivity extends Activity {
                     public void onClick(View v) {
                         TextView errorText = (TextView) findViewById(R.id.error_text);
                         errorText.setText("Logging in...");
-                        if (!doLogin(((EditText) findViewById(R.id.username))
-                                .getText().toString(),
+                        (new AsyncLogin(that,
+                                ((EditText) findViewById(R.id.username))
+                                        .getText().toString(),
                                 ((EditText) findViewById(R.id.password))
-                                        .getText().toString())) {
-                            // Login failed
-
-                            errorText.setText("Login failed");
-                        } else {
-                            openLogin();
-                        }
+                                        .getText().toString())).execute();
                     }
                 });
         return;
-
-    }
-
-    protected boolean doLogin(String username, String password) {
-
-        logged_in = false;
-
-        HttpClient httpclient = new DefaultHttpClient();
-        try {
-            HttpPost httppost = new HttpPost(SERVER_URI
-                    + "api/v1/fetch_api_key");
-
-            // Add your data
-            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-            nameValuePairs.add(new BasicNameValuePair("username", username));
-            nameValuePairs.add(new BasicNameValuePair("password", password));
-            httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-
-            HttpResponse response = httpclient.execute(httppost);
-
-            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                this.logged_in = true;
-            }
-
-            Log.i("login", response.getStatusLine().getStatusCode() + "");
-
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            response.getEntity().writeTo(out);
-            out.close();
-            api_key = out.toString();
-            email = username;
-            Log.i("login", "Logged in as " + api_key);
-
-        } catch (UnsupportedEncodingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (ClientProtocolException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } finally {
-            // When HttpClient instance is no longer needed,
-            // shut down the connection manager to ensure
-            // immediate deallocation of all system resources
-            httpclient.getConnectionManager().shutdown();
-        }
-        return logged_in;
 
     }
 
@@ -173,7 +108,7 @@ public class HumbugActivity extends Activity {
         tilepanel = (LinearLayout) findViewById(R.id.tilepanel);
 
         this.current_poll = new AsyncPoller(this);
-        this.current_poll.execute();
+        this.current_poll.execute(-1, -1);
 
     }
 
