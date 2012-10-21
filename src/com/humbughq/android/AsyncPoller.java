@@ -8,6 +8,8 @@ import android.util.Log;
 
 class AsyncPoller extends HumbugAsyncPushTask {
 
+    private Message[] receivedMessages;
+
     public AsyncPoller(HumbugActivity humbugActivity) {
         super(humbugActivity);
     }
@@ -23,21 +25,28 @@ class AsyncPoller extends HumbugAsyncPushTask {
     }
 
     @Override
-    protected void onPostExecute(String result) {
-        super.onPostExecute(result);
+    protected String doInBackground(String... api_path) {
+        String result = super.doInBackground(api_path);
+
         if (result != null) {
             try {
                 JSONObject response = new JSONObject(result);
                 JSONArray objects = response.getJSONArray("messages");
+
+                receivedMessages = new Message[objects.length()];
+
                 for (int i = 0; i < objects.length(); i++) {
                     Log.i("json-iter", "" + i);
                     Message message = new Message(objects.getJSONObject(i));
+                    /*
+                     * Add to the local message array and the global ArrayList
+                     * of all messages.
+                     * 
+                     * We do this because we want to process JSON here, but do
+                     * manipulation of the UI on the UI thread.
+                     */
+                    receivedMessages[i] = message;
                     this.that.messages.add(message);
-
-                    if (message.getType() == Message.STREAM_MESSAGE) {
-                        this.that.tilepanel.addView(this.that
-                                .renderStreamMessage(message));
-                    }
                 }
             } catch (JSONException e) {
                 Log.e("json", "parsing error");
@@ -46,6 +55,20 @@ class AsyncPoller extends HumbugAsyncPushTask {
         } else {
             Log.i("poll", "got nothing from the server");
         }
+        return null; // since onPostExecute doesn't use the result
+    }
+
+    @Override
+    protected void onPostExecute(String result) {
+        super.onPostExecute(result);
+
+        for (Message message : receivedMessages) {
+            if (message.getType() == Message.STREAM_MESSAGE) {
+                this.that.tilepanel.addView(this.that
+                        .renderStreamMessage(message));
+            }
+        }
+
         if (this.that.suspended) {
             Log.i("poll", "suspended, dying");
             return;
