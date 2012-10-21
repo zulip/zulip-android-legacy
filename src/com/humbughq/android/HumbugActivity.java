@@ -42,6 +42,7 @@ public class HumbugActivity extends Activity {
 
         LinearLayout envelopeTile = new LinearLayout(this);
         envelopeTile.setOrientation(LinearLayout.HORIZONTAL);
+        envelopeTile.setBackgroundResource(R.drawable.border);
 
         tile.addView(envelopeTile);
 
@@ -49,13 +50,17 @@ public class HumbugActivity extends Activity {
         stream2.setText(message.getDisplayRecipient());
         stream2.setTypeface(Typeface.DEFAULT_BOLD);
         stream2.setGravity(Gravity.CENTER_HORIZONTAL);
-        stream2.setPadding(10, 10, 10, 5);
+        stream2.setPadding(10, 5, 10, 5);
+
+        TextView sep = new TextView(this);
+        sep.setText(" | ");
 
         TextView instance = new TextView(this);
         instance.setText(message.getSubject());
-        instance.setPadding(10, 0, 10, 10);
+        instance.setPadding(10, 5, 10, 5);
 
         envelopeTile.addView(stream2);
+        envelopeTile.addView(sep);
         envelopeTile.addView(instance);
 
         TextView senderName = new TextView(this);
