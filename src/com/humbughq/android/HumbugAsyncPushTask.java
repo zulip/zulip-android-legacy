@@ -77,4 +77,5 @@ class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
         Log.i("HAPT", "F" + responseString);
         return responseString;
     }
+
 }
