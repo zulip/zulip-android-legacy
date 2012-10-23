@@ -11,6 +11,7 @@ import android.text.TextUtils;
 public class Message {
     public static final int STREAM_MESSAGE = 1;
     public static final int HUDDLE_MESSAGE = 2;
+    public static final int PERSONAL_MESSAGE = 3;
 
     private String sender;
     private int type;
@@ -39,13 +40,17 @@ public class Message {
             this.setType(Message.HUDDLE_MESSAGE);
             JSONArray jsonRecipients = message
                     .getJSONArray("display_recipient");
-
             recipients = new String[jsonRecipients.length()];
 
             for (int i = 0; i < jsonRecipients.length(); i++) {
                 recipients[i] = jsonRecipients.getJSONObject(i).getString(
                         "short_name");
             }
+        } else if (message.getString("type").equals("personal")) {
+            this.setType(Message.PERSONAL_MESSAGE);
+            recipients = new String[1];
+            recipients[0] = message.getJSONObject("display_recipient")
+                    .getString("short_name");
         }
         this.setContent(message.getString("content"));
         if (this.getType() == Message.STREAM_MESSAGE) {
