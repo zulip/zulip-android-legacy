@@ -18,7 +18,7 @@ public class Message {
     private String content;
     private String subject;
     private String senderEmail;
-    private Date curDateTime;
+    private Date timestamp;
     private String[] recipients;
 
     public Message() {
@@ -59,7 +59,7 @@ public class Message {
             this.setSubject(null);
         }
 
-        this.setCurDateTime(new Date(message.getInt("timestamp")));
+        this.setTimestamp(new Date(message.getInt("timestamp")));
     }
 
     public int getType() {
@@ -106,11 +106,11 @@ public class Message {
         this.senderEmail = senderEmail;
     }
 
-    public Date getCurDateTime() {
-        return curDateTime;
+    public Date getTimestamp() {
+        return timestamp;
     }
 
-    public void setCurDateTime(Date curDateTime) {
-        this.curDateTime = curDateTime;
+    public void setTimestamp(Date curDateTime) {
+        this.timestamp = curDateTime;
     }
 }
