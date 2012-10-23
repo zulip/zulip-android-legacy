@@ -2,20 +2,23 @@ package com.humbughq.android;
 
 import java.util.Date;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import android.text.TextUtils;
 
 public class Message {
     public static final int STREAM_MESSAGE = 1;
     public static final int HUDDLE_MESSAGE = 2;
 
     private String sender;
-    private String display_recipient;
     private int type;
     private String content;
     private String subject;
     private String senderEmail;
     private Date curDateTime;
+    private String[] recipients;
 
     public Message() {
         // Default constructor
@@ -28,11 +31,21 @@ public class Message {
     public void populate(JSONObject message) throws JSONException {
         this.setSender(message.getString("sender_full_name"));
         this.setSenderEmail(message.getString("sender_email"));
-        this.setDisplayRecipient(message.getString("display_recipient"));
         if (message.getString("type").equals("stream")) {
             this.setType(Message.STREAM_MESSAGE);
+            recipients = new String[1];
+            recipients[0] = message.getString("display_recipient");
         } else if (message.getString("type").equals("huddle")) {
             this.setType(Message.HUDDLE_MESSAGE);
+            JSONArray jsonRecipients = message
+                    .getJSONArray("display_recipient");
+
+            recipients = new String[jsonRecipients.length()];
+
+            for (int i = 0; i < jsonRecipients.length(); i++) {
+                recipients[i] = jsonRecipients.getJSONObject(i).getString(
+                        "short_name");
+            }
         }
         this.setContent(message.getString("content"));
         if (this.getType() == Message.STREAM_MESSAGE) {
@@ -52,12 +65,8 @@ public class Message {
         this.type = type;
     }
 
-    public String getDisplayRecipient() {
-        return display_recipient;
-    }
-
-    public void setDisplayRecipient(String display_recipient) {
-        this.display_recipient = display_recipient;
+    public String getRecipient() {
+        return TextUtils.join(", ", recipients);
     }
 
     public String getSubject() {

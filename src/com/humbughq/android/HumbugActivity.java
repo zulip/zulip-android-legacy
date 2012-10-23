@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
@@ -42,31 +43,44 @@ public class HumbugActivity extends Activity {
 
         LinearLayout envelopeTile = new LinearLayout(this);
         envelopeTile.setOrientation(LinearLayout.HORIZONTAL);
-        envelopeTile.setBackgroundResource(R.drawable.border);
+        if (message.getType() == Message.HUDDLE_MESSAGE) {
+            envelopeTile.setBackgroundResource(R.drawable.stream_header);
+        } else {
+            envelopeTile.setBackgroundResource(R.drawable.huddle_header);
+        }
 
         tile.addView(envelopeTile);
 
-        TextView stream2 = new TextView(this);
-        stream2.setText(message.getDisplayRecipient());
-        stream2.setTypeface(Typeface.DEFAULT_BOLD);
-        stream2.setGravity(Gravity.CENTER_HORIZONTAL);
-        stream2.setPadding(10, 5, 10, 5);
+        TextView display_recipient = new TextView(this);
+        if (message.getType() == Message.HUDDLE_MESSAGE) {
+            display_recipient.setText("Huddle with " + message.getRecipient());
+            display_recipient.setTextColor(Color.WHITE);
+        } else {
+            display_recipient.setText(message.getRecipient());
+        }
+        display_recipient.setTypeface(Typeface.DEFAULT_BOLD);
+        display_recipient.setGravity(Gravity.CENTER_HORIZONTAL);
+        display_recipient.setPadding(10, 5, 10, 5);
 
-        TextView sep = new TextView(this);
-        sep.setText(" | ");
+        envelopeTile.addView(display_recipient);
 
-        TextView instance = new TextView(this);
-        instance.setText(message.getSubject());
-        instance.setPadding(10, 5, 10, 5);
+        if (message.getType() == Message.STREAM_MESSAGE) {
+            TextView sep = new TextView(this);
+            sep.setText(" | ");
 
-        envelopeTile.addView(stream2);
-        envelopeTile.addView(sep);
-        envelopeTile.addView(instance);
+            TextView instance = new TextView(this);
+            instance.setText(message.getSubject());
+            instance.setPadding(10, 5, 10, 5);
+
+            envelopeTile.addView(sep);
+            envelopeTile.addView(instance);
+        }
 
         TextView senderName = new TextView(this);
 
         senderName.setText(message.getSender());
-        senderName.setPadding(10, 10, 10, 10);
+        senderName.setPadding(10, 5, 10, 5);
+        senderName.setTypeface(Typeface.DEFAULT, Typeface.ITALIC);
 
         tile.addView(senderName);
 
@@ -74,6 +88,17 @@ public class HumbugActivity extends Activity {
         String content = message.getContent().replaceAll("\\<.*?>", "");
         contentView.setText(content);
         contentView.setPadding(10, 0, 10, 10);
+
+        int color = Color.WHITE;
+
+        if (message.getType() == Message.HUDDLE_MESSAGE) {
+            color = getResources().getColor(R.color.huddle_body);
+        } else if (message.getType() == Message.STREAM_MESSAGE) {
+            color = getResources().getColor(R.color.stream_body);
+        }
+
+        senderName.setBackgroundColor(color);
+        contentView.setBackgroundColor(color);
 
         tile.addView(contentView);
 

@@ -63,10 +63,7 @@ class AsyncPoller extends HumbugAsyncPushTask {
         super.onPostExecute(result);
 
         for (Message message : receivedMessages) {
-            if (message.getType() == Message.STREAM_MESSAGE) {
-                this.that.tilepanel.addView(this.that
-                        .renderStreamMessage(message));
-            }
+            this.that.tilepanel.addView(this.that.renderStreamMessage(message));
         }
 
         if (this.that.suspended) {
