@@ -43,7 +43,7 @@ public class HumbugActivity extends Activity {
 
         LinearLayout envelopeTile = new LinearLayout(this);
         envelopeTile.setOrientation(LinearLayout.HORIZONTAL);
-        if (message.getType() == Message.HUDDLE_MESSAGE) {
+        if (message.getType() == Message.STREAM_MESSAGE) {
             envelopeTile.setBackgroundResource(R.drawable.stream_header);
         } else {
             envelopeTile.setBackgroundResource(R.drawable.huddle_header);
@@ -52,7 +52,7 @@ public class HumbugActivity extends Activity {
         tile.addView(envelopeTile);
 
         TextView display_recipient = new TextView(this);
-        if (message.getType() == Message.HUDDLE_MESSAGE) {
+        if (message.getType() != Message.STREAM_MESSAGE) {
             display_recipient.setText("Huddle with " + message.getRecipient());
             display_recipient.setTextColor(Color.WHITE);
         } else {
@@ -91,9 +91,9 @@ public class HumbugActivity extends Activity {
 
         int color = Color.WHITE;
 
-        if (message.getType() == Message.HUDDLE_MESSAGE) {
+        if (message.getType() != Message.STREAM_MESSAGE) {
             color = getResources().getColor(R.color.huddle_body);
-        } else if (message.getType() == Message.STREAM_MESSAGE) {
+        } else {
             color = getResources().getColor(R.color.stream_body);
         }
 
