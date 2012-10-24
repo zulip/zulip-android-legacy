@@ -25,7 +25,14 @@ public class HumbugActivity extends Activity {
     ScrollView mainScroller;
 
     HashMap<String, Bitmap> profile_pictures;
+
+    /*
+     * A "message" refers to an instance of the object Message. A "tile" is an
+     * instance of LinearLayout which represents a single message in the UI.
+     */
+
     SparseArray<Message> messages;
+    SparseArray<LinearLayout> messageTiles;
 
     AsyncPoller current_poll;
 
@@ -38,6 +45,7 @@ public class HumbugActivity extends Activity {
     String email;
 
     HumbugActivity that = this; // self-ref
+    int pointerPos;
 
     protected LinearLayout renderStreamMessage(Message message) {
         LinearLayout tile = new LinearLayout(this);
@@ -133,14 +141,15 @@ public class HumbugActivity extends Activity {
 
     protected void openLogin() {
         messages = new SparseArray<Message>();
+        messageTiles = new SparseArray<LinearLayout>();
         this.profile_pictures = new HashMap<String, Bitmap>();
 
         setContentView(R.layout.main);
         tilepanel = (LinearLayout) findViewById(R.id.tilepanel);
         mainScroller = (ScrollView) findViewById(R.id.scrollView1);
 
-        this.current_poll = new AsyncPoller(this);
-        this.current_poll.execute(-1, -1);
+        this.current_poll = new AsyncPoller(this, true);
+        this.current_poll.fetchInitial();
 
     }
 
@@ -155,8 +164,9 @@ public class HumbugActivity extends Activity {
         Log.i("status", "resume");
         this.suspended = false;
         if (this.logged_in) {
-            this.current_poll = new AsyncPoller(this);
-            this.current_poll.execute(HumbugActivity.SERVER_URI);
+            // Update the pointer
+            this.current_poll = new AsyncPoller(this, true);
+            this.current_poll.execute();
         }
     }
 }
