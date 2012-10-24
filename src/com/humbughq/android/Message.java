@@ -20,6 +20,7 @@ public class Message {
     private String senderEmail;
     private Date timestamp;
     private String[] recipients;
+    private int id;
 
     public Message() {
         // Default constructor
@@ -60,6 +61,7 @@ public class Message {
         }
 
         this.setTimestamp(new Date(message.getInt("timestamp")));
+        this.setID(message.getInt("id"));
     }
 
     public int getType() {
@@ -112,5 +114,13 @@ public class Message {
 
     public void setTimestamp(Date curDateTime) {
         this.timestamp = curDateTime;
+    }
+
+    public int getID() {
+        return id;
+    }
+
+    public void setID(int id) {
+        this.id = id;
     }
 }
