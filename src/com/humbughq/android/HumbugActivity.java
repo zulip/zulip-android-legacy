@@ -1,6 +1,5 @@
 package com.humbughq.android;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import android.app.Activity;
@@ -9,11 +8,13 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 public class HumbugActivity extends Activity {
@@ -21,9 +22,10 @@ public class HumbugActivity extends Activity {
     public static final String USER_AGENT = "HumbugMobile 1.0";
 
     LinearLayout tilepanel;
+    ScrollView mainScroller;
 
-    ArrayList<Message> messages;
     HashMap<String, Bitmap> profile_pictures;
+    SparseArray<Message> messages;
 
     AsyncPoller current_poll;
 
@@ -130,11 +132,12 @@ public class HumbugActivity extends Activity {
     }
 
     protected void openLogin() {
-        messages = new ArrayList<Message>();
+        messages = new SparseArray<Message>();
         this.profile_pictures = new HashMap<String, Bitmap>();
 
         setContentView(R.layout.main);
         tilepanel = (LinearLayout) findViewById(R.id.tilepanel);
+        mainScroller = (ScrollView) findViewById(R.id.scrollView1);
 
         this.current_poll = new AsyncPoller(this);
         this.current_poll.execute(-1, -1);

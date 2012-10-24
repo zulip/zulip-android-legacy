@@ -46,7 +46,7 @@ class AsyncPoller extends HumbugAsyncPushTask {
                      * manipulation of the UI on the UI thread.
                      */
                     receivedMessages[i] = message;
-                    this.that.messages.add(message);
+                    this.that.messages.append(message.getID(), message);
                 }
             } catch (JSONException e) {
                 Log.e("json", "parsing error");
