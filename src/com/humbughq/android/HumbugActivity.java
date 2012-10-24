@@ -80,7 +80,7 @@ public class HumbugActivity extends Activity {
 
         senderName.setText(message.getSender());
         senderName.setPadding(10, 5, 10, 5);
-        senderName.setTypeface(Typeface.DEFAULT, Typeface.ITALIC);
+        senderName.setTypeface(Typeface.DEFAULT_BOLD);
 
         tile.addView(senderName);
 
