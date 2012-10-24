@@ -5,13 +5,17 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.util.Log;
+import android.widget.LinearLayout;
 
 class AsyncPoller extends HumbugAsyncPushTask {
 
     private Message[] receivedMessages;
+    private boolean shouldUpdatePointer;
 
-    public AsyncPoller(HumbugActivity humbugActivity) {
+    public AsyncPoller(HumbugActivity humbugActivity,
+            boolean shouldUpdatePointer) {
         super(humbugActivity);
+        this.shouldUpdatePointer = shouldUpdatePointer;
     }
 
     public final void execute() {
@@ -22,6 +26,10 @@ class AsyncPoller extends HumbugAsyncPushTask {
         this.setProperty("first", first + "");
         this.setProperty("last", last + "");
         this.execute("api/v1/get_messages");
+    }
+
+    public final void fetchInitial() {
+        this.execute(-1, -1);
     }
 
     @Override
@@ -66,14 +74,19 @@ class AsyncPoller extends HumbugAsyncPushTask {
             return;
         }
         for (Message message : receivedMessages) {
-            this.that.tilepanel.addView(this.that.renderStreamMessage(message));
+            LinearLayout tile = this.that.renderStreamMessage(message);
+            this.that.tilepanel.addView(tile);
+            this.that.messageTiles.append(message.getID(), tile);
         }
 
+        if (shouldUpdatePointer) {
+            (new AsyncPointerUpdate(this.that)).execute();
+        }
         if (this.that.suspended) {
             Log.i("poll", "suspended, dying");
             return;
         }
-        this.that.current_poll = new AsyncPoller(this.that);
+        this.that.current_poll = new AsyncPoller(this.that, false);
         this.that.current_poll.execute();
     }
 }
