@@ -4,7 +4,6 @@ import android.util.Log;
 import android.widget.TextView;
 
 class AsyncLogin extends HumbugAsyncPushTask {
-    HumbugActivity that;
 
     public AsyncLogin(HumbugActivity humbugActivity, String username,
             String password) {
