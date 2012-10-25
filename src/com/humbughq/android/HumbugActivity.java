@@ -1,27 +1,24 @@
 package com.humbughq.android;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 
 public class HumbugActivity extends Activity {
     public static final String SERVER_URI = "https://app.humbughq.com/";
     public static final String USER_AGENT = "HumbugMobile 1.0";
 
-    LinearLayout tilepanel;
-    PointyScrollView mainScroller;
+    ListView listView;
 
     HashMap<String, Bitmap> profile_pictures;
 
@@ -30,8 +27,8 @@ public class HumbugActivity extends Activity {
      * instance of LinearLayout which represents a single message in the UI.
      */
 
-    SparseArray<Message> messages;
-    SparseArray<LinearLayout> messageTiles;
+    SparseArray<Message> messageIndex;
+    MessageAdapter adapter;
 
     AsyncPoller current_poll;
 
@@ -44,75 +41,6 @@ public class HumbugActivity extends Activity {
     String email;
 
     HumbugActivity that = this; // self-ref
-
-    protected LinearLayout renderStreamMessage(Message message) {
-        LinearLayout tile = new LinearLayout(this);
-        tile.setOrientation(LinearLayout.VERTICAL);
-
-        LinearLayout envelopeTile = new LinearLayout(this);
-        envelopeTile.setOrientation(LinearLayout.HORIZONTAL);
-        if (message.getType() == Message.STREAM_MESSAGE) {
-            envelopeTile.setBackgroundResource(R.drawable.stream_header);
-        } else {
-            envelopeTile.setBackgroundResource(R.drawable.huddle_header);
-        }
-
-        tile.addView(envelopeTile);
-
-        TextView display_recipient = new TextView(this);
-        if (message.getType() != Message.STREAM_MESSAGE) {
-            display_recipient.setText("Huddle with " + message.getRecipient());
-            display_recipient.setTextColor(Color.WHITE);
-        } else {
-            display_recipient.setText(message.getRecipient());
-        }
-        display_recipient.setTypeface(Typeface.DEFAULT_BOLD);
-        display_recipient.setGravity(Gravity.CENTER_HORIZONTAL);
-        display_recipient.setPadding(10, 5, 10, 5);
-
-        envelopeTile.addView(display_recipient);
-
-        if (message.getType() == Message.STREAM_MESSAGE) {
-            TextView sep = new TextView(this);
-            sep.setText(" | ");
-
-            TextView instance = new TextView(this);
-            instance.setText(message.getSubject());
-            instance.setPadding(10, 5, 10, 5);
-
-            envelopeTile.addView(sep);
-            envelopeTile.addView(instance);
-        }
-
-        TextView senderName = new TextView(this);
-
-        senderName.setText(message.getSender());
-        senderName.setPadding(10, 5, 10, 5);
-        senderName.setTypeface(Typeface.DEFAULT_BOLD);
-
-        tile.addView(senderName);
-
-        TextView contentView = new TextView(this);
-        String content = message.getContent().replaceAll("\\<.*?>", "");
-        contentView.setText(content);
-        contentView.setPadding(10, 0, 10, 10);
-
-        int color = Color.WHITE;
-
-        if (message.getType() != Message.STREAM_MESSAGE) {
-            color = getResources().getColor(R.color.huddle_body);
-        } else {
-            color = getResources().getColor(R.color.stream_body);
-        }
-
-        senderName.setBackgroundColor(color);
-        contentView.setBackgroundColor(color);
-
-        tile.addView(contentView);
-        tile.setTag(R.id.messageID, message.getID());
-
-        return tile;
-    }
 
     /** Called when the activity is first created. */
     @Override
@@ -139,13 +67,15 @@ public class HumbugActivity extends Activity {
     }
 
     protected void openLogin() {
-        messages = new SparseArray<Message>();
-        messageTiles = new SparseArray<LinearLayout>();
+        messageIndex = new SparseArray<Message>();
         this.profile_pictures = new HashMap<String, Bitmap>();
 
         setContentView(R.layout.main);
-        tilepanel = (LinearLayout) findViewById(R.id.tilepanel);
-        mainScroller = (PointyScrollView) findViewById(R.id.scrollView1);
+        listView = (ListView) findViewById(R.id.listview);
+
+        adapter = new MessageAdapter(this, new ArrayList<Message>());
+
+        listView.setAdapter(adapter);
 
         this.current_poll = new AsyncPoller(this, true);
         this.current_poll.fetchInitial();

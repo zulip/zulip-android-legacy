@@ -19,8 +19,9 @@ class AsyncPointerUpdate extends HumbugAsyncPushTask {
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
         try {
-            this.context.mainScroller.select((new JSONObject(result))
-                    .getInt("pointer"));
+            this.context.listView.setSelection(this.context.adapter
+                    .getPosition(this.context.messageIndex.get((new JSONObject(
+                            result)).getInt("pointer"))));
 
         } catch (JSONException e) {
             Log.e("json", "parsing error");
