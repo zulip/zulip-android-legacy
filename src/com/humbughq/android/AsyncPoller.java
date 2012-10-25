@@ -5,7 +5,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.util.Log;
-import android.widget.LinearLayout;
 
 class AsyncPoller extends HumbugAsyncPushTask {
 
@@ -54,7 +53,8 @@ class AsyncPoller extends HumbugAsyncPushTask {
                      * manipulation of the UI on the UI thread.
                      */
                     receivedMessages[i] = message;
-                    this.context.messages.append(message.getID(), message);
+                    this.context.messageIndex.append(message.getID(), message);
+
                 }
             } catch (JSONException e) {
                 Log.e("json", "parsing error");
@@ -70,15 +70,9 @@ class AsyncPoller extends HumbugAsyncPushTask {
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
 
-        if (receivedMessages == null) {
-            return;
+        if (receivedMessages != null) {
+            this.context.adapter.addAll(receivedMessages);
         }
-        for (Message message : receivedMessages) {
-            LinearLayout tile = this.context.renderStreamMessage(message);
-            this.context.tilepanel.addView(tile);
-            this.context.messageTiles.append(message.getID(), tile);
-        }
-
         if (shouldUpdatePointer) {
             (new AsyncPointerUpdate(this.context)).execute();
         }

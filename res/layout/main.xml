@@ -6,18 +6,11 @@
 
   
 
-    <com.humbughq.android.PointyScrollView
-        android:id="@+id/scrollView1"
+    <ListView
+        android:id="@+id/listview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
-		<LinearLayout
-	        android:id="@+id/tilepanel"
-	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content"
-	        android:orientation="vertical" >
-
-	    </LinearLayout> 
-    </com.humbughq.android.PointyScrollView>
+    </ListView>
 
     <ProgressBar
         android:id="@+id/progressBar1"
