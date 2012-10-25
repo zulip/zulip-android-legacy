@@ -109,6 +109,7 @@ public class HumbugActivity extends Activity {
         contentView.setBackgroundColor(color);
 
         tile.addView(contentView);
+        tile.setTag(R.id.messageID, message.getID());
 
         return tile;
     }
