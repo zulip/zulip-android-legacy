@@ -21,11 +21,11 @@ import android.util.Log;
 
 class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
 
-    HumbugActivity that;
+    HumbugActivity context;
     List<NameValuePair> nameValuePairs;
 
     public HumbugAsyncPushTask(HumbugActivity humbugActivity) {
-        that = humbugActivity;
+        context = humbugActivity;
         nameValuePairs = new ArrayList<NameValuePair>();
     }
 
@@ -44,9 +44,9 @@ class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
             Log.i("welp", HumbugActivity.SERVER_URI + api_path[0]);
 
             nameValuePairs.add(new BasicNameValuePair("api-key",
-                    this.that.api_key));
+                    this.context.api_key));
             nameValuePairs
-                    .add(new BasicNameValuePair("email", this.that.email));
+                    .add(new BasicNameValuePair("email", this.context.email));
 
             httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 

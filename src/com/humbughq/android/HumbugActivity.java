@@ -14,7 +14,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 public class HumbugActivity extends Activity {
@@ -22,7 +21,7 @@ public class HumbugActivity extends Activity {
     public static final String USER_AGENT = "HumbugMobile 1.0";
 
     LinearLayout tilepanel;
-    ScrollView mainScroller;
+    PointyScrollView mainScroller;
 
     HashMap<String, Bitmap> profile_pictures;
 
@@ -45,7 +44,6 @@ public class HumbugActivity extends Activity {
     String email;
 
     HumbugActivity that = this; // self-ref
-    int pointerPos;
 
     protected LinearLayout renderStreamMessage(Message message) {
         LinearLayout tile = new LinearLayout(this);
@@ -146,7 +144,7 @@ public class HumbugActivity extends Activity {
 
         setContentView(R.layout.main);
         tilepanel = (LinearLayout) findViewById(R.id.tilepanel);
-        mainScroller = (ScrollView) findViewById(R.id.scrollView1);
+        mainScroller = (PointyScrollView) findViewById(R.id.scrollView1);
 
         this.current_poll = new AsyncPoller(this, true);
         this.current_poll.fetchInitial();

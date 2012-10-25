@@ -8,8 +8,8 @@ class AsyncLogin extends HumbugAsyncPushTask {
     public AsyncLogin(HumbugActivity humbugActivity, String username,
             String password) {
         super(humbugActivity);
-        that = humbugActivity;
-        this.that.email = username;
+        context = humbugActivity;
+        this.context.email = username;
         this.setProperty("username", username);
         this.setProperty("password", password);
     }
@@ -23,12 +23,12 @@ class AsyncLogin extends HumbugAsyncPushTask {
         super.onPostExecute(result);
 
         if (result != null) {
-            this.that.api_key = result.toString();
-            Log.i("login", "Logged in as " + this.that.api_key);
+            this.context.api_key = result.toString();
+            Log.i("login", "Logged in as " + this.context.api_key);
 
-            this.that.openLogin();
+            this.context.openLogin();
         } else {
-            TextView errorText = (TextView) this.that
+            TextView errorText = (TextView) this.context
                     .findViewById(R.id.error_text);
             errorText.setText("Login failed");
         }

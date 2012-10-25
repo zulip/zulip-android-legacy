@@ -4,7 +4,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.util.Log;
-import android.widget.LinearLayout;
 
 class AsyncPointerUpdate extends HumbugAsyncPushTask {
 
@@ -20,19 +19,8 @@ class AsyncPointerUpdate extends HumbugAsyncPushTask {
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
         try {
-            this.that.pointerPos = (new JSONObject(result)).getInt("pointer");
-            Log.i("pointer", "Pointer moving to " + this.that.pointerPos);
-
-            LinearLayout tile = this.that.messageTiles
-                    .get(this.that.pointerPos);
-            if (tile != null) {
-                this.that.mainScroller.scrollTo(0,
-                        tile.getTop() + tile.getHeight() / 2
-                                - this.that.mainScroller.getHeight() / 2);
-            } else {
-                Log.e("pointer", "Could not find a tile for "
-                        + this.that.pointerPos);
-            }
+            this.context.mainScroller.select((new JSONObject(result))
+                    .getInt("pointer"));
 
         } catch (JSONException e) {
             Log.e("json", "parsing error");

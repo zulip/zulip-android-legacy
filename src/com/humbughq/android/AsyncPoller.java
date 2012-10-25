@@ -54,7 +54,7 @@ class AsyncPoller extends HumbugAsyncPushTask {
                      * manipulation of the UI on the UI thread.
                      */
                     receivedMessages[i] = message;
-                    this.that.messages.append(message.getID(), message);
+                    this.context.messages.append(message.getID(), message);
                 }
             } catch (JSONException e) {
                 Log.e("json", "parsing error");
@@ -74,19 +74,19 @@ class AsyncPoller extends HumbugAsyncPushTask {
             return;
         }
         for (Message message : receivedMessages) {
-            LinearLayout tile = this.that.renderStreamMessage(message);
-            this.that.tilepanel.addView(tile);
-            this.that.messageTiles.append(message.getID(), tile);
+            LinearLayout tile = this.context.renderStreamMessage(message);
+            this.context.tilepanel.addView(tile);
+            this.context.messageTiles.append(message.getID(), tile);
         }
 
         if (shouldUpdatePointer) {
-            (new AsyncPointerUpdate(this.that)).execute();
+            (new AsyncPointerUpdate(this.context)).execute();
         }
-        if (this.that.suspended) {
+        if (this.context.suspended) {
             Log.i("poll", "suspended, dying");
             return;
         }
-        this.that.current_poll = new AsyncPoller(this.that, false);
-        this.that.current_poll.execute();
+        this.context.current_poll = new AsyncPoller(this.context, false);
+        this.context.current_poll.execute();
     }
 }
