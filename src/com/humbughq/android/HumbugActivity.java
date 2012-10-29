@@ -10,6 +10,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -43,6 +47,7 @@ public class HumbugActivity extends Activity {
 
     HumbugActivity that = this; // self-ref
     SharedPreferences settings;
+    String client_id;
 
     /** Called when the activity is first created. */
     @Override
@@ -89,6 +94,42 @@ public class HumbugActivity extends Activity {
 
         listView.setAdapter(adapter);
 
+        listView.setOnScrollListener(new OnScrollListener() {
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem,
+                    int visibleItemCount, int totalItemCount) {
+                // pass
+
+            }
+
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+                int mID = ((Message) view.getItemAtPosition(view
+                        .getFirstVisiblePosition())).getID();
+                Log.i("scrolling", "Now at " + mID);
+                (new AsyncPointerUpdate(that)).execute(mID);
+            }
+        });
+
+        listView.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view,
+                    int position, long id) {
+                int mID = (Integer) view.getTag(R.id.messageID);
+                Log.i("keyboard", "Now at " + mID);
+                (new AsyncPointerUpdate(that)).execute(mID);
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // pass
+
+            }
+
+        });
         (new AsyncPointerUpdate(this)).execute();
 
     }
