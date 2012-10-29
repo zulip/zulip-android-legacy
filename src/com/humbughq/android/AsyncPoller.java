@@ -9,26 +9,25 @@ import android.util.Log;
 class AsyncPoller extends HumbugAsyncPushTask {
 
     private Message[] receivedMessages;
-    private boolean shouldUpdatePointer;
+    private boolean continuePolling;
+    private boolean updatePointer;
 
-    public AsyncPoller(HumbugActivity humbugActivity,
-            boolean shouldUpdatePointer) {
+    public AsyncPoller(HumbugActivity humbugActivity, boolean continuePolling,
+            boolean updatePointer) {
         super(humbugActivity);
-        this.shouldUpdatePointer = shouldUpdatePointer;
+        this.continuePolling = continuePolling;
+        this.updatePointer = updatePointer;
     }
 
     public final void execute() {
         this.execute("api/v1/get_messages");
     }
 
-    public final void execute(int first, int last) {
-        this.setProperty("first", first + "");
-        this.setProperty("last", last + "");
-        this.execute("api/v1/get_messages");
-    }
-
-    public final void fetchInitial() {
-        this.execute(-1, -1);
+    public final void execute(int anchor, String direction, int number) {
+        this.setProperty("start", anchor + "");
+        this.setProperty("which", direction + "");
+        this.setProperty("number", number + "");
+        this.execute("api/v1/get_old_messages");
     }
 
     @Override
@@ -73,14 +72,17 @@ class AsyncPoller extends HumbugAsyncPushTask {
         if (receivedMessages != null) {
             this.context.adapter.addAll(receivedMessages);
         }
-        if (shouldUpdatePointer) {
+        if (updatePointer) {
             (new AsyncPointerUpdate(this.context)).execute();
         }
         if (this.context.suspended) {
             Log.i("poll", "suspended, dying");
             return;
         }
-        this.context.current_poll = new AsyncPoller(this.context, false);
-        this.context.current_poll.execute();
+        if (this.continuePolling) {
+            this.context.current_poll = new AsyncPoller(this.context, true,
+                    false);
+            this.context.current_poll.execute();
+        }
     }
 }

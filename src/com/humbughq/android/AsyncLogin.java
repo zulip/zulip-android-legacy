@@ -1,5 +1,6 @@
 package com.humbughq.android;
 
+import android.content.SharedPreferences.Editor;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -25,6 +26,12 @@ class AsyncLogin extends HumbugAsyncPushTask {
         if (result != null) {
             this.context.api_key = result.toString();
             Log.i("login", "Logged in as " + this.context.api_key);
+
+            Editor ed = this.context.settings.edit();
+            ed.putString("email", this.context.email);
+            ed.putString("api_key", this.context.api_key);
+
+            ed.commit();
 
             this.context.openLogin();
         } else {
