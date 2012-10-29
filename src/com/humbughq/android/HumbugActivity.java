@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
@@ -41,6 +42,7 @@ public class HumbugActivity extends Activity {
     String email;
 
     HumbugActivity that = this; // self-ref
+    SharedPreferences settings;
 
     /** Called when the activity is first created. */
     @Override
@@ -48,20 +50,30 @@ public class HumbugActivity extends Activity {
         super.onCreate(savedInstanceState);
         Log.i("funny", "starting...");
 
-        setContentView(R.layout.login);
-        ((Button) findViewById(R.id.login))
-                .setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        TextView errorText = (TextView) findViewById(R.id.error_text);
-                        errorText.setText("Logging in...");
-                        (new AsyncLogin(that,
-                                ((EditText) findViewById(R.id.username))
-                                        .getText().toString(),
-                                ((EditText) findViewById(R.id.password))
-                                        .getText().toString())).execute();
-                    }
-                });
+        settings = getPreferences(Activity.MODE_PRIVATE);
+
+        this.email = settings.getString("email", null);
+        this.api_key = settings.getString("api_key", null);
+
+        if (this.api_key == null) {
+
+            setContentView(R.layout.login);
+            ((Button) findViewById(R.id.login))
+                    .setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            TextView errorText = (TextView) findViewById(R.id.error_text);
+                            errorText.setText("Logging in...");
+                            (new AsyncLogin(that,
+                                    ((EditText) findViewById(R.id.username))
+                                            .getText().toString(),
+                                    ((EditText) findViewById(R.id.password))
+                                            .getText().toString())).execute();
+                        }
+                    });
+        } else {
+            this.openLogin();
+        }
         return;
 
     }
@@ -77,8 +89,7 @@ public class HumbugActivity extends Activity {
 
         listView.setAdapter(adapter);
 
-        this.current_poll = new AsyncPoller(this, true);
-        this.current_poll.fetchInitial();
+        (new AsyncPointerUpdate(this)).execute();
 
     }
 
@@ -94,7 +105,7 @@ public class HumbugActivity extends Activity {
         this.suspended = false;
         if (this.logged_in) {
             // Update the pointer
-            this.current_poll = new AsyncPoller(this, true);
+            this.current_poll = new AsyncPoller(this, true, true);
             this.current_poll.execute();
         }
     }
