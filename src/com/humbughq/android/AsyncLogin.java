@@ -1,5 +1,8 @@
 package com.humbughq.android;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.SharedPreferences.Editor;
 import android.util.Log;
 import android.widget.TextView;
@@ -24,20 +27,29 @@ class AsyncLogin extends HumbugAsyncPushTask {
         super.onPostExecute(result);
 
         if (result != null) {
-            this.context.api_key = result.toString();
-            Log.i("login", "Logged in as " + this.context.api_key);
+            try {
+                JSONObject obj = new JSONObject(result);
 
-            Editor ed = this.context.settings.edit();
-            ed.putString("email", this.context.email);
-            ed.putString("api_key", this.context.api_key);
+                if (obj.getString("result").equals("success")) {
+                    this.context.api_key = obj.getString("api_key");
+                    Log.i("login", "Logged in as " + this.context.api_key);
 
-            ed.commit();
+                    Editor ed = this.context.settings.edit();
+                    ed.putString("email", this.context.email);
+                    ed.putString("api_key", this.context.api_key);
 
-            this.context.openLogin();
-        } else {
-            TextView errorText = (TextView) this.context
-                    .findViewById(R.id.error_text);
-            errorText.setText("Login failed");
+                    ed.commit();
+
+                    this.context.openLogin();
+                    return;
+                }
+            } catch (JSONException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
+        TextView errorText = (TextView) this.context
+                .findViewById(R.id.error_text);
+        errorText.setText("Login failed");
     }
 }
