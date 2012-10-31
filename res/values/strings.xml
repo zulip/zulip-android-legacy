@@ -8,5 +8,7 @@
     <string name="username">Username</string>
     <string name="password">Password</string>
     <string name="legal">Legal information</string>
+    <string name="logout">Log out</string>
+    <string name="compose">Compose</string>
 
 </resources>
