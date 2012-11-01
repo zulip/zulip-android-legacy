@@ -75,14 +75,12 @@ class AsyncPoller extends HumbugAsyncPushTask {
         if (updatePointer) {
             (new AsyncPointerUpdate(this.context)).execute();
         }
-        if (this.context.suspended) {
-            Log.i("poll", "suspended, dying");
-            return;
-        }
         if (this.continuePolling) {
             this.context.current_poll = new AsyncPoller(this.context, true,
                     false);
             this.context.current_poll.execute();
         }
+
+        callback.onTaskComplete(result);
     }
 }

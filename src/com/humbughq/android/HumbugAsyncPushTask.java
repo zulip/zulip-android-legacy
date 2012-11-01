@@ -23,10 +23,26 @@ class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
 
     HumbugActivity context;
     List<NameValuePair> nameValuePairs;
+    AsyncTaskCompleteListener callback;
+
+    interface AsyncTaskCompleteListener {
+        public void onTaskComplete(String result);
+    }
 
     public HumbugAsyncPushTask(HumbugActivity humbugActivity) {
         context = humbugActivity;
+        callback = new AsyncTaskCompleteListener() {
+            @Override
+            public void onTaskComplete(String result) {
+                // Dummy method which does nothing
+
+            }
+        };
         nameValuePairs = new ArrayList<NameValuePair>();
+    }
+
+    public void setCallback(AsyncTaskCompleteListener listener) {
+        callback = listener;
     }
 
     public void setProperty(String key, String value) {
