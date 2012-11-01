@@ -57,8 +57,7 @@ class AsyncPointerUpdate extends HumbugAsyncPushTask {
 
                                     context.listView.setSelection(context.adapter
                                             .getPosition(context.messageIndex
-                                                    .get(pointer)));
-                                    context.listView.scrollBy(0, 500);
+                                                    .get(pointer)) - 1);
                                     context.current_poll = new AsyncPoller(
                                             context, true, false);
                                     context.current_poll.execute(
