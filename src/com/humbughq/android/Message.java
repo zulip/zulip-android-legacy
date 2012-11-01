@@ -46,7 +46,7 @@ public class Message {
                     .getJSONArray("display_recipient");
             recipients = new String[jsonRecipients.length() - 1];
 
-            for (int i = 0; i < jsonRecipients.length(); i++) {
+            for (int i = 0; i < jsonRecipients.length() - 1; i++) {
                 if (!jsonRecipients.getJSONObject(i).getString("email")
                         .equals(this.your_email)) {
                     recipients[i] = jsonRecipients.getJSONObject(i).getString(
@@ -57,7 +57,7 @@ public class Message {
             this.setType(Message.PERSONAL_MESSAGE);
             recipients = new String[1];
             recipients[0] = message.getJSONObject("display_recipient")
-                    .getString("short_name");
+                    .getString("full_name");
         }
         this.setContent(message.getString("content"));
         if (this.getType() == Message.STREAM_MESSAGE) {
