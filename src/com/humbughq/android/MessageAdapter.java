@@ -45,7 +45,8 @@ public class MessageAdapter extends ArrayAdapter<Message> {
 
         TextView display_recipient = new TextView(context);
         if (message.getType() != Message.STREAM_MESSAGE) {
-            display_recipient.setText("Huddle with " + message.getRecipient());
+            display_recipient.setText(context.getString(R.string.huddle_text)
+                    + " " + message.getRecipient());
             display_recipient.setTextColor(Color.WHITE);
         } else {
             display_recipient.setText(message.getRecipient());
