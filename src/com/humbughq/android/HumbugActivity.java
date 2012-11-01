@@ -160,6 +160,7 @@ public class HumbugActivity extends Activity {
         super.onPause();
         Log.i("status", "suspend");
         this.suspended = true;
+        this.current_poll.cancel(true);
     }
 
     protected void onResume() {
@@ -169,7 +170,9 @@ public class HumbugActivity extends Activity {
         if (this.logged_in) {
             // Update the pointer
             this.current_poll = new AsyncPoller(this, true, true);
-            this.current_poll.execute();
+            this.current_poll.execute(
+                    ((Message) this.listView.getSelectedItem()).getID(),
+                    "newer", 1000);
         }
     }
 }
