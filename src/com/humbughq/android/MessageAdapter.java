@@ -98,4 +98,8 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         return tile;
     }
 
+    public long getItemId(int position) {
+        return this.getItem(position).getID();
+    }
+
 }
