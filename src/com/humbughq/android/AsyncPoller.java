@@ -43,7 +43,8 @@ class AsyncPoller extends HumbugAsyncPushTask {
 
                 for (int i = 0; i < objects.length(); i++) {
                     Log.i("json-iter", "" + i);
-                    Message message = new Message(objects.getJSONObject(i));
+                    Message message = new Message(context,
+                            objects.getJSONObject(i));
                     /*
                      * Add to the local message array and the global ArrayList
                      * of all messages.

@@ -21,9 +21,12 @@ public class Message {
     private Date timestamp;
     private String[] recipients;
     private int id;
+    private String your_email;
 
-    public Message() {
-        // Default constructor
+    public Message(HumbugActivity context, JSONObject message)
+            throws JSONException {
+        this.your_email = context.email;
+        this.populate(message);
     }
 
     public Message(JSONObject message) throws JSONException {
@@ -41,11 +44,14 @@ public class Message {
             this.setType(Message.HUDDLE_MESSAGE);
             JSONArray jsonRecipients = message
                     .getJSONArray("display_recipient");
-            recipients = new String[jsonRecipients.length()];
+            recipients = new String[jsonRecipients.length() - 1];
 
             for (int i = 0; i < jsonRecipients.length(); i++) {
-                recipients[i] = jsonRecipients.getJSONObject(i).getString(
-                        "short_name");
+                if (!jsonRecipients.getJSONObject(i).getString("email")
+                        .equals(this.your_email)) {
+                    recipients[i] = jsonRecipients.getJSONObject(i).getString(
+                            "full_name");
+                }
             }
         } else if (message.getString("type").equals("personal")) {
             this.setType(Message.PERSONAL_MESSAGE);

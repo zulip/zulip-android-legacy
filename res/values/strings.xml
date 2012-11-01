@@ -10,5 +10,6 @@
     <string name="legal">Legal information</string>
     <string name="logout">Log out</string>
     <string name="compose">Compose</string>
+    <string name="huddle_text">You and</string>
 
 </resources>
