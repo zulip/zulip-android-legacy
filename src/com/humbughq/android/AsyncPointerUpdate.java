@@ -60,10 +60,12 @@ class AsyncPointerUpdate extends HumbugAsyncPushTask {
                                                     .get(pointer)) - 1);
                                     context.current_poll = new AsyncPoller(
                                             context, true, false);
+                                    // the "newer" call is inclusive of the
+                                    // lower bound
                                     context.current_poll.execute(
                                             (int) context.adapter
                                                     .getItemId(context.adapter
-                                                            .getCount() - 1),
+                                                            .getCount() - 1) + 1,
                                             "newer", 10000);
                                 }
 
