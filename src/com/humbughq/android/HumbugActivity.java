@@ -51,6 +51,7 @@ public class HumbugActivity extends Activity {
     HumbugActivity that = this; // self-ref
     SharedPreferences settings;
     String client_id;
+    protected int mIDSelected;
 
     /** Called when the activity is first created. */
     @Override
@@ -129,8 +130,11 @@ public class HumbugActivity extends Activity {
             public void onScrollStateChanged(AbsListView view, int scrollState) {
                 int mID = ((Message) view.getItemAtPosition(view
                         .getFirstVisiblePosition())).getID();
-                Log.i("scrolling", "Now at " + mID);
-                (new AsyncPointerUpdate(that)).execute(mID);
+                if (mIDSelected != mID) {
+                    Log.i("scrolling", "Now at " + mID);
+                    (new AsyncPointerUpdate(that)).execute(mID);
+                    mIDSelected = mID;
+                }
             }
         });
 
@@ -140,8 +144,11 @@ public class HumbugActivity extends Activity {
             public void onItemSelected(AdapterView<?> parent, View view,
                     int position, long id) {
                 int mID = (Integer) view.getTag(R.id.messageID);
-                Log.i("keyboard", "Now at " + mID);
-                (new AsyncPointerUpdate(that)).execute(mID);
+                if (mIDSelected != mID) {
+                    Log.i("keyboard", "Now at " + mID);
+                    (new AsyncPointerUpdate(that)).execute(mID);
+                    mIDSelected = mID;
+                }
 
             }
 
