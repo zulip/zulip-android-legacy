@@ -21,6 +21,7 @@ class AsyncPoller extends HumbugAsyncPushTask {
 
     public final void execute() {
         this.execute("api/v1/get_messages");
+        Log.v("poll", "longpolling started");
     }
 
     public final void execute(int anchor, String direction, int number) {
@@ -28,6 +29,7 @@ class AsyncPoller extends HumbugAsyncPushTask {
         this.setProperty("which", direction + "");
         this.setProperty("number", number + "");
         this.execute("api/v1/get_old_messages");
+        Log.v("poll", "get_old_messages called");
     }
 
     @Override
@@ -59,6 +61,9 @@ class AsyncPoller extends HumbugAsyncPushTask {
             } catch (JSONException e) {
                 Log.e("json", "parsing error");
                 e.printStackTrace();
+            } catch (NullPointerException e) {
+                Log.e("poll", "No data returned?");
+                e.printStackTrace();
             }
         } else {
             Log.i("poll", "got nothing from the server");
@@ -69,8 +74,10 @@ class AsyncPoller extends HumbugAsyncPushTask {
     @Override
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
+        Log.v("poll", "Longpolling finished.");
 
         if (receivedMessages != null) {
+            Log.v("poll", "Processing messages received.");
             try {
                 this.context.adapter.addAll(receivedMessages);
             } catch (NoSuchMethodError e) {
@@ -78,11 +85,15 @@ class AsyncPoller extends HumbugAsyncPushTask {
                     this.context.adapter.add(message);
                 }
             }
+        } else {
+            Log.v("poll", "No messages returned.");
         }
         if (updatePointer) {
+            Log.v("poll", "Starting AsyncPointerUpdate");
             (new AsyncPointerUpdate(this.context)).execute();
         }
         if (this.continuePolling) {
+            Log.v("poll", "Starting new longpoll.");
             this.context.current_poll = new AsyncPoller(this.context, true,
                     false);
             this.context.current_poll.execute();
