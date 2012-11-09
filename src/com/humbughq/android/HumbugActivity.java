@@ -160,7 +160,9 @@ public class HumbugActivity extends Activity {
         super.onPause();
         Log.i("status", "suspend");
         this.suspended = true;
-        this.current_poll.cancel(true);
+        if (this.current_poll != null) {
+            this.current_poll.cancel(true);
+        }
     }
 
     protected void onResume() {
