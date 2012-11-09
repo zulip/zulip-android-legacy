@@ -107,6 +107,7 @@ public class HumbugActivity extends Activity {
     }
 
     protected void openLogin() {
+        this.logged_in = true;
         messageIndex = new SparseArray<Message>();
         this.profile_pictures = new HashMap<String, Bitmap>();
 
@@ -178,10 +179,13 @@ public class HumbugActivity extends Activity {
         this.suspended = false;
         if (this.logged_in) {
             // Update the pointer
-            this.current_poll = new AsyncPoller(this, true, true);
-            this.current_poll.execute(
-                    ((Message) this.listView.getSelectedItem()).getID(),
-                    "newer", 1000);
+
+            if (this.adapter.getCount() != 0) {
+                this.current_poll = new AsyncPoller(this, true, true);
+                this.current_poll.execute((int) this.adapter
+                        .getItemId(this.adapter.getCount() - 1) + 1, "newer",
+                        1000);
+            }
         }
     }
 }
