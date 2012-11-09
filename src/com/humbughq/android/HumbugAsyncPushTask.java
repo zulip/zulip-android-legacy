@@ -66,8 +66,8 @@ class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
 
             httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
-            HttpConnectionParams.setSoTimeout(httppost.getParams(),
-                    10 * 60 * 1000); // 10 minutes in ms
+            // timeout after 55 seconds in ms
+            HttpConnectionParams.setSoTimeout(httppost.getParams(), 55 * 1000);
 
             response = httpclient.execute(httppost);
 
