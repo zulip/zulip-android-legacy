@@ -71,7 +71,13 @@ class AsyncPoller extends HumbugAsyncPushTask {
         super.onPostExecute(result);
 
         if (receivedMessages != null) {
-            this.context.adapter.addAll(receivedMessages);
+            try {
+                this.context.adapter.addAll(receivedMessages);
+            } catch (NoSuchMethodError e) {
+                for (Message message : receivedMessages) {
+                    this.context.adapter.add(message);
+                }
+            }
         }
         if (updatePointer) {
             (new AsyncPointerUpdate(this.context)).execute();
