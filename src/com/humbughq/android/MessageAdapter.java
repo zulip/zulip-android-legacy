@@ -78,7 +78,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         tile.addView(senderName);
 
         TextView contentView = new TextView(context);
-        String content = message.getContent().replaceAll("\\<.*?>", "");
+        String content = message.getContent();
         contentView.setText(content);
         contentView.setPadding(10, 0, 10, 10);
 
