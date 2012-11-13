@@ -183,8 +183,7 @@ public class HumbugActivity extends Activity {
             if (this.adapter.getCount() != 0) {
                 this.current_poll = new AsyncPoller(this, true, true);
                 this.current_poll.execute((int) this.adapter
-                        .getItemId(this.adapter.getCount() - 1) + 1, "newer",
-                        1000);
+                        .getItemId(this.adapter.getCount() - 1) + 1, 0, 1000);
             }
         }
     }
