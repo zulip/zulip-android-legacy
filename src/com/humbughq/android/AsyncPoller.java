@@ -24,10 +24,10 @@ class AsyncPoller extends HumbugAsyncPushTask {
         Log.v("poll", "longpolling started");
     }
 
-    public final void execute(int anchor, String direction, int number) {
-        this.setProperty("start", anchor + "");
-        this.setProperty("which", direction + "");
-        this.setProperty("number", number + "");
+    public final void execute(int anchor, int before, int after) {
+        this.setProperty("anchor", anchor + "");
+        this.setProperty("num_before", before + "");
+        this.setProperty("num_after", after + "");
         this.execute("api/v1/get_old_messages");
         Log.v("poll", "get_old_messages called");
     }
