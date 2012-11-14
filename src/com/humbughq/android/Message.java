@@ -51,6 +51,8 @@ public class Message {
                         .equals(this.your_email)) {
                     recipients[i] = jsonRecipients.getJSONObject(i).getString(
                             "full_name");
+                } else {
+                    recipients[i] = this.getSender();
                 }
             }
         } else if (message.getString("type").equals("personal")) {
