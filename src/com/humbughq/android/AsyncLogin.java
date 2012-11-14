@@ -33,6 +33,7 @@ class AsyncLogin extends HumbugAsyncPushTask {
                 if (obj.getString("result").equals("success")) {
                     this.context.api_key = obj.getString("api_key");
                     Log.i("login", "Logged in as " + this.context.api_key);
+                    this.context.logged_in = true;
 
                     Editor ed = this.context.settings.edit();
                     ed.putString("email", this.context.email);
@@ -42,6 +43,7 @@ class AsyncLogin extends HumbugAsyncPushTask {
 
                     this.context.openHomeView();
                     callback.onTaskComplete(result);
+
                     return;
                 }
             } catch (JSONException e) {
