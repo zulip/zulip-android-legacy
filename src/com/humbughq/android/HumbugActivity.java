@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -13,12 +14,14 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -114,8 +117,27 @@ public class HumbugActivity extends Activity {
         setContentView(R.layout.main);
         listView = (ListView) findViewById(R.id.listview);
 
-        adapter = new MessageAdapter(this, new ArrayList<Message>());
+        /*
+         * We want to add a footer to the ListView that is half the window
+         * height.
+         * 
+         * Example algorithmic explanation:
+         * http://stackoverflow.com/a/13366310/90777
+         */
 
+        @SuppressWarnings("deprecation")
+        // needed for compat with API <13
+        int windowHeight = ((WindowManager) this
+                .getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay()
+                .getHeight();
+
+        ImageView dummy = new ImageView(this);
+        AbsListView.LayoutParams params = new AbsListView.LayoutParams(0, 0);
+        params.height = windowHeight / 2;
+        dummy.setLayoutParams(params);
+
+        listView.addFooterView(dummy);
+        adapter = new MessageAdapter(this, new ArrayList<Message>());
         listView.setAdapter(adapter);
 
         listView.setOnScrollListener(new OnScrollListener() {
