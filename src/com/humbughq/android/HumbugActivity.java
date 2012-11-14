@@ -6,6 +6,7 @@ import java.util.HashMap;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
@@ -56,6 +57,7 @@ public class HumbugActivity extends Activity {
     SharedPreferences settings;
     String client_id;
     protected int mIDSelected;
+    private Menu menu;
 
     /** Called when the activity is first created. */
     @Override
@@ -69,31 +71,27 @@ public class HumbugActivity extends Activity {
         this.api_key = settings.getString("api_key", null);
 
         if (this.api_key == null) {
-
-            setContentView(R.layout.login);
-            ((Button) findViewById(R.id.login))
-                    .setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            TextView errorText = (TextView) findViewById(R.id.error_text);
-                            errorText.setText("Logging in...");
-                            (new AsyncLogin(that,
-                                    ((EditText) findViewById(R.id.username))
-                                            .getText().toString(),
-                                    ((EditText) findViewById(R.id.password))
-                                            .getText().toString())).execute();
-                        }
-                    });
+            this.openLogin();
         } else {
             this.openHomeView();
         }
+
         return;
 
     }
 
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.options, menu);
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        if (menu == null) {
+            // we're getting called before the menu exists, bail
+            return false;
+        }
+        this.menu = menu;
+
+        menu.clear();
+        if (this.logged_in) {
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.options, menu);
+        }
         return true;
     }
 
@@ -104,13 +102,50 @@ public class HumbugActivity extends Activity {
         case R.id.compose:
             return true;
         case R.id.logout:
-            return true;
+            logout();
         default:
             return super.onOptionsItemSelected(item);
         }
     }
 
+    private void logout() {
+        this.onPrepareOptionsMenu(menu);
+
+        this.current_poll.cancel(true);
+
+        Editor ed = this.settings.edit();
+
+        ed.remove("email");
+        ed.remove("api_key");
+        ed.commit();
+
+        this.openLogin();
+
+    }
+
+    protected void openLogin() {
+        this.onPrepareOptionsMenu(menu);
+
+        setContentView(R.layout.login);
+
+        ((Button) findViewById(R.id.login))
+                .setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        TextView errorText = (TextView) findViewById(R.id.error_text);
+                        errorText.setText("Logging in...");
+                        (new AsyncLogin(that,
+                                ((EditText) findViewById(R.id.username))
+                                        .getText().toString(),
+                                ((EditText) findViewById(R.id.password))
+                                        .getText().toString())).execute();
+                    }
+                });
+    }
+
     protected void openHomeView() {
+        this.onPrepareOptionsMenu(menu);
+
         this.logged_in = true;
         messageIndex = new SparseArray<Message>();
         this.profile_pictures = new HashMap<String, Bitmap>();
