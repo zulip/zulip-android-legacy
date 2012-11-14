@@ -109,9 +109,11 @@ public class HumbugActivity extends Activity {
     }
 
     private void logout() {
-        this.onPrepareOptionsMenu(menu);
+        this.logged_in = false;
 
-        this.current_poll.cancel(true);
+        if (this.current_poll != null) {
+            this.current_poll.cancel(true);
+        }
 
         Editor ed = this.settings.edit();
 
@@ -124,6 +126,8 @@ public class HumbugActivity extends Activity {
     }
 
     protected void openLogin() {
+        this.logged_in = false;
+
         this.onPrepareOptionsMenu(menu);
 
         setContentView(R.layout.login);
