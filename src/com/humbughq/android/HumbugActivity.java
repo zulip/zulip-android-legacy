@@ -193,12 +193,16 @@ public class HumbugActivity extends Activity {
 
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {
-                int mID = ((Message) view.getItemAtPosition(view
-                        .getFirstVisiblePosition())).getID();
-                if (mIDSelected != mID) {
-                    Log.i("scrolling", "Now at " + mID);
-                    (new AsyncPointerUpdate(that)).execute(mID);
-                    mIDSelected = mID;
+                if (!that.logged_in) {
+                    // Scrolling messages isn't meaningful unless we have
+                    // messages to scroll.
+                    int mID = ((Message) view.getItemAtPosition(view
+                            .getFirstVisiblePosition())).getID();
+                    if (mIDSelected != mID) {
+                        Log.i("scrolling", "Now at " + mID);
+                        (new AsyncPointerUpdate(that)).execute(mID);
+                        mIDSelected = mID;
+                    }
                 }
             }
         });
