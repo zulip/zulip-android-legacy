@@ -24,6 +24,12 @@ class AsyncPoller extends HumbugAsyncPushTask {
         Log.v("poll", "longpolling started");
     }
 
+    public final void execute(int lastMessage) {
+        this.setProperty("last", lastMessage + "");
+        this.execute("api/v1/get_messages");
+        Log.v("poll", "longpolling started from " + lastMessage);
+    }
+
     public final void execute(int anchor, int before, int after) {
         this.setProperty("anchor", anchor + "");
         this.setProperty("num_before", before + "");
@@ -96,7 +102,9 @@ class AsyncPoller extends HumbugAsyncPushTask {
             Log.v("poll", "Starting new longpoll.");
             this.context.current_poll = new AsyncPoller(this.context, true,
                     false);
-            this.context.current_poll.execute();
+            // Start polling from the last received message ID
+            this.context.current_poll.execute((int) context.adapter
+                    .getItemId(context.adapter.getCount() - 1));
         }
 
         callback.onTaskComplete(result);
