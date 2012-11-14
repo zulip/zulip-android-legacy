@@ -40,7 +40,7 @@ class AsyncLogin extends HumbugAsyncPushTask {
 
                     ed.commit();
 
-                    this.context.openLogin();
+                    this.context.openHomeView();
                     callback.onTaskComplete(result);
                     return;
                 }

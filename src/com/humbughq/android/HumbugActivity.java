@@ -85,7 +85,7 @@ public class HumbugActivity extends Activity {
                         }
                     });
         } else {
-            this.openLogin();
+            this.openHomeView();
         }
         return;
 
@@ -110,7 +110,7 @@ public class HumbugActivity extends Activity {
         }
     }
 
-    protected void openLogin() {
+    protected void openHomeView() {
         this.logged_in = true;
         messageIndex = new SparseArray<Message>();
         this.profile_pictures = new HashMap<String, Bitmap>();
