@@ -60,14 +60,17 @@ class AsyncPointerUpdate extends HumbugAsyncPushTask {
                                                     .get(pointer)) - 1);
                                     context.current_poll = new AsyncPoller(
                                             context, true, false);
-                                    // this call is inclusive of the lower
-                                    // bound.
-                                    // TODO: get messages in hunks.
-                                    context.current_poll.execute(
-                                            (int) context.adapter
-                                                    .getItemId(context.adapter
-                                                            .getCount() - 1) + 1,
-                                            0, 10000);
+
+                                    try {
+                                        context.current_poll.execute(
+                                                (int) context.adapter
+                                                        .getItemId(context.adapter
+                                                                .getCount() - 1) + 1,
+                                                0, 10000);
+                                    } catch (java.lang.ArrayIndexOutOfBoundsException e) {
+                                        Log.e("pointer",
+                                                "No data retrieved by poll!");
+                                    }
                                 }
 
                             });
