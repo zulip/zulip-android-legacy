@@ -7,6 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 public class Message {
     public static final int STREAM_MESSAGE = 1;
@@ -33,6 +34,20 @@ public class Message {
         this.populate(message);
     }
 
+    private String getNotYouRecipient(JSONObject other) {
+        try {
+            if (!other.getString("email").equals(this.your_email)) {
+                return other.getString("full_name");
+            } else {
+                return this.getSender();
+            }
+        } catch (JSONException e) {
+            Log.e("message", "Couldn't parse JSON sender list!");
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public void populate(JSONObject message) throws JSONException {
         this.setSender(message.getString("sender_full_name"));
         this.setSenderEmail(message.getString("sender_email"));
@@ -47,19 +62,14 @@ public class Message {
             recipients = new String[jsonRecipients.length() - 1];
 
             for (int i = 0; i < jsonRecipients.length() - 1; i++) {
-                if (!jsonRecipients.getJSONObject(i).getString("email")
-                        .equals(this.your_email)) {
-                    recipients[i] = jsonRecipients.getJSONObject(i).getString(
-                            "full_name");
-                } else {
-                    recipients[i] = this.getSender();
-                }
+                recipients[i] = getNotYouRecipient(jsonRecipients
+                        .getJSONObject(i));
             }
         } else if (message.getString("type").equals("personal")) {
             this.setType(Message.PERSONAL_MESSAGE);
             recipients = new String[1];
-            recipients[0] = message.getJSONObject("display_recipient")
-                    .getString("full_name");
+            recipients[0] = getNotYouRecipient(message
+                    .getJSONObject("display_recipient"));
         }
         this.setContent(message.getString("content"));
         if (this.getType() == Message.STREAM_MESSAGE) {
