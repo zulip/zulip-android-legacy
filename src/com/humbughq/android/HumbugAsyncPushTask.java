@@ -72,12 +72,12 @@ class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
             response = httpclient.execute(httppost);
 
             StatusLine statusLine = response.getStatusLine();
-            if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                response.getEntity().writeTo(out);
-                out.close();
-                responseString = out.toString();
-            } else {
+
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            response.getEntity().writeTo(out);
+            out.close();
+            responseString = out.toString();
+            if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
                 // Closes the connection.
                 response.getEntity().getContent().close();
                 throw new IOException(statusLine.getReasonPhrase());
