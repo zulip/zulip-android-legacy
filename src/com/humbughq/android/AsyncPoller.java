@@ -34,6 +34,9 @@ class AsyncPoller extends HumbugAsyncPushTask {
         this.setProperty("anchor", anchor + "");
         this.setProperty("num_before", before + "");
         this.setProperty("num_after", after + "");
+        // We don't support narrowing at all, so always specify we're
+        // unnarrowed.
+        this.setProperty("narrow", "{}");
         this.execute("api/v1/get_old_messages");
         Log.v("poll", "get_old_messages called");
     }
