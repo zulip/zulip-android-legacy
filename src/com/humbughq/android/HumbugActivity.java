@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
@@ -16,9 +18,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Button;
 import android.widget.EditText;
@@ -99,12 +103,75 @@ public class HumbugActivity extends Activity {
         // Handle item selection
         switch (item.getItemId()) {
         case R.id.compose:
-            return true;
+            openCompose();
+            break;
         case R.id.logout:
             logout();
+            break;
         default:
             return super.onOptionsItemSelected(item);
         }
+        return true;
+    }
+
+    protected void openCompose() {
+        openCompose(null);
+    }
+
+    protected void openCompose(Message msg) {
+        final Dialog composeWindow = new Dialog(this);
+        composeWindow.setContentView(R.layout.compose);
+        composeWindow.setTitle("Compose");
+
+        EditText stream = (EditText) composeWindow
+                .findViewById(R.id.composeStream);
+
+        EditText subject = (EditText) composeWindow
+                .findViewById(R.id.composeSubject);
+
+        EditText body = (EditText) composeWindow.findViewById(R.id.composeText);
+
+        if (msg != null) {
+            stream.setText(msg.getRecipient());
+            subject.setText(msg.getSubject());
+            body.requestFocus();
+        } else {
+            // Focus the stream, zero out stream/subject
+            stream.requestFocus();
+            stream.setText("");
+            subject.setText("");
+        }
+
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,
+                InputMethodManager.HIDE_IMPLICIT_ONLY);
+
+        Button send = (Button) composeWindow.findViewById(R.id.send);
+        send.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                composeWindow.dismiss();
+            }
+        });
+        Button cancel = (Button) composeWindow.findViewById(R.id.cancel);
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                composeWindow.dismiss();
+            }
+        });
+
+        composeWindow.show();
+        composeWindow
+                .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
+
+                    }
+                });
+
     }
 
     private void logout() {
@@ -204,6 +271,21 @@ public class HumbugActivity extends Activity {
             }
         });
 
+        listView.setOnItemClickListener(new OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view,
+                    int position, long id) {
+                try {
+                    openCompose(adapter.getItem(position));
+                } catch (IndexOutOfBoundsException e) {
+                    // We can ignore this because its probably before the data
+                    // has been fetched.
+                }
+
+            }
+
+        });
         listView.setOnItemSelectedListener(new OnItemSelectedListener() {
 
             @Override

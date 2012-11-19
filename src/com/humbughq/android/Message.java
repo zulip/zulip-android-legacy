@@ -10,12 +10,8 @@ import android.text.TextUtils;
 import android.util.Log;
 
 public class Message {
-    public static final int STREAM_MESSAGE = 1;
-    public static final int HUDDLE_MESSAGE = 2;
-    public static final int PERSONAL_MESSAGE = 3;
-
     private String sender;
-    private int type;
+    private MessageType type;
     private String content;
     private String subject;
     private String senderEmail;
@@ -52,11 +48,11 @@ public class Message {
         this.setSender(message.getString("sender_full_name"));
         this.setSenderEmail(message.getString("sender_email"));
         if (message.getString("type").equals("stream")) {
-            this.setType(Message.STREAM_MESSAGE);
+            this.setType(MessageType.STREAM_MESSAGE);
             recipients = new String[1];
             recipients[0] = message.getString("display_recipient");
         } else if (message.getString("type").equals("huddle")) {
-            this.setType(Message.HUDDLE_MESSAGE);
+            this.setType(MessageType.HUDDLE_MESSAGE);
             JSONArray jsonRecipients = message
                     .getJSONArray("display_recipient");
             recipients = new String[jsonRecipients.length() - 1];
@@ -66,13 +62,13 @@ public class Message {
                         .getJSONObject(i));
             }
         } else if (message.getString("type").equals("personal")) {
-            this.setType(Message.PERSONAL_MESSAGE);
+            this.setType(MessageType.PERSONAL_MESSAGE);
             recipients = new String[1];
             recipients[0] = getNotYouRecipient(message
                     .getJSONObject("display_recipient"));
         }
         this.setContent(message.getString("content"));
-        if (this.getType() == Message.STREAM_MESSAGE) {
+        if (this.getType() == MessageType.STREAM_MESSAGE) {
             this.setSubject(message.getString("subject"));
         } else {
             this.setSubject(null);
@@ -82,12 +78,12 @@ public class Message {
         this.setID(message.getInt("id"));
     }
 
-    public int getType() {
+    public MessageType getType() {
         return type;
     }
 
-    public void setType(int type) {
-        this.type = type;
+    public void setType(MessageType streamMessage) {
+        this.type = streamMessage;
     }
 
     public String getRecipient() {

@@ -11,5 +11,9 @@
     <string name="logout">Log out</string>
     <string name="compose">Compose</string>
     <string name="huddle_text">You and</string>
+    <string name="send">Send</string>
+    <string name="compose_hint">Compose your message here…</string>
+    <string name="stream">Stream</string>
+    <string name="subject">Subject</string>
 
 </resources>
