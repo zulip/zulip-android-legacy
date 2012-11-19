@@ -35,7 +35,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
 
         LinearLayout envelopeTile = new LinearLayout(context);
         envelopeTile.setOrientation(LinearLayout.HORIZONTAL);
-        if (message.getType() == Message.STREAM_MESSAGE) {
+        if (message.getType() == MessageType.STREAM_MESSAGE) {
             envelopeTile.setBackgroundResource(R.drawable.stream_header);
         } else {
             envelopeTile.setBackgroundResource(R.drawable.huddle_header);
@@ -44,7 +44,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         tile.addView(envelopeTile);
 
         TextView display_recipient = new TextView(context);
-        if (message.getType() != Message.STREAM_MESSAGE) {
+        if (message.getType() != MessageType.STREAM_MESSAGE) {
             display_recipient.setText(context.getString(R.string.huddle_text)
                     + " " + message.getRecipient());
             display_recipient.setTextColor(Color.WHITE);
@@ -57,7 +57,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
 
         envelopeTile.addView(display_recipient);
 
-        if (message.getType() == Message.STREAM_MESSAGE) {
+        if (message.getType() == MessageType.STREAM_MESSAGE) {
             TextView sep = new TextView(context);
             sep.setText(" | ");
 
@@ -84,7 +84,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
 
         int color = Color.WHITE;
 
-        if (message.getType() != Message.STREAM_MESSAGE) {
+        if (message.getType() != MessageType.STREAM_MESSAGE) {
             color = context.getResources().getColor(R.color.huddle_body);
         } else {
             color = context.getResources().getColor(R.color.stream_body);
