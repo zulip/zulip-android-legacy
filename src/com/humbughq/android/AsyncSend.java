@@ -2,6 +2,14 @@ package com.humbughq.android;
 
 public class AsyncSend extends HumbugAsyncPushTask {
 
+    /**
+     * Initialise an AsyncSend task to send a specific message.
+     * 
+     * @param humbugActivity
+     *            The calling Activity
+     * @param msg
+     *            The mesasge to send.
+     */
     public AsyncSend(HumbugActivity humbugActivity, Message msg) {
         super(humbugActivity);
         this.setProperty("type", msg.getType().toString());
