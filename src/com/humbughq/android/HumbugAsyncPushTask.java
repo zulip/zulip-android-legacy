@@ -78,8 +78,6 @@ class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
             out.close();
             responseString = out.toString();
             if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
-                // Closes the connection.
-                response.getEntity().getContent().close();
                 throw new IOException(statusLine.getReasonPhrase());
             }
         } catch (ClientProtocolException e) {
