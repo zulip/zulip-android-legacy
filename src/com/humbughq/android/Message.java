@@ -10,6 +10,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 public class Message {
+
     private String sender;
     private MessageType type;
     private String content;
@@ -28,6 +29,10 @@ public class Message {
 
     public Message(JSONObject message) throws JSONException {
         this.populate(message);
+    }
+
+    public Message() {
+        // Dummy empty constructor
     }
 
     private String getNotYouRecipient(JSONObject other) {
@@ -84,6 +89,16 @@ public class Message {
 
     public void setType(MessageType streamMessage) {
         this.type = streamMessage;
+    }
+
+    public void setRecipient(String[] recipients) {
+        this.recipients = recipients;
+    }
+
+    public void setRecipient(String recipient) {
+        String[] recipients = new String[1];
+        recipients[0] = recipient;
+        this.recipients = recipients;
     }
 
     public String getRecipient() {
