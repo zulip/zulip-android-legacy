@@ -151,6 +151,26 @@ public class HumbugActivity extends Activity {
         send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                EditText stream = (EditText) composeWindow
+                        .findViewById(R.id.composeStream);
+
+                EditText subject = (EditText) composeWindow
+                        .findViewById(R.id.composeSubject);
+
+                EditText body = (EditText) composeWindow
+                        .findViewById(R.id.composeText);
+
+                Message msg = new Message();
+                msg.setSenderEmail(that.email);
+                msg.setType(MessageType.STREAM_MESSAGE);
+
+                msg.setRecipient(stream.getText().toString());
+                msg.setSubject(subject.getText().toString());
+                msg.setContent(body.getText().toString());
+
+                AsyncSend sender = new AsyncSend(that, msg);
+                sender.execute();
+
                 composeWindow.dismiss();
             }
         });

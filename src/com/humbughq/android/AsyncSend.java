@@ -6,7 +6,9 @@ public class AsyncSend extends HumbugAsyncPushTask {
         super(humbugActivity);
         this.setProperty("type", msg.getType().toString());
         this.setProperty("to", msg.getRecipient());
+        this.setProperty("stream", msg.getSubject());
         this.setProperty("subject", msg.getSubject());
+        this.setProperty("content", msg.getContent());
     }
 
     public final void execute() {
