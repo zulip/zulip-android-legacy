@@ -48,32 +48,8 @@ class AsyncPointerUpdate extends HumbugAsyncPushTask {
                     Log.d("pointer", pointer + " not found in message list.");
 
                     this.context.current_poll = new AsyncPoller(this.context,
-                            false, false);
+                            true, true);
 
-                    this.context.current_poll
-                            .setCallback(new AsyncTaskCompleteListener() {
-                                @Override
-                                public void onTaskComplete(String result) {
-
-                                    context.listView.setSelection(context.adapter
-                                            .getPosition(context.messageIndex
-                                                    .get(pointer)) - 1);
-                                    context.current_poll = new AsyncPoller(
-                                            context, true, false);
-
-                                    try {
-                                        context.current_poll.execute(
-                                                (int) context.adapter
-                                                        .getItemId(context.adapter
-                                                                .getCount() - 1) + 1,
-                                                0, 10000);
-                                    } catch (java.lang.ArrayIndexOutOfBoundsException e) {
-                                        Log.e("pointer",
-                                                "No data retrieved by poll!");
-                                    }
-                                }
-
-                            });
                     this.context.current_poll.execute(pointer, 100, 100);
 
                 } else {
