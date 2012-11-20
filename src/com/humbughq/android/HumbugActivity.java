@@ -160,6 +160,13 @@ public class HumbugActivity extends Activity {
                 EditText body = (EditText) composeWindow
                         .findViewById(R.id.composeText);
 
+                if (!(requireFilled(stream, "stream")
+                        && requireFilled(subject, "subject") && requireFilled(
+                        body, "message body"))) {
+                    return;
+
+                }
+
                 Message msg = new Message();
                 msg.setSenderEmail(that.email);
                 msg.setType(MessageType.STREAM_MESSAGE);
@@ -192,6 +199,16 @@ public class HumbugActivity extends Activity {
 
                     }
                 });
+
+    }
+
+    protected boolean requireFilled(EditText field, String name) {
+        if (field.getText().toString().equals("")) {
+            field.setError("You must specify a " + name);
+            field.requestFocus();
+            return false;
+        }
+        return true;
 
     }
 
