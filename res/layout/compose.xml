@@ -15,7 +15,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.30"
             android:ems="10"
-            android:hint="@string/stream" >
+            android:hint="@string/stream"
+            android:maxLines="1" >
 
             <requestFocus />
         </EditText>
@@ -26,7 +27,9 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.70"
             android:ems="10"
-            android:hint="@string/subject" />
+            android:hint="@string/subject"
+            android:maxLines="1" />
+
     </LinearLayout>
 
     <EditText
