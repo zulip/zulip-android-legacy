@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -55,13 +56,13 @@ public class HumbugActivity extends Activity {
 
     String api_key;
 
-    String email;
-
     HumbugActivity that = this; // self-ref
     SharedPreferences settings;
     String client_id;
     protected int mIDSelected;
     private Menu menu;
+    public Person you;
+    private Dialog composeWindow;
 
     /** Called when the activity is first created. */
     @Override
@@ -71,7 +72,7 @@ public class HumbugActivity extends Activity {
 
         settings = getPreferences(Activity.MODE_PRIVATE);
 
-        this.email = settings.getString("email", null);
+        this.you = new Person(null, settings.getString("email", null));
         this.api_key = settings.getString("api_key", null);
 
         if (this.api_key == null) {
@@ -119,8 +120,28 @@ public class HumbugActivity extends Activity {
         openCompose(null);
     }
 
+    protected void switchToPersonal() {
+        EditText stream = (EditText) composeWindow
+                .findViewById(R.id.composeStream);
+        EditText subject = (EditText) composeWindow
+                .findViewById(R.id.composeSubject);
+
+        subject.setVisibility(View.GONE);
+        stream.setGravity(Gravity.FILL_HORIZONTAL);
+    }
+
+    protected void switchToStream() {
+        EditText stream = (EditText) composeWindow
+                .findViewById(R.id.composeStream);
+        EditText subject = (EditText) composeWindow
+                .findViewById(R.id.composeSubject);
+
+        subject.setVisibility(View.VISIBLE);
+        stream.setGravity(Gravity.NO_GRAVITY);
+    }
+
     protected void openCompose(Message msg) {
-        final Dialog composeWindow = new Dialog(this);
+        this.composeWindow = new Dialog(this);
         composeWindow.setContentView(R.layout.compose);
         composeWindow.setTitle("Compose");
 
@@ -133,8 +154,14 @@ public class HumbugActivity extends Activity {
         EditText body = (EditText) composeWindow.findViewById(R.id.composeText);
 
         if (msg != null) {
-            stream.setText(msg.getRecipient());
-            subject.setText(msg.getSubject());
+            if (msg.getType() == MessageType.STREAM_MESSAGE) {
+                stream.setText(msg.getStream());
+                subject.setText(msg.getSubject());
+                this.switchToStream();
+            } else {
+                stream.setText(msg.getReplyTo());
+                this.switchToPersonal();
+            }
             body.requestFocus();
         } else {
             // Focus the stream, zero out stream/subject
@@ -168,10 +195,10 @@ public class HumbugActivity extends Activity {
                 }
 
                 Message msg = new Message();
-                msg.setSenderEmail(that.email);
+                msg.setSender(that.you);
                 msg.setType(MessageType.STREAM_MESSAGE);
 
-                msg.setRecipient(stream.getText().toString());
+                msg.setStream(stream.getText().toString());
                 msg.setSubject(subject.getText().toString());
                 msg.setContent(body.getText().toString());
 
