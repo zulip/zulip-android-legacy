@@ -13,7 +13,10 @@ class AsyncLogin extends HumbugAsyncPushTask {
             String password) {
         super(humbugActivity);
         context = humbugActivity;
-        this.context.email = username;
+        // Knowing your name would be nice, but we don't use it anywhere and
+        // it's not returned by the API, so having it be null here is fine for
+        // now.
+        this.context.you = new Person(null, username);
         this.setProperty("username", username);
         this.setProperty("password", password);
     }
@@ -36,7 +39,7 @@ class AsyncLogin extends HumbugAsyncPushTask {
                     this.context.logged_in = true;
 
                     Editor ed = this.context.settings.edit();
-                    ed.putString("email", this.context.email);
+                    ed.putString("email", this.context.you.getEmail());
                     ed.putString("api_key", this.context.api_key);
 
                     ed.commit();

@@ -46,10 +46,10 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         TextView display_recipient = new TextView(context);
         if (message.getType() != MessageType.STREAM_MESSAGE) {
             display_recipient.setText(context.getString(R.string.huddle_text)
-                    + " " + message.getRecipient());
+                    + " " + message.getDisplayRecipient());
             display_recipient.setTextColor(Color.WHITE);
         } else {
-            display_recipient.setText(message.getRecipient());
+            display_recipient.setText(message.getDisplayRecipient());
         }
         display_recipient.setTypeface(Typeface.DEFAULT_BOLD);
         display_recipient.setGravity(Gravity.CENTER_HORIZONTAL);
@@ -71,7 +71,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
 
         TextView senderName = new TextView(context);
 
-        senderName.setText(message.getSender());
+        senderName.setText(message.getSender().getName());
         senderName.setPadding(10, 5, 10, 5);
         senderName.setTypeface(Typeface.DEFAULT_BOLD);
 
