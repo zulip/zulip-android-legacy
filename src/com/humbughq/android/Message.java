@@ -11,38 +11,37 @@ import android.util.Log;
 
 public class Message {
 
-    private String sender;
+    private Person sender;
     private MessageType type;
     private String content;
     private String subject;
-    private String senderEmail;
     private Date timestamp;
-    private String[] recipients;
+    private Person[] recipients;
     private int id;
-    private String your_email;
+    private String stream;
+    private Person you;
 
     /**
      * Construct a new Message from JSON returned by the Humbug server.
      * 
-     * @param context
-     *            The HumbugActivity that created the message
+     * @param you
+     *            A Person object corresponding to the user's name and email.
      * @param message
      *            The JSON object parsed from the server's output
      * @throws JSONException
      *             Thrown if the JSON provided is malformed.
      */
-    public Message(HumbugActivity context, JSONObject message)
-            throws JSONException {
-        this.your_email = context.email;
+    public Message(Person you, JSONObject message) throws JSONException {
+        this.you = you;
         this.populate(message);
     }
 
     /**
      * Construct a new Message from JSON returned by the Humbug server.
      * 
-     * This method operates without HumbugActivity context, so some automatic
-     * features like excluding the user from the recipient list are not
-     * performed.
+     * This method operates without information about the user, so some
+     * automatic features like excluding the user from the recipient list are
+     * not performed.
      * 
      * @param message
      *            The JSON object parsed from the server's output
@@ -66,10 +65,11 @@ public class Message {
      * @return Either the specified Recipient's full name, or the sender's name
      *         if you are the Recipient.
      */
-    private String getNotYouRecipient(JSONObject other) {
+    private Person getNotYouRecipient(JSONObject other) {
         try {
-            if (!other.getString("email").equals(this.your_email)) {
-                return other.getString("full_name");
+            if (!other.getString("email").equals(this.you.getEmail())) {
+                return new Person(other.getString("full_name"),
+                        other.getString("email"));
             } else {
                 return this.getSender();
             }
@@ -88,17 +88,16 @@ public class Message {
      * @throws JSONException
      */
     public void populate(JSONObject message) throws JSONException {
-        this.setSender(message.getString("sender_full_name"));
-        this.setSenderEmail(message.getString("sender_email"));
+        this.setSender(new Person(message.getString("sender_full_name"),
+                message.getString("sender_email")));
         if (message.getString("type").equals("stream")) {
             this.setType(MessageType.STREAM_MESSAGE);
-            recipients = new String[1];
-            recipients[0] = message.getString("display_recipient");
+            setStream(message.getString("display_recipient"));
         } else if (message.getString("type").equals("huddle")) {
             this.setType(MessageType.HUDDLE_MESSAGE);
             JSONArray jsonRecipients = message
                     .getJSONArray("display_recipient");
-            recipients = new String[jsonRecipients.length() - 1];
+            recipients = new Person[jsonRecipients.length() - 1];
 
             for (int i = 0; i < jsonRecipients.length() - 1; i++) {
                 recipients[i] = getNotYouRecipient(jsonRecipients
@@ -106,7 +105,7 @@ public class Message {
             }
         } else if (message.getString("type").equals("personal")) {
             this.setType(MessageType.PERSONAL_MESSAGE);
-            recipients = new String[1];
+            recipients = new Person[1];
             recipients[0] = getNotYouRecipient(message
                     .getJSONObject("display_recipient"));
         }
@@ -129,7 +128,7 @@ public class Message {
         this.type = streamMessage;
     }
 
-    public void setRecipient(String[] recipients) {
+    public void setRecipient(Person[] recipients) {
         this.recipients = recipients;
     }
 
@@ -139,14 +138,35 @@ public class Message {
      * @param recipient
      *            The sole recipient of the message.
      */
-    public void setRecipient(String recipient) {
-        String[] recipients = new String[1];
+    public void setRecipient(Person recipient) {
+        Person[] recipients = new Person[1];
         recipients[0] = recipient;
         this.recipients = recipients;
     }
 
-    public String getRecipient() {
-        return TextUtils.join(", ", recipients);
+    public String getDisplayRecipient() {
+        if (this.getType() == MessageType.STREAM_MESSAGE) {
+            return this.getStream();
+        } else {
+            String[] names = new String[this.recipients.length];
+
+            for (int i = 0; i < this.recipients.length; i++) {
+                names[i] = recipients[i].getName();
+            }
+            return TextUtils.join(", ", names);
+        }
+    }
+
+    public String getReplyTo() {
+        if (this.getType() == MessageType.STREAM_MESSAGE) {
+            return this.getSender().getEmail();
+        }
+        String[] emails = new String[this.recipients.length];
+
+        for (int i = 0; i < this.recipients.length; i++) {
+            emails[i] = recipients[i].getEmail();
+        }
+        return TextUtils.join(", ", emails);
     }
 
     public String getSubject() {
@@ -165,20 +185,12 @@ public class Message {
         this.content = content;
     }
 
-    public String getSender() {
+    public Person getSender() {
         return sender;
     }
 
-    public void setSender(String sender) {
+    public void setSender(Person sender) {
         this.sender = sender;
-    }
-
-    public String getSenderEmail() {
-        return senderEmail;
-    }
-
-    public void setSenderEmail(String senderEmail) {
-        this.senderEmail = senderEmail;
     }
 
     public Date getTimestamp() {
@@ -195,5 +207,13 @@ public class Message {
 
     public void setID(int id) {
         this.id = id;
+    }
+
+    public String getStream() {
+        return stream;
+    }
+
+    public void setStream(String stream) {
+        this.stream = stream;
     }
 }

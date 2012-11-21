@@ -14,6 +14,7 @@
     <string name="send">Send</string>
     <string name="compose_hint">Compose your message here…</string>
     <string name="stream">Stream</string>
+    <string name="people">People</string>
     <string name="subject">Subject</string>
 
 </resources>
