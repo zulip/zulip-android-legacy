@@ -104,8 +104,11 @@ public class HumbugActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
-        case R.id.compose:
-            openCompose();
+        case R.id.compose_stream:
+            openCompose(MessageType.STREAM_MESSAGE);
+            break;
+        case R.id.compose_pm:
+            openCompose(MessageType.PERSONAL_MESSAGE);
             break;
         case R.id.logout:
             logout();
@@ -116,10 +119,6 @@ public class HumbugActivity extends Activity {
         return true;
     }
 
-    protected void openCompose() {
-        openCompose(null);
-    }
-
     protected void switchToPersonal() {
         EditText stream = (EditText) composeWindow
                 .findViewById(R.id.composeStream);
@@ -128,6 +127,7 @@ public class HumbugActivity extends Activity {
 
         subject.setVisibility(View.GONE);
         stream.setGravity(Gravity.FILL_HORIZONTAL);
+        stream.setHint(R.string.pm_prompt);
     }
 
     protected void switchToStream() {
@@ -138,9 +138,18 @@ public class HumbugActivity extends Activity {
 
         subject.setVisibility(View.VISIBLE);
         stream.setGravity(Gravity.NO_GRAVITY);
+        stream.setHint(R.string.stream);
     }
 
     protected void openCompose(Message msg) {
+        openCompose(msg, null);
+    }
+
+    protected void openCompose(MessageType type) {
+        openCompose(null, type);
+    }
+
+    private void openCompose(Message msg, MessageType type) {
         this.composeWindow = new Dialog(this);
         composeWindow.setContentView(R.layout.compose);
         composeWindow.setTitle("Compose");
@@ -153,14 +162,19 @@ public class HumbugActivity extends Activity {
 
         EditText body = (EditText) composeWindow.findViewById(R.id.composeText);
 
+        if (type == MessageType.STREAM_MESSAGE
+                || (msg != null && msg.getType() == MessageType.STREAM_MESSAGE)) {
+            this.switchToStream();
+        } else {
+            this.switchToPersonal();
+        }
         if (msg != null) {
             if (msg.getType() == MessageType.STREAM_MESSAGE) {
                 stream.setText(msg.getStream());
                 subject.setText(msg.getSubject());
-                this.switchToStream();
+
             } else {
                 stream.setText(msg.getReplyTo());
-                this.switchToPersonal();
             }
             body.requestFocus();
         } else {
@@ -187,16 +201,24 @@ public class HumbugActivity extends Activity {
                 EditText body = (EditText) composeWindow
                         .findViewById(R.id.composeText);
 
+                // If the subject field is hidden, we have a personal message.
+                boolean subjectFilledIfRequired = subject.getVisibility() == View.GONE
+                        || requireFilled(subject, "subject");
+
                 if (!(requireFilled(stream, "stream")
-                        && requireFilled(subject, "subject") && requireFilled(
-                        body, "message body"))) {
+                        && subjectFilledIfRequired && requireFilled(body,
+                        "message body"))) {
                     return;
 
                 }
 
                 Message msg = new Message();
                 msg.setSender(that.you);
-                msg.setType(MessageType.STREAM_MESSAGE);
+                if (subject.getVisibility() == View.GONE) {
+                    msg.setType(MessageType.PERSONAL_MESSAGE);
+                } else {
+                    msg.setType(MessageType.STREAM_MESSAGE);
+                }
 
                 msg.setStream(stream.getText().toString());
                 msg.setSubject(subject.getText().toString());
