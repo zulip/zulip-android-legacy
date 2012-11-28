@@ -33,7 +33,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 public class HumbugActivity extends Activity {
-    public static final String SERVER_URI = "https://app.humbughq.com/";
+    public static final String SERVER_URI = "https://staging.humbughq.com/";
     public static final String USER_AGENT = "HumbugMobile 1.0";
 
     ListView listView;
