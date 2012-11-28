@@ -9,11 +9,13 @@
     <string name="password">Password</string>
     <string name="legal">Legal information</string>
     <string name="logout">Log out</string>
-    <string name="compose">Compose</string>
+    <string name="compose_stream">Compose message to Stream</string>
+    <string name="compose_pm">Compose private message</string>
     <string name="huddle_text">You and</string>
     <string name="send">Send</string>
     <string name="compose_hint">Compose your message here…</string>
     <string name="stream">Stream</string>
+    <string name="pm_prompt">One or more email address</string>
     <string name="people">People</string>
     <string name="subject">Subject</string>
 
