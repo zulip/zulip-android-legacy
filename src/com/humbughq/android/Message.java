@@ -65,19 +65,18 @@ public class Message {
      * @return Either the specified Recipient's full name, or the sender's name
      *         if you are the Recipient.
      */
-    private Person getNotYouRecipient(JSONObject other) {
+    private boolean getNotYouRecipient(JSONObject other) {
         try {
             if (!other.getString("email").equals(this.you.getEmail())) {
-                return new Person(other.getString("full_name"),
-                        other.getString("email"));
+                return true;
             } else {
-                return this.getSender();
+                return false;
             }
         } catch (JSONException e) {
             Log.e("message", "Couldn't parse JSON sender list!");
             e.printStackTrace();
         }
-        return null;
+        return false;
     }
 
     /**
@@ -98,16 +97,23 @@ public class Message {
             JSONArray jsonRecipients = message
                     .getJSONArray("display_recipient");
             recipients = new Person[jsonRecipients.length() - 1];
-
-            for (int i = 0; i < jsonRecipients.length() - 1; i++) {
-                recipients[i] = getNotYouRecipient(jsonRecipients
-                        .getJSONObject(i));
+            if (message.getInt("id") == 303377) {
+                Log.i("ho", "fuck");
+            }
+            for (int i = 0, j = 0; i < jsonRecipients.length(); i++) {
+                JSONObject obj = jsonRecipients.getJSONObject(i);
+                if (getNotYouRecipient(obj)) {
+                    recipients[j] = new Person(obj.getString("full_name"),
+                            obj.getString("email"));
+                    j++;
+                }
             }
         } else if (message.getString("type").equals("personal")) {
             this.setType(MessageType.PERSONAL_MESSAGE);
             recipients = new Person[1];
-            recipients[0] = getNotYouRecipient(message
-                    .getJSONObject("display_recipient"));
+            JSONObject obj = message.getJSONObject("display_recipient");
+            recipients[0] = new Person(obj.getString("full_name"),
+                    obj.getString("email"));
         }
         this.setContent(message.getString("content"));
         if (this.getType() == MessageType.STREAM_MESSAGE) {
@@ -130,6 +136,13 @@ public class Message {
 
     public void setRecipient(Person[] recipients) {
         this.recipients = recipients;
+    }
+
+    public void setRecipient(String[] emails) {
+        this.recipients = new Person[emails.length];
+        for (int i = 0; i < emails.length; i++) {
+            this.recipients[i] = new Person(null, emails[i]);
+        }
     }
 
     /**
@@ -161,12 +174,16 @@ public class Message {
         if (this.getType() == MessageType.STREAM_MESSAGE) {
             return this.getSender().getEmail();
         }
+        return TextUtils.join(", ", getReplyToArray());
+    }
+
+    public String[] getReplyToArray() {
         String[] emails = new String[this.recipients.length];
 
         for (int i = 0; i < this.recipients.length; i++) {
             emails[i] = recipients[i].getEmail();
         }
-        return TextUtils.join(", ", emails);
+        return emails;
     }
 
     public String getSubject() {
@@ -216,4 +233,5 @@ public class Message {
     public void setStream(String stream) {
         this.stream = stream;
     }
+
 }
