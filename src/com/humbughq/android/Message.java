@@ -181,7 +181,11 @@ public class Message {
         String[] emails = new String[this.recipients.length];
 
         for (int i = 0; i < this.recipients.length; i++) {
-            emails[i] = recipients[i].getEmail();
+            if (recipients[i].getEmail().equals(you.getEmail())) {
+                emails[i] = sender.getEmail();
+            } else {
+                emails[i] = recipients[i].getEmail();
+            }
         }
         return emails;
     }
