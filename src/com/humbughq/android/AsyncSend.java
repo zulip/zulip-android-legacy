@@ -1,5 +1,7 @@
 package com.humbughq.android;
 
+import org.json.JSONArray;
+
 public class AsyncSend extends HumbugAsyncPushTask {
 
     /**
@@ -13,7 +15,15 @@ public class AsyncSend extends HumbugAsyncPushTask {
     public AsyncSend(HumbugActivity humbugActivity, Message msg) {
         super(humbugActivity);
         this.setProperty("type", msg.getType().toString());
-        this.setProperty("to", msg.getStream());
+        if (msg.getType() == MessageType.STREAM_MESSAGE) {
+            this.setProperty("to", msg.getStream());
+        } else {
+            JSONArray arr = new JSONArray();
+            for (String email : msg.getReplyToArray()) {
+                arr.put(email);
+            }
+            this.setProperty("to", arr.toString());
+        }
         this.setProperty("stream", msg.getSubject());
         this.setProperty("subject", msg.getSubject());
         this.setProperty("content", msg.getContent());
