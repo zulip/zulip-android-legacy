@@ -21,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.WebView;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
@@ -296,6 +297,27 @@ public class HumbugActivity extends Activity {
                                         .getText().toString(),
                                 ((EditText) findViewById(R.id.password))
                                         .getText().toString())).execute();
+                    }
+                });
+        ((TextView) findViewById(R.id.legalTextView))
+                .setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        final Dialog dia = new Dialog(that);
+                        dia.setContentView(R.layout.web_view_dialog);
+                        dia.setTitle("Legal");
+
+                        // XXX: Why does this spawn a new browser window?
+                        WebView webView = (WebView) dia
+                                .findViewById(R.id.webView);
+                        webView.loadUrl(getString(R.string.legalUrl));
+                        Button close = (Button) dia.findViewById(R.id.close);
+                        close.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                dia.dismiss();
+                            }
+                        });
                     }
                 });
     }
