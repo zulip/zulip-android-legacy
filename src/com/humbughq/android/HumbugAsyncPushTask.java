@@ -55,9 +55,9 @@ class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
         HttpResponse response;
         String responseString = null;
         try {
-            HttpPost httppost = new HttpPost(HumbugActivity.SERVER_URI
+            HttpPost httppost = new HttpPost(context.getServerURI()
                     + api_path[0]);
-            Log.i("welp", HumbugActivity.SERVER_URI + api_path[0]);
+            Log.i("welp", context.getServerURI() + api_path[0]);
 
             nameValuePairs.add(new BasicNameValuePair("api-key",
                     this.context.api_key));

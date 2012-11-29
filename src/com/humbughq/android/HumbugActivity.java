@@ -33,7 +33,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 public class HumbugActivity extends Activity {
-    public static final String SERVER_URI = "https://staging.humbughq.com/";
     public static final String USER_AGENT = "HumbugMobile 1.0";
 
     ListView listView;
@@ -423,5 +422,12 @@ public class HumbugActivity extends Activity {
                         .getItemId(this.adapter.getCount() - 1) + 1);
             }
         }
+    }
+
+    public String getServerURI() {
+        if (you.getRealm() == "humbughq.com") {
+            return "https://staging.humbughq.com/";
+        }
+        return "https://humbughq.com/";
     }
 }
