@@ -18,5 +18,7 @@
     <string name="pm_prompt">One or more email addresses</string>
     <string name="people">People</string>
     <string name="subject">Subject</string>
+    <string name="close">Close</string>
+    <string name="legalUrl">http://humbughq.com/terms?mobile=true</string>
 
 </resources>
