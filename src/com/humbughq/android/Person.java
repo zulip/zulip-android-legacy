@@ -28,6 +28,11 @@ public class Person {
         this.email = email;
     }
 
+    public String getRealm() {
+        String[] split_email = this.getEmail().split("@");
+        return split_email[split_email.length - 1];
+    }
+
     public boolean equals(Person obj) {
         return (this.name.equals(obj.getName()) && this.email.equals(obj
                 .getEmail()));
