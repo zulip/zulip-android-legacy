@@ -51,11 +51,22 @@
 
     <Button
         android:id="@+id/login"
+        style="android:buttonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/password"
         android:layout_marginTop="20dp"
         android:text="@string/login_button" />
+
+    <TextView
+        android:id="@+id/legalTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/login"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="35dp"
+        android:text="@string/legal"
+        android:textColor="#ff0099cc" />
 
 </RelativeLayout>
