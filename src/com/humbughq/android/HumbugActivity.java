@@ -204,7 +204,7 @@ public class HumbugActivity extends Activity {
                 boolean subjectFilledIfRequired = subject.getVisibility() == View.GONE
                         || requireFilled(subject, "subject");
 
-                if (!(requireFilled(stream, "stream")
+                if (!(requireFilled(stream, "recipient")
                         && subjectFilledIfRequired && requireFilled(body,
                         "message body"))) {
                     return;
