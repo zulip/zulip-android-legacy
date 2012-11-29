@@ -16,6 +16,7 @@
             android:layout_weight="0.30"
             android:ems="10"
             android:hint="@string/stream"
+            android:inputType="textNoSuggestions"
             android:maxLines="1" >
 
             <requestFocus />
@@ -28,6 +29,7 @@
             android:layout_weight="0.70"
             android:ems="10"
             android:hint="@string/subject"
+            android:inputType="textNoSuggestions"
             android:maxLines="1" />
 
     </LinearLayout>
