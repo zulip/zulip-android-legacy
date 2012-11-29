@@ -215,12 +215,13 @@ public class HumbugActivity extends Activity {
                 msg.setSender(that.you);
                 if (subject.getVisibility() == View.GONE) {
                     msg.setType(MessageType.PERSONAL_MESSAGE);
+                    msg.setRecipient(stream.getText().toString().split(","));
                 } else {
                     msg.setType(MessageType.STREAM_MESSAGE);
+                    msg.setStream(stream.getText().toString());
+                    msg.setSubject(subject.getText().toString());
                 }
 
-                msg.setStream(stream.getText().toString());
-                msg.setSubject(subject.getText().toString());
                 msg.setContent(body.getText().toString());
 
                 AsyncSend sender = new AsyncSend(that, msg);
