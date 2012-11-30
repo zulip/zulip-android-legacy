@@ -35,7 +35,7 @@ class AsyncPointerUpdate extends HumbugAsyncPushTask {
                         .getString("client_id");
                 Log.i("pointer", "got from server as " + pointer);
 
-                final Message message = this.context.messageIndex.get(pointer);
+                Message message = this.context.messageIndex.get(pointer);
                 if (message == null) {
                     /*
                      * We're missing the pointer in the fetched message view!
@@ -48,7 +48,42 @@ class AsyncPointerUpdate extends HumbugAsyncPushTask {
                     Log.d("pointer", pointer + " not found in message list.");
 
                     this.context.current_poll = new AsyncPoller(this.context,
-                            true, true);
+                            true);
+
+                    /*
+                     * We need to hook into the end of the task to update the
+                     * pointer.
+                     * 
+                     * Due to
+                     * 
+                     * https://groups.google.com/d/topic/android-developers
+                     * /EnyldBQDUwE/discussion
+                     * 
+                     * we need to post an event to set the selection after other
+                     * code has run to handle the adapter's dataset being
+                     * invalidated.
+                     */
+                    this.context.current_poll
+                            .setCallback(new AsyncTaskCompleteListener() {
+                                @Override
+                                public void onTaskComplete(String result) {
+
+                                    final Message message = context.messageIndex
+                                            .get(pointer);
+                                    Log.e("test", message.getID() + "");
+
+                                    context.listView.post(new Runnable() {
+
+                                        @Override
+                                        public void run() {
+                                            Log.e("test", "called");
+                                            context.listView
+                                                    .setSelection(context.adapter
+                                                            .getPosition(message));
+                                        }
+                                    });
+                                }
+                            });
 
                     this.context.current_poll.execute(pointer, 100, 100);
 

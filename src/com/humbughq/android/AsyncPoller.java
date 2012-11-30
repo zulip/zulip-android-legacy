@@ -10,22 +10,19 @@ class AsyncPoller extends HumbugAsyncPushTask {
 
     private Message[] receivedMessages;
     private boolean continuePolling;
-    private boolean updatePointer;
 
     /**
      * Initialises an AsyncPoller object and sets execution defaults.
-     *
+     * 
      * @param humbugActivity
      *            The calling Activity.
      * @param continuePolling
      *            Whether to start up a new AsyncPoller task
      * @param updatePointer
      */
-    public AsyncPoller(HumbugActivity humbugActivity, boolean continuePolling,
-            boolean updatePointer) {
+    public AsyncPoller(HumbugActivity humbugActivity, boolean continuePolling) {
         super(humbugActivity);
         this.continuePolling = continuePolling;
-        this.updatePointer = updatePointer;
     }
 
     /**
@@ -135,14 +132,9 @@ class AsyncPoller extends HumbugAsyncPushTask {
         } else {
             Log.v("poll", "No messages returned.");
         }
-        if (updatePointer) {
-            Log.v("poll", "Starting AsyncPointerUpdate");
-            (new AsyncPointerUpdate(this.context)).execute();
-        }
         if (this.continuePolling) {
             Log.v("poll", "Starting new longpoll.");
-            this.context.current_poll = new AsyncPoller(this.context, true,
-                    false);
+            this.context.current_poll = new AsyncPoller(this.context, true);
             // Start polling from the last received message ID
             this.context.current_poll.execute((int) context.adapter
                     .getItemId(context.adapter.getCount() - 1));
