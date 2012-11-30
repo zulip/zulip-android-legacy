@@ -28,6 +28,14 @@ public class Person {
         this.email = email;
     }
 
+    /**
+     * Calculate the Humbug realm for the person, currently by splitting the
+     * email address.
+     * 
+     * In the future, realms may be distinct from your email hostname.
+     * 
+     * @return the Person's realm.
+     */
     public String getRealm() {
         String[] split_email = this.getEmail().split("@");
         return split_email[split_email.length - 1];

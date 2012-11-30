@@ -19,16 +19,36 @@ import android.net.http.AndroidHttpClient;
 import android.os.AsyncTask;
 import android.util.Log;
 
+/* General AsyncTask for use in making various web requests to Humbug.
+ * 
+ * This class should be extended by each asynchronous operation you
+ * want to run. Most clients will need to override onPostExecute. 
+ */
 class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
 
     HumbugActivity context;
     List<NameValuePair> nameValuePairs;
     AsyncTaskCompleteListener callback;
 
+    /**
+     * Interface implemented by callbacks which are run at the end of a task.
+     * 
+     * Clients overriding onPostExecute will need to finish with
+     * 
+     * callback.onTaskComplete(result);
+     * 
+     * if they want to honor declared callback.
+     */
     interface AsyncTaskCompleteListener {
         public void onTaskComplete(String result);
     }
 
+    /**
+     * Declares a new HumbugAsyncPushTask, passing the activity as context.
+     * 
+     * @param humbugActivity
+     *            The Activity that created the PushTask
+     */
     public HumbugAsyncPushTask(HumbugActivity humbugActivity) {
         context = humbugActivity;
         callback = new AsyncTaskCompleteListener() {
@@ -41,10 +61,19 @@ class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
         nameValuePairs = new ArrayList<NameValuePair>();
     }
 
+    /**
+     * Sets the callback to run when the task is complete.
+     * 
+     * @param listener
+     *            AsyncTaskCompleteListener to run
+     */
     public void setCallback(AsyncTaskCompleteListener listener) {
         callback = listener;
     }
 
+    /**
+     * Sets a POST parameter for the request.
+     */
     public void setProperty(String key, String value) {
         this.nameValuePairs.add(new BasicNameValuePair(key, value));
     }
@@ -88,7 +117,7 @@ class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
         }
 
         httpclient.close();
-        Log.i("HAPT", "F" + responseString);
+        Log.i("HAPT", responseString + "");
         return responseString;
     }
 

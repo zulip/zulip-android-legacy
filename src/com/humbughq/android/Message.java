@@ -138,6 +138,17 @@ public class Message {
         this.recipients = recipients;
     }
 
+    /**
+     * Convenience function to set the recipients without requiring the caller
+     * to construct a full Person[] array.
+     * 
+     * Do not call this method if you want to get the recipient's names for this
+     * message later; construct a Person[] array and use setRecipient(Person[]
+     * recipients) instead.
+     * 
+     * @param emails
+     *            The emails of the recipients.
+     */
     public void setRecipient(String[] emails) {
         this.recipients = new Person[emails.length];
         for (int i = 0; i < emails.length; i++) {
@@ -157,6 +168,15 @@ public class Message {
         this.recipients = recipients;
     }
 
+    /**
+     * Constructs a pretty-printable-to-the-user string consisting of the names
+     * of all of the participants in the message, minus you.
+     * 
+     * For MessageType.STREAM_MESSAGE, return the stream name instead.
+     * 
+     * @return A String of the names of each Person in recipients[],
+     *         comma-separated, or the stream name.
+     */
     public String getDisplayRecipient() {
         if (this.getType() == MessageType.STREAM_MESSAGE) {
             return this.getStream();
@@ -170,6 +190,13 @@ public class Message {
         }
     }
 
+    /**
+     * Creates a comma-separated String of the email addressed of all the
+     * recipients of the message, as would be suitable to place in the compose
+     * box.
+     * 
+     * @return the aforementioned String.
+     */
     public String getReplyTo() {
         if (this.getType() == MessageType.STREAM_MESSAGE) {
             return this.getSender().getEmail();

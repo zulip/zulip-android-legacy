@@ -12,6 +12,15 @@ class AsyncPoller extends HumbugAsyncPushTask {
     private boolean continuePolling;
     private boolean updatePointer;
 
+    /**
+     * Initialises an AsyncPoller object and sets execution defaults.
+     *
+     * @param humbugActivity
+     *            The calling Activity.
+     * @param continuePolling
+     *            Whether to start up a new AsyncPoller task
+     * @param updatePointer
+     */
     public AsyncPoller(HumbugActivity humbugActivity, boolean continuePolling,
             boolean updatePointer) {
         super(humbugActivity);
@@ -19,17 +28,42 @@ class AsyncPoller extends HumbugAsyncPushTask {
         this.updatePointer = updatePointer;
     }
 
+    /**
+     * Default longpolling which will instantly return once messages are
+     * available for consumption which were sent after this method is called.
+     * 
+     * You probably never want to use this method.
+     */
     public final void execute() {
         this.execute("api/v1/get_messages");
         Log.v("poll", "longpolling started");
     }
 
+    /**
+     * Longpoll for messages after a specified last received message.
+     * 
+     * @param lastMessage
+     *            Last message received. More specifically, longpolling will
+     *            return once messages after this message ID are available for
+     *            consumption.
+     */
     public final void execute(int lastMessage) {
         this.setProperty("last", lastMessage + "");
         this.execute("api/v1/get_messages");
         Log.v("poll", "longpolling started from " + lastMessage);
     }
 
+    /**
+     * Get messages surrounding a specified anchor message ID, inclusive of both
+     * endpoints and the anchor.
+     * 
+     * @param anchor
+     *            Message ID of the message to fetch around
+     * @param before
+     *            Number of messages after the anchor to return
+     * @param after
+     *            Number of messages before the anchor to return
+     */
     public final void execute(int anchor, int before, int after) {
         this.setProperty("anchor", anchor + "");
         this.setProperty("num_before", before + "");
@@ -90,6 +124,10 @@ class AsyncPoller extends HumbugAsyncPushTask {
             try {
                 this.context.adapter.addAll(receivedMessages);
             } catch (NoSuchMethodError e) {
+                /*
+                 * Older versions of Android do not have .addAll, so we fall
+                 * back to manually looping here.
+                 */
                 for (Message message : receivedMessages) {
                     this.context.adapter.add(message);
                 }
