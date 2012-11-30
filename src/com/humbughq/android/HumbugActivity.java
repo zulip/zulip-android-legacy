@@ -484,7 +484,7 @@ public class HumbugActivity extends Activity {
      * @return either the production or staging server's URI
      */
     public String getServerURI() {
-        if (you.getRealm() == "humbughq.com") {
+        if (you.getRealm().equals("humbughq.com")) {
             return "https://staging.humbughq.com/";
         }
         return "https://humbughq.com/";
