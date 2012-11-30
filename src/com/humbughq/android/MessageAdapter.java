@@ -12,12 +12,22 @@ import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+/**
+ * Adapter which stores Messages in a view, and generates LinearLayouts for
+ * consumption by the ListView which displays the view.
+ */
 public class MessageAdapter extends ArrayAdapter<Message> {
 
     public MessageAdapter(Context context, List<Message> objects) {
         super(context, 0, objects);
     }
 
+    /**
+     * Creates a new (empty) message tile with all the relevant fillable Views
+     * tagged.
+     * 
+     * @return the constructed message tile
+     */
     private LinearLayout generateTile() {
         Context context = this.getContext();
 
