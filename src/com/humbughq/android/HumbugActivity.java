@@ -33,6 +33,8 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.humbughq.android.HumbugAsyncPushTask.AsyncTaskCompleteListener;
+
 public class HumbugActivity extends Activity {
     public static final String USER_AGENT = "HumbugMobile 1.0";
 
@@ -461,12 +463,20 @@ public class HumbugActivity extends Activity {
         Log.i("status", "resume");
         this.suspended = false;
         if (this.logged_in) {
-            // Update the pointer
-
             if (this.adapter.getCount() != 0) {
-                this.current_poll = new AsyncPoller(this, true, true);
+                this.current_poll = new AsyncPoller(this, true);
                 this.current_poll.execute((int) this.adapter
                         .getItemId(this.adapter.getCount() - 1) + 1);
+
+                // Update the pointer on resume.
+                this.current_poll.setCallback(new AsyncTaskCompleteListener() {
+
+                    @Override
+                    public void onTaskComplete(String result) {
+                        (new AsyncPointerUpdate(that)).execute();
+                    }
+
+                });
             }
         }
     }
