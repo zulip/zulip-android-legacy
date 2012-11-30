@@ -39,11 +39,6 @@ public class HumbugActivity extends Activity {
 
     HashMap<String, Bitmap> profile_pictures;
 
-    /*
-     * A "message" refers to an instance of the object Message. A "tile" is an
-     * instance of LinearLayout which represents a single message in the UI.
-     */
-
     SparseArray<Message> messageIndex;
     MessageAdapter adapter;
 
@@ -85,8 +80,14 @@ public class HumbugActivity extends Activity {
     }
 
     public boolean onPrepareOptionsMenu(Menu menu) {
+        /*
+         * We want to show a menu only when we're logged in, so this function is
+         * called by both Android and our own app when we encounter state
+         * changes where we might want to update the menu.
+         */
         if (menu == null) {
-            // we're getting called before the menu exists, bail
+            // We were called by a function before the menu had been
+            // initialised, so we should bail.
             return false;
         }
         this.menu = menu;
@@ -118,6 +119,9 @@ public class HumbugActivity extends Activity {
         return true;
     }
 
+    /**
+     * Switches the compose window's state to compose a personal message.
+     */
     protected void switchToPersonal() {
         EditText stream = (EditText) composeWindow
                 .findViewById(R.id.composeStream);
@@ -129,6 +133,9 @@ public class HumbugActivity extends Activity {
         stream.setHint(R.string.pm_prompt);
     }
 
+    /**
+     * Switches the compose window's state to compose a stream message.
+     */
     protected void switchToStream() {
         EditText stream = (EditText) composeWindow
                 .findViewById(R.id.composeStream);
@@ -251,6 +258,15 @@ public class HumbugActivity extends Activity {
 
     }
 
+    /**
+     * Check if a field is nonempty and mark fields as invalid if they are.
+     * 
+     * @param field
+     *            The field to check
+     * @param name
+     *            The human-readable name of the field
+     * @return Whether the field correctly validated.
+     */
     protected boolean requireFilled(EditText field, String name) {
         if (field.getText().toString().equals("")) {
             field.setError("You must specify a " + name);
@@ -261,6 +277,9 @@ public class HumbugActivity extends Activity {
 
     }
 
+    /**
+     * Log the user out of the app, clearing our cache of their credentials.
+     */
     private void logout() {
         this.logged_in = false;
 
@@ -278,6 +297,9 @@ public class HumbugActivity extends Activity {
 
     }
 
+    /**
+     * Switch to the login view.
+     */
     protected void openLogin() {
         this.logged_in = false;
 
@@ -321,6 +343,9 @@ public class HumbugActivity extends Activity {
                 });
     }
 
+    /**
+     * Open the home view, where the message list is displayed.
+     */
     protected void openHomeView() {
         this.onPrepareOptionsMenu(menu);
 
@@ -443,6 +468,11 @@ public class HumbugActivity extends Activity {
         }
     }
 
+    /**
+     * Determines the server URI applicable for the user.
+     * 
+     * @return either the production or staging server's URI
+     */
     public String getServerURI() {
         if (you.getRealm() == "humbughq.com") {
             return "https://staging.humbughq.com/";
