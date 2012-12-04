@@ -92,10 +92,7 @@ public class Message {
         if (message.getString("type").equals("stream")) {
             this.setType(MessageType.STREAM_MESSAGE);
             setStream(message.getString("display_recipient"));
-        } else if (message.getString("type").equals("private")
-                || message.getString("type").equals("huddle")) { // remove me
-                                                                 // once things
-                                                                 // are deployed
+        } else if (message.getString("type").equals("private")) {
             this.setType(MessageType.PRIVATE_MESSAGE);
             JSONArray jsonRecipients = message
                     .getJSONArray("display_recipient");
@@ -111,17 +108,8 @@ public class Message {
                     j++;
                 }
             }
-        } else if (message.getString("type").equals("personal")) { // this
-                                                                   // entire
-                                                                   // conditional
-                                                                   // can go die
-                                                                   // in a fire
-            this.setType(MessageType.PRIVATE_MESSAGE);
-            recipients = new Person[1];
-            JSONObject obj = message.getJSONObject("display_recipient");
-            recipients[0] = new Person(obj.getString("full_name"),
-                    obj.getString("email"));
         }
+
         this.setContent(message.getString("content"));
         if (this.getType() == MessageType.STREAM_MESSAGE) {
             this.setSubject(message.getString("subject"));
