@@ -111,7 +111,7 @@ public class HumbugActivity extends Activity {
             openCompose(MessageType.STREAM_MESSAGE);
             break;
         case R.id.compose_pm:
-            openCompose(MessageType.PERSONAL_MESSAGE);
+            openCompose(MessageType.PRIVATE_MESSAGE);
             break;
         case R.id.logout:
             logout();
@@ -224,7 +224,7 @@ public class HumbugActivity extends Activity {
                 Message msg = new Message();
                 msg.setSender(that.you);
                 if (subject.getVisibility() == View.GONE) {
-                    msg.setType(MessageType.PERSONAL_MESSAGE);
+                    msg.setType(MessageType.PRIVATE_MESSAGE);
                     msg.setRecipient(stream.getText().toString().split(","));
                 } else {
                     msg.setType(MessageType.STREAM_MESSAGE);

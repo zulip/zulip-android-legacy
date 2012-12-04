@@ -8,8 +8,7 @@ package com.humbughq.android;
  * 
  */
 public enum MessageType {
-    STREAM_MESSAGE("stream"), HUDDLE_MESSAGE("private"), PERSONAL_MESSAGE(
-            "private");
+    STREAM_MESSAGE("stream"), PRIVATE_MESSAGE("private");
 
     private String sendMessageType;
 
