@@ -86,7 +86,7 @@ class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
         try {
             HttpPost httppost = new HttpPost(context.getServerURI()
                     + api_path[0]);
-            Log.i("welp", context.getServerURI() + api_path[0]);
+            Log.i("HAPT.get", context.getServerURI() + api_path[0]);
 
             nameValuePairs.add(new BasicNameValuePair("api-key",
                     this.context.api_key));
@@ -117,7 +117,7 @@ class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
         }
 
         httpclient.close();
-        Log.i("HAPT", responseString + "");
+        Log.i("HAPT.response", responseString + "");
         return responseString;
     }
 

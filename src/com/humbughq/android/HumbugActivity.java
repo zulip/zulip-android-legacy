@@ -65,7 +65,6 @@ public class HumbugActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.i("funny", "starting...");
 
         settings = getPreferences(Activity.MODE_PRIVATE);
 
