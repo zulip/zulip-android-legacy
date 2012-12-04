@@ -97,9 +97,6 @@ public class Message {
             JSONArray jsonRecipients = message
                     .getJSONArray("display_recipient");
             recipients = new Person[jsonRecipients.length() - 1];
-            if (message.getInt("id") == 303377) {
-                Log.i("ho", "fuck");
-            }
             for (int i = 0, j = 0; i < jsonRecipients.length(); i++) {
                 JSONObject obj = jsonRecipients.getJSONObject(i);
                 if (getNotYouRecipient(obj)) {
