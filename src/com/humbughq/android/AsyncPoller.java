@@ -26,17 +26,6 @@ class AsyncPoller extends HumbugAsyncPushTask {
     }
 
     /**
-     * Default longpolling which will instantly return once messages are
-     * available for consumption which were sent after this method is called.
-     * 
-     * You probably never want to use this method.
-     */
-    public final void execute() {
-        this.execute("api/v1/get_messages");
-        Log.v("poll", "longpolling started");
-    }
-
-    /**
      * Longpoll for messages after a specified last received message.
      * 
      * @param lastMessage
