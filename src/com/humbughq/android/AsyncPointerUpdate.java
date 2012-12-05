@@ -21,7 +21,7 @@ class AsyncPointerUpdate extends HumbugAsyncPushTask {
     public final void execute(int newPointer) {
         this.receivedPointer = false;
         this.setProperty("client_id", this.context.client_id);
-        this.setProperty("pointer", newPointer + "");
+        this.setProperty("pointer", Integer.toString(newPointer));
         execute("api/v1/update_pointer");
     }
 
@@ -70,7 +70,7 @@ class AsyncPointerUpdate extends HumbugAsyncPushTask {
 
                                     final Message message = context.messageIndex
                                             .get(pointer);
-                                    Log.e("test", message.getID() + "");
+                                    Log.e("test", Integer.toString(message.getID()));
 
                                     context.listView.post(new Runnable() {
 
