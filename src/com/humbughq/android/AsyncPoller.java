@@ -34,7 +34,7 @@ class AsyncPoller extends HumbugAsyncPushTask {
      *            consumption.
      */
     public final void execute(int lastMessage) {
-        this.setProperty("last", lastMessage + "");
+        this.setProperty("last", Integer.toString(lastMessage));
         this.execute("api/v1/get_messages");
         Log.v("poll", "longpolling started from " + lastMessage);
     }
@@ -51,9 +51,9 @@ class AsyncPoller extends HumbugAsyncPushTask {
      *            Number of messages before the anchor to return
      */
     public final void execute(int anchor, int before, int after) {
-        this.setProperty("anchor", anchor + "");
-        this.setProperty("num_before", before + "");
-        this.setProperty("num_after", after + "");
+        this.setProperty("anchor", Integer.toString(anchor));
+        this.setProperty("num_before", Integer.toString(before));
+        this.setProperty("num_after", Integer.toString(after));
         // We don't support narrowing at all, so always specify we're
         // unnarrowed.
         this.setProperty("narrow", "{}");
