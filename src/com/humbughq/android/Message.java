@@ -200,7 +200,7 @@ public class Message {
         String[] emails = new String[this.recipients.length];
 
         for (int i = 0; i < this.recipients.length; i++) {
-            if (recipients[i].getEmail().equals(you.getEmail())) {
+            if (you != null && recipients[i].getEmail().equals(you.getEmail())) {
                 emails[i] = sender.getEmail();
             } else {
                 emails[i] = recipients[i].getEmail();
