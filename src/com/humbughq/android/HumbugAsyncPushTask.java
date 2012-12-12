@@ -117,8 +117,11 @@ class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
         }
 
         httpclient.close();
-        Log.i("HAPT.response", responseString);
+        if (responseString != null) {
+            Log.i("HAPT.response", responseString);
+        } else {
+            Log.i("HAPT.response", "<empty>");
+        }
         return responseString;
     }
-
 }
