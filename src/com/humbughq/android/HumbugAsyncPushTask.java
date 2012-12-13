@@ -110,10 +110,9 @@ class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
                 throw new IOException(statusLine.getReasonPhrase());
             }
         } catch (ClientProtocolException e) {
-            // TODO Handle problems..
+            handleError(e);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            handleError(e);
         }
 
         httpclient.close();
@@ -123,5 +122,21 @@ class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
             Log.i("HAPT.response", "<empty>");
         }
         return responseString;
+    }
+
+    /**
+     * Prints a stacktrace and cancels the task.
+     * 
+     * This function is called whenever the backend ends up in an error
+     * condition.
+     * 
+     * Override this to specify custom error behavior in your Task.
+     * 
+     * @param e
+     *            the Exception that triggered this handler
+     */
+    protected void handleError(Exception e) {
+        e.printStackTrace();
+        this.cancel(true);
     }
 }
