@@ -70,8 +70,6 @@ class AsyncPointerUpdate extends HumbugAsyncPushTask {
 
                                     final Message message = context.messageIndex
                                             .get(pointer);
-                                    Log.e("test", Integer.toString(message.getID()));
-
                                     context.listView.post(new Runnable() {
 
                                         @Override
