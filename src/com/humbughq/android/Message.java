@@ -52,8 +52,11 @@ public class Message {
         this.populate(message);
     }
 
+    /**
+     * Construct an empty Message object.
+     */
     public Message() {
-        // Dummy empty constructor
+
     }
 
     /**
@@ -87,18 +90,24 @@ public class Message {
      * @throws JSONException
      */
     public void populate(JSONObject message) throws JSONException {
+
         this.setSender(new Person(message.getString("sender_full_name"),
                 message.getString("sender_email")));
+
         if (message.getString("type").equals("stream")) {
             this.setType(MessageType.STREAM_MESSAGE);
+
             setStream(message.getString("display_recipient"));
         } else if (message.getString("type").equals("private")) {
             this.setType(MessageType.PRIVATE_MESSAGE);
+
             JSONArray jsonRecipients = message
                     .getJSONArray("display_recipient");
             recipients = new Person[jsonRecipients.length() - 1];
+
             for (int i = 0, j = 0; i < jsonRecipients.length(); i++) {
                 JSONObject obj = jsonRecipients.getJSONObject(i);
+
                 if (getNotYouRecipient(obj)) {
                     recipients[j] = new Person(obj.getString("full_name"),
                             obj.getString("email"));
@@ -134,9 +143,9 @@ public class Message {
      * Convenience function to set the recipients without requiring the caller
      * to construct a full Person[] array.
      * 
-     * Do not call this method if you want to get the recipient's names for this
-     * message later; construct a Person[] array and use setRecipient(Person[]
-     * recipients) instead.
+     * Do not call this method if you want to be able to get the recipient's
+     * names for this message later; construct a Person[] array and use
+     * setRecipient(Person[] recipients) instead.
      * 
      * @param emails
      *            The emails of the recipients.
@@ -196,6 +205,12 @@ public class Message {
         return TextUtils.join(", ", getReplyToArray());
     }
 
+    /**
+     * Creates a string array of the email addresses of the recipients of a
+     * message.
+     * 
+     * @return said String[].
+     */
     public String[] getReplyToArray() {
         String[] emails = new String[this.recipients.length];
 

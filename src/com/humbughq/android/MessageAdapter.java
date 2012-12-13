@@ -40,14 +40,14 @@ public class MessageAdapter extends ArrayAdapter<Message> {
 
         tile.addView(envelopeTile);
 
-        TextView display_recipient = new TextView(context);
-        display_recipient.setTag("display_recipient");
+        TextView displayRecipient = new TextView(context);
+        displayRecipient.setTag("display_recipient");
 
-        display_recipient.setTypeface(Typeface.DEFAULT_BOLD);
-        display_recipient.setGravity(Gravity.CENTER_HORIZONTAL);
-        display_recipient.setPadding(10, 5, 10, 5);
+        displayRecipient.setTypeface(Typeface.DEFAULT_BOLD);
+        displayRecipient.setGravity(Gravity.CENTER_HORIZONTAL);
+        displayRecipient.setPadding(10, 5, 10, 5);
 
-        envelopeTile.addView(display_recipient);
+        envelopeTile.addView(displayRecipient);
 
         TextView sep = new TextView(context);
         sep.setText(" | ");
@@ -84,6 +84,8 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         LinearLayout tile;
 
         if (convertView == null) {
+            // We didn't get passed a tile, so construct a new one.
+            // In the future, we should inflate from a layout here.
             tile = generateTile();
         } else {
             tile = (LinearLayout) convertView;
@@ -127,7 +129,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         TextView contentView = (TextView) tile.findViewWithTag("contentView");
         contentView.setText(message.getContent());
 
-        int color = Color.WHITE;
+        int color;
 
         if (message.getType() != MessageType.STREAM_MESSAGE) {
             color = context.getResources().getColor(R.color.huddle_body);

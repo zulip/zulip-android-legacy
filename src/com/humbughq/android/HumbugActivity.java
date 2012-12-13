@@ -1,7 +1,6 @@
 package com.humbughq.android;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -9,7 +8,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseArray;
@@ -38,8 +36,6 @@ public class HumbugActivity extends Activity {
     public static final String USER_AGENT = "HumbugMobile 1.0";
 
     ListView listView;
-
-    HashMap<String, Bitmap> profile_pictures;
 
     SparseArray<Message> messageIndex;
     MessageAdapter adapter;
@@ -124,28 +120,28 @@ public class HumbugActivity extends Activity {
      * Switches the compose window's state to compose a personal message.
      */
     protected void switchToPersonal() {
-        EditText stream = (EditText) composeWindow
-                .findViewById(R.id.composeStream);
+        EditText recipient = (EditText) composeWindow
+                .findViewById(R.id.composeRecipient);
         EditText subject = (EditText) composeWindow
                 .findViewById(R.id.composeSubject);
 
         subject.setVisibility(View.GONE);
-        stream.setGravity(Gravity.FILL_HORIZONTAL);
-        stream.setHint(R.string.pm_prompt);
+        recipient.setGravity(Gravity.FILL_HORIZONTAL);
+        recipient.setHint(R.string.pm_prompt);
     }
 
     /**
      * Switches the compose window's state to compose a stream message.
      */
     protected void switchToStream() {
-        EditText stream = (EditText) composeWindow
-                .findViewById(R.id.composeStream);
+        EditText recipient = (EditText) composeWindow
+                .findViewById(R.id.composeRecipient);
         EditText subject = (EditText) composeWindow
                 .findViewById(R.id.composeSubject);
 
         subject.setVisibility(View.VISIBLE);
-        stream.setGravity(Gravity.NO_GRAVITY);
-        stream.setHint(R.string.stream);
+        recipient.setGravity(Gravity.NO_GRAVITY);
+        recipient.setHint(R.string.stream);
     }
 
     protected void openCompose(Message msg) {
@@ -161,8 +157,8 @@ public class HumbugActivity extends Activity {
         composeWindow.setContentView(R.layout.compose);
         composeWindow.setTitle("Compose");
 
-        EditText stream = (EditText) composeWindow
-                .findViewById(R.id.composeStream);
+        EditText recipient = (EditText) composeWindow
+                .findViewById(R.id.composeRecipient);
 
         EditText subject = (EditText) composeWindow
                 .findViewById(R.id.composeSubject);
@@ -177,17 +173,17 @@ public class HumbugActivity extends Activity {
         }
         if (msg != null) {
             if (msg.getType() == MessageType.STREAM_MESSAGE) {
-                stream.setText(msg.getStream());
+                recipient.setText(msg.getStream());
                 subject.setText(msg.getSubject());
 
             } else {
-                stream.setText(msg.getReplyTo());
+                recipient.setText(msg.getReplyTo());
             }
             body.requestFocus();
         } else {
             // Focus the stream, zero out stream/subject
-            stream.requestFocus();
-            stream.setText("");
+            recipient.requestFocus();
+            recipient.setText("");
             subject.setText("");
         }
 
@@ -199,8 +195,8 @@ public class HumbugActivity extends Activity {
         send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EditText stream = (EditText) composeWindow
-                        .findViewById(R.id.composeStream);
+                EditText recipient = (EditText) composeWindow
+                        .findViewById(R.id.composeRecipient);
 
                 EditText subject = (EditText) composeWindow
                         .findViewById(R.id.composeSubject);
@@ -212,7 +208,7 @@ public class HumbugActivity extends Activity {
                 boolean subjectFilledIfRequired = subject.getVisibility() == View.GONE
                         || requireFilled(subject, "subject");
 
-                if (!(requireFilled(stream, "recipient")
+                if (!(requireFilled(recipient, "recipient")
                         && subjectFilledIfRequired && requireFilled(body,
                         "message body"))) {
                     return;
@@ -223,10 +219,10 @@ public class HumbugActivity extends Activity {
                 msg.setSender(that.you);
                 if (subject.getVisibility() == View.GONE) {
                     msg.setType(MessageType.PRIVATE_MESSAGE);
-                    msg.setRecipient(stream.getText().toString().split(","));
+                    msg.setRecipient(recipient.getText().toString().split(","));
                 } else {
                     msg.setType(MessageType.STREAM_MESSAGE);
-                    msg.setStream(stream.getText().toString());
+                    msg.setStream(recipient.getText().toString());
                     msg.setSubject(subject.getText().toString());
                 }
 
@@ -251,6 +247,7 @@ public class HumbugActivity extends Activity {
                 .setOnDismissListener(new DialogInterface.OnDismissListener() {
                     @Override
                     public void onDismiss(DialogInterface dialog) {
+                        // Hide physical keyboard if present.
                         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                         imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
 
@@ -264,13 +261,13 @@ public class HumbugActivity extends Activity {
      * 
      * @param field
      *            The field to check
-     * @param name
+     * @param fieldName
      *            The human-readable name of the field
      * @return Whether the field correctly validated.
      */
-    protected boolean requireFilled(EditText field, String name) {
+    protected boolean requireFilled(EditText field, String fieldName) {
         if (field.getText().toString().equals("")) {
-            field.setError("You must specify a " + name);
+            field.setError("You must specify a " + fieldName);
             field.requestFocus();
             return false;
         }
@@ -352,7 +349,6 @@ public class HumbugActivity extends Activity {
 
         this.logged_in = true;
         messageIndex = new SparseArray<Message>();
-        this.profile_pictures = new HashMap<String, Bitmap>();
 
         setContentView(R.layout.main);
         listView = (ListView) findViewById(R.id.listview);
@@ -391,7 +387,7 @@ public class HumbugActivity extends Activity {
 
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {
-                if (!that.logged_in) {
+                if (that.logged_in) {
                     // Scrolling messages isn't meaningful unless we have
                     // messages to scroll.
                     int mID = ((Message) view.getItemAtPosition(view
