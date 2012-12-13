@@ -1,22 +1,15 @@
-/**
- * 
- */
 package com.humbughq.android;
 
-/**
- * @author lfaraone
- * 
- */
 public enum MessageType {
     STREAM_MESSAGE("stream"), PRIVATE_MESSAGE("private");
 
-    private String sendMessageType;
+    private String jsonMessageType;
 
     MessageType(String sendMessageType) {
-        this.sendMessageType = sendMessageType;
+        this.jsonMessageType = sendMessageType;
     }
 
     public String toString() {
-        return this.sendMessageType;
+        return this.jsonMessageType;
     }
 }
