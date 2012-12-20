@@ -5,6 +5,7 @@ import java.util.List;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.text.util.Linkify;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -128,6 +129,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
 
         TextView contentView = (TextView) tile.findViewWithTag("contentView");
         contentView.setText(message.getContent());
+        Linkify.addLinks(contentView, Linkify.ALL);
 
         int color;
 
