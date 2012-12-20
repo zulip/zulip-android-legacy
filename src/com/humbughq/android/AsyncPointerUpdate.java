@@ -7,19 +7,19 @@ import android.util.Log;
 
 class AsyncPointerUpdate extends HumbugAsyncPushTask {
 
-    boolean receivedPointer;
+    boolean shouldHaveReceivedPointer;
 
     public AsyncPointerUpdate(HumbugActivity humbugActivity) {
         super(humbugActivity);
     }
 
     public final void execute() {
-        this.receivedPointer = true;
+        this.shouldHaveReceivedPointer = true;
         execute("api/v1/get_profile");
     }
 
     public final void execute(int newPointer) {
-        this.receivedPointer = false;
+        this.shouldHaveReceivedPointer = false;
         this.setProperty("client_id", this.context.client_id);
         this.setProperty("pointer", Integer.toString(newPointer));
         execute("api/v1/update_pointer");
@@ -28,7 +28,7 @@ class AsyncPointerUpdate extends HumbugAsyncPushTask {
     @Override
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
-        if (this.receivedPointer) {
+        if (this.shouldHaveReceivedPointer && result != null) {
             try {
                 final int pointer = (new JSONObject(result)).getInt("pointer");
                 this.context.client_id = (new JSONObject(result))
