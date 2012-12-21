@@ -415,7 +415,7 @@ public class HumbugActivity extends Activity {
 
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {
-                if (that.logged_in) {
+                try {
                     // Scrolling messages isn't meaningful unless we have
                     // messages to scroll.
                     int mID = ((Message) view.getItemAtPosition(view
@@ -425,6 +425,9 @@ public class HumbugActivity extends Activity {
                         (new AsyncPointerUpdate(that)).execute(mID);
                         mIDSelected = mID;
                     }
+                } catch (NullPointerException e) {
+                    Log.w("scrolling",
+                            "Could not find a location to scroll to!");
                 }
             }
         });
