@@ -1,4 +1,4 @@
-package com.humbughq.android;
+package com.humbughq.mobile;
 
 public enum MessageType {
     STREAM_MESSAGE("stream"), PRIVATE_MESSAGE("private");
