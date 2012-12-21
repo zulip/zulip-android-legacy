@@ -1,4 +1,4 @@
-package com.humbughq.android;
+package com.humbughq.mobile;
 
 import java.util.Date;
 

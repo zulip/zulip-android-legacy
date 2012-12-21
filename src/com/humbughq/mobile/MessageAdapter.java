@@ -1,6 +1,8 @@
-package com.humbughq.android;
+package com.humbughq.mobile;
 
 import java.util.List;
+
+import com.humbughq.mobile.R;
 
 import android.content.Context;
 import android.graphics.Color;

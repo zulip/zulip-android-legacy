@@ -1,4 +1,4 @@
-package com.humbughq.android;
+package com.humbughq.mobile;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,7 +35,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.humbughq.android.HumbugAsyncPushTask.AsyncTaskCompleteListener;
+import com.humbughq.mobile.HumbugAsyncPushTask.AsyncTaskCompleteListener;
 
 public class HumbugActivity extends Activity {
     public static final String USER_AGENT = "HumbugMobile 1.0";

@@ -1,7 +1,9 @@
-package com.humbughq.android;
+package com.humbughq.mobile;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.humbughq.mobile.R;
 
 import android.content.SharedPreferences.Editor;
 import android.util.Log;
