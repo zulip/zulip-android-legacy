@@ -1,13 +1,18 @@
 package com.humbughq.android;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseArray;
@@ -109,6 +114,9 @@ public class HumbugActivity extends Activity {
             break;
         case R.id.logout:
             logout();
+            break;
+        case R.id.legal:
+            openLegal();
             break;
         default:
             return super.onOptionsItemSelected(item);
@@ -322,23 +330,40 @@ public class HumbugActivity extends Activity {
                 .setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        final Dialog dia = new Dialog(that);
-                        dia.setContentView(R.layout.web_view_dialog);
-                        dia.setTitle("Legal");
-
-                        // XXX: Why does this spawn a new browser window?
-                        WebView webView = (WebView) dia
-                                .findViewById(R.id.webView);
-                        webView.loadUrl(getString(R.string.legalUrl));
-                        Button close = (Button) dia.findViewById(R.id.close);
-                        close.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                dia.dismiss();
-                            }
-                        });
+                        openLegal();
                     }
                 });
+    }
+
+    protected void openLegal() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        try {
+            InputStream legalStream = this.getResources().getAssets()
+                    .open("legal.html", AssetManager.ACCESS_BUFFER);
+
+            WebView legalView = new WebView(this);
+            legalView.loadData(new Scanner(legalStream).useDelimiter("\\Z")
+                    .next(), "text/html", null);
+
+            builder.setView(legalView)
+                    .setTitle(R.string.legal)
+                    .setPositiveButton(R.string.close,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog,
+                                        int id) {
+                                    dialog.dismiss();
+                                }
+                            });
+
+            AlertDialog dialog = builder.create();
+            dialog.show();
+
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
     }
 
     /**
