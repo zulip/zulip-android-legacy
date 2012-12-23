@@ -1,9 +1,6 @@
 package com.humbughq.mobile;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Scanner;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -12,7 +9,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseArray;
@@ -339,31 +335,20 @@ public class HumbugActivity extends Activity {
     protected void openLegal() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        try {
-            InputStream legalStream = this.getResources().getAssets()
-                    .open("legal.html", AssetManager.ACCESS_BUFFER);
+        WebView legalView = new WebView(this);
+        legalView.loadUrl("file:///android_asset/legal.html");
 
-            WebView legalView = new WebView(this);
-            legalView.loadData(new Scanner(legalStream).useDelimiter("\\Z")
-                    .next(), "text/html", null);
+        builder.setView(legalView)
+                .setTitle(R.string.legal)
+                .setPositiveButton(R.string.close,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.dismiss();
+                            }
+                        });
 
-            builder.setView(legalView)
-                    .setTitle(R.string.legal)
-                    .setPositiveButton(R.string.close,
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog,
-                                        int id) {
-                                    dialog.dismiss();
-                                }
-                            });
-
-            AlertDialog dialog = builder.create();
-            dialog.show();
-
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        AlertDialog dialog = builder.create();
+        dialog.show();
 
     }
 
