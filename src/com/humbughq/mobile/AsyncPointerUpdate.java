@@ -74,7 +74,6 @@ class AsyncPointerUpdate extends HumbugAsyncPushTask {
 
                                         @Override
                                         public void run() {
-                                            Log.e("test", "called");
                                             context.listView
                                                     .setSelection(context.adapter
                                                             .getPosition(message));
