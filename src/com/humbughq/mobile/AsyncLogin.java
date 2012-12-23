@@ -1,9 +1,9 @@
 package com.humbughq.mobile;
 
+import org.apache.http.HttpStatus;
+import org.apache.http.StatusLine;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import com.humbughq.mobile.R;
 
 import android.content.SharedPreferences.Editor;
 import android.util.Log;
@@ -58,6 +58,27 @@ class AsyncLogin extends HumbugAsyncPushTask {
         }
         TextView errorText = (TextView) this.context
                 .findViewById(R.id.error_text);
-        errorText.setText("Login failed");
+        errorText.setText("Unknown error");
+        Log.wtf("login", "We shouldn't have gotten this far.");
+    }
+
+    @Override
+    protected void handleHTTPError(final StatusLine statusLine,
+            String responseString) {
+        final TextView errorText = (TextView) this.context
+                .findViewById(R.id.error_text);
+        errorText.post(new Runnable() {
+
+            @Override
+            public void run() {
+                if (statusLine.getStatusCode() == HttpStatus.SC_FORBIDDEN) {
+                    errorText.setText("Incorrect username or password");
+                } else {
+                    errorText.setText("Unknown error");
+                }
+            }
+        });
+
+        this.cancel(true);
     }
 }

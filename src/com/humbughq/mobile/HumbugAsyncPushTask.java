@@ -107,7 +107,7 @@ class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
             out.close();
             responseString = out.toString();
             if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
-                throw new IOException(statusLine.getReasonPhrase());
+                handleHTTPError(statusLine, responseString);
             }
         } catch (ClientProtocolException e) {
             handleError(e);
@@ -122,6 +122,26 @@ class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
             Log.i("HAPT.response", "<empty>");
         }
         return responseString;
+    }
+
+    /**
+     * 
+     * Prints the error reason and response and cancels the task.
+     * 
+     * This function is called if the server does not return a 200 OK as a
+     * response to a request.
+     * 
+     * Override this to specify custom behavior in your task.
+     * 
+     * @param statusLine
+     *            The StatusLine produced by the request response
+     * @param responseString
+     *            Data as returned by the server
+     */
+    protected void handleHTTPError(StatusLine statusLine, String responseString) {
+        Log.e("HAPT", statusLine.getReasonPhrase());
+        Log.e("HAPT", responseString);
+        this.cancel(true);
     }
 
     /**
