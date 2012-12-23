@@ -437,11 +437,15 @@ public class HumbugActivity extends Activity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view,
                     int position, long id) {
-                int mID = (Integer) view.getTag(R.id.messageID);
-                if (mIDSelected != mID) {
-                    Log.i("keyboard", "Now at " + mID);
-                    (new AsyncPointerUpdate(that)).execute(mID);
-                    mIDSelected = mID;
+                try {
+                    int mID = (Integer) view.getTag(R.id.messageID);
+                    if (mIDSelected != mID) {
+                        Log.i("keyboard", "Now at " + mID);
+                        (new AsyncPointerUpdate(that)).execute(mID);
+                        mIDSelected = mID;
+                    }
+                } catch (NullPointerException e) {
+                    Log.e("selected", "None, because we couldn't find the tag.");
                 }
 
             }
