@@ -1,5 +1,7 @@
 package com.humbughq.mobile;
 
+import java.net.SocketTimeoutException;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -122,13 +124,27 @@ class AsyncPoller extends HumbugAsyncPushTask {
             Log.v("poll", "No messages returned.");
         }
         if (this.continuePolling) {
-            Log.v("poll", "Starting new longpoll.");
-            this.context.current_poll = new AsyncPoller(this.context, true);
-            // Start polling from the last received message ID
-            this.context.current_poll.execute((int) context.adapter
-                    .getItemId(context.adapter.getCount() - 1));
+            restart();
         }
 
         callback.onTaskComplete(result);
+    }
+
+    private void restart() {
+        Log.v("poll", "Starting new longpoll.");
+        this.context.current_poll = new AsyncPoller(this.context, true);
+        // Start polling from the last received message ID
+        this.context.current_poll.execute((int) context.adapter
+                .getItemId(context.adapter.getCount() - 1));
+    }
+
+    protected void handleError(Exception e) {
+        if (e instanceof SocketTimeoutException && this.continuePolling) {
+            Log.i("poll", "Timed out.");
+            restart();
+            this.cancel(true);
+        } else {
+            super.handleError(e);
+        }
     }
 }
