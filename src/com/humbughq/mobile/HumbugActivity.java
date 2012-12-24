@@ -480,19 +480,21 @@ public class HumbugActivity extends Activity {
         this.suspended = false;
         if (this.logged_in) {
             if (this.adapter.getCount() != 0) {
-                this.current_poll = new AsyncPoller(this, true);
-                this.current_poll.execute((int) this.adapter
-                        .getItemId(this.adapter.getCount() - 1) + 1);
+                AsyncPointerUpdate apu = new AsyncPointerUpdate(this);
 
-                // Update the pointer on resume.
-                this.current_poll.setCallback(new AsyncTaskCompleteListener() {
+                apu.setCallback(new AsyncTaskCompleteListener() {
 
                     @Override
                     public void onTaskComplete(String result) {
-                        (new AsyncPointerUpdate(that)).execute();
+                        if (that.current_poll.isCancelled()) {
+                            that.current_poll = new AsyncPoller(that, true);
+                            that.current_poll.execute((int) that.adapter
+                                    .getItemId(that.adapter.getCount() - 1) + 1);
+                        }
                     }
-
                 });
+                apu.execute();
+
             }
         }
     }
