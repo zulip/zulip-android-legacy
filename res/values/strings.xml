@@ -20,5 +20,6 @@
     <string name="subject">Subject</string>
     <string name="close">Close</string>
     <string name="legalUrl">http://humbughq.com/terms?mobile=true</string>
+    <string name="refresh">Refresh</string>
 
 </resources>

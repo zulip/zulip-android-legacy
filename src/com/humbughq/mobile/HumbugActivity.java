@@ -108,6 +108,10 @@ public class HumbugActivity extends Activity {
         case R.id.compose_pm:
             openCompose(MessageType.PRIVATE_MESSAGE);
             break;
+        case R.id.refresh:
+            Log.w("menu", "Refreshed manually by user. We shouldn't need this.");
+            onResume();
+            break;
         case R.id.logout:
             logout();
             break;
