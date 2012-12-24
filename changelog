@@ -1,0 +1,16 @@
+com.humbughq.mobile (0.4.8) stable; urgency=low
+
+  * Fix crasher that occured if the main message view was scrolled too far.
+  * Temporarily disable linkifying which broke replies in some cases.
+  * Fix encoding issues in legal dialog.
+  * Display error if login information is incorrect
+  * Add button to manually refresh the feed.
+  * Various responsiveness and reliability improvements.
+
+ -- Luke Faraone <lfaraone@humbughq.com>  Tue, 25 Dec 2012 14:42:33 -0500
+
+com.humbughq.mobile (0.4.7) stable; urgency=low
+
+  * Initial release.
+
+ -- Luke Faraone <lfaraone@humbughq.com>  Fri, 21 Dec 2012 09:17:59 -0500
