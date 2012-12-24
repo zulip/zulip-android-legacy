@@ -12,6 +12,11 @@
         android:showAsAction="ifRoom">
         
     </item>
+    
+     <item android:id="@+id/refresh"
+        android:title="@string/refresh">
+    </item>
+    
     <item android:id="@+id/logout"
         android:title="@string/logout">
     </item>
