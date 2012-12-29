@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -14,6 +13,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -56,7 +56,7 @@ public class HumbugActivity extends Activity {
     protected int mIDSelected;
     private Menu menu;
     public Person you;
-    private Dialog composeWindow;
+    private View composeView;
 
     /** Called when the activity is first created. */
     @Override
@@ -129,9 +129,9 @@ public class HumbugActivity extends Activity {
      * Switches the compose window's state to compose a personal message.
      */
     protected void switchToPersonal() {
-        EditText recipient = (EditText) composeWindow
+        EditText recipient = (EditText) composeView
                 .findViewById(R.id.composeRecipient);
-        EditText subject = (EditText) composeWindow
+        EditText subject = (EditText) composeView
                 .findViewById(R.id.composeSubject);
 
         subject.setVisibility(View.GONE);
@@ -143,9 +143,9 @@ public class HumbugActivity extends Activity {
      * Switches the compose window's state to compose a stream message.
      */
     protected void switchToStream() {
-        EditText recipient = (EditText) composeWindow
+        EditText recipient = (EditText) composeView
                 .findViewById(R.id.composeRecipient);
-        EditText subject = (EditText) composeWindow
+        EditText subject = (EditText) composeView
                 .findViewById(R.id.composeSubject);
 
         subject.setVisibility(View.VISIBLE);
@@ -162,17 +162,76 @@ public class HumbugActivity extends Activity {
     }
 
     private void openCompose(Message msg, MessageType type) {
-        this.composeWindow = new Dialog(this);
-        composeWindow.setContentView(R.layout.compose);
-        composeWindow.setTitle("Compose");
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = this.getLayoutInflater();
 
-        EditText recipient = (EditText) composeWindow
+        composeView = inflater.inflate(R.layout.compose, null);
+        AlertDialog composeWindow = builder
+                .setView(composeView)
+                .setTitle("Compose")
+                .setPositiveButton(R.string.send,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface d, int id) {
+                                EditText recipient = (EditText) composeView
+                                        .findViewById(R.id.composeRecipient);
+
+                                EditText subject = (EditText) composeView
+                                        .findViewById(R.id.composeSubject);
+
+                                EditText body = (EditText) composeView
+                                        .findViewById(R.id.composeText);
+
+                                // If the subject field is hidden, we have a
+                                // personal
+                                // message.
+                                boolean subjectFilledIfRequired = subject
+                                        .getVisibility() == View.GONE
+                                        || requireFilled(subject, "subject");
+
+                                if (!(requireFilled(recipient, "recipient")
+                                        && subjectFilledIfRequired && requireFilled(
+                                        body, "message body"))) {
+                                    return;
+
+                                }
+
+                                Message msg = new Message();
+                                msg.setSender(that.you);
+                                if (subject.getVisibility() == View.GONE) {
+                                    msg.setType(MessageType.PRIVATE_MESSAGE);
+                                    msg.setRecipient(recipient.getText()
+                                            .toString().split(","));
+                                } else {
+                                    msg.setType(MessageType.STREAM_MESSAGE);
+                                    msg.setStream(recipient.getText()
+                                            .toString());
+                                    msg.setSubject(subject.getText().toString());
+                                }
+
+                                msg.setContent(body.getText().toString());
+
+                                AsyncSend sender = new AsyncSend(that, msg);
+                                sender.execute();
+                            }
+                        })
+                .setNegativeButton(android.R.string.cancel,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface d, int id) {
+                                d.dismiss();
+                            }
+                        }).create();
+
+        // ***
+
+        EditText recipient = (EditText) composeView
                 .findViewById(R.id.composeRecipient);
 
-        EditText subject = (EditText) composeWindow
+        EditText subject = (EditText) composeView
                 .findViewById(R.id.composeSubject);
 
-        EditText body = (EditText) composeWindow.findViewById(R.id.composeText);
+        EditText body = (EditText) composeView.findViewById(R.id.composeText);
 
         if (type == MessageType.STREAM_MESSAGE
                 || (msg != null && msg.getType() == MessageType.STREAM_MESSAGE)) {
@@ -200,58 +259,6 @@ public class HumbugActivity extends Activity {
         imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,
                 InputMethodManager.HIDE_IMPLICIT_ONLY);
 
-        Button send = (Button) composeWindow.findViewById(R.id.send);
-        send.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                EditText recipient = (EditText) composeWindow
-                        .findViewById(R.id.composeRecipient);
-
-                EditText subject = (EditText) composeWindow
-                        .findViewById(R.id.composeSubject);
-
-                EditText body = (EditText) composeWindow
-                        .findViewById(R.id.composeText);
-
-                // If the subject field is hidden, we have a personal message.
-                boolean subjectFilledIfRequired = subject.getVisibility() == View.GONE
-                        || requireFilled(subject, "subject");
-
-                if (!(requireFilled(recipient, "recipient")
-                        && subjectFilledIfRequired && requireFilled(body,
-                        "message body"))) {
-                    return;
-
-                }
-
-                Message msg = new Message();
-                msg.setSender(that.you);
-                if (subject.getVisibility() == View.GONE) {
-                    msg.setType(MessageType.PRIVATE_MESSAGE);
-                    msg.setRecipient(recipient.getText().toString().split(","));
-                } else {
-                    msg.setType(MessageType.STREAM_MESSAGE);
-                    msg.setStream(recipient.getText().toString());
-                    msg.setSubject(subject.getText().toString());
-                }
-
-                msg.setContent(body.getText().toString());
-
-                AsyncSend sender = new AsyncSend(that, msg);
-                sender.execute();
-
-                composeWindow.dismiss();
-            }
-        });
-        Button cancel = (Button) composeWindow.findViewById(R.id.cancel);
-        cancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                composeWindow.dismiss();
-            }
-        });
-
-        composeWindow.show();
         composeWindow
                 .setOnDismissListener(new DialogInterface.OnDismissListener() {
                     @Override
@@ -262,6 +269,7 @@ public class HumbugActivity extends Activity {
 
                     }
                 });
+        composeWindow.show();
 
     }
 
