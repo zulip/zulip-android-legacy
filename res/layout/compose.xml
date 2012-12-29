@@ -41,7 +41,8 @@
         android:layout_gravity="center"
         android:hint="@string/compose_hint"
         android:lines="3"
-        android:textColor="#000000" />
+        android:textColor="#000000" 
+        android:inputType="textCapSentences|textAutoCorrect|textMultiLine" />
 
     <LinearLayout android:layout_width="fill_parent"
             android:layout_height="fill_parent">
