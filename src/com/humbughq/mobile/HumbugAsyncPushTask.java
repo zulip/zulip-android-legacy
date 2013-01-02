@@ -92,6 +92,7 @@ class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
                     this.context.api_key));
             nameValuePairs.add(new BasicNameValuePair("email", this.context.you
                     .getEmail()));
+            nameValuePairs.add(new BasicNameValuePair("client", "Android"));
 
             httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
