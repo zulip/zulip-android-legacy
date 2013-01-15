@@ -1,6 +1,9 @@
 package com.humbughq.mobile;
 
 import java.util.Date;
+import java.util.TimeZone;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -123,7 +126,7 @@ public class Message {
             this.setSubject(null);
         }
 
-        this.setTimestamp(new Date(message.getInt("timestamp")));
+        this.setTimestamp(new Date(message.getLong("timestamp") * 1000));
         this.setID(message.getInt("id"));
     }
 
@@ -222,6 +225,12 @@ public class Message {
             }
         }
         return emails;
+    }
+    
+    public String getFormattedTimestamp() {
+    	DateFormat format = new SimpleDateFormat("MMM dd HH:mm");
+    	format.setTimeZone(TimeZone.getDefault());
+    	return format.format(this.getTimestamp());
     }
 
     public String getSubject() {
