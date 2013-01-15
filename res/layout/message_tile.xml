@@ -39,16 +39,33 @@
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/senderName"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="5dp"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:paddingTop="5dp"
-        android:text="Sender &lt;alice@example.com>"
-        android:textStyle="bold" />
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:id="@+id/senderName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="5dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="5dp"
+            android:text="Sender &lt;alice@example.com>"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/timestamp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/senderName"
+            android:layout_alignBottom="@+id/senderName"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="14dp"
+            android:text="timestamp"
+            android:textColor="@android:color/darker_gray" />
+
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/contentView"
