@@ -11,6 +11,8 @@ import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -23,11 +25,13 @@ import android.webkit.WebView;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -161,6 +165,10 @@ public class HumbugActivity extends Activity {
     }
 
     private void openCompose(Message msg, MessageType type) {
+        openCompose(msg, type, false);
+    }
+
+    private void openCompose(Message msg, MessageType type, boolean to_sender) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         LayoutInflater inflater = this.getLayoutInflater();
 
@@ -233,18 +241,19 @@ public class HumbugActivity extends Activity {
         EditText body = (EditText) composeView.findViewById(R.id.composeText);
 
         if (type == MessageType.STREAM_MESSAGE
-                || (msg != null && msg.getType() == MessageType.STREAM_MESSAGE)) {
+                || (msg != null && msg.getType() == MessageType.STREAM_MESSAGE  && !to_sender)) {
             this.switchToStream();
         } else {
             this.switchToPersonal();
         }
         if (msg != null) {
-            if (msg.getType() == MessageType.STREAM_MESSAGE) {
+            if (msg.getType() == MessageType.STREAM_MESSAGE && !to_sender) {
                 recipient.setText(msg.getStream());
                 subject.setText(msg.getSubject());
-
-            } else {
+            } else if (msg.getType() == MessageType.PRIVATE_MESSAGE && !to_sender){
                 recipient.setText(msg.getReplyTo());
+            } else {
+                recipient.setText(msg.getSender().getEmail());
             }
             body.requestFocus();
         } else {
@@ -397,6 +406,8 @@ public class HumbugActivity extends Activity {
         listView.addFooterView(dummy);
         adapter = new MessageAdapter(this, new ArrayList<Message>());
         listView.setAdapter(adapter);
+        
+        registerForContextMenu(listView);
 
         listView.setOnScrollListener(new OnScrollListener() {
 
@@ -514,5 +525,38 @@ public class HumbugActivity extends Activity {
             return "https://staging.humbughq.com/";
         }
         return "https://humbughq.com/";
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        // Using menuInfo, determine which menu to show (stream or private)
+        AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
+        if (messageIndex.get((int) info.id).getType().equals(MessageType.STREAM_MESSAGE)) {
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.context_stream, menu);
+        } else {
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.context_private, menu);
+        }
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+        Message message = messageIndex.get((int) info.id);
+        switch (item.getItemId()) {
+        case R.id.reply_to_stream:
+            openCompose(message, message.getType());
+            return true;
+        case R.id.reply_to_private:
+            openCompose(message, message.getType());
+            return true;
+        case R.id.reply_to_sender:
+            openCompose(message, MessageType.PRIVATE_MESSAGE, true);
+            return true;
+        default:
+            return super.onContextItemSelected(item);
+        }
     }
 }

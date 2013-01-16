@@ -76,7 +76,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
 
         TextView contentView = (TextView) tile.findViewById(R.id.contentView);
         contentView.setText(message.getContent());
-        
+
         TextView timestamp = (TextView) tile.findViewById(R.id.timestamp);
         timestamp.setText(message.getFormattedTimestamp());
 
