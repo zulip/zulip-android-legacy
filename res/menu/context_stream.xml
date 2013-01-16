@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item android:id="@+id/reply_to_stream" android:title="Reply to Stream"></item>
+    <item android:id="@+id/reply_to_sender" android:title="Reply to Sender"></item>
+    
+
+</menu>
