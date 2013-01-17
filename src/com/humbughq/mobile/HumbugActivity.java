@@ -535,12 +535,16 @@ public class HumbugActivity extends Activity {
         super.onCreateContextMenu(menu, v, menuInfo);
         // Using menuInfo, determine which menu to show (stream or private)
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
-        if (messageIndex.get((int) info.id).getType().equals(MessageType.STREAM_MESSAGE)) {
+        Message msg = messageIndex.get((int) info.id);
+        if (msg.getType().equals(MessageType.STREAM_MESSAGE)) {
             MenuInflater inflater = getMenuInflater();
             inflater.inflate(R.menu.context_stream, menu);
-        } else {
+        } else if (msg.getReplyToArray().length > 1) {
             MenuInflater inflater = getMenuInflater();
             inflater.inflate(R.menu.context_private, menu);
+        } else {
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.context_single_private, menu);
         }
     }
 
