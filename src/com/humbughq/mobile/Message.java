@@ -226,7 +226,7 @@ public class Message {
         }
         return emails;
     }
-    
+
     public String getFormattedTimestamp() {
     	DateFormat format = new SimpleDateFormat("MMM dd HH:mm");
     	format.setTimeZone(TimeZone.getDefault());

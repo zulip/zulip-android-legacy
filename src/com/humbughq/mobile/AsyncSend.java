@@ -10,7 +10,7 @@ public class AsyncSend extends HumbugAsyncPushTask {
      * @param humbugActivity
      *            The calling Activity
      * @param msg
-     *            The mesasge to send.
+     *            The message to send.
      */
     public AsyncSend(HumbugActivity humbugActivity, Message msg) {
         super(humbugActivity);
