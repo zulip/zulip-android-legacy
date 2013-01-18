@@ -48,7 +48,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingBottom="5dp"
-            android:paddingLeft="10dp"
+            android:paddingLeft="32dp"
             android:paddingRight="10dp"
             android:paddingTop="5dp"
             android:text="Sender &lt;alice@example.com>"
@@ -64,6 +64,14 @@
             android:layout_marginRight="14dp"
             android:text="timestamp"
             android:textColor="@android:color/darker_gray" />
+
+        <ImageView
+            android:id="@+id/gravatar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="2dp"
+            android:paddingTop="2dp"
+            android:src="@android:drawable/presence_online" />
 
     </RelativeLayout>
 

@@ -1,6 +1,7 @@
 package com.humbughq.mobile;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -8,6 +9,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseArray;
@@ -60,6 +62,8 @@ public class HumbugActivity extends Activity {
     private Menu menu;
     public Person you;
     private View composeView;
+
+    protected HashMap<String, Bitmap> gravatars = new HashMap<String, Bitmap>();
 
     /** Called when the activity is first created. */
     @Override

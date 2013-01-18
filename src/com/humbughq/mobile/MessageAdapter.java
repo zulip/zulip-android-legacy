@@ -1,14 +1,18 @@
 package com.humbughq.mobile;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -24,7 +28,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
 
     public View getView(int position, View convertView, ViewGroup group) {
 
-        Context context = this.getContext();
+        HumbugActivity context = (HumbugActivity) this.getContext();
         Message message = getItem(position);
         LinearLayout tile;
 
@@ -79,6 +83,25 @@ public class MessageAdapter extends ArrayAdapter<Message> {
 
         TextView timestamp = (TextView) tile.findViewById(R.id.timestamp);
         timestamp.setText(message.getFormattedTimestamp());
+
+        ImageView gravatar = (ImageView) tile.findViewById(R.id.gravatar);
+        Bitmap gravatar_img = context.gravatars.get(message.getSender().getEmail());
+        if (gravatar_img != null) {
+            // Gravatar already exists for this image, set the ImageView to it
+            gravatar.setImageBitmap(gravatar_img);
+        } else {
+            // Go get the Bitmap
+            URL url = null;
+            try {
+                url = new URL("http://www.gravatar.com/avatar/" +
+                        message.getSender().getEmailHash() + "?s=40&d=identicon");
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+            GravatarAsyncFetchTask task =
+                    new GravatarAsyncFetchTask(context, gravatar, message.getSender());
+            task.loadBitmap(context, url, gravatar, message.getSender());
+        }
 
         int color;
 
