@@ -1,7 +1,5 @@
 package com.humbughq.mobile;
 
-import org.apache.commons.lang.builder.HashCodeBuilder;
-
 public class Person {
 
     private String name;
@@ -25,7 +23,9 @@ public class Person {
     }
 
     private void setEmail(String email) {
-        this.email = email;
+        if (email != null) {
+            this.email = email.toLowerCase();
+        }
     }
 
     /**
@@ -47,8 +47,15 @@ public class Person {
     }
 
     public int hashCode() {
-        // arbitrary numbers
-        return new HashCodeBuilder(741, 737).append(name).append(email)
-                .toHashCode();
+        // Joshua Bloch's standard recipe
+        int result = 17;
+        result = 31 * result + name.hashCode();
+        result = 31 * result + email.hashCode();
+        return result;
+    }
+
+    // For use with Gravatar request urls
+    public String getEmailHash() {
+        return MD5Util.md5Hex(email);
     }
 }
