@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/messageTile"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@android:color/background_light"
     android:orientation="vertical" >
 
     <LinearLayout
@@ -40,19 +42,9 @@
     </LinearLayout>
 
     <RelativeLayout
+        android:id="@+id/senderTile"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
-
-        <TextView
-            android:id="@+id/senderName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingBottom="5dp"
-            android:paddingLeft="32dp"
-            android:paddingRight="10dp"
-            android:paddingTop="5dp"
-            android:text="Sender &lt;alice@example.com>"
-            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/timestamp"
@@ -69,9 +61,22 @@
             android:id="@+id/gravatar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingLeft="2dp"
+            android:paddingLeft="10dp"
             android:paddingTop="2dp"
             android:src="@android:drawable/presence_online" />
+
+        <TextView
+            android:id="@+id/senderName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@+id/gravatar"
+            android:paddingBottom="5dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="5dp"
+            android:text="Sender &lt;alice@example.com>"
+            android:textStyle="bold" />
 
     </RelativeLayout>
 

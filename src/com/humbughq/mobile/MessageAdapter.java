@@ -6,8 +6,10 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -84,6 +86,11 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         TextView timestamp = (TextView) tile.findViewById(R.id.timestamp);
         timestamp.setText(message.getFormattedTimestamp());
 
+        // Convert 40dp to px for gravatar. 
+        // From http://stackoverflow.com/questions/4605527/
+        Resources r = context.getResources();
+        float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                35, r.getDisplayMetrics());
         ImageView gravatar = (ImageView) tile.findViewById(R.id.gravatar);
         Bitmap gravatar_img = context.gravatars.get(message.getSender().getEmail());
         if (gravatar_img != null) {
@@ -94,7 +101,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
             URL url = null;
             try {
                 url = new URL("http://www.gravatar.com/avatar/" +
-                        message.getSender().getEmailHash() + "?s=40&d=identicon");
+                        message.getSender().getEmailHash() + "?s=" + px + "&d=identicon");
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
@@ -111,8 +118,8 @@ public class MessageAdapter extends ArrayAdapter<Message> {
             color = context.getResources().getColor(R.color.stream_body);
         }
 
-        senderName.setBackgroundColor(color);
-        contentView.setBackgroundColor(color);
+        LinearLayout messageTile = (LinearLayout) tile.findViewById(R.id.messageTile);
+        messageTile.setBackgroundColor(color);
 
         tile.setTag(R.id.messageID, message.getID());
 
