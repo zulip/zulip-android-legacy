@@ -1,3 +1,16 @@
+com.humbughq.mobile (0.5.0) stable; urgency=low
+
+  [ Luke Faraone ]
+  * Switch to using Android action buttons in the compose dialog.
+  * Include "Android" as the "client" parameter on all API calls.
+
+  [ Tyler Hallada ]
+  * Add gray timestamps to every message in layout
+  * Add context menu for long-pressing messages
+  * Add gravatars to each message
+
+ -- Luke Faraone <lfaraone@humbughq.com>  Wed, 23 Jan 2013 10:43:10 -0500
+
 com.humbughq.mobile (0.4.8) stable; urgency=low
 
   * Fix crasher that occured if the main message view was scrolled too far.
