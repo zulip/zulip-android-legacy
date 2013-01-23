@@ -15,8 +15,10 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.HttpConnectionParams;
 
+import android.annotation.TargetApi;
 import android.net.http.AndroidHttpClient;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.util.Log;
 
 /* General AsyncTask for use in making various web requests to Humbug.
@@ -59,6 +61,20 @@ class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
             }
         };
         nameValuePairs = new ArrayList<NameValuePair>();
+    }
+
+    /*
+     * Target newer API than the general application because
+     * THREAD_POOL_EXECUTOR was not available on older Androids. This is okay
+     * because on pre-honeycomb, post-donut Android always used a thread pool.
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public AsyncTask<String, String, String> execute(String url) {
+        try {
+            return this.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, url);
+        } catch (NoSuchFieldError e) {
+            return super.execute(url);
+        }
     }
 
     /**
