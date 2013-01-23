@@ -6,13 +6,14 @@ import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.net.URLConnection;
 
-import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.util.Log;
 import android.widget.ImageView;
 
@@ -89,7 +90,7 @@ class GravatarAsyncFetchTask extends AsyncTask<URL, Void, Bitmap> {
 
     // Called externally to initiate a new gravatar fetch task, only if there
     // already isn't one
-    @SuppressLint("NewApi")
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public void loadBitmap(HumbugActivity context, URL url,
             ImageView imageView, Person person) {
         if (cancelPotentialWork(person, imageView)) {
@@ -101,7 +102,11 @@ class GravatarAsyncFetchTask extends AsyncTask<URL, Void, Bitmap> {
                             context.getResources(),
                             android.R.drawable.presence_online), task);
             imageView.setImageDrawable(asyncDrawable);
-            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, url);
+            try {
+                task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, url);
+            } catch (NoSuchFieldError e) {
+                task.execute(url);
+            }
         }
     }
 
