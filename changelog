@@ -1,3 +1,9 @@
+com.humbughq.mobile (0.5.1) stable; urgency=low
+
+  * Improve parallelism in server requests.
+
+ -- Luke Faraone <lfaraone@humbughq.com>  Wed, 23 Jan 2013 16:38:13 -0500
+
 com.humbughq.mobile (0.5.0) stable; urgency=low
 
   [ Luke Faraone ]
