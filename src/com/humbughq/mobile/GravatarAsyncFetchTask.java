@@ -22,7 +22,8 @@ class GravatarAsyncFetchTask extends AsyncTask<URL, Void, Bitmap> {
     private Person person;
     private HumbugActivity context;
 
-    public GravatarAsyncFetchTask(HumbugActivity context, ImageView imageView, Person person) {
+    public GravatarAsyncFetchTask(HumbugActivity context, ImageView imageView,
+            Person person) {
         // Use a WeakReference to ensure the ImageView can be garbage collected
         imageViewReference = new WeakReference<ImageView>(imageView);
         this.person = person;
@@ -40,7 +41,7 @@ class GravatarAsyncFetchTask extends AsyncTask<URL, Void, Bitmap> {
             connection.setUseCaches(true);
             Object response = connection.getContent();
             if (response instanceof InputStream) {
-              return BitmapFactory.decodeStream((InputStream) response);
+                return BitmapFactory.decodeStream((InputStream) response);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -57,8 +58,7 @@ class GravatarAsyncFetchTask extends AsyncTask<URL, Void, Bitmap> {
 
         if (imageViewReference != null && bitmap != null) {
             final ImageView imageView = imageViewReference.get();
-            final GravatarAsyncFetchTask bitmapWorkerTask =
-                    getBitmapWorkerTask(imageView);
+            final GravatarAsyncFetchTask bitmapWorkerTask = getBitmapWorkerTask(imageView);
             if (this == bitmapWorkerTask && imageView != null) {
                 Log.i("GAFT.done", "Setting " + imageView + " to " + bitmap);
                 imageView.setImageBitmap(bitmap);
@@ -69,9 +69,8 @@ class GravatarAsyncFetchTask extends AsyncTask<URL, Void, Bitmap> {
 
     /*
      * This object is attached to the ImageView at the time of a gravatar
-     * request to keep a reference back to the task that is fetching the
-     * image. This is to prevent multiple tasks being initiated for the
-     * same ImageView.
+     * request to keep a reference back to the task that is fetching the image.
+     * This is to prevent multiple tasks being initiated for the same ImageView.
      */
     static class AsyncDrawable extends BitmapDrawable {
         private final WeakReference<GravatarAsyncFetchTask> taskReference;
@@ -79,8 +78,8 @@ class GravatarAsyncFetchTask extends AsyncTask<URL, Void, Bitmap> {
         public AsyncDrawable(Resources res, Bitmap bitmap,
                 GravatarAsyncFetchTask bitmapWorkerTask) {
             super(res, bitmap);
-            taskReference =
-                new WeakReference<GravatarAsyncFetchTask>(bitmapWorkerTask);
+            taskReference = new WeakReference<GravatarAsyncFetchTask>(
+                    bitmapWorkerTask);
         }
 
         public GravatarAsyncFetchTask getBitmapWorkerTask() {
@@ -88,16 +87,19 @@ class GravatarAsyncFetchTask extends AsyncTask<URL, Void, Bitmap> {
         }
     }
 
-    // Called externally to initiate a new gravatar fetch task, only if there already isn't one
+    // Called externally to initiate a new gravatar fetch task, only if there
+    // already isn't one
     @SuppressLint("NewApi")
-    public void loadBitmap(HumbugActivity context, URL url, ImageView imageView, Person person) {
+    public void loadBitmap(HumbugActivity context, URL url,
+            ImageView imageView, Person person) {
         if (cancelPotentialWork(person, imageView)) {
             Log.i("GAFT.init", "Starting new task for " + imageView);
-            final GravatarAsyncFetchTask task = new GravatarAsyncFetchTask(context, imageView, person);
-            final AsyncDrawable asyncDrawable =
-                    new AsyncDrawable(context.getResources(),
-                    BitmapFactory.decodeResource(context.getResources(),
-                    android.R.drawable.presence_online), task);
+            final GravatarAsyncFetchTask task = new GravatarAsyncFetchTask(
+                    context, imageView, person);
+            final AsyncDrawable asyncDrawable = new AsyncDrawable(
+                    context.getResources(), BitmapFactory.decodeResource(
+                            context.getResources(),
+                            android.R.drawable.presence_online), task);
             imageView.setImageDrawable(asyncDrawable);
             task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, url);
         }
@@ -110,25 +112,28 @@ class GravatarAsyncFetchTask extends AsyncTask<URL, Void, Bitmap> {
             final Person bitmapData = bitmapWorkerTask.person;
             if (!bitmapData.equals(person)) {
                 // Cancel previous task
-                Log.i("GAFT.refetch", imageView + " was recycled, fetching new gravatar");
+                Log.i("GAFT.refetch", imageView
+                        + " was recycled, fetching new gravatar");
                 bitmapWorkerTask.cancel(true);
             } else {
                 // The same work is already in progress
                 return false;
             }
         }
-        // No task associated with the ImageView, or an existing task was cancelled
+        // No task associated with the ImageView, or an existing task was
+        // cancelled
         return true;
     }
 
-    private static GravatarAsyncFetchTask getBitmapWorkerTask(ImageView imageView) {
+    private static GravatarAsyncFetchTask getBitmapWorkerTask(
+            ImageView imageView) {
         if (imageView != null) {
             final Drawable drawable = imageView.getDrawable();
             if (drawable instanceof AsyncDrawable) {
                 final AsyncDrawable asyncDrawable = (AsyncDrawable) drawable;
                 return asyncDrawable.getBitmapWorkerTask();
             }
-         }
-         return null;
-     }
+        }
+        return null;
+    }
 }

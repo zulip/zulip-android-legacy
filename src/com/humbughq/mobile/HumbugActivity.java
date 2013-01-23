@@ -34,7 +34,6 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -246,7 +245,7 @@ public class HumbugActivity extends Activity {
         EditText body = (EditText) composeView.findViewById(R.id.composeText);
 
         if (type == MessageType.STREAM_MESSAGE
-                || (msg != null && msg.getType() == MessageType.STREAM_MESSAGE  && !to_sender)) {
+                || (msg != null && msg.getType() == MessageType.STREAM_MESSAGE && !to_sender)) {
             this.switchToStream();
         } else {
             this.switchToPersonal();
@@ -255,7 +254,8 @@ public class HumbugActivity extends Activity {
             if (msg.getType() == MessageType.STREAM_MESSAGE && !to_sender) {
                 recipient.setText(msg.getStream());
                 subject.setText(msg.getSubject());
-            } else if (msg.getType() == MessageType.PRIVATE_MESSAGE && !to_sender){
+            } else if (msg.getType() == MessageType.PRIVATE_MESSAGE
+                    && !to_sender) {
                 recipient.setText(msg.getReplyTo());
             } else {
                 recipient.setText(msg.getSender().getEmail());
@@ -413,7 +413,7 @@ public class HumbugActivity extends Activity {
 
         adapter = new MessageAdapter(this, new ArrayList<Message>());
         listView.setAdapter(adapter);
-        
+
         registerForContextMenu(listView);
 
         listView.setOnScrollListener(new OnScrollListener() {
@@ -535,7 +535,8 @@ public class HumbugActivity extends Activity {
     }
 
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+    public void onCreateContextMenu(ContextMenu menu, View v,
+            ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         // Using menuInfo, determine which menu to show (stream or private)
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
@@ -554,7 +555,8 @@ public class HumbugActivity extends Activity {
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+        AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
+                .getMenuInfo();
         Message message = messageIndex.get((int) info.id);
         switch (item.getItemId()) {
         case R.id.reply_to_stream:
