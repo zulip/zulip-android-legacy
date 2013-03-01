@@ -541,6 +541,9 @@ public class HumbugActivity extends Activity {
         // Using menuInfo, determine which menu to show (stream or private)
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
         Message msg = messageIndex.get((int) info.id);
+        if (msg == null) {
+            return;
+        }
         if (msg.getType().equals(MessageType.STREAM_MESSAGE)) {
             MenuInflater inflater = getMenuInflater();
             inflater.inflate(R.menu.context_stream, menu);
