@@ -414,6 +414,9 @@ public class HumbugActivity extends Activity {
         adapter = new MessageAdapter(this, new ArrayList<Message>());
         listView.setAdapter(adapter);
 
+        // We want blue highlights when you longpress
+        listView.setDrawSelectorOnTop(true);
+
         registerForContextMenu(listView);
 
         listView.setOnScrollListener(new OnScrollListener() {
