@@ -107,6 +107,13 @@ class AsyncPoller extends HumbugAsyncPushTask {
         super.onPostExecute(result);
         Log.v("poll", "Longpolling finished.");
 
+        // Duplicate thread detection
+        if (this.context.current_poll != this) {
+            Log.w("poll",
+                    "Thread still running, but we're not the active poll! Bailing...");
+            return;
+        }
+
         if (receivedMessages != null) {
             Log.v("poll", "Processing messages received.");
             try {
