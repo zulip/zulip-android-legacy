@@ -1,3 +1,12 @@
+com.humbughq.mobile (0.5.2) stable; urgency=low
+
+  * The "selected" tile is now hilighted in blue when pressed.
+  * Make the footer to the list view responsive to layout changes
+  * Resolve crasher if the user long-presses on the bottom of the list.
+  * Eliminate bug causing duplicate messages.
+
+ -- Luke Faraone <lfaraone@humbughq.com>  Tue, 05 Mar 2013 16:01:37 -0500
+
 com.humbughq.mobile (0.5.1) stable; urgency=low
 
   * Improve parallelism in server requests.
