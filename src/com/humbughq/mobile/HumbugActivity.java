@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
@@ -53,6 +54,8 @@ public class HumbugActivity extends Activity {
     boolean logged_in = false;
 
     String api_key;
+
+    View bottom_list_spacer;
 
     HumbugActivity that = this; // self-ref
     SharedPreferences settings;
@@ -376,6 +379,25 @@ public class HumbugActivity extends Activity {
 
     }
 
+    private void size_bottom_spacer() {
+        @SuppressWarnings("deprecation")
+        // needed for compat with API <13
+        int windowHeight = ((WindowManager) this
+                .getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay()
+                .getHeight();
+
+        AbsListView.LayoutParams params = new AbsListView.LayoutParams(0, 0);
+        params.height = windowHeight / 2;
+        this.bottom_list_spacer.setLayoutParams(params);
+    }
+
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        // our display has changed, lets recalculate the spacer
+        this.size_bottom_spacer();
+    }
+
     /**
      * Open the home view, where the message list is displayed.
      */
@@ -388,26 +410,10 @@ public class HumbugActivity extends Activity {
         setContentView(R.layout.main);
         listView = (ListView) findViewById(R.id.listview);
 
-        /*
-         * We want to add a footer to the ListView that is half the window
-         * height.
-         * 
-         * Example algorithmic explanation:
-         * http://stackoverflow.com/a/13366310/90777
-         */
+        this.bottom_list_spacer = new ImageView(this);
+        this.size_bottom_spacer();
+        listView.addFooterView(this.bottom_list_spacer);
 
-        @SuppressWarnings("deprecation")
-        // needed for compat with API <13
-        int windowHeight = ((WindowManager) this
-                .getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay()
-                .getHeight();
-
-        ImageView dummy = new ImageView(this);
-        AbsListView.LayoutParams params = new AbsListView.LayoutParams(0, 0);
-        params.height = windowHeight / 2;
-        dummy.setLayoutParams(params);
-
-        listView.addFooterView(dummy);
         adapter = new MessageAdapter(this, new ArrayList<Message>());
         listView.setAdapter(adapter);
 
