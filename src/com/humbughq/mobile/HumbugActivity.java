@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
@@ -54,6 +55,8 @@ public class HumbugActivity extends Activity {
     boolean logged_in = false;
 
     String api_key;
+
+    View bottom_list_spacer;
 
     HumbugActivity that = this; // self-ref
     SharedPreferences settings;
@@ -377,6 +380,27 @@ public class HumbugActivity extends Activity {
 
     }
 
+    private void size_bottom_spacer() {
+        WindowManager wm = (WindowManager) this
+                .getSystemService(Context.WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
+        @SuppressWarnings("deprecation")
+        // needed for compat with API >13
+        int screenHeight = display.getHeight();
+
+        AbsListView.LayoutParams lp = new AbsListView.LayoutParams(
+                screenHeight / 2, 0);
+        lp.height = screenHeight / 2;
+        this.bottom_list_spacer.setLayoutParams(lp);
+    }
+
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        // our display has changed, lets recalculate the spacer
+        this.size_bottom_spacer();
+    }
+
     /**
      * Open the home view, where the message list is displayed.
      */
@@ -397,19 +421,9 @@ public class HumbugActivity extends Activity {
          * http://stackoverflow.com/questions/13366281/how-can-i-add
          * -blank-space-to-the-end-of-a-listview#13366310
          */
-        WindowManager wm = (WindowManager) this
-                .getSystemService(Context.WINDOW_SERVICE);
-        Display display = wm.getDefaultDisplay();
-        @SuppressWarnings("deprecation")
-        // needed for compat with API >13
-        int screenHeight = display.getHeight();
-
-        View layout = new ImageView(this);
-        AbsListView.LayoutParams lp = new AbsListView.LayoutParams(
-                screenHeight / 2, 0);
-        lp.height = screenHeight / 2;
-        layout.setLayoutParams(lp);
-        listView.addFooterView(layout);
+        this.bottom_list_spacer = new ImageView(this);
+        this.size_bottom_spacer();
+        listView.addFooterView(this.bottom_list_spacer);
 
         adapter = new MessageAdapter(this, new ArrayList<Message>());
         listView.setAdapter(adapter);
