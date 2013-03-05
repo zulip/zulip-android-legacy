@@ -85,8 +85,19 @@ class AsyncPointerUpdate extends HumbugAsyncPushTask {
                     this.context.current_poll.execute(pointer, 100, 100);
 
                 } else {
+                    // Set the pointer and kick off a poll if one isn't already
+                    // running.
                     this.context.listView.setSelection(this.context.adapter
                             .getPosition(message));
+                    if (this.context.current_poll.isCancelled()
+                            || this.context.current_poll.getStatus() == AsyncPoller.Status.FINISHED) {
+                        this.context.current_poll = new AsyncPoller(
+                                this.context, true);
+                        this.context.current_poll
+                                .execute((int) this.context.adapter
+                                        .getItemId(this.context.adapter
+                                                .getCount() - 1) + 1);
+                    }
                 }
 
                 callback.onTaskComplete(result);
