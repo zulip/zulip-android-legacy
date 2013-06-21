@@ -106,12 +106,20 @@ public class Message {
 
             JSONArray jsonRecipients = message
                     .getJSONArray("display_recipient");
-            recipients = new Person[jsonRecipients.length() - 1];
+            int display_recipients = jsonRecipients.length() - 1;
+            if (display_recipients == 0) {
+                display_recipients = 1;
+            }
+
+            recipients = new Person[display_recipients];
 
             for (int i = 0, j = 0; i < jsonRecipients.length(); i++) {
                 JSONObject obj = jsonRecipients.getJSONObject(i);
 
-                if (getNotYouRecipient(obj)) {
+                if (getNotYouRecipient(obj) ||
+                // If you sent a message to yourself, we still show your as the
+                // other party.
+                        jsonRecipients.length() == 1) {
                     recipients[j] = new Person(obj.getString("full_name"),
                             obj.getString("email"));
                     j++;
