@@ -30,7 +30,7 @@ public class AsyncSend extends HumbugAsyncPushTask {
     }
 
     public final void execute() {
-        execute("api/v1/send_message");
+        execute("POST", "api/v1/messages");
     }
 
 }

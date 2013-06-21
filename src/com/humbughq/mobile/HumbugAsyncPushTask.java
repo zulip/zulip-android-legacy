@@ -11,7 +11,12 @@ import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.HttpConnectionParams;
 
@@ -19,6 +24,7 @@ import android.annotation.TargetApi;
 import android.net.http.AndroidHttpClient;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.util.Base64;
 import android.util.Log;
 
 /* General AsyncTask for use in making various web requests to Humbug.
@@ -69,11 +75,11 @@ class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
      * because on pre-honeycomb, post-donut Android always used a thread pool.
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public AsyncTask<String, String, String> execute(String url) {
+    public AsyncTask<String, String, String> execute(String method, String url) {
         try {
-            return this.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, url);
+            return this.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, method, url);
         } catch (NoSuchFieldError e) {
-            return super.execute(url);
+            return super.execute(method, url);
         }
     }
 
@@ -100,22 +106,40 @@ class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
         HttpResponse response;
         String responseString = null;
         try {
-            HttpPost httppost = new HttpPost(context.getServerURI()
-                    + api_path[0]);
-            Log.i("HAPT.get", context.getServerURI() + api_path[0]);
-
-            nameValuePairs.add(new BasicNameValuePair("api-key",
-                    this.context.api_key));
-            nameValuePairs.add(new BasicNameValuePair("email", this.context.you
-                    .getEmail()));
+            HttpRequestBase request;
+            String method = api_path[0];
+            String url = context.getServerURI() + api_path[1];
             nameValuePairs.add(new BasicNameValuePair("client", "Android"));
 
-            httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, "UTF-8"));
+            // Only POST, PUT and GET are supported, for now.
+            if (method.equals("POST")) {
+                request = new HttpPost(url);
+                ((HttpEntityEnclosingRequestBase) request)
+                        .setEntity(new UrlEncodedFormEntity(nameValuePairs,
+                                "UTF-8"));
+            } else if (method.equals("PUT")) {
+                request = new HttpPut(url);
+                ((HttpEntityEnclosingRequestBase) request)
+                        .setEntity(new UrlEncodedFormEntity(nameValuePairs,
+                                "UTF-8"));
+            } else {
+                request = new HttpGet(url + "?"
+                        + URLEncodedUtils.format(nameValuePairs, "utf-8"));
+            }
 
+            Log.i("HAPT.request", request.getMethod() + " " + request.getURI());
+
+            String authstr = this.context.you.getEmail() + ":"
+                    + this.context.api_key;
+            request.setHeader(
+                    "Authorization",
+                    "Basic "
+                            + Base64.encodeToString(authstr.getBytes(),
+                                    Base64.NO_WRAP));
             // timeout after 55 seconds in ms
-            HttpConnectionParams.setSoTimeout(httppost.getParams(), 55 * 1000);
+            HttpConnectionParams.setSoTimeout(request.getParams(), 55 * 1000);
 
-            response = httpclient.execute(httppost);
+            response = httpclient.execute(request);
 
             StatusLine statusLine = response.getStatusLine();
 

@@ -15,14 +15,14 @@ class AsyncPointerUpdate extends HumbugAsyncPushTask {
 
     public final void execute() {
         this.shouldHaveReceivedPointer = true;
-        execute("api/v1/get_profile");
+        execute("GET", "api/v1/users/me");
     }
 
     public final void execute(int newPointer) {
         this.shouldHaveReceivedPointer = false;
         this.setProperty("client_id", this.context.client_id);
         this.setProperty("pointer", Integer.toString(newPointer));
-        execute("api/v1/update_pointer");
+        execute("PUT", "api/v1/users/me/pointer");
     }
 
     @Override

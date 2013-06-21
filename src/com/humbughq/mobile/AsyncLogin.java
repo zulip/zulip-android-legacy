@@ -24,7 +24,7 @@ class AsyncLogin extends HumbugAsyncPushTask {
     }
 
     public final void execute() {
-        execute("api/v1/fetch_api_key");
+        execute("POST", "api/v1/fetch_api_key");
     }
 
     @Override
