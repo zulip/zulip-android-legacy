@@ -522,9 +522,9 @@ public class HumbugActivity extends Activity {
      */
     public String getServerURI() {
         if (you.getRealm().equals("humbughq.com")) {
-            return "https://staging.humbughq.com/";
+            return "https://staging.humbughq.com/api/";
         }
-        return "https://humbughq.com/";
+        return "https://api.humbughq.com/";
     }
 
     @Override
