@@ -2,8 +2,8 @@
 <resources>
 
     <string name="hello">Hello World, HumbugActivity!</string>
-    <string name="app_name">Humbug</string>
-    <string name="login_welcome_blurb">Welcome to Humbug!</string>
+    <string name="app_name">Zulip</string>
+    <string name="login_welcome_blurb">Welcome to Zulip!</string>
     <string name="login_button">Log in</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
@@ -19,7 +19,7 @@
     <string name="people">People</string>
     <string name="subject">Subject</string>
     <string name="close">Close</string>
-    <string name="legalUrl">http://humbughq.com/terms?mobile=true</string>
+    <string name="legalUrl">http://zulip.com/terms?mobile=true</string>
     <string name="refresh">Refresh</string>
 
 </resources>
