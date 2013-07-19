@@ -77,7 +77,8 @@ class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public AsyncTask<String, String, String> execute(String method, String url) {
         try {
-            return this.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, method, url);
+            return this.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
+                    method, url);
         } catch (NoSuchFieldError e) {
             return super.execute(method, url);
         }

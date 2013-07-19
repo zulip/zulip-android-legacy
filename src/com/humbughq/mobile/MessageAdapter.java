@@ -86,13 +86,14 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         TextView timestamp = (TextView) tile.findViewById(R.id.timestamp);
         timestamp.setText(message.getFormattedTimestamp());
 
-        // Convert 40dp to px for gravatar. 
+        // Convert 40dp to px for gravatar.
         // From http://stackoverflow.com/questions/4605527/
         Resources r = context.getResources();
-        float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                35, r.getDisplayMetrics());
+        float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 35,
+                r.getDisplayMetrics());
         ImageView gravatar = (ImageView) tile.findViewById(R.id.gravatar);
-        Bitmap gravatar_img = context.gravatars.get(message.getSender().getEmail());
+        Bitmap gravatar_img = context.gravatars.get(message.getSender()
+                .getEmail());
         if (gravatar_img != null) {
             // Gravatar already exists for this image, set the ImageView to it
             gravatar.setImageBitmap(gravatar_img);
@@ -100,13 +101,14 @@ public class MessageAdapter extends ArrayAdapter<Message> {
             // Go get the Bitmap
             URL url = null;
             try {
-                url = new URL("http://www.gravatar.com/avatar/" +
-                        message.getSender().getEmailHash() + "?s=" + px + "&d=identicon");
+                url = new URL("http://www.gravatar.com/avatar/"
+                        + message.getSender().getEmailHash() + "?s=" + px
+                        + "&d=identicon");
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
-            GravatarAsyncFetchTask task =
-                    new GravatarAsyncFetchTask(context, gravatar, message.getSender());
+            GravatarAsyncFetchTask task = new GravatarAsyncFetchTask(context,
+                    gravatar, message.getSender());
             task.loadBitmap(context, url, gravatar, message.getSender());
         }
 
@@ -118,7 +120,8 @@ public class MessageAdapter extends ArrayAdapter<Message> {
             color = context.getResources().getColor(R.color.stream_body);
         }
 
-        LinearLayout messageTile = (LinearLayout) tile.findViewById(R.id.messageTile);
+        LinearLayout messageTile = (LinearLayout) tile
+                .findViewById(R.id.messageTile);
         messageTile.setBackgroundColor(color);
 
         tile.setTag(R.id.messageID, message.getID());

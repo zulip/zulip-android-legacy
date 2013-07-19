@@ -294,7 +294,8 @@ public class HumbugActivity extends Activity {
     private void copyMessage(Message msg) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             android.content.ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-            clipboard.setPrimaryClip(ClipData.newPlainText("Zulip Message", msg.getContent()));
+            clipboard.setPrimaryClip(ClipData.newPlainText("Zulip Message",
+                    msg.getContent()));
         } else {
             // TODO: implement a pre-Honeycomb version
             // using the older android.text.ClipboardManager API
