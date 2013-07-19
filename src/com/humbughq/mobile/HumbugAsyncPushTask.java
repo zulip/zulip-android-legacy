@@ -102,8 +102,8 @@ class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
     }
 
     protected String doInBackground(String... api_path) {
-        AndroidHttpClient httpclient = AndroidHttpClient
-                .newInstance(HumbugActivity.USER_AGENT);
+        AndroidHttpClient httpclient = AndroidHttpClient.newInstance(context
+                .getUserAgent());
         HttpResponse response;
         String responseString = null;
         try {

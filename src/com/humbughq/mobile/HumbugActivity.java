@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Build;
@@ -42,7 +43,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 public class HumbugActivity extends Activity {
-    public static final String USER_AGENT = "ZulipMobile 1.0";
+    private static final String USER_AGENT = "ZulipMobile";
 
     ListView listView;
 
@@ -586,6 +587,18 @@ public class HumbugActivity extends Activity {
             return true;
         default:
             return super.onContextItemSelected(item);
+        }
+    }
+
+    public String getUserAgent() {
+        try {
+            return HumbugActivity.USER_AGENT
+                    + "/"
+                    + getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+        } catch (NameNotFoundException e) {
+            // This should… never happen, but okay.
+            e.printStackTrace();
+            return HumbugActivity.USER_AGENT + "/unknown";
         }
     }
 }
