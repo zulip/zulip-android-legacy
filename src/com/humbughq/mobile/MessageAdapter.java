@@ -101,7 +101,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
             // Go get the Bitmap
             URL url = null;
             try {
-                url = new URL("http://www.gravatar.com/avatar/"
+                url = new URL("https://www.gravatar.com/avatar/"
                         + message.getSender().getEmailHash() + "?s=" + px
                         + "&d=identicon");
             } catch (MalformedURLException e) {
