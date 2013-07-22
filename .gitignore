@@ -1,3 +1,5 @@
 /gen
 /bin
 .settings
+*-sources.jar
+*-javadoc.jar
