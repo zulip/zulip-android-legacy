@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import android.annotation.TargetApi;
+import com.humbughq.mobile.HumbugAsyncPushTask.AsyncTaskCompleteListener;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ClipData;
@@ -69,6 +70,7 @@ public class HumbugActivity extends Activity {
     private View composeView;
 
     protected HashMap<String, Bitmap> gravatars = new HashMap<String, Bitmap>();
+    protected HashMap<String, Stream> streams;
 
     /** Called when the activity is first created. */
     @Override
@@ -505,8 +507,7 @@ public class HumbugActivity extends Activity {
             }
 
         });
-        (new AsyncPointerUpdate(this)).execute();
-
+        this.startRequests();
     }
 
     protected void onPause() {
@@ -524,12 +525,22 @@ public class HumbugActivity extends Activity {
         this.suspended = false;
         if (this.logged_in) {
             if (this.adapter.getCount() != 0) {
-                AsyncPointerUpdate apu = new AsyncPointerUpdate(this);
-
-                apu.execute();
-
+                this.startRequests();
             }
         }
+    }
+
+    protected void startRequests(){
+        AsyncLoadParams request = new AsyncLoadParams(this);
+        final HumbugActivity self = this;
+        request.setCallback(new AsyncTaskCompleteListener() {
+            @Override
+            public void onTaskComplete(String result) {
+                (new AsyncPointerUpdate(self)).execute();
+
+            }
+        });
+        request.execute();
     }
 
     /**
