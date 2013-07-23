@@ -3,14 +3,18 @@ package com.humbughq.mobile;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseArray;
@@ -284,6 +288,17 @@ public class HumbugActivity extends Activity {
                 });
         composeWindow.show();
 
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    private void copyMessage(Message msg) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            android.content.ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+            clipboard.setPrimaryClip(ClipData.newPlainText("Zulip Message", msg.getContent()));
+        } else {
+            // TODO: implement a pre-Honeycomb version
+            // using the older android.text.ClipboardManager API
+        }
     }
 
     /**
@@ -563,6 +578,9 @@ public class HumbugActivity extends Activity {
             return true;
         case R.id.reply_to_sender:
             openCompose(message, MessageType.PRIVATE_MESSAGE, true);
+            return true;
+        case R.id.copy_message:
+            copyMessage(message);
             return true;
         default:
             return super.onContextItemSelected(item);
