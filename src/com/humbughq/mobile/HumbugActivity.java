@@ -537,10 +537,11 @@ public class HumbugActivity extends Activity {
      * @return either the production or staging server's URI
      */
     public String getServerURI() {
-        if (you.getRealm().equals("humbughq.com")) {
-            return "https://staging.humbughq.com/api/";
+        if (you.getRealm().equals("zulip.com")
+                || you.getRealm().equals("humbughq.com")) {
+            return "https://staging.zulip.com/api/";
         }
-        return "https://api.humbughq.com/";
+        return "https://api.zulip.com/";
     }
 
     @Override
