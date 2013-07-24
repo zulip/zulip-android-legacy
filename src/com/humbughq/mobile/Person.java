@@ -4,10 +4,16 @@ public class Person {
 
     private String name;
     private String email;
+    private String avatarURL;
 
     public Person(String name, String email) {
         this.setName(name);
         this.setEmail(email);
+    }
+
+    public Person(String name, String email, String avatarURL) {
+        this(name, email);
+        this.setAvatarURL(avatarURL);
     }
 
     public String getName() {
@@ -26,6 +32,14 @@ public class Person {
         if (email != null) {
             this.email = email.toLowerCase();
         }
+    }
+
+    public String getAvatarURL() {
+        return avatarURL;
+    }
+
+    public void setAvatarURL(String avatarURL) {
+        this.avatarURL = avatarURL;
     }
 
     /**
@@ -52,10 +66,5 @@ public class Person {
         result = 31 * result + name.hashCode();
         result = 31 * result + email.hashCode();
         return result;
-    }
-
-    // For use with Gravatar request urls
-    public String getEmailHash() {
-        return MD5Util.md5Hex(email);
     }
 }

@@ -59,10 +59,11 @@
 
         <ImageView
             android:id="@+id/gravatar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="45dp"
+            android:layout_height="37dp"
             android:paddingLeft="10dp"
             android:paddingTop="2dp"
+            android:scaleType="centerInside"
             android:src="@android:drawable/presence_online" />
 
         <TextView

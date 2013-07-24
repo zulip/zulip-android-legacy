@@ -95,7 +95,8 @@ public class Message {
     public void populate(JSONObject message) throws JSONException {
 
         this.setSender(new Person(message.getString("sender_full_name"),
-                message.getString("sender_email")));
+                message.getString("sender_email"), message
+                        .getString("avatar_url")));
 
         if (message.getString("type").equals("stream")) {
             this.setType(MessageType.STREAM_MESSAGE);
