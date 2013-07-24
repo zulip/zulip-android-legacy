@@ -42,7 +42,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 public class HumbugActivity extends Activity {
-    public static final String USER_AGENT = "HumbugMobile 1.0";
+    public static final String USER_AGENT = "ZulipMobile 1.0";
 
     ListView listView;
 
