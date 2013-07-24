@@ -86,7 +86,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         TextView timestamp = (TextView) tile.findViewById(R.id.timestamp);
         timestamp.setText(message.getFormattedTimestamp());
 
-        // Convert 40dp to px for gravatar.
+        // Convert 35dp to px for gravatar.
         // From http://stackoverflow.com/questions/4605527/
         Resources r = context.getResources();
         float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 35,
