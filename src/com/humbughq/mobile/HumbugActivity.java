@@ -8,7 +8,6 @@ import com.humbughq.mobile.HumbugAsyncPushTask.AsyncTaskCompleteListener;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -293,15 +292,16 @@ public class HumbugActivity extends Activity {
 
     }
 
+    @SuppressWarnings("deprecation")
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     private void copyMessage(Message msg) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            android.content.ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+            android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
             clipboard.setPrimaryClip(ClipData.newPlainText("Zulip Message",
                     msg.getContent()));
         } else {
-            // TODO: implement a pre-Honeycomb version
-            // using the older android.text.ClipboardManager API
+            android.text.ClipboardManager clipboard = (android.text.ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+            clipboard.setText(msg.getContent());
         }
     }
 
