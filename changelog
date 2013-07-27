@@ -1,3 +1,20 @@
+com.humbughq.mobile (0.6.0) testing; urgency=low
+
+  [ Luke Faraone ]
+  * Change branding to Zulip
+
+  [ Tim Abbott ]
+  * Switch to REST API
+
+  [ Kevin Mehall ]
+  * Change stream/subject separator
+  * Implement stream coloring
+
+  [ Scott Feeney ]
+  * Add "Copy Message" to the long-press menu
+
+ -- Luke Faraone <lfaraone@zulip.com>  Sat, 27 Jul 2013 10:58:58 -0400
+
 com.humbughq.mobile (0.5.2) stable; urgency=low
 
   * The "selected" tile is now hilighted in blue when pressed.
