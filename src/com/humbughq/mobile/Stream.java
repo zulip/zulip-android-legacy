@@ -13,7 +13,7 @@ public class Stream {
 
     /**
      * Construct a new Stream from JSON returned by the server.
-     *
+     * 
      * @param message
      *            The JSON object parsed from the server's output
      * @throws JSONException

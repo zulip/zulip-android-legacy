@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import android.annotation.TargetApi;
-import com.humbughq.mobile.HumbugAsyncPushTask.AsyncTaskCompleteListener;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ClipData;
@@ -41,6 +40,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.humbughq.mobile.HumbugAsyncPushTask.AsyncTaskCompleteListener;
 
 public class HumbugActivity extends Activity {
     private static final String USER_AGENT = "ZulipMobile";
@@ -530,7 +531,7 @@ public class HumbugActivity extends Activity {
         }
     }
 
-    protected void startRequests(){
+    protected void startRequests() {
         AsyncLoadParams request = new AsyncLoadParams(this);
         final HumbugActivity self = this;
         request.setCallback(new AsyncTaskCompleteListener() {

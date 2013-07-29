@@ -27,8 +27,7 @@ public class AsyncLoadParams extends HumbugAsyncPushTask {
                 HashMap<String, Stream> streamHash = new HashMap<String, Stream>();
 
                 for (int i = 0; i < subscriptions.length(); i++) {
-                    Stream stream = new Stream(
-                            subscriptions.getJSONObject(i));
+                    Stream stream = new Stream(subscriptions.getJSONObject(i));
                     Log.d("msg", "" + stream);
                     streamHash.put(stream.getName(), stream);
                 }
