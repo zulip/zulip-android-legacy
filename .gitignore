@@ -1,5 +1,6 @@
 /gen
 /bin
+/res/raw/ormlite_config.txt
 .settings
 *-sources.jar
 *-javadoc.jar
