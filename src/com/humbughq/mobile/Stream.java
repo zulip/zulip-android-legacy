@@ -26,6 +26,13 @@ public class Stream {
         inviteOnly = message.getBoolean("invite_only");
     }
 
+    /**
+     * Construct an empty Stream object.
+     */
+    public Stream() {
+
+    }
+
     public String getName() {
         return name;
     }

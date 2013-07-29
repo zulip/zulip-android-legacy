@@ -16,6 +16,13 @@ public class Person {
         this.setAvatarURL(avatarURL);
     }
 
+    /**
+     * Construct an empty Person object.
+     */
+    public Person() {
+
+    }
+
     public String getName() {
         return name;
     }
