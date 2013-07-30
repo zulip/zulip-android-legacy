@@ -22,7 +22,6 @@ public class Message {
     private Person[] recipients;
     private int id;
     private String stream;
-    private Person you;
 
     /**
      * Construct a new Message from JSON returned by the Humbug server.
@@ -35,8 +34,7 @@ public class Message {
      *             Thrown if the JSON provided is malformed.
      */
     public Message(Person you, JSONObject message) throws JSONException {
-        this.you = you;
-        this.populate(message);
+        this.populate(you, message);
     }
 
     /**
@@ -52,7 +50,7 @@ public class Message {
      *             Thrown if the JSON provided is malformed.
      */
     public Message(JSONObject message) throws JSONException {
-        this.populate(message);
+        this.populate(null, message);
     }
 
     /**
@@ -66,14 +64,16 @@ public class Message {
      * Convenience function to return either the Recipient specified or the
      * sender of the message as appropriate.
      * 
+     * @param you
+     * 
      * @param other
      *            a Recipient object you want to analyse
      * @return Either the specified Recipient's full name, or the sender's name
      *         if you are the Recipient.
      */
-    private boolean getNotYouRecipient(JSONObject other) {
+    private boolean getNotYouRecipient(Person you, JSONObject other) {
         try {
-            if (!other.getString("email").equals(this.you.getEmail())) {
+            if (you != null && !other.getString("email").equals(you.getEmail())) {
                 return true;
             } else {
                 return false;
@@ -88,11 +88,13 @@ public class Message {
     /**
      * Populate a Message object based off a parsed JSON hash.
      * 
+     * @param you
+     * 
      * @param message
      *            the JSON object as returned by the server.
      * @throws JSONException
      */
-    public void populate(JSONObject message) throws JSONException {
+    public void populate(Person you, JSONObject message) throws JSONException {
 
         this.setSender(new Person(message.getString("sender_full_name"),
                 message.getString("sender_email"), message
@@ -117,7 +119,7 @@ public class Message {
             for (int i = 0, j = 0; i < jsonRecipients.length(); i++) {
                 JSONObject obj = jsonRecipients.getJSONObject(i);
 
-                if (getNotYouRecipient(obj) ||
+                if (getNotYouRecipient(you, obj) ||
                 // If you sent a message to yourself, we still show your as the
                 // other party.
                         jsonRecipients.length() == 1) {
@@ -227,7 +229,7 @@ public class Message {
         String[] emails = new String[this.recipients.length];
 
         for (int i = 0; i < this.recipients.length; i++) {
-            if (you != null && recipients[i].getEmail().equals(you.getEmail())) {
+            if (recipients[i] == null) {
                 emails[i] = sender.getEmail();
             } else {
                 emails[i] = recipients[i].getEmail();
