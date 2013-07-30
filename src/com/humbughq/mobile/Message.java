@@ -27,21 +27,6 @@ public class Message {
     private Stream stream;
 
     /**
-     * Construct a new Message from JSON returned by the Humbug server.
-     * 
-     * @param you
-     *            A Person object corresponding to the user's name and email.
-     * @param message
-     *            The JSON object parsed from the server's output
-     * @throws JSONException
-     *             Thrown if the JSON provided is malformed.
-     */
-    public Message(HumbugActivity context, JSONObject message)
-            throws JSONException {
-        this.populate(context, message);
-    }
-
-    /**
      * Construct an empty Message object.
      */
     public Message() {
@@ -83,7 +68,7 @@ public class Message {
      *            the JSON object as returned by the server.
      * @throws JSONException
      */
-    public void populate(HumbugActivity context, JSONObject message)
+    public Message(HumbugActivity context, JSONObject message)
             throws JSONException {
 
         this.setSender(new Person(message.getString("sender_full_name"),
