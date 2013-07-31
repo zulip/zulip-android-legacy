@@ -216,26 +216,25 @@ public class Message {
         if (this.getType() == MessageType.STREAM_MESSAGE) {
             return this.getSender().getEmail();
         }
-        return TextUtils.join(", ", getReplyToArray());
+        Person[] people = getPersonalReplyTo();
+        String[] emails = new String[people.length];
+        for (int i = 0; i < people.length; i++) {
+            emails[i] = people[i].getEmail();
+        }
+        return TextUtils.join(", ", emails);
     }
 
     /**
-     * Creates a string array of the email addresses of the recipients of a
-     * message.
+     * Returns a Person array of the email addresses of the parties of the
+     * message, the user excluded.
      * 
-     * @return said String[].
+     * @return said Person[].
      */
-    public String[] getReplyToArray() {
-        String[] emails = new String[this.recipients.length];
-
-        for (int i = 0; i < this.recipients.length; i++) {
-            if (recipients[i] == null) {
-                emails[i] = sender.getEmail();
-            } else {
-                emails[i] = recipients[i].getEmail();
-            }
+    public Person[] getPersonalReplyTo() {
+        if (this.recipients.length == 0) {
+            throw new WrongMessageType();
         }
-        return emails;
+        return this.recipients.clone();
     }
 
     public String getFormattedTimestamp() {

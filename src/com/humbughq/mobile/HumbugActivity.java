@@ -570,7 +570,7 @@ public class HumbugActivity extends Activity {
         if (msg.getType().equals(MessageType.STREAM_MESSAGE)) {
             MenuInflater inflater = getMenuInflater();
             inflater.inflate(R.menu.context_stream, menu);
-        } else if (msg.getReplyToArray().length > 1) {
+        } else if (msg.getPersonalReplyTo().length > 1) {
             MenuInflater inflater = getMenuInflater();
             inflater.inflate(R.menu.context_private, menu);
         } else {
