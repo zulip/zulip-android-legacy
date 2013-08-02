@@ -2,7 +2,6 @@ package com.humbughq.mobile;
 
 import java.sql.SQLException;
 
-import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
@@ -19,14 +18,15 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
 
     // name of the database file for your application -- change to something
     // appropriate for your app
-    private static final String DATABASE_NAME = "zulip.db";
+    private static final String DATABASE_NAME = "zulip-%s.db";
     // any time you make changes to your database objects, you may have to
     // increase the database version
     private static final int DATABASE_VERSION = 1;
 
-    public DatabaseHelper(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION,
-                R.raw.ormlite_config);
+    public DatabaseHelper(HumbugActivity context) {
+        super(context, String.format(DATABASE_NAME,
+                MD5Util.md5Hex(context.you.getEmail())), null,
+                DATABASE_VERSION, R.raw.ormlite_config);
     }
 
     /**
