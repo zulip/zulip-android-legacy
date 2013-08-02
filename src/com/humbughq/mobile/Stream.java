@@ -15,12 +15,15 @@ public class Stream {
     public static final int DEFAULT_COLOR = Color.GRAY;
 
     public static final String NAME_FIELD = "name";
+    public static final String MESSAGES_FIELD = "messages";
     public static final String COLOR_FIELD = "color";
     public static final String INHOMEVIEW_FIELD = "inHomeView";
     public static final String INVITEONLY_FIELD = "inviteOnly";
 
     @DatabaseField(columnName = NAME_FIELD, id = true)
     private String name;
+    @ForeignCollectionField(columnName = MESSAGES_FIELD)
+    private ForeignCollection<Message> messages;
     @DatabaseField(columnName = COLOR_FIELD)
     private int color;
     @DatabaseField(columnName = INHOMEVIEW_FIELD)

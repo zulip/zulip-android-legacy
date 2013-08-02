@@ -216,7 +216,7 @@ public class HumbugActivity extends Activity {
 
                                 }
 
-                                Message msg = new Message();
+                                Message msg = new Message(that);
                                 msg.setSender(that.you);
                                 if (subject.getVisibility() == View.GONE) {
                                     msg.setType(MessageType.PRIVATE_MESSAGE);

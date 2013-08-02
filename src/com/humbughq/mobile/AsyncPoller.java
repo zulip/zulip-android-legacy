@@ -1,12 +1,15 @@
 package com.humbughq.mobile;
 
 import java.net.SocketTimeoutException;
+import java.sql.SQLException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.util.Log;
+
+import com.j256.ormlite.dao.Dao;
 
 class AsyncPoller extends HumbugAsyncPushTask {
 
@@ -89,6 +92,14 @@ class AsyncPoller extends HumbugAsyncPushTask {
                      */
                     receivedMessages[i] = message;
                     this.context.messageIndex.append(message.getID(), message);
+                    try {
+                        Dao<Message, Integer> messages = this.context.databaseHelper
+                                .getDao(Message.class);
+                        messages.createOrUpdate(message);
+                    } catch (SQLException e) {
+                        // Awkward. (TODO)
+                        e.printStackTrace();
+                    }
 
                 }
             } catch (JSONException e) {

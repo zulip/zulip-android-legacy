@@ -3,6 +3,7 @@ package com.humbughq.mobile;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -14,23 +15,54 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.j256.ormlite.dao.Dao;
+import com.j256.ormlite.dao.ForeignCollection;
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.field.ForeignCollectionField;
+import com.j256.ormlite.table.DatabaseTable;
 
+@DatabaseTable(tableName = "messages")
 public class Message {
 
+    public static final String SENDER_FIELD = "sender";
+    public static final String TYPE_FIELD = "type";
+    public static final String CONTENT_FIELD = "content";
+    public static final String SUBJECT_FIELD = "subject";
+    public static final String TIMESTAMP_FIELD = "timestamp";
+    public static final String RECIPIENTS_FIELD = "recipients";
+    public static final String STREAM_FIELD = "stream";
+
+    @DatabaseField(foreign = true, columnName = SENDER_FIELD)
     private Person sender;
+    @DatabaseField(columnName = TYPE_FIELD)
     private MessageType type;
+    @DatabaseField(columnName = CONTENT_FIELD)
     private String content;
+    @DatabaseField(columnName = SUBJECT_FIELD)
     private String subject;
+    @DatabaseField(columnName = TIMESTAMP_FIELD)
     private Date timestamp;
-    private Person[] recipients;
+    @ForeignCollectionField(columnName = RECIPIENTS_FIELD, eager = true)
+    private ForeignCollection<MessagePerson> recipients;
+    @DatabaseField(id = true)
     private int id;
+    @DatabaseField(foreign = true, columnName = STREAM_FIELD)
     private Stream stream;
 
     /**
      * Construct an empty Message object.
      */
-    public Message() {
+    protected Message() {
 
+    }
+
+    public Message(HumbugActivity context) {
+        try {
+            recipients = context.databaseHelper.getDao(Message.class)
+                    .getEmptyForeignCollection(RECIPIENTS_FIELD);
+        } catch (SQLException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
     }
 
     /**
@@ -98,9 +130,13 @@ public class Message {
             if (display_recipients == 0) {
                 display_recipients = 1;
             }
-
-            recipients = new Person[display_recipients];
-
+            try {
+                recipients = context.databaseHelper.getDao(Message.class)
+                        .getEmptyForeignCollection(RECIPIENTS_FIELD);
+            } catch (SQLException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
             for (int i = 0, j = 0; i < jsonRecipients.length(); i++) {
                 JSONObject obj = jsonRecipients.getJSONObject(i);
 
@@ -108,8 +144,8 @@ public class Message {
                 // If you sent a message to yourself, we still show your as the
                 // other party.
                         jsonRecipients.length() == 1) {
-                    recipients[j] = new Person(obj.getString("full_name"),
-                            obj.getString("email"));
+                    recipients.add(new MessagePerson(this, new Person(obj
+                            .getString("full_name"), obj.getString("email"))));
                     j++;
                 }
             }
@@ -124,6 +160,13 @@ public class Message {
 
         this.setTimestamp(new Date(message.getLong("timestamp") * 1000));
         this.setID(message.getInt("id"));
+        try {
+            context.databaseHelper.getDao(Message.class)
+                    .createIfNotExists(this);
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     public MessageType getType() {
@@ -134,8 +177,11 @@ public class Message {
         this.type = streamMessage;
     }
 
-    public void setRecipient(Person[] recipients) {
-        this.recipients = recipients;
+    public void setRecipient(Collection<Person> recipients) {
+        this.recipients.clear();
+        for (Person recipient : recipients) {
+            this.recipients.add(new MessagePerson(this, recipient));
+        }
     }
 
     /**
@@ -150,9 +196,10 @@ public class Message {
      *            The emails of the recipients.
      */
     public void setRecipient(String[] emails) {
-        this.recipients = new Person[emails.length];
-        for (int i = 0; i < emails.length; i++) {
-            this.recipients[i] = new Person(null, emails[i]);
+        this.recipients.clear();
+        for (String email : emails) {
+            this.recipients
+                    .add(new MessagePerson(this, new Person(null, email)));
         }
     }
 
@@ -163,9 +210,8 @@ public class Message {
      *            The sole recipient of the message.
      */
     public void setRecipient(Person recipient) {
-        Person[] recipients = new Person[1];
-        recipients[0] = recipient;
-        this.recipients = recipients;
+        assert (this.recipients.remove(null) == true);
+        this.recipients.add(new MessagePerson(this, recipient));
     }
 
     /**
@@ -181,10 +227,12 @@ public class Message {
         if (this.getType() == MessageType.STREAM_MESSAGE) {
             return this.getStream().getName();
         } else {
-            String[] names = new String[this.recipients.length];
+            MessagePerson[] recipientsArray = this.recipients
+                    .toArray(new MessagePerson[0]);
+            String[] names = new String[recipientsArray.length];
 
-            for (int i = 0; i < this.recipients.length; i++) {
-                names[i] = recipients[i].getName();
+            for (int i = 0; i < recipientsArray.length; i++) {
+                names[i] = recipientsArray[i].recipient.getName();
             }
             return TextUtils.join(", ", names);
         }
@@ -216,10 +264,16 @@ public class Message {
      * @return said Person[].
      */
     public Person[] getPersonalReplyTo() {
-        if (this.recipients.length == 0) {
+        MessagePerson[] messagePeople = this.recipients
+                .toArray(new MessagePerson[0]);
+        if (messagePeople.length == 0) {
             throw new WrongMessageType();
         }
-        return this.recipients.clone();
+        Person[] people = new Person[messagePeople.length];
+        for (int i = 0; i < messagePeople.length; i++) {
+            people[i] = messagePeople[i].recipient;
+        }
+        return people;
     }
 
     public String getFormattedTimestamp() {
