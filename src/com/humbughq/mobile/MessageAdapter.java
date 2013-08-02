@@ -53,11 +53,9 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         if (message.getType() == MessageType.STREAM_MESSAGE) {
             envelopeTile.setBackgroundResource(R.drawable.stream_header);
 
-            if (context.streams != null) {
-                Stream stream = context.streams.get(message.getStream());
-                if (stream != null) {
-                    envelopeTile.setBackgroundColor(stream.getColor());
-                }
+            Stream stream = message.getStream();
+            if (stream != null) {
+                envelopeTile.setBackgroundColor(stream.getColor());
             }
         } else {
             envelopeTile.setBackgroundResource(R.drawable.huddle_header);

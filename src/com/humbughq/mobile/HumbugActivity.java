@@ -70,7 +70,8 @@ public class HumbugActivity extends Activity {
     private View composeView;
 
     protected HashMap<String, Bitmap> gravatars = new HashMap<String, Bitmap>();
-    protected HashMap<String, Stream> streams;
+
+    public DatabaseHelper databaseHelper;
 
     /** Called when the activity is first created. */
     @Override
@@ -81,6 +82,7 @@ public class HumbugActivity extends Activity {
 
         this.you = new Person(null, settings.getString("email", null));
         this.api_key = settings.getString("api_key", null);
+        this.databaseHelper = new DatabaseHelper(this);
 
         if (this.api_key == null) {
             this.openLogin();
@@ -222,8 +224,8 @@ public class HumbugActivity extends Activity {
                                             .toString().split(","));
                                 } else {
                                     msg.setType(MessageType.STREAM_MESSAGE);
-                                    msg.setStream(recipient.getText()
-                                            .toString());
+                                    msg.setStream(new Stream(recipient
+                                            .getText().toString()));
                                     msg.setSubject(subject.getText().toString());
                                 }
 
@@ -259,7 +261,7 @@ public class HumbugActivity extends Activity {
         }
         if (msg != null) {
             if (msg.getType() == MessageType.STREAM_MESSAGE && !to_sender) {
-                recipient.setText(msg.getStream());
+                recipient.setText(msg.getStream().getName());
                 subject.setText(msg.getSubject());
             } else if (msg.getType() == MessageType.PRIVATE_MESSAGE
                     && !to_sender) {

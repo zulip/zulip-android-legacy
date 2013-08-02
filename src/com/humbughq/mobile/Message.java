@@ -1,5 +1,6 @@
 package com.humbughq.mobile;
 
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -12,6 +13,8 @@ import org.json.JSONObject;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.j256.ormlite.dao.Dao;
+
 public class Message {
 
     private Person sender;
@@ -21,7 +24,7 @@ public class Message {
     private Date timestamp;
     private Person[] recipients;
     private int id;
-    private String stream;
+    private Stream stream;
 
     /**
      * Construct a new Message from JSON returned by the Humbug server.
@@ -33,24 +36,9 @@ public class Message {
      * @throws JSONException
      *             Thrown if the JSON provided is malformed.
      */
-    public Message(Person you, JSONObject message) throws JSONException {
-        this.populate(you, message);
-    }
-
-    /**
-     * Construct a new Message from JSON returned by the Humbug server.
-     * 
-     * This method operates without information about the user, so some
-     * automatic features like excluding the user from the recipient list are
-     * not performed.
-     * 
-     * @param message
-     *            The JSON object parsed from the server's output
-     * @throws JSONException
-     *             Thrown if the JSON provided is malformed.
-     */
-    public Message(JSONObject message) throws JSONException {
-        this.populate(null, message);
+    public Message(HumbugActivity context, JSONObject message)
+            throws JSONException {
+        this.populate(context, message);
     }
 
     /**
@@ -88,13 +76,15 @@ public class Message {
     /**
      * Populate a Message object based off a parsed JSON hash.
      * 
-     * @param you
+     * @param context
+     *            The HumbugActivity that created the message.
      * 
      * @param message
      *            the JSON object as returned by the server.
      * @throws JSONException
      */
-    public void populate(Person you, JSONObject message) throws JSONException {
+    public void populate(HumbugActivity context, JSONObject message)
+            throws JSONException {
 
         this.setSender(new Person(message.getString("sender_full_name"),
                 message.getString("sender_email"), message
@@ -103,7 +93,17 @@ public class Message {
         if (message.getString("type").equals("stream")) {
             this.setType(MessageType.STREAM_MESSAGE);
 
-            setStream(message.getString("display_recipient"));
+            try {
+                Dao<Stream, String> streams = context.databaseHelper
+                        .getDao(Stream.class);
+                setStream(streams.queryForId(message
+                        .getString("display_recipient")));
+            } catch (SQLException e) {
+                Log.w("message",
+                        "We received a stream message for a stream we don't have data for. Fake it until you make it.");
+                e.printStackTrace();
+                setStream(new Stream(message.getString("display_recipient")));
+            }
         } else if (message.getString("type").equals("private")) {
             this.setType(MessageType.PRIVATE_MESSAGE);
 
@@ -119,7 +119,7 @@ public class Message {
             for (int i = 0, j = 0; i < jsonRecipients.length(); i++) {
                 JSONObject obj = jsonRecipients.getJSONObject(i);
 
-                if (getNotYouRecipient(you, obj) ||
+                if (getNotYouRecipient(context.you, obj) ||
                 // If you sent a message to yourself, we still show your as the
                 // other party.
                         jsonRecipients.length() == 1) {
@@ -194,7 +194,7 @@ public class Message {
      */
     public String getDisplayRecipient() {
         if (this.getType() == MessageType.STREAM_MESSAGE) {
-            return this.getStream();
+            return this.getStream().getName();
         } else {
             String[] names = new String[this.recipients.length];
 
@@ -283,11 +283,11 @@ public class Message {
         this.id = id;
     }
 
-    public String getStream() {
+    public Stream getStream() {
         return stream;
     }
 
-    public void setStream(String stream) {
+    public void setStream(Stream stream) {
         this.stream = stream;
     }
 

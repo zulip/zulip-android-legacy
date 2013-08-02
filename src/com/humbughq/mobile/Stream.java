@@ -5,10 +5,27 @@ import org.json.JSONObject;
 
 import android.graphics.Color;
 
+import com.j256.ormlite.dao.ForeignCollection;
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.field.ForeignCollectionField;
+import com.j256.ormlite.table.DatabaseTable;
+
+@DatabaseTable(tableName = "streams")
 public class Stream {
+    public static final int DEFAULT_COLOR = Color.GRAY;
+
+    public static final String NAME_FIELD = "name";
+    public static final String COLOR_FIELD = "color";
+    public static final String INHOMEVIEW_FIELD = "inHomeView";
+    public static final String INVITEONLY_FIELD = "inviteOnly";
+
+    @DatabaseField(columnName = NAME_FIELD, id = true)
     private String name;
+    @DatabaseField(columnName = COLOR_FIELD)
     private int color;
+    @DatabaseField(columnName = INHOMEVIEW_FIELD)
     private Boolean inHomeView;
+    @DatabaseField(columnName = INVITEONLY_FIELD)
     private Boolean inviteOnly;
 
     /**
@@ -31,6 +48,21 @@ public class Stream {
      */
     public Stream() {
 
+    }
+
+    /**
+     * Construct a new Stream object when all that's known is the name.
+     * 
+     * These should be sensible defaults.
+     * 
+     * @param name
+     *            The stream name
+     */
+    public Stream(String name) {
+        this.name = name;
+        color = DEFAULT_COLOR;
+        inHomeView = true; // Sure, why not
+        inviteOnly = false; // Most probably
     }
 
     public String getName() {
