@@ -34,7 +34,8 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         Message message = getItem(position);
         LinearLayout tile;
 
-        if (convertView == null) {
+        if (convertView == null
+                || !(convertView.getClass().equals(LinearLayout.class))) {
             // We didn't get passed a tile, so construct a new one.
             // In the future, we should inflate from a layout here.
             LayoutInflater inflater = ((Activity) this.getContext())
