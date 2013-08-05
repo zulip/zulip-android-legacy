@@ -4,3 +4,4 @@
 .settings
 *-sources.jar
 *-javadoc.jar
+*.log
