@@ -129,14 +129,9 @@ class AsyncPoller extends HumbugAsyncPushTask {
 
         if (receivedMessages != null) {
             Log.v("poll", "Processing messages received.");
-            try {
-                this.context.adapter.addAll(receivedMessages);
-            } catch (NoSuchMethodError e) {
-                /*
-                 * Older versions of Android do not have .addAll, so we fall
-                 * back to manually looping here.
-                 */
-                for (Message message : receivedMessages) {
+            for (Message message : receivedMessages) {
+                Stream stream = message.getStream();
+                if (stream == null || stream.getInHomeView()) {
                     this.context.adapter.add(message);
                 }
             }
