@@ -82,7 +82,6 @@ public class HumbugActivity extends Activity {
 
         this.you = new Person(null, settings.getString("email", null));
         this.api_key = settings.getString("api_key", null);
-        this.databaseHelper = new DatabaseHelper(this);
 
         if (this.api_key == null) {
             this.openLogin();
@@ -422,6 +421,7 @@ public class HumbugActivity extends Activity {
      * Open the home view, where the message list is displayed.
      */
     protected void openHomeView() {
+        this.databaseHelper = new DatabaseHelper(this);
         this.onPrepareOptionsMenu(menu);
 
         this.logged_in = true;
