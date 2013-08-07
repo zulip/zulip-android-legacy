@@ -12,6 +12,7 @@ import android.util.Log;
 import com.j256.ormlite.dao.Dao;
 
 class AsyncPoller extends HumbugAsyncPushTask {
+    HumbugActivity context;
 
     private Message[] receivedMessages;
     private boolean continuePolling;
@@ -26,7 +27,8 @@ class AsyncPoller extends HumbugAsyncPushTask {
      * @param updatePointer
      */
     public AsyncPoller(HumbugActivity humbugActivity, boolean continuePolling) {
-        super(humbugActivity);
+        super(humbugActivity.app);
+        context = humbugActivity;
         this.continuePolling = continuePolling;
     }
 
@@ -81,7 +83,7 @@ class AsyncPoller extends HumbugAsyncPushTask {
 
                 for (int i = 0; i < objects.length(); i++) {
                     Log.i("json-iter", "" + i);
-                    Message message = new Message(this.context,
+                    Message message = new Message(this.app,
                             objects.getJSONObject(i));
                     /*
                      * Add to the local message array and the global ArrayList
@@ -93,8 +95,8 @@ class AsyncPoller extends HumbugAsyncPushTask {
                     receivedMessages[i] = message;
                     this.context.messageIndex.append(message.getID(), message);
                     try {
-                        Dao<Message, Integer> messages = this.context.databaseHelper
-                                .getDao(Message.class);
+                        Dao<Message, Integer> messages = this.app
+                                .getDatabaseHelper().getDao(Message.class);
                         messages.createOrUpdate(message);
                     } catch (SQLException e) {
                         // Awkward. (TODO)

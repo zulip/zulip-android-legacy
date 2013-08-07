@@ -6,11 +6,12 @@ import org.json.JSONObject;
 import android.util.Log;
 
 class AsyncPointerUpdate extends HumbugAsyncPushTask {
-
+    HumbugActivity context;
     boolean shouldHaveReceivedPointer;
 
     public AsyncPointerUpdate(HumbugActivity humbugActivity) {
-        super(humbugActivity);
+        super(humbugActivity.app);
+        context = humbugActivity;
     }
 
     public final void execute() {
@@ -20,7 +21,7 @@ class AsyncPointerUpdate extends HumbugAsyncPushTask {
 
     public final void execute(int newPointer) {
         this.shouldHaveReceivedPointer = false;
-        this.setProperty("client_id", this.context.client_id);
+        this.setProperty("client_id", this.app.client_id);
         this.setProperty("pointer", Integer.toString(newPointer));
         execute("PUT", "v1/users/me/pointer");
     }
@@ -31,7 +32,7 @@ class AsyncPointerUpdate extends HumbugAsyncPushTask {
         if (this.shouldHaveReceivedPointer && result != null) {
             try {
                 final int pointer = (new JSONObject(result)).getInt("pointer");
-                this.context.client_id = (new JSONObject(result))
+                this.app.client_id = (new JSONObject(result))
                         .getString("client_id");
                 Log.i("pointer", "got from server as " + pointer);
 

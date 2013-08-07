@@ -34,7 +34,7 @@ import android.util.Log;
  */
 class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
 
-    HumbugActivity context;
+    ZulipApp app;
     List<NameValuePair> nameValuePairs;
     AsyncTaskCompleteListener callback;
 
@@ -57,8 +57,8 @@ class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
      * @param humbugActivity
      *            The Activity that created the PushTask
      */
-    public HumbugAsyncPushTask(HumbugActivity humbugActivity) {
-        context = humbugActivity;
+    public HumbugAsyncPushTask(ZulipApp app) {
+        this.app = app;
         callback = new AsyncTaskCompleteListener() {
             @Override
             public void onTaskComplete(String result) {
@@ -102,14 +102,14 @@ class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
     }
 
     protected String doInBackground(String... api_path) {
-        AndroidHttpClient httpclient = AndroidHttpClient.newInstance(context
+        AndroidHttpClient httpclient = AndroidHttpClient.newInstance(app
                 .getUserAgent());
         HttpResponse response;
         String responseString = null;
         try {
             HttpRequestBase request;
             String method = api_path[0];
-            String url = context.getServerURI() + api_path[1];
+            String url = app.getServerURI() + api_path[1];
             nameValuePairs.add(new BasicNameValuePair("client", "Android"));
 
             // Only POST, PUT and GET are supported, for now.
@@ -130,8 +130,7 @@ class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
 
             Log.i("HAPT.request", request.getMethod() + " " + request.getURI());
 
-            String authstr = this.context.you.getEmail() + ":"
-                    + this.context.api_key;
+            String authstr = this.app.getEmail() + ":" + this.app.getApiKey();
             request.setHeader(
                     "Authorization",
                     "Basic "

@@ -9,9 +9,8 @@ import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Build;
@@ -35,16 +34,14 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.humbughq.mobile.HumbugAsyncPushTask.AsyncTaskCompleteListener;
 
 public class HumbugActivity extends Activity {
-    private static final String USER_AGENT = "ZulipMobile";
+    ZulipApp app;
 
     ListView listView;
 
@@ -71,26 +68,19 @@ public class HumbugActivity extends Activity {
 
     protected HashMap<String, Bitmap> gravatars = new HashMap<String, Bitmap>();
 
-    public DatabaseHelper databaseHelper;
-
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        app = (ZulipApp) getApplicationContext();
+        settings = app.settings;
 
-        settings = getPreferences(Activity.MODE_PRIVATE);
-
-        this.you = new Person(null, settings.getString("email", null));
-        this.api_key = settings.getString("api_key", null);
-
-        if (this.api_key == null) {
-            this.openLogin();
-        } else {
-            this.openHomeView();
+        if (!app.isLoggedIn()) {
+            openLogin();
+            return;
         }
 
-        return;
-
+        openHomeView();
     }
 
     public boolean onPrepareOptionsMenu(Menu menu) {
@@ -215,7 +205,7 @@ public class HumbugActivity extends Activity {
 
                                 }
 
-                                Message msg = new Message(that);
+                                Message msg = new Message(that.app);
                                 msg.setSender(that.you);
                                 if (subject.getVisibility() == View.GONE) {
                                     msg.setType(MessageType.PRIVATE_MESSAGE);
@@ -336,66 +326,22 @@ public class HumbugActivity extends Activity {
             this.current_poll.cancel(true);
         }
 
-        Editor ed = this.settings.edit();
-
-        ed.remove("email");
-        ed.remove("api_key");
-        ed.commit();
-
+        app.logOut();
         this.openLogin();
-
     }
 
     /**
      * Switch to the login view.
      */
     protected void openLogin() {
-        this.logged_in = false;
-
-        this.onPrepareOptionsMenu(menu);
-
-        setContentView(R.layout.login);
-
-        ((Button) findViewById(R.id.login))
-                .setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        TextView errorText = (TextView) findViewById(R.id.error_text);
-                        errorText.setText("Logging in...");
-                        (new AsyncLogin(that,
-                                ((EditText) findViewById(R.id.username))
-                                        .getText().toString(),
-                                ((EditText) findViewById(R.id.password))
-                                        .getText().toString())).execute();
-                    }
-                });
-        ((TextView) findViewById(R.id.legalTextView))
-                .setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        openLegal();
-                    }
-                });
+        Intent i = new Intent(this, LoginActivity.class);
+        startActivity(i, null);
+        finish();
     }
 
     protected void openLegal() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-        WebView legalView = new WebView(this);
-        legalView.loadUrl("file:///android_asset/legal.html");
-
-        builder.setView(legalView)
-                .setTitle(R.string.legal)
-                .setPositiveButton(R.string.close,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.dismiss();
-                            }
-                        });
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
-
+        Intent i = new Intent(this, LegalActivity.class);
+        startActivityForResult(i, 0);
     }
 
     private void size_bottom_spacer() {
@@ -421,7 +367,6 @@ public class HumbugActivity extends Activity {
      * Open the home view, where the message list is displayed.
      */
     protected void openHomeView() {
-        this.databaseHelper = new DatabaseHelper(this);
         this.onPrepareOptionsMenu(menu);
 
         this.logged_in = true;
@@ -546,19 +491,6 @@ public class HumbugActivity extends Activity {
         request.execute();
     }
 
-    /**
-     * Determines the server URI applicable for the user.
-     * 
-     * @return either the production or staging server's URI
-     */
-    public String getServerURI() {
-        if (you.getRealm().equals("zulip.com")
-                || you.getRealm().equals("humbughq.com")) {
-            return "https://staging.zulip.com/api/";
-        }
-        return "https://api.zulip.com/";
-    }
-
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v,
             ContextMenuInfo menuInfo) {
@@ -601,18 +533,6 @@ public class HumbugActivity extends Activity {
             return true;
         default:
             return super.onContextItemSelected(item);
-        }
-    }
-
-    public String getUserAgent() {
-        try {
-            return HumbugActivity.USER_AGENT
-                    + "/"
-                    + getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
-        } catch (NameNotFoundException e) {
-            // This should… never happen, but okay.
-            e.printStackTrace();
-            return HumbugActivity.USER_AGENT + "/unknown";
         }
     }
 }

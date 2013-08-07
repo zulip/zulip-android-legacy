@@ -55,9 +55,9 @@ public class Message {
 
     }
 
-    public Message(HumbugActivity context) {
+    public Message(ZulipApp app) {
         try {
-            recipients = context.databaseHelper.getDao(Message.class)
+            recipients = app.getDatabaseHelper().getDao(Message.class)
                     .getEmptyForeignCollection(RECIPIENTS_FIELD);
         } catch (SQLException e1) {
             // TODO Auto-generated catch block
@@ -93,15 +93,14 @@ public class Message {
     /**
      * Populate a Message object based off a parsed JSON hash.
      * 
-     * @param context
-     *            The HumbugActivity that created the message.
+     * @param app
+     *            The global ZulipApp.
      * 
      * @param message
      *            the JSON object as returned by the server.
      * @throws JSONException
      */
-    public Message(HumbugActivity context, JSONObject message)
-            throws JSONException {
+    public Message(ZulipApp app, JSONObject message) throws JSONException {
 
         this.setSender(new Person(message.getString("sender_full_name"),
                 message.getString("sender_email"), message
@@ -111,8 +110,8 @@ public class Message {
             this.setType(MessageType.STREAM_MESSAGE);
 
             try {
-                Dao<Stream, String> streams = context.databaseHelper
-                        .getDao(Stream.class);
+                Dao<Stream, String> streams = app.getDatabaseHelper().getDao(
+                        Stream.class);
                 setStream(streams.queryForId(message
                         .getString("display_recipient")));
             } catch (SQLException e) {
@@ -131,7 +130,7 @@ public class Message {
                 display_recipients = 1;
             }
             try {
-                recipients = context.databaseHelper.getDao(Message.class)
+                recipients = app.getDatabaseHelper().getDao(Message.class)
                         .getEmptyForeignCollection(RECIPIENTS_FIELD);
             } catch (SQLException e1) {
                 // TODO Auto-generated catch block
@@ -140,7 +139,7 @@ public class Message {
             for (int i = 0, j = 0; i < jsonRecipients.length(); i++) {
                 JSONObject obj = jsonRecipients.getJSONObject(i);
 
-                if (getNotYouRecipient(context.you, obj) ||
+                if (getNotYouRecipient(app.you, obj) ||
                 // If you sent a message to yourself, we still show your as the
                 // other party.
                         jsonRecipients.length() == 1) {
@@ -161,7 +160,7 @@ public class Message {
         this.setTimestamp(new Date(message.getLong("timestamp") * 1000));
         this.setID(message.getInt("id"));
         try {
-            context.databaseHelper.getDao(Message.class)
+            app.getDatabaseHelper().getDao(Message.class)
                     .createIfNotExists(this);
         } catch (SQLException e) {
             // TODO Auto-generated catch block

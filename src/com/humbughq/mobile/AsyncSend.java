@@ -13,7 +13,7 @@ public class AsyncSend extends HumbugAsyncPushTask {
      *            The message to send.
      */
     public AsyncSend(HumbugActivity humbugActivity, Message msg) {
-        super(humbugActivity);
+        super(humbugActivity.app);
         this.setProperty("type", msg.getType().toString());
         if (msg.getType() == MessageType.STREAM_MESSAGE) {
             this.setProperty("to", msg.getStream().getName());

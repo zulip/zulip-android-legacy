@@ -12,7 +12,7 @@ import com.j256.ormlite.dao.Dao;
 
 public class AsyncLoadParams extends HumbugAsyncPushTask {
     public AsyncLoadParams(HumbugActivity humbugActivity) {
-        super(humbugActivity);
+        super(humbugActivity.app);
     }
 
     public final void execute() {
@@ -28,8 +28,8 @@ public class AsyncLoadParams extends HumbugAsyncPushTask {
 
                 Dao<Stream, String> streamDao;
                 try {
-                    streamDao = this.context.databaseHelper
-                            .getDao(Stream.class);
+                    streamDao = this.app.getDatabaseHelper().getDao(
+                            Stream.class);
                 } catch (SQLException e) {
                     // Well that's sort of awkward. We can't really store this
                     // data except in the database.

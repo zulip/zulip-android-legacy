@@ -11,12 +11,13 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:name="com.humbughq.mobile.ZulipApp"
         android:allowBackup="false"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/MyTheme" >
         <activity
-            android:name=".HumbugActivity"
+            android:name="com.humbughq.mobile.HumbugActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
             android:label="@string/app_name" >
             <intent-filter>
@@ -24,6 +25,14 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name="com.humbughq.mobile.LoginActivity"
+            android:label="@string/app_name" >
+        </activity>
+        <activity
+            android:name="com.humbughq.mobile.LegalActivity"
+            android:label="@string/title_activity_legal" >
         </activity>
     </application>
 

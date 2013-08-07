@@ -5,20 +5,20 @@ import org.apache.http.StatusLine;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.content.SharedPreferences.Editor;
 import android.util.Log;
 import android.widget.TextView;
 
 class AsyncLogin extends HumbugAsyncPushTask {
+    LoginActivity context;
 
-    public AsyncLogin(HumbugActivity humbugActivity, String username,
+    public AsyncLogin(LoginActivity loginActivity, String username,
             String password) {
-        super(humbugActivity);
-        context = humbugActivity;
+        super(loginActivity.app);
+        context = loginActivity;
         // Knowing your name would be nice, but we don't use it anywhere and
         // it's not returned by the API, so having it be null here is fine for
         // now.
-        this.context.you = new Person(null, username);
+        this.app.setEmail(username);
         this.setProperty("username", username);
         this.setProperty("password", password);
     }
@@ -36,17 +36,8 @@ class AsyncLogin extends HumbugAsyncPushTask {
                 JSONObject obj = new JSONObject(result);
 
                 if (obj.getString("result").equals("success")) {
-                    this.context.api_key = obj.getString("api_key");
-                    Log.i("login", "Logged in as " + this.context.api_key);
-                    this.context.logged_in = true;
-
-                    Editor ed = this.context.settings.edit();
-                    ed.putString("email", this.context.you.getEmail());
-                    ed.putString("api_key", this.context.api_key);
-
-                    ed.commit();
-
-                    this.context.openHomeView();
+                    this.app.setLoggedInApiKey(obj.getString("api_key"));
+                    this.context.openHome();
                     callback.onTaskComplete(result);
 
                     return;
