@@ -335,7 +335,7 @@ public class HumbugActivity extends Activity {
      */
     protected void openLogin() {
         Intent i = new Intent(this, LoginActivity.class);
-        startActivity(i, null);
+        startActivity(i);
         finish();
     }
 

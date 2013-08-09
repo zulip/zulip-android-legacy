@@ -48,7 +48,7 @@ public class LoginActivity extends Activity {
 
     protected void openHome() {
         Intent i = new Intent(this, HumbugActivity.class);
-        startActivity(i, null);
+        startActivity(i);
         finish();
     }
 }
