@@ -46,6 +46,9 @@ public class ZulipApp extends Application {
      * @return either the production or staging server's URI
      */
     public String getServerURI() {
+        if (getEmail().equals("iago@zulip.com")) {
+            return "http://10.0.2.2:9991/api/";
+        }
         if (you.getRealm().equals("zulip.com")
                 || you.getRealm().equals("humbughq.com")) {
             return "https://staging.zulip.com/api/";
