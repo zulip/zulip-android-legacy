@@ -1,14 +1,11 @@
 package com.zulip.android;
 
 import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -283,12 +280,6 @@ public class Message {
         }
 
         return people;
-    }
-
-    public String getFormattedTimestamp() {
-        DateFormat format = new SimpleDateFormat("MMM dd HH:mm");
-        format.setTimeZone(TimeZone.getDefault());
-        return format.format(this.getTimestamp());
     }
 
     public String getSubject() {

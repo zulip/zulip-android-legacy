@@ -1,7 +1,10 @@
 package com.zulip.android;
 
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.TimeZone;
 
 import android.app.Activity;
 import android.content.Context;
@@ -87,7 +90,9 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         contentView.setText(message.getContent());
 
         TextView timestamp = (TextView) tile.findViewById(R.id.timestamp);
-        timestamp.setText(message.getFormattedTimestamp());
+        DateFormat format = new SimpleDateFormat("MMM dd HH:mm");
+        format.setTimeZone(TimeZone.getDefault());
+        timestamp.setText(format.format(message.getTimestamp()));
 
         ImageView gravatar = (ImageView) tile.findViewById(R.id.gravatar);
         Bitmap gravatar_img = context.gravatars.get(message.getSender()
