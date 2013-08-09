@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="hello">Hello World, HumbugActivity!</string>
     <string name="app_name">Zulip</string>
     <string name="login_welcome_blurb">Welcome to Zulip!</string>
     <string name="login_button">Log in</string>
@@ -21,9 +20,7 @@
     <string name="close">Close</string>
     <string name="legalUrl">https://zulip.com/terms?mobile=true</string>
     <string name="refresh">Refresh</string>
-    <string name="title_activity_login">LoginActivity</string>
     <string name="action_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
     <string name="title_activity_legal">Legal</string>
 
 </resources>
