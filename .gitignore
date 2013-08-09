@@ -5,3 +5,4 @@
 *-sources.jar
 *-javadoc.jar
 *.log
+/local.properties
