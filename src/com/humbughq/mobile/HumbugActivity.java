@@ -27,7 +27,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
-import android.webkit.WebView;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
@@ -48,8 +47,6 @@ public class HumbugActivity extends Activity {
     SparseArray<Message> messageIndex;
     MessageAdapter adapter;
 
-    AsyncPoller current_poll;
-
     boolean suspended = false;
 
     boolean logged_in = false;
@@ -67,6 +64,8 @@ public class HumbugActivity extends Activity {
     private View composeView;
 
     protected HashMap<String, Bitmap> gravatars = new HashMap<String, Bitmap>();
+
+    private AsyncGetEvents event_poll;
 
     /** Called when the activity is first created. */
     @Override
@@ -322,10 +321,6 @@ public class HumbugActivity extends Activity {
     private void logout() {
         this.logged_in = false;
 
-        if (this.current_poll != null) {
-            this.current_poll.cancel(true);
-        }
-
         app.logOut();
         this.openLogin();
     }
@@ -455,15 +450,14 @@ public class HumbugActivity extends Activity {
             }
 
         });
-        this.startRequests();
     }
 
     protected void onPause() {
         super.onPause();
         Log.i("status", "suspend");
         this.suspended = true;
-        if (this.current_poll != null) {
-            this.current_poll.cancel(true);
+        if (event_poll != null) {
+            event_poll.abort();
         }
     }
 
@@ -471,24 +465,17 @@ public class HumbugActivity extends Activity {
         super.onResume();
         Log.i("status", "resume");
         this.suspended = false;
-        if (this.logged_in) {
-            if (this.adapter.getCount() != 0) {
-                this.startRequests();
-            }
-        }
+        startRequests();
     }
 
     protected void startRequests() {
-        AsyncLoadParams request = new AsyncLoadParams(this);
-        final HumbugActivity self = this;
-        request.setCallback(new AsyncTaskCompleteListener() {
-            @Override
-            public void onTaskComplete(String result) {
-                (new AsyncPointerUpdate(self)).execute();
+        Log.i("zulip", "Starting requests");
 
-            }
-        });
-        request.execute();
+        if (event_poll != null) {
+            event_poll.abort();
+        }
+        event_poll = new AsyncGetEvents(this);
+        event_poll.start();
     }
 
     @Override
@@ -534,5 +521,41 @@ public class HumbugActivity extends Activity {
         default:
             return super.onContextItemSelected(item);
         }
+    }
+
+    public void onRegister() {
+        adapter.clear();
+
+        AsyncGetOldMessages oldMessagesReq = new AsyncGetOldMessages(this);
+        oldMessagesReq.execute(app.pointer, 100, 100);
+        oldMessagesReq.setCallback(new AsyncTaskCompleteListener() {
+            @Override
+            public void onTaskComplete(String result) {
+                that.selectMessage(that.getMessageById(app.pointer));
+            }
+        });
+
+    }
+
+    public void onMessage(Message message) {
+        this.messageIndex.append(message.getID(), message);
+
+        Stream stream = message.getStream();
+        if (stream == null || stream.getInHomeView()) {
+            this.adapter.add(message);
+        }
+    }
+
+    public void selectMessage(final Message message) {
+        listView.post(new Runnable() {
+            @Override
+            public void run() {
+                listView.setSelection(adapter.getPosition(message));
+            }
+        });
+    }
+
+    public Message getMessageById(int id) {
+        return this.messageIndex.get(id);
     }
 }

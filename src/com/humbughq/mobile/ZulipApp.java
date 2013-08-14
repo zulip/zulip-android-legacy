@@ -17,7 +17,10 @@ public class ZulipApp extends Application {
     Person you;
     SharedPreferences settings;
     String api_key;
+    int max_message_id;
     DatabaseHelper databaseHelper;
+
+    public int pointer;
 
     @Override
     public void onCreate() {

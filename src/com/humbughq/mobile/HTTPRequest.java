@@ -21,6 +21,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.HttpConnectionParams;
 
 import android.net.http.AndroidHttpClient;
+import android.os.AsyncTask;
 import android.util.Base64;
 import android.util.Log;
 
@@ -30,6 +31,7 @@ public class HTTPRequest {
     List<NameValuePair> nameValuePairs;
     HttpRequestBase request;
     HttpResponse response;
+    volatile boolean aborting = false;
 
     HTTPRequest(ZulipApp app) {
         nameValuePairs = new ArrayList<NameValuePair>();
@@ -45,8 +47,15 @@ public class HTTPRequest {
     }
 
     public void abort() {
+        aborting = true;
         if (request != null) {
-            request.abort();
+            (new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... voids) {
+                    request.abort();
+                    return null;
+                }
+            }).execute();
         }
     }
 
