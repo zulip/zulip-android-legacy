@@ -1,11 +1,15 @@
 package com.humbughq.mobile;
 
+import java.sql.SQLException;
+
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.util.Log;
+
+import com.j256.ormlite.dao.Dao;
 
 public class ZulipApp extends Application {
     private static final String USER_AGENT = "ZulipMobile";
@@ -99,5 +103,16 @@ public class ZulipApp extends Application {
 
     public DatabaseHelper getDatabaseHelper() {
         return databaseHelper;
+    }
+
+    public <C, T> Dao<C, T> getDao(Class<C> cls) {
+        try {
+            return databaseHelper.getDao(cls);
+        } catch (SQLException e) {
+            // Well that's sort of awkward.
+            e.printStackTrace();
+            Log.e("ZulipApp", "Could not initialise database");
+            return null;
+        }
     }
 }
