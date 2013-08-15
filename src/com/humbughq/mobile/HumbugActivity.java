@@ -47,6 +47,15 @@ public class HumbugActivity extends Activity {
     SparseArray<Message> messageIndex;
     MessageAdapter adapter;
 
+    public enum LoadPosition {
+        ABOVE, BELOW, NEW, INITIAL,
+    }
+
+    int firstMessageId = -1;
+    int lastMessageId = -1;
+    int lastAvailableMessageId = -1;
+    boolean loadingMessages = true;
+
     boolean suspended = false;
 
     boolean logged_in = false;
@@ -387,7 +396,21 @@ public class HumbugActivity extends Activity {
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem,
                     int visibleItemCount, int totalItemCount) {
-                // pass
+
+                final int near = 6;
+
+                if (!loadingMessages && firstMessageId > 0 && lastMessageId > 0) {
+                    if (firstVisibleItem + visibleItemCount > totalItemCount
+                            - near) {
+                        Log.i("scroll", "at bottom " + loadingMessages + " "
+                                + listHasMostRecent() + " " + lastMessageId
+                                + " " + lastAvailableMessageId);
+                        // At the bottom of the list
+                        if (!listHasMostRecent()) {
+                            loadMoreMessages(LoadPosition.BELOW);
+                        }
+                    }
+                }
 
             }
 
@@ -474,6 +497,7 @@ public class HumbugActivity extends Activity {
         if (event_poll != null) {
             event_poll.abort();
         }
+        loadingMessages = true;
         event_poll = new AsyncGetEvents(this);
         event_poll.start();
     }
@@ -526,24 +550,107 @@ public class HumbugActivity extends Activity {
     public void onRegister() {
         adapter.clear();
 
+        lastAvailableMessageId = app.max_message_id;
+        firstMessageId = -1;
+        lastMessageId = -1;
+
         AsyncGetOldMessages oldMessagesReq = new AsyncGetOldMessages(this);
-        oldMessagesReq.execute(app.pointer, 100, 100);
+        oldMessagesReq.execute(app.pointer, LoadPosition.INITIAL, 100, 100);
         oldMessagesReq.setCallback(new AsyncTaskCompleteListener() {
             @Override
             public void onTaskComplete(String result) {
                 that.selectMessage(that.getMessageById(app.pointer));
+                loadingMessages = false;
             }
         });
 
     }
 
-    public void onMessage(Message message) {
-        this.messageIndex.append(message.getID(), message);
+    public void onMessages(Message[] messages, LoadPosition pos) {
+        Log.i("onMessages", "Adding " + messages.length + " messages at " + pos);
 
-        Stream stream = message.getStream();
-        if (stream == null || stream.getInHomeView()) {
-            this.adapter.add(message);
+        if (pos == LoadPosition.NEW) {
+            // listHasMostRecent check needs to occur before updating
+            // lastAvailableMessageId
+            boolean hasMostRecent = listHasMostRecent();
+            lastAvailableMessageId = messages[messages.length - 1].getID();
+            if (!hasMostRecent) {
+                // If we don't have intermediate messages loaded, don't add new
+                // messages -- they'll be loaded when we scroll down.
+                Log.i("onMessage",
+                        "skipping new message " + messages[0].getID() + " "
+                                + lastAvailableMessageId);
+                return;
+            }
         }
+
+        for (int i = 0; i < messages.length; i++) {
+            Message message = messages[i];
+
+            if (this.messageIndex.get(message.getID()) != null) {
+                // Already have this message.
+                Log.i("onMessage", "Already have " + message.getID());
+                continue;
+            }
+
+            this.messageIndex.append(message.getID(), message);
+            Stream stream = message.getStream();
+
+            if (stream == null || stream.getInHomeView()) {
+                if (pos == LoadPosition.NEW || pos == LoadPosition.BELOW) {
+                    this.adapter.add(message);
+                } else if (pos == LoadPosition.ABOVE
+                        || pos == LoadPosition.INITIAL) {
+                    this.adapter.insert(message, i);
+                }
+
+                Log.i("onMessages", "Added message " + message.getID());
+
+                if (message.getID() > lastMessageId) {
+                    lastMessageId = message.getID();
+                }
+
+                if (message.getID() < firstMessageId || firstMessageId == -1) {
+                    firstMessageId = message.getID();
+                }
+            }
+        }
+
+    }
+
+    public Boolean listHasMostRecent() {
+        return lastMessageId == lastAvailableMessageId;
+    }
+
+    public void loadMoreMessages(LoadPosition pos) {
+        int above = 0;
+        int below = 0;
+        int around;
+
+        if (pos == LoadPosition.ABOVE) {
+            above = 100;
+            around = firstMessageId;
+        } else if (pos == LoadPosition.BELOW) {
+            below = 100;
+            around = lastMessageId;
+        } else {
+            Log.e("loadMoreMessages", "Invalid position");
+            return;
+        }
+
+        Log.i("loadMoreMessages", "" + around + " " + pos + " " + above + " "
+                + below);
+
+        loadingMessages = true;
+
+        AsyncGetOldMessages oldMessagesReq = new AsyncGetOldMessages(this);
+        oldMessagesReq.execute(around, pos, above, below);
+        oldMessagesReq.setCallback(new AsyncTaskCompleteListener() {
+            @Override
+            public void onTaskComplete(String result) {
+                loadingMessages = false;
+            }
+        });
     }
 
     public void selectMessage(final Message message) {

@@ -13,6 +13,7 @@ import com.j256.ormlite.dao.Dao;
 public class AsyncGetOldMessages extends HumbugAsyncPushTask {
     HumbugActivity activity;
     private Message[] receivedMessages;
+    HumbugActivity.LoadPosition position;
 
     public AsyncGetOldMessages(HumbugActivity humbugActivity) {
         super(humbugActivity.app);
@@ -30,7 +31,8 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
      * @param after
      *            Number of messages before the anchor to return
      */
-    public final void execute(int anchor, int before, int after) {
+    public final void execute(int anchor, HumbugActivity.LoadPosition pos,
+            int before, int after) {
         this.setProperty("anchor", Integer.toString(anchor));
         this.setProperty("num_before", Integer.toString(before));
         this.setProperty("num_after", Integer.toString(after));
@@ -38,6 +40,7 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
         // We don't support narrowing at all, so always specify we're
         // unnarrowed.
         this.setProperty("narrow", "{}");
+        position = pos;
         execute("GET", "v1/messages");
     }
 
@@ -82,9 +85,7 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
     protected void onPostExecute(String result) {
         if (receivedMessages != null) {
             Log.v("poll", "Processing messages received.");
-            for (Message message : receivedMessages) {
-                activity.onMessage(message);
-            }
+            activity.onMessages(receivedMessages, position);
         } else {
             Log.v("poll", "No messages returned.");
         }

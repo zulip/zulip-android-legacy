@@ -157,6 +157,7 @@ public class AsyncGetEvents extends Thread {
             // Awkward. (TODO)
             e.printStackTrace();
         }
-        this.activity.onMessage(message);
+        Message[] messages = { message };
+        this.activity.onMessages(messages, HumbugActivity.LoadPosition.NEW);
     }
 }
