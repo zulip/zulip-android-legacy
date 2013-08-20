@@ -20,6 +20,9 @@ public class ZulipApp extends Application {
     int max_message_id;
     DatabaseHelper databaseHelper;
 
+    String eventQueueId;
+    int lastEventId;
+
     public int pointer;
 
     @Override
@@ -45,6 +48,10 @@ public class ZulipApp extends Application {
 
     public Boolean isLoggedIn() {
         return this.api_key != null;
+    }
+
+    public void clearConnectionState() {
+        eventQueueId = null;
     }
 
     /**
@@ -98,6 +105,7 @@ public class ZulipApp extends Application {
         ed.remove("api_key");
         ed.commit();
         this.api_key = null;
+        eventQueueId = null;
     }
 
     public String getEmail() {

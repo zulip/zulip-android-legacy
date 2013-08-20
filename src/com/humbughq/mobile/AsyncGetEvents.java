@@ -1,13 +1,16 @@
 package com.humbughq.mobile;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.sql.SQLException;
 
+import org.apache.http.client.HttpResponseException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.Handler;
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.j256.ormlite.dao.Dao;
@@ -21,6 +24,7 @@ public class AsyncGetEvents extends Thread {
     HTTPRequest request;
 
     AsyncGetEvents that = this;
+    int failures = 0;
 
     public AsyncGetEvents(HumbugActivity humbugActivity) {
         super();
@@ -62,40 +66,75 @@ public class AsyncGetEvents extends Thread {
         request.abort();
     }
 
+    private void backoff(Exception e) {
+        if (e != null) {
+            e.printStackTrace();
+        }
+        failures += 1;
+        long backoff = (long) (Math.exp(failures / 2.0) * 1000);
+        Log.e("asyncGetEvents", "Failure " + failures + ", sleeping for "
+                + backoff);
+        SystemClock.sleep(backoff);
+    }
+
+    private void register() throws JSONException, IOException {
+        request.setProperty("apply_markdown", "false");
+        JSONObject response = new JSONObject(request.execute("POST",
+                "v1/register"));
+
+        app.eventQueueId = response.getString("queue_id");
+        app.lastEventId = response.getInt("last_event_id");
+
+        onRegisterHandler.obtainMessage(0, response).sendToTarget();
+    }
+
     public void run() {
         try {
-            request.setProperty("apply_markdown", "false");
-            JSONObject response = new JSONObject(request.execute("POST",
-                    "v1/register"));
-
-            String eventQueueId = response.getString("queue_id");
-            int lastEventId = response.getInt("last_event_id");
-
-            onRegisterHandler.obtainMessage(0, response).sendToTarget();
-
             while (true) {
-                request.clearProperties();
-                request.setProperty("queue_id", eventQueueId);
-                request.setProperty("last_event_id", "" + lastEventId);
-                response = new JSONObject(request.execute("GET", "v1/events"));
+                try {
+                    request.clearProperties();
+                    if (app.eventQueueId == null) {
+                        register();
+                    }
+                    request.setProperty("queue_id", app.eventQueueId);
+                    request.setProperty("last_event_id", "" + app.lastEventId);
+                    JSONObject response = new JSONObject(request.execute("GET",
+                            "v1/events"));
 
-                JSONArray events = response.getJSONArray("events");
-                JSONObject lastEvent = events
-                        .getJSONObject(events.length() - 1);
-                lastEventId = lastEvent.getInt("id");
+                    JSONArray events = response.getJSONArray("events");
+                    JSONObject lastEvent = events
+                            .getJSONObject(events.length() - 1);
+                    app.lastEventId = lastEvent.getInt("id");
 
-                onEventsHandler.obtainMessage(0, response).sendToTarget();
+                    onEventsHandler.obtainMessage(0, response).sendToTarget();
+                    failures = 0;
+                } catch (HttpResponseException e) {
+                    if (e.getStatusCode() == 400) {
+                        String msg = e.getMessage();
+                        if (msg.contains("Bad event queue id")
+                                || msg.contains("too old")) {
+                            // Queue dead. Register again.
+                            Log.w("asyncGetEvents", "Queue dead");
+                            app.eventQueueId = null;
+                            continue;
+                        }
+                    }
+                    backoff(e);
+                } catch (SocketTimeoutException e) {
+                    e.printStackTrace();
+                    // Retry without backoff, since it's already been a while
+                } catch (IOException e) {
+                    if (request.aborting) {
+                        Log.i("asyncGetEvents", "Thread aborted");
+                        return;
+                    } else {
+                        backoff(e);
+                    }
+                } catch (JSONException e) {
+                    backoff(e);
+                }
             }
-
-        } catch (JSONException e) {
-            // TODO: Some means of automatically retrying / restarting
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            if (request.aborting) {
-                Log.i("asyncGetEvents", "Thread aborted");
-                return;
-            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

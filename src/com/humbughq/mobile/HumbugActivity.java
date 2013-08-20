@@ -88,6 +88,11 @@ public class HumbugActivity extends Activity {
             return;
         }
 
+        // If we're creating a new Activity, but the app state is still around,
+        // re-register anyway to update the view. Won't be necessary once we
+        // pull messages from the DB.
+        app.clearConnectionState();
+
         openHomeView();
     }
 
@@ -124,7 +129,7 @@ public class HumbugActivity extends Activity {
             break;
         case R.id.refresh:
             Log.w("menu", "Refreshed manually by user. We shouldn't need this.");
-            onResume();
+            onRefresh();
             break;
         case R.id.logout:
             logout();
@@ -491,6 +496,16 @@ public class HumbugActivity extends Activity {
         startRequests();
     }
 
+    protected void onRefresh() {
+        super.onResume();
+
+        if (event_poll != null) {
+            event_poll.abort();
+        }
+        app.clearConnectionState();
+        startRequests();
+    }
+
     protected void startRequests() {
         Log.i("zulip", "Starting requests");
 
@@ -549,6 +564,7 @@ public class HumbugActivity extends Activity {
 
     public void onRegister() {
         adapter.clear();
+        messageIndex.clear();
 
         lastAvailableMessageId = app.max_message_id;
         firstMessageId = -1;
@@ -601,10 +617,9 @@ public class HumbugActivity extends Activity {
                     this.adapter.add(message);
                 } else if (pos == LoadPosition.ABOVE
                         || pos == LoadPosition.INITIAL) {
+                    Log.i("onMessages", "Inserting at " + i);
                     this.adapter.insert(message, i);
                 }
-
-                Log.i("onMessages", "Added message " + message.getID());
 
                 if (message.getID() > lastMessageId) {
                     lastMessageId = message.getID();
