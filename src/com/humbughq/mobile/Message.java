@@ -114,11 +114,15 @@ public class Message {
                         Stream.class);
                 setStream(streams.queryForId(message
                         .getString("display_recipient")));
+
+                if (this.getStream() == null) {
+                    Log.w("message",
+                            "We received a stream message for a stream we don't have data for. Fake it until you make it.");
+                    setStream(new Stream(message.getString("display_recipient")));
+                }
             } catch (SQLException e) {
-                Log.w("message",
-                        "We received a stream message for a stream we don't have data for. Fake it until you make it.");
                 e.printStackTrace();
-                setStream(new Stream(message.getString("display_recipient")));
+
             }
         } else if (message.getString("type").equals("private")) {
             this.setType(MessageType.PRIVATE_MESSAGE);
