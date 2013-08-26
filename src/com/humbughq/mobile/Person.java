@@ -13,11 +13,11 @@ public class Person {
     public static final String EMAIL_FIELD = "email";
     public static final String AVATARURL_FIELD = "avatarUrl";
 
-    @DatabaseField(columnName = NAME_FIELD, id = true)
+    @DatabaseField(columnName = NAME_FIELD)
     private String name;
     @ForeignCollectionField(columnName = MESSAGESPARTICIPATEDIN_FIELD)
     private ForeignCollection<MessagePerson> messagesParticipatedIn;
-    @DatabaseField(columnName = EMAIL_FIELD)
+    @DatabaseField(columnName = EMAIL_FIELD, id = true)
     private String email;
     @DatabaseField(columnName = AVATARURL_FIELD)
     private String avatarURL;
