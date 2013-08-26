@@ -1,15 +1,13 @@
 package com.zulip.android;
 
 import java.net.URL;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.List;
-import java.util.TimeZone;
 
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -90,9 +88,16 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         contentView.setText(message.getContent());
 
         TextView timestamp = (TextView) tile.findViewById(R.id.timestamp);
-        DateFormat format = new SimpleDateFormat("MMM dd HH:mm");
-        format.setTimeZone(TimeZone.getDefault());
-        timestamp.setText(format.format(message.getTimestamp()));
+
+        if (DateUtils.isToday(message.getTimestamp().getTime())) {
+            timestamp.setText(DateUtils.formatDateTime(context, message
+                    .getTimestamp().getTime(), DateUtils.FORMAT_SHOW_TIME));
+        } else {
+            timestamp.setText(DateUtils.formatDateTime(context, message
+                    .getTimestamp().getTime(), DateUtils.FORMAT_SHOW_DATE
+                    | DateUtils.FORMAT_ABBREV_MONTH
+                    | DateUtils.FORMAT_SHOW_TIME));
+        }
 
         ImageView gravatar = (ImageView) tile.findViewById(R.id.gravatar);
         Bitmap gravatar_img = context.gravatars.get(message.getSender()
