@@ -93,7 +93,110 @@ public class HumbugActivity extends Activity {
         // pull messages from the DB.
         app.clearConnectionState();
 
-        openHomeView();
+        this.onPrepareOptionsMenu(menu);
+
+        this.logged_in = true;
+        messageIndex = new SparseArray<Message>();
+
+        setContentView(R.layout.main);
+        listView = (ListView) findViewById(R.id.listview);
+
+        this.bottom_list_spacer = new ImageView(this);
+        this.size_bottom_spacer();
+        listView.addFooterView(this.bottom_list_spacer);
+
+        adapter = new MessageAdapter(this, new ArrayList<Message>());
+        listView.setAdapter(adapter);
+
+        // We want blue highlights when you longpress
+        listView.setDrawSelectorOnTop(true);
+
+        registerForContextMenu(listView);
+
+        listView.setOnScrollListener(new OnScrollListener() {
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem,
+                    int visibleItemCount, int totalItemCount) {
+
+                final int near = 6;
+
+                if (!loadingMessages && firstMessageId > 0 && lastMessageId > 0) {
+                    if (firstVisibleItem + visibleItemCount > totalItemCount
+                            - near) {
+                        Log.i("scroll", "at bottom " + loadingMessages + " "
+                                + listHasMostRecent() + " " + lastMessageId
+                                + " " + lastAvailableMessageId);
+                        // At the bottom of the list
+                        if (!listHasMostRecent()) {
+                            loadMoreMessages(LoadPosition.BELOW);
+                        }
+                    }
+                }
+
+            }
+
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+                try {
+                    // Scrolling messages isn't meaningful unless we have
+                    // messages to scroll.
+                    int mID = ((Message) view.getItemAtPosition(view
+                            .getFirstVisiblePosition())).getID();
+                    if (mIDSelected != mID) {
+                        Log.i("scrolling", "Now at " + mID);
+                        (new AsyncPointerUpdate(that)).execute(mID);
+                        mIDSelected = mID;
+                    }
+                } catch (NullPointerException e) {
+                    Log.w("scrolling",
+                            "Could not find a location to scroll to!");
+                }
+            }
+        });
+
+        listView.setOnItemClickListener(new OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view,
+                    int position, long id) {
+                try {
+                    openCompose(adapter.getItem(position));
+                } catch (IndexOutOfBoundsException e) {
+                    // We can ignore this because its probably before the data
+                    // has been fetched.
+                }
+
+            }
+
+        });
+        listView.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view,
+                    int position, long id) {
+                try {
+                    int mID = (Integer) view.getTag(R.id.messageID);
+                    if (mIDSelected != mID) {
+                        Log.i("keyboard", "Now at " + mID);
+                        (new AsyncPointerUpdate(that)).execute(mID);
+                        mIDSelected = mID;
+                    }
+                } catch (NullPointerException e) {
+                    Log.e("selected", "None, because we couldn't find the tag.");
+                }
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // pass
+
+            }
+
+        });
+
+        this.startRequests();
     }
 
     public boolean onPrepareOptionsMenu(Menu menu) {
@@ -370,114 +473,6 @@ public class HumbugActivity extends Activity {
 
         // our display has changed, lets recalculate the spacer
         this.size_bottom_spacer();
-    }
-
-    /**
-     * Open the home view, where the message list is displayed.
-     */
-    protected void openHomeView() {
-        this.onPrepareOptionsMenu(menu);
-
-        this.logged_in = true;
-        messageIndex = new SparseArray<Message>();
-
-        setContentView(R.layout.main);
-        listView = (ListView) findViewById(R.id.listview);
-
-        this.bottom_list_spacer = new ImageView(this);
-        this.size_bottom_spacer();
-        listView.addFooterView(this.bottom_list_spacer);
-
-        adapter = new MessageAdapter(this, new ArrayList<Message>());
-        listView.setAdapter(adapter);
-
-        // We want blue highlights when you longpress
-        listView.setDrawSelectorOnTop(true);
-
-        registerForContextMenu(listView);
-
-        listView.setOnScrollListener(new OnScrollListener() {
-
-            @Override
-            public void onScroll(AbsListView view, int firstVisibleItem,
-                    int visibleItemCount, int totalItemCount) {
-
-                final int near = 6;
-
-                if (!loadingMessages && firstMessageId > 0 && lastMessageId > 0) {
-                    if (firstVisibleItem + visibleItemCount > totalItemCount
-                            - near) {
-                        Log.i("scroll", "at bottom " + loadingMessages + " "
-                                + listHasMostRecent() + " " + lastMessageId
-                                + " " + lastAvailableMessageId);
-                        // At the bottom of the list
-                        if (!listHasMostRecent()) {
-                            loadMoreMessages(LoadPosition.BELOW);
-                        }
-                    }
-                }
-
-            }
-
-            @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) {
-                try {
-                    // Scrolling messages isn't meaningful unless we have
-                    // messages to scroll.
-                    int mID = ((Message) view.getItemAtPosition(view
-                            .getFirstVisiblePosition())).getID();
-                    if (mIDSelected != mID) {
-                        Log.i("scrolling", "Now at " + mID);
-                        (new AsyncPointerUpdate(that)).execute(mID);
-                        mIDSelected = mID;
-                    }
-                } catch (NullPointerException e) {
-                    Log.w("scrolling",
-                            "Could not find a location to scroll to!");
-                }
-            }
-        });
-
-        listView.setOnItemClickListener(new OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view,
-                    int position, long id) {
-                try {
-                    openCompose(adapter.getItem(position));
-                } catch (IndexOutOfBoundsException e) {
-                    // We can ignore this because its probably before the data
-                    // has been fetched.
-                }
-
-            }
-
-        });
-        listView.setOnItemSelectedListener(new OnItemSelectedListener() {
-
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view,
-                    int position, long id) {
-                try {
-                    int mID = (Integer) view.getTag(R.id.messageID);
-                    if (mIDSelected != mID) {
-                        Log.i("keyboard", "Now at " + mID);
-                        (new AsyncPointerUpdate(that)).execute(mID);
-                        mIDSelected = mID;
-                    }
-                } catch (NullPointerException e) {
-                    Log.e("selected", "None, because we couldn't find the tag.");
-                }
-
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                // pass
-
-            }
-
-        });
     }
 
     protected void onPause() {
