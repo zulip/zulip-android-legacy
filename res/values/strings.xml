@@ -22,5 +22,8 @@
     <string name="refresh">Refresh</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_legal">Legal</string>
+    <string name="streams_open">Open stream sidebar</string>
+    <string name="streams_close">Close stream sidebar</string>
+    
 
 </resources>

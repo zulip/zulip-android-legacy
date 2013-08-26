@@ -15,6 +15,8 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.ContextMenu;
@@ -67,6 +69,10 @@ public class HumbugActivity extends Activity {
     HumbugActivity that = this; // self-ref
     SharedPreferences settings;
     String client_id;
+
+    private DrawerLayout drawerLayout;
+    private ActionBarDrawerToggle drawerToggle;
+
     protected int mIDSelected;
     private Menu menu;
     public Person you;
@@ -93,6 +99,7 @@ public class HumbugActivity extends Activity {
     };
 
     /** Called when the activity is first created. */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -199,6 +206,36 @@ public class HumbugActivity extends Activity {
         });
 
         this.startRequests();
+
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
+                R.drawable.ic_drawer, R.string.streams_open,
+                R.string.streams_close) {
+
+            /** Called when a drawer has settled in a completely closed state. */
+            public void onDrawerClosed(View view) {
+                // pass
+            }
+
+            /** Called when a drawer has settled in a completely open state. */
+            public void onDrawerOpened(View drawerView) {
+                // pass
+            }
+        };
+
+        // Set the drawer toggle as the DrawerListener
+        drawerLayout.setDrawerListener(drawerToggle);
+
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setHomeButtonEnabled(true);
+
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        // Sync the toggle state after onRestoreInstanceState has occurred.
+        drawerToggle.syncState();
     }
 
     public boolean onPrepareOptionsMenu(Menu menu) {
@@ -224,6 +261,12 @@ public class HumbugActivity extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        // Pass the event to ActionBarDrawerToggle, if it returns
+        // true, then it has handled the app icon touch event
+        if (drawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
+
         // Handle item selection
         switch (item.getItemId()) {
         case R.id.compose_stream:
@@ -475,6 +518,8 @@ public class HumbugActivity extends Activity {
 
         // our display has changed, lets recalculate the spacer
         this.size_bottom_spacer();
+
+        drawerToggle.onConfigurationChanged(newConfig);
     }
 
     protected void onPause() {
