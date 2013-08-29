@@ -104,9 +104,16 @@ public class Message {
      */
     public Message(ZulipApp app, JSONObject message) throws JSONException {
 
-        this.setSender(new Person(message.getString("sender_full_name"),
-                message.getString("sender_email"), message
-                        .getString("avatar_url")));
+        Person sender = new Person(message.getString("sender_full_name"),
+                message.getString("sender_email"),
+                message.getString("avatar_url"));
+        try {
+            app.getDao(Person.class).createOrUpdate(sender);
+        } catch (SQLException e2) {
+            // TODO Auto-generated catch block
+            e2.printStackTrace();
+        }
+        this.setSender(sender);
 
         if (message.getString("type").equals("stream")) {
             this.setType(MessageType.STREAM_MESSAGE);
@@ -120,7 +127,10 @@ public class Message {
                 if (this.getStream() == null) {
                     Log.w("message",
                             "We received a stream message for a stream we don't have data for. Fake it until you make it.");
-                    setStream(new Stream(message.getString("display_recipient")));
+                    Stream newStream = new Stream(
+                            message.getString("display_recipient"));
+                    app.getDao(Stream.class).createIfNotExists(newStream);
+                    setStream(newStream);
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
