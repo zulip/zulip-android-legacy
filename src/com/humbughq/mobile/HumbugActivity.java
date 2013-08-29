@@ -76,6 +76,22 @@ public class HumbugActivity extends Activity {
 
     private AsyncGetEvents event_poll;
 
+    private OnItemClickListener tileClickListener = new OnItemClickListener() {
+
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position,
+                long id) {
+            try {
+                openCompose((Message) parent.getItemAtPosition(position));
+            } catch (IndexOutOfBoundsException e) {
+                // We can ignore this because its probably before the data
+                // has been fetched.
+            }
+
+        }
+
+    };
+
     /** Called when the activity is first created. */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -155,21 +171,7 @@ public class HumbugActivity extends Activity {
             }
         });
 
-        listView.setOnItemClickListener(new OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view,
-                    int position, long id) {
-                try {
-                    openCompose(adapter.getItem(position));
-                } catch (IndexOutOfBoundsException e) {
-                    // We can ignore this because its probably before the data
-                    // has been fetched.
-                }
-
-            }
-
-        });
+        listView.setOnItemClickListener(tileClickListener);
         listView.setOnItemSelectedListener(new OnItemSelectedListener() {
 
             @Override
