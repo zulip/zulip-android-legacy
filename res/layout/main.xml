@@ -15,6 +15,13 @@
 	        android:layout_width="match_parent"
 	        android:layout_height="fill_parent" >
 	    </ListView>
+	    <ListView
+            android:id="@+id/narrowed_listview"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:background="#f0f8ff"
+            android:visibility="gone" />
+
         <TextView
             android:id="@+id/listFYI"
             android:layout_width="match_parent"

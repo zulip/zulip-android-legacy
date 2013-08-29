@@ -43,6 +43,7 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.humbughq.mobile.HumbugAsyncPushTask.AsyncTaskCompleteListener;
 import com.j256.ormlite.android.AndroidDatabaseResults;
@@ -58,6 +59,7 @@ public class HumbugActivity extends Activity {
 
     SparseArray<Message> messageIndex;
     MessageAdapter adapter;
+    MessageAdapter narrowedAdapter;
 
     public enum LoadPosition {
         ABOVE, BELOW, NEW, INITIAL,
@@ -91,6 +93,8 @@ public class HumbugActivity extends Activity {
     protected HashMap<String, Bitmap> gravatars = new HashMap<String, Bitmap>();
 
     private AsyncGetEvents event_poll;
+
+    private ListView narrowedListView;
 
     private OnItemClickListener tileClickListener = new OnItemClickListener() {
 
@@ -128,6 +132,8 @@ public class HumbugActivity extends Activity {
 
     };
 
+    private NarrowFilter narrowFilter;
+
     /** Called when the activity is first created. */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     @Override
@@ -153,10 +159,12 @@ public class HumbugActivity extends Activity {
 
         setContentView(R.layout.main);
         listView = (ListView) findViewById(R.id.listview);
+        narrowedListView = (ListView) findViewById(R.id.narrowed_listview);
 
         this.bottom_list_spacer = new ImageView(this);
         this.size_bottom_spacer();
         listView.addFooterView(this.bottom_list_spacer);
+        narrowedListView.addFooterView(this.bottom_list_spacer);
 
         listView.setEmptyView(findViewById(R.id.listFYI));
 
@@ -289,9 +297,112 @@ public class HumbugActivity extends Activity {
             e.printStackTrace();
         }
 
+        streamsDrawer.setOnItemClickListener(new OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view,
+                    int position, long id) {
+                try {
+                    narrow(app.getDao(Stream.class).queryForId(
+                            ((TextView) view.findViewById(R.id.name)).getText()
+                                    + ""));
+                } catch (SQLException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+
+            }
+
+        });
+
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
 
+    }
+
+    protected void narrow(final Stream stream) {
+        Dao<Message, Integer> messageDao = app.getDao(Message.class);
+
+        try {
+            final SelectArg streamName = new SelectArg();
+
+            NarrowFilter streamNarrow = new NarrowFilter() {
+                @Override
+                public Where<Message, Object> modWhere(
+                        Where<Message, Object> where) throws SQLException {
+                    where.eq(Message.STREAM_FIELD, streamName);
+
+                    streamName.setValue(stream.getName());
+                    return where;
+                }
+
+                @Override
+                public boolean matches(Message msg) {
+                    return msg.getType() == MessageType.STREAM_MESSAGE
+                            && msg.getStream().equals(stream);
+                }
+
+                @Override
+                public String getTitle() {
+                    return stream.getName();
+                }
+
+                @Override
+                public String getSubtitle() {
+                    return null;
+                }
+            };
+
+            doNarrow(streamNarrow);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    private void doNarrow(NarrowFilter filter) throws SQLException {
+        Where<Message, Object> filteredWhere = filter.modWhere(app
+                .getDao(Message.class).queryBuilder().where());
+        List<Message> messages = filteredWhere.query();
+
+        this.narrowedAdapter = new MessageAdapter(this, messages);
+        this.narrowedListView.setAdapter(this.narrowedAdapter);
+        this.narrowFilter = filter;
+
+        filteredWhere.and().le(Message.TIMESTAMP_FIELD,
+                this.getMessageById(app.pointer).getTimestamp());
+
+        QueryBuilder<Message, Object> closestQuery = app.getDao(Message.class)
+                .queryBuilder();
+
+        closestQuery.orderBy(Message.TIMESTAMP_FIELD, false).setWhere(
+                filteredWhere);
+        this.narrowedListView.setSelection(this.narrowedAdapter
+                .getPosition(closestQuery.queryForFirst()));
+        this.listView.setVisibility(View.GONE);
+        this.narrowedListView.setVisibility(View.VISIBLE);
+
+        String title = filter.getTitle();
+        if (title != null) {
+            getActionBar().setTitle(title);
+        }
+        getActionBar().setSubtitle(filter.getSubtitle());
+        this.narrowedListView.setOnItemClickListener(tileClickListener);
+        this.drawerToggle.setDrawerIndicatorEnabled(false);
+        this.drawerLayout.closeDrawers();
+
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    private void doUnnarrow() {
+        this.narrowedAdapter.clear();
+        this.narrowedListView.setVisibility(View.GONE);
+        this.listView.setVisibility(View.VISIBLE);
+        this.drawerToggle.setDrawerIndicatorEnabled(true);
+        getActionBar().setTitle("Zulip");
+        getActionBar().setSubtitle(null);
+        this.narrowFilter = null;
     }
 
     @Override
@@ -332,6 +443,9 @@ public class HumbugActivity extends Activity {
 
         // Handle item selection
         switch (item.getItemId()) {
+        case android.R.id.home:
+            doUnnarrow();
+            break;
         case R.id.compose_stream:
             openCompose(MessageType.STREAM_MESSAGE);
             break;
@@ -720,6 +834,16 @@ public class HumbugActivity extends Activity {
             if (stream == null || stream.getInHomeView()) {
                 if (pos == LoadPosition.NEW || pos == LoadPosition.BELOW) {
                     this.adapter.add(message);
+
+                    if (this.narrowFilter != null) {
+                        // For some reason calling adapter.add above shows the
+                        // main message list. Lets explicitly re-hide it here.
+                        this.listView.setVisibility(View.GONE);
+
+                        if (this.narrowFilter.matches(message)) {
+                            this.narrowedAdapter.add(message);
+                        }
+                    }
                 } else if (pos == LoadPosition.ABOVE
                         || pos == LoadPosition.INITIAL) {
                     Log.i("onMessages", "Inserting at " + i);
