@@ -33,7 +33,7 @@ public class Message {
     public static final String RECIPIENTS_FIELD = "recipients";
     public static final String STREAM_FIELD = "stream";
 
-    @DatabaseField(foreign = true, columnName = SENDER_FIELD)
+    @DatabaseField(foreign = true, columnName = SENDER_FIELD, foreignAutoRefresh = true)
     private Person sender;
     @DatabaseField(columnName = TYPE_FIELD)
     private MessageType type;
@@ -47,7 +47,7 @@ public class Message {
     private ForeignCollection<MessagePerson> recipients;
     @DatabaseField(id = true)
     private int id;
-    @DatabaseField(foreign = true, columnName = STREAM_FIELD)
+    @DatabaseField(foreign = true, columnName = STREAM_FIELD, foreignAutoRefresh = true)
     private Stream stream;
 
     /**
