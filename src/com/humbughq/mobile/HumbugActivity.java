@@ -128,6 +128,8 @@ public class HumbugActivity extends Activity {
         this.size_bottom_spacer();
         listView.addFooterView(this.bottom_list_spacer);
 
+        listView.setEmptyView(findViewById(R.id.listFYI));
+
         adapter = new MessageAdapter(this, new ArrayList<Message>());
         listView.setAdapter(adapter);
 

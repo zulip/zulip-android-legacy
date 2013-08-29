@@ -13,13 +13,17 @@
 	    <ListView
 	        android:id="@+id/listview"
 	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content" >
+	        android:layout_height="fill_parent" >
 	    </ListView>
-	    <ProgressBar
-	        android:id="@+id/progressBar1"
-	        style="?android:attr/progressBarStyleLarge"
-	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/listFYI"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:paddingLeft="10dp"
+            android:paddingTop="10dp"
+            android:text="Loading messages from Zulip..."
+            android:visibility="gone"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
     </LinearLayout>
     <!-- The navigation drawer -->
     <ListView android:id="@+id/streams_drawer"
