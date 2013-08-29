@@ -1,5 +1,7 @@
 package com.humbughq.mobile;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -94,5 +96,25 @@ public class Stream {
             color = "#" + r + r + g + g + b + b;
         }
         return Color.parseColor(color);
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 31).append(name).toHashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (obj == this) {
+            return true;
+        }
+        if (obj.getClass() != getClass()) {
+            return false;
+        }
+        Stream rhs = (Stream) obj;
+        return new EqualsBuilder().append(this.name, rhs.name).isEquals();
     }
 }

@@ -7,6 +7,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.TimeZone;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -170,6 +172,30 @@ public class Message {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+    }
+
+    public int hashCode() {
+        return new HashCodeBuilder(17, 31).append(sender).append(type)
+                .append(content).append(subject).append(timestamp).append(id)
+                .append(stream).toHashCode();
+    }
+
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof Message)) {
+            return false;
+        }
+        Message msg = (Message) obj;
+
+        return new EqualsBuilder().append(sender, msg.sender)
+                .append(type, msg.type).append(content, msg.content)
+                .append(subject, msg.subject).append(timestamp, msg.timestamp)
+                .append(id, msg.id).append(stream, msg.stream).isEquals();
     }
 
     public MessageType getType() {

@@ -1,5 +1,7 @@
 package com.humbughq.mobile;
 
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 import com.j256.ormlite.dao.ForeignCollection;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.ForeignCollectionField;
@@ -78,16 +80,23 @@ public class Person {
         return split_email[split_email.length - 1];
     }
 
-    public boolean equals(Person obj) {
-        return (this.name.equals(obj.getName()) && this.email.equals(obj
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof Person)) {
+            return false;
+        }
+        Person per = (Person) obj;
+        return (this.name.equals(per.getName()) && this.email.equals(per
                 .getEmail()));
     }
 
     public int hashCode() {
-        // Joshua Bloch's standard recipe
-        int result = 17;
-        result = 31 * result + name.hashCode();
-        result = 31 * result + email.hashCode();
-        return result;
+        return new HashCodeBuilder(17, 31).append(name).append(email)
+                .toHashCode();
     }
 }
