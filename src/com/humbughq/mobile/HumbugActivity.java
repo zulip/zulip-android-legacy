@@ -1,7 +1,9 @@
 package com.humbughq.mobile;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -12,11 +14,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.PorterDuff.Mode;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.ContextMenu;
@@ -40,6 +45,11 @@ import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.humbughq.mobile.HumbugAsyncPushTask.AsyncTaskCompleteListener;
+import com.j256.ormlite.android.AndroidDatabaseResults;
+import com.j256.ormlite.dao.Dao;
+import com.j256.ormlite.stmt.QueryBuilder;
+import com.j256.ormlite.stmt.SelectArg;
+import com.j256.ormlite.stmt.Where;
 
 public class HumbugActivity extends Activity {
     ZulipApp app;
@@ -94,6 +104,26 @@ public class HumbugActivity extends Activity {
                 // has been fetched.
             }
 
+        }
+
+    };
+
+    private SimpleCursorAdapter.ViewBinder streamBinder = new SimpleCursorAdapter.ViewBinder() {
+
+        @Override
+        public boolean setViewValue(View arg0, Cursor arg1, int arg2) {
+            switch (arg0.getId()) {
+            case R.id.name:
+                TextView name = (TextView) arg0;
+                name.setText(arg1.getString(arg2));
+                return true;
+            case R.id.stream_dot:
+                // Set the color of the (currently white) dot
+                arg0.getBackground().setColorFilter(arg1.getInt(arg2),
+                        Mode.MULTIPLY);
+                return true;
+            }
+            return false;
         }
 
     };
@@ -227,6 +257,37 @@ public class HumbugActivity extends Activity {
 
         // Set the drawer toggle as the DrawerListener
         drawerLayout.setDrawerListener(drawerToggle);
+
+        ListView streamsDrawer = (ListView) findViewById(R.id.streams_drawer);
+        ListView peopleDrawer = (ListView) findViewById(R.id.people_drawer);
+        try {
+            SimpleCursorAdapter streamsAdapter = new SimpleCursorAdapter(
+                    this.getApplicationContext(), R.layout.stream_tile,
+                    ((AndroidDatabaseResults) app.getDao(Stream.class)
+                            .queryBuilder().selectRaw("rowid _id", "*")
+                            .orderBy(Stream.NAME_FIELD, true).queryRaw()
+                            .closeableIterator().getRawResults())
+                            .getRawCursor(), new String[] { Stream.NAME_FIELD,
+                            Stream.COLOR_FIELD }, new int[] { R.id.name,
+                            R.id.stream_dot }, 0);
+            streamsAdapter.setViewBinder(streamBinder);
+            streamsDrawer.setAdapter(streamsAdapter);
+
+            SimpleCursorAdapter peopleAdapter = new SimpleCursorAdapter(
+                    this.getApplicationContext(), R.layout.stream_tile,
+                    ((AndroidDatabaseResults) app.getDao(Person.class)
+                            .queryBuilder().selectRaw("rowid _id", "*")
+                            .orderBy(Person.NAME_FIELD, true).queryRaw()
+                            .closeableIterator().getRawResults())
+                            .getRawCursor(),
+                    new String[] { Person.NAME_FIELD },
+                    new int[] { R.id.name }, 0);
+
+            peopleDrawer.setAdapter(peopleAdapter);
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
