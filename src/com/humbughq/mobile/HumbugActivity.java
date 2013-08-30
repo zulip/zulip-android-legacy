@@ -478,6 +478,8 @@ public class HumbugActivity extends Activity {
         case R.id.refresh:
             Log.w("menu", "Refreshed manually by user. We shouldn't need this.");
             onRefresh();
+            ((RefreshableCursorAdapter) ((ListView) findViewById(R.id.streams_drawer))
+                    .getAdapter()).refresh();
             break;
         case R.id.logout:
             logout();
