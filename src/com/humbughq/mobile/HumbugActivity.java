@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -133,6 +134,10 @@ public class HumbugActivity extends Activity {
     };
 
     private NarrowFilter narrowFilter;
+
+    protected RefreshableCursorAdapter streamsAdapter;
+
+    protected RefreshableCursorAdapter peopleAdapter;
 
     /** Called when the activity is first created. */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
@@ -268,31 +273,49 @@ public class HumbugActivity extends Activity {
 
         ListView streamsDrawer = (ListView) findViewById(R.id.streams_drawer);
         ListView peopleDrawer = (ListView) findViewById(R.id.people_drawer);
+
+        Callable<Cursor> streamsGenerator = new Callable<Cursor>() {
+            @Override
+            public Cursor call() throws Exception {
+                return ((AndroidDatabaseResults) app.getDao(Stream.class)
+                        .queryBuilder().selectRaw("rowid _id", "*")
+                        .orderBy(Stream.NAME_FIELD, true).queryRaw()
+                        .closeableIterator().getRawResults()).getRawCursor();
+            }
+        };
+
+        Callable<Cursor> peopleGenerator = new Callable<Cursor>() {
+
+            @Override
+            public Cursor call() throws Exception {
+                // TODO Auto-generated method stub
+                return ((AndroidDatabaseResults) app.getDao(Person.class)
+                        .queryBuilder().selectRaw("rowid _id", "*")
+                        .orderBy(Person.NAME_FIELD, true).queryRaw()
+                        .closeableIterator().getRawResults()).getRawCursor();
+            }
+
+        };
         try {
-            SimpleCursorAdapter streamsAdapter = new SimpleCursorAdapter(
+            this.streamsAdapter = new RefreshableCursorAdapter(
                     this.getApplicationContext(), R.layout.stream_tile,
-                    ((AndroidDatabaseResults) app.getDao(Stream.class)
-                            .queryBuilder().selectRaw("rowid _id", "*")
-                            .orderBy(Stream.NAME_FIELD, true).queryRaw()
-                            .closeableIterator().getRawResults())
-                            .getRawCursor(), new String[] { Stream.NAME_FIELD,
-                            Stream.COLOR_FIELD }, new int[] { R.id.name,
-                            R.id.stream_dot }, 0);
+                    streamsGenerator.call(), streamsGenerator, new String[] {
+                            Stream.NAME_FIELD, Stream.COLOR_FIELD }, new int[] {
+                            R.id.name, R.id.stream_dot }, 0);
             streamsAdapter.setViewBinder(streamBinder);
             streamsDrawer.setAdapter(streamsAdapter);
 
-            SimpleCursorAdapter peopleAdapter = new SimpleCursorAdapter(
+            this.peopleAdapter = new RefreshableCursorAdapter(
                     this.getApplicationContext(), R.layout.stream_tile,
-                    ((AndroidDatabaseResults) app.getDao(Person.class)
-                            .queryBuilder().selectRaw("rowid _id", "*")
-                            .orderBy(Person.NAME_FIELD, true).queryRaw()
-                            .closeableIterator().getRawResults())
-                            .getRawCursor(),
+                    peopleGenerator.call(), peopleGenerator,
                     new String[] { Person.NAME_FIELD },
                     new int[] { R.id.name }, 0);
 
             peopleDrawer.setAdapter(peopleAdapter);
         } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
