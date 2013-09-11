@@ -325,17 +325,10 @@ public class HumbugActivity extends Activity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
                     int position, long id) {
-                try {
-                    narrow(app.getDao(Stream.class).queryForId(
-                            ((TextView) view.findViewById(R.id.name)).getText()
-                                    + ""));
-                } catch (SQLException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-
+                // TODO: is there a way to get the Stream from the adapter
+                // without re-querying it?
+                narrow(Stream.getById(app, (int) id));
             }
-
         });
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -347,15 +340,15 @@ public class HumbugActivity extends Activity {
         Dao<Message, Integer> messageDao = app.getDao(Message.class);
 
         try {
-            final SelectArg streamName = new SelectArg();
+            final SelectArg streamArg = new SelectArg();
 
             NarrowFilter streamNarrow = new NarrowFilter() {
                 @Override
                 public Where<Message, Object> modWhere(
                         Where<Message, Object> where) throws SQLException {
-                    where.eq(Message.STREAM_FIELD, streamName);
+                    where.eq(Message.STREAM_FIELD, streamArg);
 
-                    streamName.setValue(stream.getName());
+                    streamArg.setValue(stream);
                     return where;
                 }
 

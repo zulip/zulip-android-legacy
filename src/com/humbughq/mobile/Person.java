@@ -10,16 +10,19 @@ import com.j256.ormlite.table.DatabaseTable;
 @DatabaseTable(tableName = "people")
 public class Person {
 
+    public static final String ID_FIELD = "id";
     public static final String NAME_FIELD = "name";
     public static final String MESSAGESPARTICIPATEDIN_FIELD = "messagesParticipatedIn";
     public static final String EMAIL_FIELD = "email";
     public static final String AVATARURL_FIELD = "avatarUrl";
 
+    @DatabaseField(columnName = ID_FIELD, generatedId = true)
+    private int id;
     @DatabaseField(columnName = NAME_FIELD)
     private String name;
     @ForeignCollectionField(columnName = MESSAGESPARTICIPATEDIN_FIELD)
     private ForeignCollection<MessagePerson> messagesParticipatedIn;
-    @DatabaseField(columnName = EMAIL_FIELD, id = true)
+    @DatabaseField(columnName = EMAIL_FIELD)
     private String email;
     @DatabaseField(columnName = AVATARURL_FIELD)
     private String avatarURL;

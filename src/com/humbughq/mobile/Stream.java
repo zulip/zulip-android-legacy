@@ -20,13 +20,16 @@ import com.j256.ormlite.table.DatabaseTable;
 public class Stream {
     public static final int DEFAULT_COLOR = Color.GRAY;
 
+    public static final String ID_FIELD = "id";
     public static final String NAME_FIELD = "name";
     public static final String MESSAGES_FIELD = "messages";
     public static final String COLOR_FIELD = "color";
     public static final String INHOMEVIEW_FIELD = "inHomeView";
     public static final String INVITEONLY_FIELD = "inviteOnly";
 
-    @DatabaseField(columnName = NAME_FIELD, id = true)
+    @DatabaseField(columnName = ID_FIELD, generatedId = true)
+    private int id;
+    @DatabaseField(columnName = NAME_FIELD, uniqueIndex = true)
     private String name;
     @ForeignCollectionField(columnName = MESSAGES_FIELD)
     private ForeignCollection<Message> messages;
@@ -144,4 +147,15 @@ public class Stream {
         return stream;
     }
 
+    static Stream getById(ZulipApp app, int id) {
+        try {
+            Dao<Stream, Integer> streams = app.getDatabaseHelper().getDao(
+                    Stream.class);
+            return streams.queryForId(id);
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return null;
+        }
+    }
 }
