@@ -16,7 +16,6 @@ import org.json.JSONObject;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.ForeignCollection;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.ForeignCollectionField;
@@ -118,24 +117,9 @@ public class Message {
         if (message.getString("type").equals("stream")) {
             this.setType(MessageType.STREAM_MESSAGE);
 
-            try {
-                Dao<Stream, String> streams = app.getDatabaseHelper().getDao(
-                        Stream.class);
-                setStream(streams.queryForId(message
-                        .getString("display_recipient")));
+            setStream(Stream.getByName(app,
+                    message.getString("display_recipient")));
 
-                if (this.getStream() == null) {
-                    Log.w("message",
-                            "We received a stream message for a stream we don't have data for. Fake it until you make it.");
-                    Stream newStream = new Stream(
-                            message.getString("display_recipient"));
-                    app.getDao(Stream.class).createIfNotExists(newStream);
-                    setStream(newStream);
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-
-            }
         } else if (message.getString("type").equals("private")) {
             this.setType(MessageType.PRIVATE_MESSAGE);
 

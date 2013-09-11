@@ -1,12 +1,16 @@
 package com.humbughq.mobile;
 
+import java.sql.SQLException;
+
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.graphics.Color;
+import android.util.Log;
 
+import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.ForeignCollection;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.ForeignCollectionField;
@@ -117,4 +121,27 @@ public class Stream {
         Stream rhs = (Stream) obj;
         return new EqualsBuilder().append(this.name, rhs.name).isEquals();
     }
+
+    static Stream getByName(ZulipApp app, String name) {
+        Stream stream = null;
+        try {
+            Dao<Stream, String> streams = app.getDatabaseHelper().getDao(
+                    Stream.class);
+            stream = streams.queryBuilder().where().eq(Stream.NAME_FIELD, name)
+                    .queryForFirst();
+
+            if (stream == null) {
+                Log.w("Stream.getByName",
+                        "We received a stream message for a stream we don't have data for. Fake it until you make it.");
+                stream = new Stream(name);
+                app.getDao(Stream.class).createIfNotExists(stream);
+            }
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return stream;
+    }
+
 }
