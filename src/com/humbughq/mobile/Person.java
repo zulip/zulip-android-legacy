@@ -25,7 +25,7 @@ public class Person {
     private String name;
     @ForeignCollectionField(columnName = MESSAGESPARTICIPATEDIN_FIELD)
     private ForeignCollection<MessagePerson> messagesParticipatedIn;
-    @DatabaseField(columnName = EMAIL_FIELD)
+    @DatabaseField(columnName = EMAIL_FIELD, uniqueIndex = true)
     private String email;
     @DatabaseField(columnName = AVATARURL_FIELD)
     private String avatarURL;

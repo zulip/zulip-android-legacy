@@ -102,17 +102,11 @@ public class Message {
      * @throws JSONException
      */
     public Message(ZulipApp app, JSONObject message) throws JSONException {
-
-        Person sender = new Person(message.getString("sender_full_name"),
+        this.setID(message.getInt("id"));
+        this.setSender(Person.getOrUpdate(app,
                 message.getString("sender_email"),
-                message.getString("avatar_url"));
-        try {
-            app.getDao(Person.class).createOrUpdate(sender);
-        } catch (SQLException e2) {
-            // TODO Auto-generated catch block
-            e2.printStackTrace();
-        }
-        this.setSender(sender);
+                message.getString("sender_full_name"),
+                message.getString("avatar_url")));
 
         if (message.getString("type").equals("stream")) {
             this.setType(MessageType.STREAM_MESSAGE);
@@ -143,8 +137,9 @@ public class Message {
                 // If you sent a message to yourself, we still show your as the
                 // other party.
                         jsonRecipients.length() == 1) {
-                    recipients.add(new MessagePerson(this, new Person(obj
-                            .getString("full_name"), obj.getString("email"))));
+                    recipients.add(new MessagePerson(this, Person.getOrUpdate(
+                            app, obj.getString("email"),
+                            obj.getString("full_name"), null)));
                     j++;
                 }
             }
@@ -158,7 +153,6 @@ public class Message {
         }
 
         this.setTimestamp(new Date(message.getLong("timestamp") * 1000));
-        this.setID(message.getInt("id"));
         try {
             app.getDatabaseHelper().getDao(Message.class)
                     .createIfNotExists(this);
