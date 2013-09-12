@@ -1,7 +1,10 @@
 package com.humbughq.mobile;
 
+import java.sql.SQLException;
+
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
+import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.ForeignCollection;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.ForeignCollectionField;
@@ -101,5 +104,44 @@ public class Person {
     public int hashCode() {
         return new HashCodeBuilder(17, 31).append(name).append(email)
                 .toHashCode();
+    }
+
+    static Person getByEmail(ZulipApp app, String email) {
+        try {
+            Dao<Person, Integer> dao = app.getDatabaseHelper().getDao(
+                    Person.class);
+            return dao.queryBuilder().where().eq(Person.EMAIL_FIELD, email)
+                    .queryForFirst();
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    static Person getOrUpdate(ZulipApp app, String email, String name,
+            String avatarURL) {
+        Person person = getByEmail(app, email);
+        if (person == null) {
+            person = new Person(name, email, avatarURL);
+            try {
+                app.getDao(Person.class).create(person);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return person;
+    }
+
+    public static Person getById(ZulipApp app, int id) {
+        try {
+            Dao<Person, Integer> dao = app.getDatabaseHelper().getDao(
+                    Person.class);
+            return dao.queryForId(id);
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return null;
+        }
     }
 }
