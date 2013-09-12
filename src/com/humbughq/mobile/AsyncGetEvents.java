@@ -151,7 +151,8 @@ public class AsyncGetEvents extends Thread {
             Log.i("stream", "" + subscriptions.length() + " streams");
 
             for (int i = 0; i < subscriptions.length(); i++) {
-                Stream stream = new Stream(subscriptions.getJSONObject(i));
+                Stream stream = Stream.getFromJSON(app,
+                        subscriptions.getJSONObject(i));
                 Log.i("stream", "" + stream);
 
                 try {

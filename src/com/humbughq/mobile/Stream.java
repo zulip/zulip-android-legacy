@@ -41,21 +41,6 @@ public class Stream {
     private Boolean inviteOnly;
 
     /**
-     * Construct a new Stream from JSON returned by the server.
-     * 
-     * @param message
-     *            The JSON object parsed from the server's output
-     * @throws JSONException
-     *             Thrown if the JSON provided is malformed.
-     */
-    public Stream(JSONObject message) throws JSONException {
-        name = message.getString("name");
-        color = parseColor(message.getString("color"));
-        inHomeView = message.getBoolean("in_home_view");
-        inviteOnly = message.getBoolean("invite_only");
-    }
-
-    /**
      * Construct an empty Stream object.
      */
     public Stream() {
@@ -157,5 +142,25 @@ public class Stream {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public void updateFromJSON(JSONObject message) throws JSONException {
+        color = parseColor(message.getString("color"));
+        inHomeView = message.getBoolean("in_home_view");
+        inviteOnly = message.getBoolean("invite_only");
+    }
+
+    static Stream getFromJSON(ZulipApp app, JSONObject message)
+            throws JSONException {
+        String name = message.getString("name");
+        Stream stream = getByName(app, name);
+        stream.updateFromJSON(message);
+        try {
+            app.getDao(Stream.class).update(stream);
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return stream;
     }
 }
