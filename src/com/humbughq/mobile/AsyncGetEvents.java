@@ -145,6 +145,8 @@ public class AsyncGetEvents extends Thread {
             app.pointer = response.getInt("pointer");
             app.max_message_id = response.getInt("max_message_id");
 
+            activity.populateCurrentRange();
+
             // Get subscriptions
             JSONArray subscriptions = response.getJSONArray("subscriptions");
             Dao<Stream, String> streamDao = this.app.getDao(Stream.class);
@@ -207,10 +209,14 @@ public class AsyncGetEvents extends Thread {
     }
 
     protected void onMessage(JSONObject m) throws JSONException {
-        Message message = new Message(this.app, m);
+        final Message message = new Message(this.app, m);
         try {
             Dao<Message, Integer> messages = this.app.getDao(Message.class);
             messages.createOrUpdate(message);
+            if (this.activity.currentRange.high <= message.getID()) {
+                this.app.getDao(MessageRange.class).createOrUpdate(
+                        this.activity.currentRange);
+            }
         } catch (SQLException e) {
             // Awkward. (TODO)
             e.printStackTrace();

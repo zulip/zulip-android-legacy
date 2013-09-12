@@ -44,6 +44,7 @@ import android.widget.TextView;
 
 import com.humbughq.mobile.HumbugAsyncPushTask.AsyncTaskCompleteListener;
 import com.j256.ormlite.android.AndroidDatabaseResults;
+import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.stmt.SelectArg;
 import com.j256.ormlite.stmt.Where;
@@ -143,6 +144,8 @@ public class HumbugActivity extends FragmentActivity {
 
     View loadIndicatorTop;
     View loadIndicatorBottom;
+
+    protected MessageRange currentRange;
 
     /** Called when the activity is first created. */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
@@ -798,10 +801,13 @@ public class HumbugActivity extends FragmentActivity {
         messageIndex.clear();
 
         lastAvailableMessageId = app.max_message_id;
+        this.populateCurrentRange();
+
         firstMessageId = -1;
         lastMessageId = -1;
 
         AsyncGetOldMessages oldMessagesReq = new AsyncGetOldMessages(this);
+
         oldMessagesReq.execute(app.pointer, LoadPosition.INITIAL, 100, 100);
         oldMessagesReq.setCallback(new AsyncTaskCompleteListener() {
             @Override
@@ -950,5 +956,16 @@ public class HumbugActivity extends FragmentActivity {
 
     public Message getMessageById(int id) {
         return this.messageIndex.get(id);
+    }
+
+    public void populateCurrentRange() {
+        Dao<MessageRange, Integer> messageRangeDao = app
+                .getDao(MessageRange.class);
+        this.currentRange = MessageRange.getRangeContaining(app.pointer,
+                messageRangeDao);
+        if (this.currentRange == null) {
+            this.currentRange = new MessageRange(app.pointer, app.pointer);
+            // Does not get saved until we actually have messages here
+        }
     }
 }
