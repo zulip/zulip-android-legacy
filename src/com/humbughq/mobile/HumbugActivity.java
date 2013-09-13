@@ -69,7 +69,6 @@ public class HumbugActivity extends FragmentActivity {
 
     int firstMessageId = -1;
     int lastMessageId = -1;
-    int lastAvailableMessageId = -1;
     boolean loadingMessages = true;
 
     boolean suspended = false;
@@ -210,7 +209,7 @@ public class HumbugActivity extends FragmentActivity {
                             - near) {
                         Log.i("scroll", "at bottom " + loadingMessages + " "
                                 + listHasMostRecent() + " " + lastMessageId
-                                + " " + lastAvailableMessageId);
+                                + " " + app.getMaxMessageId());
                         // At the bottom of the list
                         if (!listHasMostRecent()) {
                             loadMoreMessages(LoadPosition.BELOW);
@@ -800,8 +799,6 @@ public class HumbugActivity extends FragmentActivity {
         adapter.clear();
         messageIndex.clear();
 
-        lastAvailableMessageId = app.getMaxMessageId();
-
         firstMessageId = -1;
         lastMessageId = -1;
 
@@ -844,13 +841,13 @@ public class HumbugActivity extends FragmentActivity {
             // listHasMostRecent check needs to occur before updating
             // lastAvailableMessageId
             boolean hasMostRecent = listHasMostRecent();
-            lastAvailableMessageId = messages[messages.length - 1].getID();
+            app.setMaxMessageId(messages[messages.length - 1].getID());
             if (!hasMostRecent) {
                 // If we don't have intermediate messages loaded, don't add new
                 // messages -- they'll be loaded when we scroll down.
                 Log.i("onMessage",
                         "skipping new message " + messages[0].getID() + " "
-                                + lastAvailableMessageId);
+                                + app.getMaxMessageId());
                 return;
             }
         }
@@ -912,7 +909,7 @@ public class HumbugActivity extends FragmentActivity {
     }
 
     public Boolean listHasMostRecent() {
-        return lastMessageId == lastAvailableMessageId;
+        return lastMessageId == app.getMaxMessageId();
     }
 
     public void loadMoreMessages(LoadPosition pos) {
