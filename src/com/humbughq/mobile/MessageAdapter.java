@@ -108,12 +108,12 @@ public class MessageAdapter extends ArrayAdapter<Message> {
             URL url = null;
             try {
                 url = new URL(message.getSender().getAvatarURL() + "&s=" + px);
+                GravatarAsyncFetchTask task = new GravatarAsyncFetchTask(
+                        context, gravatar, message.getSender());
+                task.loadBitmap(context, url, gravatar, message.getSender());
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
-            GravatarAsyncFetchTask task = new GravatarAsyncFetchTask(context,
-                    gravatar, message.getSender());
-            task.loadBitmap(context, url, gravatar, message.getSender());
         }
 
         int color;
