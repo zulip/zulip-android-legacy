@@ -610,7 +610,7 @@ public class HumbugActivity extends Activity {
                 subject.setText(msg.getSubject());
             } else if (msg.getType() == MessageType.PRIVATE_MESSAGE
                     && !to_sender) {
-                recipient.setText(msg.getReplyTo());
+                recipient.setText(msg.getReplyTo(app));
             } else {
                 recipient.setText(msg.getSender().getEmail());
             }
@@ -767,7 +767,7 @@ public class HumbugActivity extends Activity {
         if (msg.getType().equals(MessageType.STREAM_MESSAGE)) {
             MenuInflater inflater = getMenuInflater();
             inflater.inflate(R.menu.context_stream, menu);
-        } else if (msg.getPersonalReplyTo().length > 1) {
+        } else if (msg.getPersonalReplyTo(app).length > 1) {
             MenuInflater inflater = getMenuInflater();
             inflater.inflate(R.menu.context_private, menu);
         } else {

@@ -19,7 +19,7 @@ public class AsyncSend extends HumbugAsyncPushTask {
             this.setProperty("to", msg.getStream().getName());
         } else {
             JSONArray arr = new JSONArray();
-            for (Person recipient : msg.getPersonalReplyTo()) {
+            for (Person recipient : msg.getPersonalReplyTo(humbugActivity.app)) {
                 arr.put(recipient.getEmail());
             }
             this.setProperty("to", arr.toString());

@@ -64,10 +64,10 @@ public class MessageAdapter extends ArrayAdapter<Message> {
 
         if (message.getType() != MessageType.STREAM_MESSAGE) {
             display_recipient.setText(context.getString(R.string.huddle_text)
-                    + " " + message.getDisplayRecipient());
+                    + " " + message.getDisplayRecipient(context.app));
             display_recipient.setTextColor(Color.WHITE);
         } else {
-            display_recipient.setText(message.getDisplayRecipient());
+            display_recipient.setText(message.getDisplayRecipient(context.app));
             display_recipient.setTextColor(Color.BLACK);
         }
 

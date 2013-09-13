@@ -5,9 +5,7 @@ import java.sql.SQLException;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import com.j256.ormlite.dao.Dao;
-import com.j256.ormlite.dao.ForeignCollection;
 import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.table.DatabaseTable;
 
 @DatabaseTable(tableName = "people")
@@ -20,11 +18,9 @@ public class Person {
     public static final String AVATARURL_FIELD = "avatarUrl";
 
     @DatabaseField(columnName = ID_FIELD, generatedId = true)
-    private int id;
+    protected int id;
     @DatabaseField(columnName = NAME_FIELD)
     private String name;
-    @ForeignCollectionField(columnName = MESSAGESPARTICIPATEDIN_FIELD)
-    private ForeignCollection<MessagePerson> messagesParticipatedIn;
     @DatabaseField(columnName = EMAIL_FIELD, uniqueIndex = true)
     private String email;
     @DatabaseField(columnName = AVATARURL_FIELD)

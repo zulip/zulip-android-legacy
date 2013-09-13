@@ -3,7 +3,8 @@ package com.humbughq.mobile;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -14,11 +15,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.text.TextUtils;
-import android.util.Log;
 
-import com.j256.ormlite.dao.ForeignCollection;
 import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.table.DatabaseTable;
 
 @DatabaseTable(tableName = "messages")
@@ -42,8 +40,9 @@ public class Message {
     private String subject;
     @DatabaseField(columnName = TIMESTAMP_FIELD)
     private Date timestamp;
-    @ForeignCollectionField(columnName = RECIPIENTS_FIELD, eager = true)
-    private ForeignCollection<MessagePerson> recipients;
+    @DatabaseField(columnName = RECIPIENTS_FIELD, index = true)
+    private String recipients;
+    private Person[] recipientsCache;
     @DatabaseField(id = true)
     private int id;
     @DatabaseField(foreign = true, columnName = STREAM_FIELD, foreignAutoRefresh = true)
@@ -57,38 +56,15 @@ public class Message {
     }
 
     public Message(ZulipApp app) {
-        try {
-            recipients = app.getDatabaseHelper().getDao(Message.class)
-                    .getEmptyForeignCollection(RECIPIENTS_FIELD);
-        } catch (SQLException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
     }
 
-    /**
-     * Convenience function to return either the Recipient specified or the
-     * sender of the message as appropriate.
-     * 
-     * @param you
-     * 
-     * @param other
-     *            a Recipient object you want to analyse
-     * @return Either the specified Recipient's full name, or the sender's name
-     *         if you are the Recipient.
-     */
-    private boolean getNotYouRecipient(Person you, JSONObject other) {
-        try {
-            if (you != null && !other.getString("email").equals(you.getEmail())) {
-                return true;
-            } else {
-                return false;
-            }
-        } catch (JSONException e) {
-            Log.e("message", "Couldn't parse JSON sender list!");
-            e.printStackTrace();
+    static String recipientList(Person[] recipients) {
+        Integer[] ids = new Integer[recipients.length];
+        for (int i = 0; i < recipients.length; i++) {
+            ids[i] = recipients[i].id;
         }
-        return false;
+        Arrays.sort(ids);
+        return TextUtils.join(",", ids);
     }
 
     /**
@@ -119,30 +95,15 @@ public class Message {
 
             JSONArray jsonRecipients = message
                     .getJSONArray("display_recipient");
-            int display_recipients = jsonRecipients.length() - 1;
-            if (display_recipients == 0) {
-                display_recipients = 1;
-            }
-            try {
-                recipients = app.getDatabaseHelper().getDao(Message.class)
-                        .getEmptyForeignCollection(RECIPIENTS_FIELD);
-            } catch (SQLException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            }
-            for (int i = 0, j = 0; i < jsonRecipients.length(); i++) {
-                JSONObject obj = jsonRecipients.getJSONObject(i);
 
-                if (getNotYouRecipient(app.you, obj) ||
-                // If you sent a message to yourself, we still show your as the
-                // other party.
-                        jsonRecipients.length() == 1) {
-                    recipients.add(new MessagePerson(this, Person.getOrUpdate(
-                            app, obj.getString("email"),
-                            obj.getString("full_name"), null)));
-                    j++;
-                }
+            Person[] r = new Person[jsonRecipients.length()];
+            for (int i = 0; i < jsonRecipients.length(); i++) {
+                JSONObject obj = jsonRecipients.getJSONObject(i);
+                Person person = Person.getOrUpdate(app, obj.getString("email"),
+                        obj.getString("full_name"), null);
+                r[i] = person;
             }
+            recipients = recipientList(r);
         }
 
         this.setContent(message.getString("content"));
@@ -194,11 +155,25 @@ public class Message {
         this.type = streamMessage;
     }
 
-    public void setRecipient(Collection<Person> recipients) {
-        this.recipients.clear();
-        for (Person recipient : recipients) {
-            this.recipients.add(new MessagePerson(this, recipient));
+    public String getRawRecipients() {
+        return recipients;
+    }
+
+    public Person[] getRecipients(ZulipApp app) {
+        if (recipientsCache == null) {
+            String[] ids = TextUtils.split(this.recipients, ",");
+            recipientsCache = new Person[ids.length];
+            for (int i = 0; i < ids.length; i++) {
+                recipientsCache[i] = Person.getById(app,
+                        Integer.parseInt(ids[i]));
+            }
         }
+        return recipientsCache;
+    }
+
+    public void setRecipients(Person[] list) {
+        this.recipientsCache = list;
+        this.recipients = recipientList(list);
     }
 
     /**
@@ -213,22 +188,11 @@ public class Message {
      *            The emails of the recipients.
      */
     public void setRecipient(String[] emails) {
-        this.recipients.clear();
-        for (String email : emails) {
-            this.recipients
-                    .add(new MessagePerson(this, new Person(null, email)));
+        Person[] r = new Person[emails.length];
+        for (int i = 0; i < emails.length; i++) {
+            r[i] = new Person(null, emails[i]);
         }
-    }
-
-    /**
-     * Convenience function to set the recipient in case of a single recipient.
-     * 
-     * @param recipient
-     *            The sole recipient of the message.
-     */
-    public void setRecipient(Person recipient) {
-        assert (this.recipients.remove(null) == true);
-        this.recipients.add(new MessagePerson(this, recipient));
+        setRecipients(r);
     }
 
     /**
@@ -240,16 +204,17 @@ public class Message {
      * @return A String of the names of each Person in recipients[],
      *         comma-separated, or the stream name.
      */
-    public String getDisplayRecipient() {
+    public String getDisplayRecipient(ZulipApp app) {
         if (this.getType() == MessageType.STREAM_MESSAGE) {
             return this.getStream().getName();
         } else {
-            MessagePerson[] recipientsArray = this.recipients
-                    .toArray(new MessagePerson[0]);
-            String[] names = new String[recipientsArray.length];
+            Person[] people = this.getRecipients(app);
+            ArrayList<String> names = new ArrayList<String>();
 
-            for (int i = 0; i < recipientsArray.length; i++) {
-                names[i] = recipientsArray[i].recipient.getName();
+            for (Person person : people) {
+                if (person.id != app.you.id) {
+                    names.add(person.getName());
+                }
             }
             return TextUtils.join(", ", names);
         }
@@ -262,16 +227,20 @@ public class Message {
      * 
      * @return the aforementioned String.
      */
-    public String getReplyTo() {
+    public String getReplyTo(ZulipApp app) {
         if (this.getType() == MessageType.STREAM_MESSAGE) {
             return this.getSender().getEmail();
+        } else {
+            Person[] people = this.getRecipients(app);
+            ArrayList<String> names = new ArrayList<String>();
+
+            for (Person person : people) {
+                if (person.id != app.you.id) {
+                    names.add(person.getEmail());
+                }
+            }
+            return TextUtils.join(", ", names);
         }
-        Person[] people = getPersonalReplyTo();
-        String[] emails = new String[people.length];
-        for (int i = 0; i < people.length; i++) {
-            emails[i] = people[i].getEmail();
-        }
-        return TextUtils.join(", ", emails);
     }
 
     /**
@@ -280,16 +249,16 @@ public class Message {
      * 
      * @return said Person[].
      */
-    public Person[] getPersonalReplyTo() {
-        MessagePerson[] messagePeople = this.recipients
-                .toArray(new MessagePerson[0]);
-        if (messagePeople.length == 0) {
-            throw new WrongMessageType();
+    public Person[] getPersonalReplyTo(ZulipApp app) {
+        Person[] people = this.getRecipients(app);
+        ArrayList<Person> names = new ArrayList<Person>();
+
+        for (Person person : people) {
+            if (person.id != app.you.id) {
+                names.add(person);
+            }
         }
-        Person[] people = new Person[messagePeople.length];
-        for (int i = 0; i < messagePeople.length; i++) {
-            people[i] = messagePeople[i].recipient;
-        }
+
         return people;
     }
 
@@ -346,5 +315,4 @@ public class Message {
     public void setStream(Stream stream) {
         this.stream = stream;
     }
-
 }
