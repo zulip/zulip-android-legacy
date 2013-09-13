@@ -185,7 +185,7 @@ public class AsyncGetEvents extends Thread {
             }
             that.activity.peopleAdapter.refresh();
 
-            activity.onRegister();
+            that.activity.onReadyToDisplay();
         } catch (JSONException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

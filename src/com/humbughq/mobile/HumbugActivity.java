@@ -872,7 +872,7 @@ public class HumbugActivity extends Activity {
         }
     }
 
-    public void onRegister() {
+    public void onReadyToDisplay() {
         adapter.clear();
         messageIndex.clear();
 
