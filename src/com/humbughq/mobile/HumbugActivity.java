@@ -86,7 +86,6 @@ public class HumbugActivity extends FragmentActivity {
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
 
-    protected int mIDSelected;
     private Menu menu;
     public Person you;
 
@@ -231,10 +230,10 @@ public class HumbugActivity extends FragmentActivity {
                     // messages to scroll.
                     int mID = ((Message) view.getItemAtPosition(view
                             .getFirstVisiblePosition())).getID();
-                    if (mIDSelected != mID) {
+                    if (app.getPointer() < mID) {
                         Log.i("scrolling", "Now at " + mID);
                         (new AsyncPointerUpdate(that)).execute(mID);
-                        mIDSelected = mID;
+                        app.setPointer(mID);
                     }
                 } catch (NullPointerException e) {
                     Log.w("scrolling",
@@ -251,10 +250,10 @@ public class HumbugActivity extends FragmentActivity {
                     int position, long id) {
                 try {
                     int mID = (Integer) view.getTag(R.id.messageID);
-                    if (mIDSelected != mID) {
+                    if (app.getPointer() < mID) {
                         Log.i("keyboard", "Now at " + mID);
                         (new AsyncPointerUpdate(that)).execute(mID);
-                        mIDSelected = mID;
+                        app.setPointer(mID);
                     }
                 } catch (NullPointerException e) {
                     Log.e("selected", "None, because we couldn't find the tag.");
