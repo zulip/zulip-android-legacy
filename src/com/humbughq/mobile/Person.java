@@ -129,6 +129,23 @@ public class Person {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
+        } else {
+            boolean changed = false;
+            if (name != null && !name.equals(person.name)) {
+                person.name = name;
+                changed = true;
+            }
+            if (avatarURL != null && !avatarURL.equals(person.avatarURL)) {
+                person.avatarURL = avatarURL;
+                changed = true;
+            }
+            if (changed) {
+                try {
+                    app.getDao(Person.class).update(person);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
         return person;
     }
