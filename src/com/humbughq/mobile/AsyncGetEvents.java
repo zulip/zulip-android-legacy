@@ -82,8 +82,8 @@ public class AsyncGetEvents extends Thread {
         JSONObject response = new JSONObject(request.execute("POST",
                 "v1/register"));
 
-        app.eventQueueId = response.getString("queue_id");
-        app.lastEventId = response.getInt("last_event_id");
+        app.setEventQueueId(response.getString("queue_id"));
+        app.setLastEventId(response.getInt("last_event_id"));
 
         onRegisterHandler.obtainMessage(0, response).sendToTarget();
     }
@@ -93,18 +93,20 @@ public class AsyncGetEvents extends Thread {
             while (true) {
                 try {
                     request.clearProperties();
-                    if (app.eventQueueId == null) {
+                    if (app.getEventQueueId() == null) {
                         register();
                     }
-                    request.setProperty("queue_id", app.eventQueueId);
-                    request.setProperty("last_event_id", "" + app.lastEventId);
+                    request.setProperty("queue_id", app.getEventQueueId());
+                    request.setProperty("last_event_id",
+                            "" + app.getLastEventId());
                     JSONObject response = new JSONObject(request.execute("GET",
                             "v1/events"));
 
                     JSONArray events = response.getJSONArray("events");
                     JSONObject lastEvent = events
                             .getJSONObject(events.length() - 1);
-                    app.lastEventId = lastEvent.getInt("id");
+
+                    app.setLastEventId(lastEvent.getInt("id"));
 
                     onEventsHandler.obtainMessage(0, response).sendToTarget();
                     failures = 0;
@@ -115,7 +117,7 @@ public class AsyncGetEvents extends Thread {
                                 || msg.contains("too old")) {
                             // Queue dead. Register again.
                             Log.w("asyncGetEvents", "Queue dead");
-                            app.eventQueueId = null;
+                            app.setEventQueueId(null);
                             continue;
                         }
                     }
@@ -142,8 +144,8 @@ public class AsyncGetEvents extends Thread {
     protected void onRegister(JSONObject response) {
         try {
 
-            app.pointer = response.getInt("pointer");
-            app.max_message_id = response.getInt("max_message_id");
+            app.setPointer(response.getInt("pointer"));
+            app.setMaxMessageId(response.getInt("max_message_id"));
 
             activity.populateCurrentRange();
 

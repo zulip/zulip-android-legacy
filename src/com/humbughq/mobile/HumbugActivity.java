@@ -525,7 +525,7 @@ public class HumbugActivity extends FragmentActivity {
         this.narrowFilter = filter;
 
         filteredWhere.and().le(Message.TIMESTAMP_FIELD,
-                this.getMessageById(app.pointer).getTimestamp());
+                this.getMessageById(app.getPointer()).getTimestamp());
 
         QueryBuilder<Message, Object> closestQuery = app.getDao(Message.class)
                 .queryBuilder();
@@ -800,19 +800,21 @@ public class HumbugActivity extends FragmentActivity {
         adapter.clear();
         messageIndex.clear();
 
-        lastAvailableMessageId = app.max_message_id;
-        this.populateCurrentRange();
+        lastAvailableMessageId = app.getMaxMessageId();
 
         firstMessageId = -1;
         lastMessageId = -1;
 
-        AsyncGetOldMessages oldMessagesReq = new AsyncGetOldMessages(this);
+        that.populateCurrentRange();
+        final AsyncGetOldMessages oldMessagesReq = new AsyncGetOldMessages(this);
 
-        oldMessagesReq.execute(app.pointer, LoadPosition.INITIAL, 100, 100);
+        oldMessagesReq
+                .execute(app.getPointer(), LoadPosition.INITIAL, 100, 100);
         oldMessagesReq.setCallback(new AsyncTaskCompleteListener() {
             @Override
             public void onTaskComplete(String result) {
-                that.selectMessage(that.getMessageById(app.pointer));
+                int anc = app.getPointer();
+                that.selectMessage(that.getMessageById(anc));
                 loadingMessages = false;
                 showLoadIndicatorTop(false);
             }
@@ -961,10 +963,11 @@ public class HumbugActivity extends FragmentActivity {
     public void populateCurrentRange() {
         Dao<MessageRange, Integer> messageRangeDao = app
                 .getDao(MessageRange.class);
-        this.currentRange = MessageRange.getRangeContaining(app.pointer,
+        this.currentRange = MessageRange.getRangeContaining(app.getPointer(),
                 messageRangeDao);
         if (this.currentRange == null) {
-            this.currentRange = new MessageRange(app.pointer, app.pointer);
+            this.currentRange = new MessageRange(app.getPointer(),
+                    app.getPointer());
             // Does not get saved until we actually have messages here
         }
     }

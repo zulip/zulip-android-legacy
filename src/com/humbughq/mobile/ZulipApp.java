@@ -16,13 +16,13 @@ public class ZulipApp extends Application {
     Person you;
     SharedPreferences settings;
     String api_key;
-    int max_message_id;
+    private int max_message_id;
     DatabaseHelper databaseHelper;
 
-    String eventQueueId;
-    int lastEventId;
+    private String eventQueueId;
+    private int lastEventId;
 
-    public int pointer;
+    private int pointer;
 
     @Override
     public void onCreate() {
@@ -32,6 +32,11 @@ public class ZulipApp extends Application {
         // file name.
         this.settings = getSharedPreferences("HumbugActivity",
                 Context.MODE_PRIVATE);
+
+        max_message_id = settings.getInt("max_message_id", -1);
+        eventQueueId = settings.getString("eventQueueId", null);
+        lastEventId = settings.getInt("lastEventId", -1);
+        pointer = settings.getInt("pointer", -1);
 
         this.api_key = settings.getString("api_key", null);
 
@@ -50,7 +55,7 @@ public class ZulipApp extends Application {
     }
 
     public void clearConnectionState() {
-        eventQueueId = null;
+        setEventQueueId(null);
     }
 
     /**
@@ -105,7 +110,7 @@ public class ZulipApp extends Application {
         ed.remove("api_key");
         ed.commit();
         this.api_key = null;
-        eventQueueId = null;
+        setEventQueueId(null);
     }
 
     public String getEmail() {
@@ -129,10 +134,57 @@ public class ZulipApp extends Application {
 
     public void setContext(Context targetContext) {
         this.attachBaseContext(targetContext);
+    }
 
+    public String getEventQueueId() {
+        return eventQueueId;
+    }
+
+    public void setEventQueueId(String eventQueueId) {
+        this.eventQueueId = eventQueueId;
+        Editor ed = settings.edit();
+        ed.putString("eventQueueId", this.eventQueueId);
+        ed.apply();
+    }
+
+    public int getLastEventId() {
+        return lastEventId;
+    }
+
+    public void setLastEventId(int lastEventId) {
+        this.lastEventId = lastEventId;
+        Editor ed = settings.edit();
+        ed.putInt("lastEventId", lastEventId);
+        ed.apply();
+    }
+
+    public int getMaxMessageId() {
+        return max_message_id;
+    }
+
+    public void setMaxMessageId(int max_message_id) {
+        this.max_message_id = max_message_id;
+        Editor ed = settings.edit();
+        ed.putInt("max_message_id", max_message_id);
+        ed.apply();
+    }
+
+    public int getPointer() {
+        return pointer;
+    }
+
+    public void setPointer(int pointer) {
+        this.pointer = pointer;
+        Editor ed = settings.edit();
+        ed.putInt("pointer", pointer);
+        ed.apply();
     }
 
     public boolean resetDatabase() {
+        setPointer(-1);
+        setMaxMessageId(-1);
+        setLastEventId(-1);
+        setEventQueueId(null);
         return getApplicationContext().deleteDatabase(
                 getDatabaseHelper().getDatabaseName());
     }
