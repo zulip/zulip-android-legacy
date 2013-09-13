@@ -23,10 +23,9 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
     // increase the database version
     private static final int DATABASE_VERSION = 1;
 
-    public DatabaseHelper(ZulipApp app) {
-        super(app,
-                String.format(DATABASE_NAME, MD5Util.md5Hex(app.getEmail())),
-                null, DATABASE_VERSION, R.raw.ormlite_config);
+    public DatabaseHelper(ZulipApp app, String email) {
+        super(app, String.format(DATABASE_NAME, MD5Util.md5Hex(email)), null,
+                DATABASE_VERSION, R.raw.ormlite_config);
     }
 
     /**

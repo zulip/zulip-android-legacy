@@ -34,7 +34,6 @@ public class ZulipApp extends Application {
         this.settings = getSharedPreferences("HumbugActivity",
                 Context.MODE_PRIVATE);
 
-        this.you = new Person(null, settings.getString("email", null));
         this.api_key = settings.getString("api_key", null);
 
         if (api_key != null) {
@@ -43,7 +42,8 @@ public class ZulipApp extends Application {
     }
 
     public void afterLogin() {
-        databaseHelper = new DatabaseHelper(this);
+        String email = settings.getString("email", null);
+        setEmail(email);
     }
 
     public Boolean isLoggedIn() {
@@ -87,7 +87,8 @@ public class ZulipApp extends Application {
     }
 
     public void setEmail(String email) {
-        this.you = new Person(null, email);
+        databaseHelper = new DatabaseHelper(this, email);
+        this.you = Person.getOrUpdate(this, email, null, null);
     }
 
     public void setLoggedInApiKey(String apiKey) {
