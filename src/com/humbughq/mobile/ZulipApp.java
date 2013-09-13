@@ -13,7 +13,6 @@ import com.j256.ormlite.dao.Dao;
 
 public class ZulipApp extends Application {
     private static final String USER_AGENT = "ZulipMobile";
-    String client_id;
     Person you;
     SharedPreferences settings;
     String api_key;

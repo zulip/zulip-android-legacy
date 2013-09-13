@@ -16,7 +16,6 @@ class AsyncPointerUpdate extends HumbugAsyncPushTask {
 
     public final void execute(int newPointer) {
         this.shouldHaveReceivedPointer = false;
-        this.setProperty("client_id", this.app.client_id);
         this.setProperty("pointer", Integer.toString(newPointer));
         execute("PUT", "v1/users/me/pointer");
     }
@@ -27,8 +26,6 @@ class AsyncPointerUpdate extends HumbugAsyncPushTask {
         if (this.shouldHaveReceivedPointer && result != null) {
             try {
                 final int pointer = (new JSONObject(result)).getInt("pointer");
-                this.app.client_id = (new JSONObject(result))
-                        .getString("client_id");
                 Log.i("pointer", "got from server as " + pointer);
 
                 Message message = this.context.messageIndex.get(pointer);
