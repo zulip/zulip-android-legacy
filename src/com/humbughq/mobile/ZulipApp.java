@@ -131,4 +131,9 @@ public class ZulipApp extends Application {
         this.attachBaseContext(targetContext);
 
     }
+
+    public boolean resetDatabase() {
+        return getApplicationContext().deleteDatabase(
+                getDatabaseHelper().getDatabaseName());
+    }
 }

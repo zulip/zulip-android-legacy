@@ -58,6 +58,11 @@ public class HumbugActivity extends Activity {
 
     ListView listView;
 
+    // Intent Extra constants
+    public enum Flag {
+        RESET_DATABASE,
+    }
+
     SparseArray<Message> messageIndex;
     MessageAdapter adapter;
     MessageAdapter narrowedAdapter;
@@ -149,6 +154,8 @@ public class HumbugActivity extends Activity {
         super.onCreate(savedInstanceState);
         app = (ZulipApp) getApplicationContext();
         settings = app.settings;
+
+        processParams();
 
         if (!app.isLoggedIn()) {
             openLogin();
@@ -348,6 +355,35 @@ public class HumbugActivity extends Activity {
             getActionBar().setHomeButtonEnabled(true);
         }
 
+    }
+
+    private void processParams() {
+        Bundle params = getIntent().getExtras();
+        if (params == null)
+            return;
+        for (String unprocessedParam : params.keySet()) {
+            Flag param;
+            if (unprocessedParam.contains(getBaseContext().getPackageName())) {
+                try {
+                    param = Flag.valueOf(unprocessedParam
+                            .substring(getBaseContext().getPackageName()
+                                    .length() + 1));
+                } catch (IllegalArgumentException e) {
+                    Log.e("params", "Invalid app-specific intent specified.", e);
+                    continue;
+                }
+            } else {
+                continue;
+            }
+            switch (param) {
+            case RESET_DATABASE:
+                Log.i("params", "Resetting the database...");
+                boolean result = app.resetDatabase();
+                Log.i("params", "Database deleted successfully.");
+                this.finish();
+                break;
+            }
+        }
     }
 
     protected void narrow(final Stream stream) {
