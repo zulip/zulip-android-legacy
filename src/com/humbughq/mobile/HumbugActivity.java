@@ -331,6 +331,14 @@ public class HumbugActivity extends Activity {
             }
         });
 
+        peopleDrawer.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view,
+                    int position, long id) {
+                narrow_pm_with(Person.getById(app, (int) id));
+            }
+        });
+
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
 
@@ -370,6 +378,47 @@ public class HumbugActivity extends Activity {
             };
 
             doNarrow(streamNarrow);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    protected void narrow_pm_with(final Person person) {
+        try {
+            final String recipientString = Message.recipientList(new Person[] {
+                    person, app.you });
+            NarrowFilter pmNarrow = new NarrowFilter() {
+                @Override
+                public Where<Message, Object> modWhere(
+                        Where<Message, Object> where) throws SQLException {
+
+                    final SelectArg recipientsArg = new SelectArg(
+                            recipientString);
+                    where.eq(Message.RECIPIENTS_FIELD, recipientsArg);
+                    return where;
+                }
+
+                @Override
+                public boolean matches(Message msg) {
+                    if (msg.getType() == MessageType.PRIVATE_MESSAGE) {
+                        return msg.getRawRecipients().equals(recipientString);
+                    }
+                    return false;
+                }
+
+                @Override
+                public String getTitle() {
+                    return person.getName();
+                }
+
+                @Override
+                public String getSubtitle() {
+                    return null;
+                }
+            };
+
+            doNarrow(pmNarrow);
         } catch (SQLException e) {
             e.printStackTrace();
         }
