@@ -253,8 +253,6 @@ public class HumbugActivity extends Activity {
 
         });
 
-        this.startRequests();
-
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
                 R.drawable.ic_drawer, R.string.streams_open,
