@@ -160,11 +160,6 @@ public class HumbugActivity extends FragmentActivity {
             return;
         }
 
-        // If we're creating a new Activity, but the app state is still around,
-        // re-register anyway to update the view. Won't be necessary once we
-        // pull messages from the DB.
-        app.clearConnectionState();
-
         this.onPrepareOptionsMenu(menu);
 
         this.logged_in = true;
