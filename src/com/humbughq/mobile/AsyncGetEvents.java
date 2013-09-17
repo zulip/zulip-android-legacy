@@ -25,6 +25,7 @@ public class AsyncGetEvents extends Thread {
 
     AsyncGetEvents that = this;
     int failures = 0;
+    boolean registeredOrGotEventsThisRun;
 
     public AsyncGetEvents(HumbugActivity humbugActivity) {
         super();
@@ -34,6 +35,11 @@ public class AsyncGetEvents extends Thread {
     }
 
     public void start() {
+        registeredOrGotEventsThisRun = false;
+
+        if (this.app.getPointer() > 0 && this.activity.currentRange == null) {
+            this.activity.populateCurrentRange();
+        }
 
         onRegisterHandler = new Handler() {
             public void handleMessage(android.os.Message msg) {
@@ -82,6 +88,7 @@ public class AsyncGetEvents extends Thread {
         JSONObject response = new JSONObject(request.execute("POST",
                 "v1/register"));
 
+        registeredOrGotEventsThisRun = true;
         app.setEventQueueId(response.getString("queue_id"));
         app.setLastEventId(response.getInt("last_event_id"));
 
@@ -99,6 +106,9 @@ public class AsyncGetEvents extends Thread {
                     request.setProperty("queue_id", app.getEventQueueId());
                     request.setProperty("last_event_id",
                             "" + app.getLastEventId());
+                    if (registeredOrGotEventsThisRun == false) {
+                        request.setProperty("dont_block", "true");
+                    }
                     JSONObject response = new JSONObject(request.execute("GET",
                             "v1/events"));
 
@@ -110,6 +120,16 @@ public class AsyncGetEvents extends Thread {
 
                     onEventsHandler.obtainMessage(0, response).sendToTarget();
                     failures = 0;
+
+                    if (registeredOrGotEventsThisRun == false) {
+                        registeredOrGotEventsThisRun = true;
+                        activity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                activity.onReadyToDisplay();
+                            }
+                        });
+                    }
                 } catch (HttpResponseException e) {
                     if (e.getStatusCode() == 400) {
                         String msg = e.getMessage();
@@ -203,6 +223,9 @@ public class AsyncGetEvents extends Thread {
 
             if (type.equals("message")) {
                 onMessage(event.getJSONObject("message"));
+            } else if (type.equals("pointer")) {
+                // Keep our pointer synced with global pointer
+                app.setPointer(event.getInt("pointer"));
             }
         } catch (JSONException e) {
             // TODO Auto-generated catch block
