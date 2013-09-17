@@ -3,6 +3,8 @@ package com.humbughq.mobile;
 import java.sql.SQLException;
 
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.field.DatabaseField;
@@ -106,7 +108,8 @@ public class Person {
         try {
             Dao<Person, Integer> dao = app.getDatabaseHelper().getDao(
                     Person.class);
-            return dao.queryBuilder().where().eq(Person.EMAIL_FIELD, email)
+            return dao.queryBuilder().where()
+                    .eq(Person.EMAIL_FIELD, email.toLowerCase())
                     .queryForFirst();
         } catch (SQLException e) {
             // TODO Auto-generated catch block
@@ -143,6 +146,22 @@ public class Person {
                 }
             }
         }
+        return person;
+    }
+
+    void updateFromJSON(JSONObject jPerson) throws JSONException {
+        name = jPerson.getString("full_name");
+        // It would be nice if the server gave us avatarURL here, but it doesn't
+    }
+
+    static Person getFromJSON(ZulipApp app, JSONObject jPerson)
+            throws JSONException {
+        String email = jPerson.getString("email");
+        Person person = getByEmail(app, email);
+        if (person == null) {
+            person = new Person(null, email);
+        }
+        person.updateFromJSON(jPerson);
         return person;
     }
 

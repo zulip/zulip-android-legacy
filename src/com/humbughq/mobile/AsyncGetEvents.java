@@ -167,6 +167,24 @@ public class AsyncGetEvents extends Thread {
                 }
             }
             that.activity.streamsAdapter.refresh();
+
+            // Get people
+            JSONArray people = response.getJSONArray("realm_users");
+            Dao<Person, String> personDao = this.app.getDao(Person.class);
+            for (int i = 0; i < people.length(); i++) {
+                Person person = Person
+                        .getFromJSON(app, people.getJSONObject(i));
+                Log.i("person", "" + person);
+                try {
+                    personDao.createOrUpdate(person);
+                } catch (SQLException e) {
+                    Log.e("ALP",
+                            "Could not create or update person in database");
+                    e.printStackTrace();
+                }
+            }
+            that.activity.peopleAdapter.refresh();
+
             activity.onRegister();
         } catch (JSONException e) {
             // TODO Auto-generated catch block
