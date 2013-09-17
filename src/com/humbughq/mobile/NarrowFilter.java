@@ -16,4 +16,8 @@ public interface NarrowFilter {
     public String getTitle();
 
     public String getSubtitle();
+
+    public Stream getComposeStream();
+
+    public String getComposePMRecipient();
 }

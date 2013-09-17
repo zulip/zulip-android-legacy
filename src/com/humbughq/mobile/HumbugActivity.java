@@ -377,6 +377,17 @@ public class HumbugActivity extends Activity {
                 public String getSubtitle() {
                     return null;
                 }
+
+                @Override
+                public Stream getComposeStream() {
+                    return stream;
+                }
+
+                @Override
+                public String getComposePMRecipient() {
+                    return null;
+                }
+
             };
 
             doNarrow(streamNarrow);
@@ -417,6 +428,16 @@ public class HumbugActivity extends Activity {
                 @Override
                 public String getSubtitle() {
                     return null;
+                }
+
+                @Override
+                public Stream getComposeStream() {
+                    return null;
+                }
+
+                @Override
+                public String getComposePMRecipient() {
+                    return person.getEmail();
                 }
 
             };
@@ -515,10 +536,18 @@ public class HumbugActivity extends Activity {
             doUnnarrow();
             break;
         case R.id.compose_stream:
-            openCompose(MessageType.STREAM_MESSAGE);
+            Stream stream = null;
+            if (narrowFilter != null) {
+                stream = narrowFilter.getComposeStream();
+            }
+            openCompose(MessageType.STREAM_MESSAGE, stream, null, null);
             break;
         case R.id.compose_pm:
-            openCompose(MessageType.PRIVATE_MESSAGE);
+            String recipient = null;
+            if (narrowFilter != null) {
+                recipient = narrowFilter.getComposePMRecipient();
+            }
+            openCompose(MessageType.PRIVATE_MESSAGE, null, null, recipient);
             break;
         case R.id.refresh:
             Log.w("menu", "Refreshed manually by user. We shouldn't need this.");
