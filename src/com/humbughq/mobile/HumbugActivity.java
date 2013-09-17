@@ -103,7 +103,9 @@ public class HumbugActivity extends Activity {
         public void onItemClick(AdapterView<?> parent, View view, int position,
                 long id) {
             try {
-                openCompose((Message) parent.getItemAtPosition(position));
+                Message m = (Message) parent.getItemAtPosition(position);
+                openCompose(m.getType(), m.getStream(), m.getSubject(),
+                        m.getReplyTo(app));
             } catch (IndexOutOfBoundsException e) {
                 // We can ignore this because its probably before the data
                 // has been fetched.
@@ -416,6 +418,7 @@ public class HumbugActivity extends Activity {
                 public String getSubtitle() {
                     return null;
                 }
+
             };
 
             doNarrow(pmNarrow);
@@ -563,23 +566,33 @@ public class HumbugActivity extends Activity {
         recipient.setHint(R.string.stream);
     }
 
-    protected void openCompose(Message msg) {
-        openCompose(msg, null);
-    }
-
     protected void openCompose(MessageType type) {
-        openCompose(null, type);
+        openCompose(type, null, null, null);
     }
 
-    private void openCompose(Message msg, MessageType type) {
-        openCompose(msg, type, false);
+    protected void openCompose(Stream stream, String topic) {
+        openCompose(MessageType.STREAM_MESSAGE, stream, topic, null);
     }
 
-    private void openCompose(Message msg, MessageType type, boolean to_sender) {
+    protected void openCompose(String pmRecipients) {
+        openCompose(MessageType.PRIVATE_MESSAGE, null, null, pmRecipients);
+    }
+
+    private void openCompose(final MessageType type, Stream stream,
+            String topic, String pmRecipients) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         LayoutInflater inflater = this.getLayoutInflater();
 
         composeView = inflater.inflate(R.layout.compose, null);
+        final EditText recipient = (EditText) composeView
+                .findViewById(R.id.composeRecipient);
+
+        final EditText subject = (EditText) composeView
+                .findViewById(R.id.composeSubject);
+
+        final EditText body = (EditText) composeView
+                .findViewById(R.id.composeText);
+
         AlertDialog composeWindow = builder
                 .setView(composeView)
                 .setTitle("Compose")
@@ -587,40 +600,27 @@ public class HumbugActivity extends Activity {
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface d, int id) {
-                                EditText recipient = (EditText) composeView
-                                        .findViewById(R.id.composeRecipient);
-
-                                EditText subject = (EditText) composeView
-                                        .findViewById(R.id.composeSubject);
-
-                                EditText body = (EditText) composeView
-                                        .findViewById(R.id.composeText);
-
-                                // If the subject field is hidden, we have a
-                                // personal
-                                // message.
-                                boolean subjectFilledIfRequired = subject
-                                        .getVisibility() == View.GONE
-                                        || requireFilled(subject, "subject");
-
-                                if (!(requireFilled(recipient, "recipient")
-                                        && subjectFilledIfRequired && requireFilled(
-                                        body, "message body"))) {
-                                    return;
-
+                                if (type == MessageType.STREAM_MESSAGE) {
+                                    requireFilled(subject, "subject");
+                                    requireFilled(recipient, "recipient"); // stream
+                                } else if (type == MessageType.PRIVATE_MESSAGE) {
+                                    requireFilled(recipient, "recipient");
                                 }
+
+                                requireFilled(body, "message body");
 
                                 Message msg = new Message(that.app);
                                 msg.setSender(that.you);
-                                if (subject.getVisibility() == View.GONE) {
-                                    msg.setType(MessageType.PRIVATE_MESSAGE);
-                                    msg.setRecipient(recipient.getText()
-                                            .toString().split(","));
-                                } else {
+
+                                if (type == MessageType.STREAM_MESSAGE) {
                                     msg.setType(MessageType.STREAM_MESSAGE);
                                     msg.setStream(new Stream(recipient
                                             .getText().toString()));
                                     msg.setSubject(subject.getText().toString());
+                                } else if (type == MessageType.PRIVATE_MESSAGE) {
+                                    msg.setType(MessageType.PRIVATE_MESSAGE);
+                                    msg.setRecipient(recipient.getText()
+                                            .toString().split(","));
                                 }
 
                                 msg.setContent(body.getText().toString());
@@ -637,38 +637,30 @@ public class HumbugActivity extends Activity {
                             }
                         }).create();
 
-        // ***
-
-        EditText recipient = (EditText) composeView
-                .findViewById(R.id.composeRecipient);
-
-        EditText subject = (EditText) composeView
-                .findViewById(R.id.composeSubject);
-
-        EditText body = (EditText) composeView.findViewById(R.id.composeText);
-
-        if (type == MessageType.STREAM_MESSAGE
-                || (msg != null && msg.getType() == MessageType.STREAM_MESSAGE && !to_sender)) {
+        if (type == MessageType.STREAM_MESSAGE) {
             this.switchToStream();
+            if (stream != null) {
+                recipient.setText(stream.getName());
+                if (topic != null) {
+                    subject.setText(topic);
+                    body.requestFocus();
+                } else {
+                    subject.setText("");
+                    subject.requestFocus();
+                }
+            } else {
+                recipient.setText("");
+                recipient.requestFocus();
+            }
         } else {
             this.switchToPersonal();
-        }
-        if (msg != null) {
-            if (msg.getType() == MessageType.STREAM_MESSAGE && !to_sender) {
-                recipient.setText(msg.getStream().getName());
-                subject.setText(msg.getSubject());
-            } else if (msg.getType() == MessageType.PRIVATE_MESSAGE
-                    && !to_sender) {
-                recipient.setText(msg.getReplyTo(app));
+            if (pmRecipients != null) {
+                recipient.setText(pmRecipients);
+                body.requestFocus();
             } else {
-                recipient.setText(msg.getSender().getEmail());
+                recipient.setText("");
+                recipient.requestFocus();
             }
-            body.requestFocus();
-        } else {
-            // Focus the stream, zero out stream/subject
-            recipient.requestFocus();
-            recipient.setText("");
-            subject.setText("");
         }
 
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -686,7 +678,6 @@ public class HumbugActivity extends Activity {
                     }
                 });
         composeWindow.show();
-
     }
 
     @SuppressWarnings("deprecation")
@@ -832,13 +823,13 @@ public class HumbugActivity extends Activity {
         Message message = messageIndex.get((int) info.id);
         switch (item.getItemId()) {
         case R.id.reply_to_stream:
-            openCompose(message, message.getType());
+            openCompose(message.getStream(), message.getSubject());
             return true;
         case R.id.reply_to_private:
-            openCompose(message, message.getType());
+            openCompose(message.getReplyTo(app));
             return true;
         case R.id.reply_to_sender:
-            openCompose(message, MessageType.PRIVATE_MESSAGE, true);
+            openCompose(message.getSender().getEmail());
             return true;
         case R.id.copy_message:
             copyMessage(message);
