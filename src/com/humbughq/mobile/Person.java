@@ -18,6 +18,7 @@ public class Person {
     public static final String MESSAGESPARTICIPATEDIN_FIELD = "messagesParticipatedIn";
     public static final String EMAIL_FIELD = "email";
     public static final String AVATARURL_FIELD = "avatarUrl";
+    public static final String ISBOT_FIELD = "isBot";
 
     @DatabaseField(columnName = ID_FIELD, generatedId = true)
     protected int id;
@@ -27,6 +28,8 @@ public class Person {
     private String email;
     @DatabaseField(columnName = AVATARURL_FIELD)
     private String avatarURL;
+    @DatabaseField(columnName = ISBOT_FIELD)
+    private boolean isBot;
 
     public Person(String name, String email) {
         this.setName(name);
@@ -55,6 +58,10 @@ public class Person {
 
     public String getEmail() {
         return email;
+    }
+
+    public boolean getIsBot() {
+        return isBot;
     }
 
     private void setEmail(String email) {
@@ -151,6 +158,7 @@ public class Person {
 
     void updateFromJSON(JSONObject jPerson) throws JSONException {
         name = jPerson.getString("full_name");
+        isBot = jPerson.getBoolean("is_bot");
         // It would be nice if the server gave us avatarURL here, but it doesn't
     }
 

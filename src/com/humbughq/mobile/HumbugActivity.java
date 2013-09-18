@@ -293,7 +293,8 @@ public class HumbugActivity extends Activity {
                 // TODO Auto-generated method stub
                 return ((AndroidDatabaseResults) app.getDao(Person.class)
                         .queryBuilder().selectRaw("rowid _id", "*")
-                        .orderBy(Person.NAME_FIELD, true).queryRaw()
+                        .orderBy(Person.NAME_FIELD, true).where()
+                        .eq(Person.ISBOT_FIELD, false).queryRaw()
                         .closeableIterator().getRawResults()).getRawCursor();
             }
 
