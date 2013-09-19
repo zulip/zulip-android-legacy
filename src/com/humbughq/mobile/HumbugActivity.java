@@ -126,6 +126,7 @@ public class HumbugActivity extends Activity {
                 return true;
             case R.id.stream_dot:
                 // Set the color of the (currently white) dot
+                arg0.setVisibility(View.VISIBLE);
                 arg0.getBackground().setColorFilter(arg1.getInt(arg2),
                         Mode.MULTIPLY);
                 return true;
