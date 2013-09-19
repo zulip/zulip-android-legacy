@@ -113,13 +113,16 @@ public class AsyncGetEvents extends Thread {
                             "v1/events"));
 
                     JSONArray events = response.getJSONArray("events");
-                    JSONObject lastEvent = events
-                            .getJSONObject(events.length() - 1);
+                    if (events.length() > 0) {
+                        JSONObject lastEvent = events.getJSONObject(events
+                                .length() - 1);
 
-                    app.setLastEventId(lastEvent.getInt("id"));
+                        app.setLastEventId(lastEvent.getInt("id"));
 
-                    onEventsHandler.obtainMessage(0, response).sendToTarget();
-                    failures = 0;
+                        onEventsHandler.obtainMessage(0, response)
+                                .sendToTarget();
+                        failures = 0;
+                    }
 
                     if (registeredOrGotEventsThisRun == false) {
                         registeredOrGotEventsThisRun = true;
