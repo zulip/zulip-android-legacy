@@ -282,8 +282,9 @@ public class HumbugActivity extends Activity {
             public Cursor call() throws Exception {
                 return ((AndroidDatabaseResults) app.getDao(Stream.class)
                         .queryBuilder().selectRaw("rowid _id", "*")
-                        .orderBy(Stream.NAME_FIELD, true).queryRaw()
-                        .closeableIterator().getRawResults()).getRawCursor();
+                        .orderByRaw(Stream.NAME_FIELD + " COLLATE NOCASE")
+                        .queryRaw().closeableIterator().getRawResults())
+                        .getRawCursor();
             }
         };
 
@@ -294,8 +295,8 @@ public class HumbugActivity extends Activity {
                 // TODO Auto-generated method stub
                 return ((AndroidDatabaseResults) app.getDao(Person.class)
                         .queryBuilder().selectRaw("rowid _id", "*")
-                        .orderBy(Person.NAME_FIELD, true).where()
-                        .eq(Person.ISBOT_FIELD, false).queryRaw()
+                        .orderByRaw(Person.NAME_FIELD + " COLLATE NOCASE")
+                        .where().eq(Person.ISBOT_FIELD, false).queryRaw()
                         .closeableIterator().getRawResults()).getRawCursor();
             }
 
