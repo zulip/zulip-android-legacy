@@ -210,6 +210,11 @@ public class HumbugActivity extends Activity {
                             loadMoreMessages(LoadPosition.BELOW);
                         }
                     }
+                    if (firstVisibleItem < near) {
+                        Log.i("scroll", "at top" + firstVisibleItem + " "
+                                + visibleItemCount + " " + totalItemCount);
+                        loadMoreMessages(LoadPosition.ABOVE);
+                    }
                 }
 
             }
@@ -931,6 +936,12 @@ public class HumbugActivity extends Activity {
     public void onMessages(Message[] messages, LoadPosition pos) {
         Log.i("onMessages", "Adding " + messages.length + " messages at " + pos);
 
+        // Collect state used to maintain scroll position
+        int topPosBefore = listView.getFirstVisiblePosition();
+        View topView = listView.getChildAt(0);
+        int topOffsetBefore = (topView != null) ? topView.getTop() : 0;
+        int addedCount = 0;
+
         if (pos == LoadPosition.NEW) {
             // listHasMostRecent check needs to occur before updating
             // lastAvailableMessageId
@@ -973,8 +984,9 @@ public class HumbugActivity extends Activity {
                     }
                 } else if (pos == LoadPosition.ABOVE
                         || pos == LoadPosition.INITIAL) {
-                    Log.i("onMessages", "Inserting at " + i);
-                    this.adapter.insert(message, i);
+                    // TODO: Does this copy the array every time?
+                    this.adapter.insert(message, addedCount);
+                    addedCount++;
                 }
 
                 if (message.getID() > lastMessageId) {
@@ -987,6 +999,11 @@ public class HumbugActivity extends Activity {
             }
         }
 
+        if (pos == LoadPosition.ABOVE) {
+            // Restore the position of the top item
+            this.listView.setSelectionFromTop(topPosBefore + addedCount,
+                    topOffsetBefore);
+        }
     }
 
     public Boolean listHasMostRecent() {
@@ -1025,12 +1042,7 @@ public class HumbugActivity extends Activity {
     }
 
     public void selectMessage(final Message message) {
-        listView.post(new Runnable() {
-            @Override
-            public void run() {
-                listView.setSelection(adapter.getPosition(message));
-            }
-        });
+        listView.setSelection(adapter.getPosition(message));
     }
 
     public Message getMessageById(int id) {
