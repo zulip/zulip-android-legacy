@@ -3,6 +3,7 @@
 /res/raw/ormlite_config.txt
 .settings
 *-sources.jar
+*-sources
 *-javadoc.jar
 *.log
 /local.properties

@@ -2,18 +2,19 @@
 # Downloads docs and sources for third party libraries
 set -e
 
-if [[ `ls` != *.jar* ]]; then
-    echo Run this script fron libs/! >&2
+if [[ $(basename $(pwd)) != libsrc ]]; then
+    echo Run this script fron libsrc/! >&2
     exit 1
 fi
 
 ORMLITE_VER=4.45
 ANDROID_SUPPORT_VER=v13
+WGET="wget -nv -N"
 
-wget -nv -N http://ormlite.com/releases/$ORMLITE_VER/ormlite-core-$ORMLITE_VER-sources.jar
-wget -nv -N http://ormlite.com/releases/$ORMLITE_VER/ormlite-core-$ORMLITE_VER-javadoc.jar
-wget -nv -N http://ormlite.com/releases/$ORMLITE_VER/ormlite-android-$ORMLITE_VER-sources.jar
-wget -nv -N http://ormlite.com/releases/$ORMLITE_VER/ormlite-android-$ORMLITE_VER-javadoc.jar
+$WGET http://ormlite.com/releases/$ORMLITE_VER/ormlite-core-$ORMLITE_VER-sources.jar
+$WGET http://ormlite.com/releases/$ORMLITE_VER/ormlite-core-$ORMLITE_VER-javadoc.jar
+$WGET http://ormlite.com/releases/$ORMLITE_VER/ormlite-android-$ORMLITE_VER-sources.jar
+$WGET http://ormlite.com/releases/$ORMLITE_VER/ormlite-android-$ORMLITE_VER-javadoc.jar
 
 echo Sources and javadocs downloaded successfully to libs/
 echo
