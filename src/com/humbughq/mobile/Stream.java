@@ -14,6 +14,7 @@ import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.ForeignCollection;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.ForeignCollectionField;
+import com.j256.ormlite.stmt.SelectArg;
 import com.j256.ormlite.table.DatabaseTable;
 
 @DatabaseTable(tableName = "streams")
@@ -115,8 +116,8 @@ public class Stream {
         try {
             Dao<Stream, String> streams = app.getDatabaseHelper().getDao(
                     Stream.class);
-            stream = streams.queryBuilder().where().eq(Stream.NAME_FIELD, name)
-                    .queryForFirst();
+            stream = streams.queryBuilder().where()
+                    .eq(Stream.NAME_FIELD, new SelectArg(name)).queryForFirst();
 
             if (stream == null) {
                 Log.w("Stream.getByName",

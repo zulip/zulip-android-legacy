@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.stmt.SelectArg;
 import com.j256.ormlite.table.DatabaseTable;
 
 @DatabaseTable(tableName = "people")
@@ -116,7 +117,7 @@ public class Person {
             Dao<Person, Integer> dao = app.getDatabaseHelper().getDao(
                     Person.class);
             return dao.queryBuilder().where()
-                    .eq(Person.EMAIL_FIELD, email.toLowerCase())
+                    .eq(Person.EMAIL_FIELD, new SelectArg(email.toLowerCase()))
                     .queryForFirst();
         } catch (SQLException e) {
             // TODO Auto-generated catch block
