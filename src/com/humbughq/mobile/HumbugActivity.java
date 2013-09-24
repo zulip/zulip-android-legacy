@@ -48,7 +48,6 @@ import android.widget.TextView;
 
 import com.humbughq.mobile.HumbugAsyncPushTask.AsyncTaskCompleteListener;
 import com.j256.ormlite.android.AndroidDatabaseResults;
-import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.stmt.SelectArg;
 import com.j256.ormlite.stmt.Where;
@@ -408,8 +407,6 @@ public class HumbugActivity extends Activity {
     }
 
     protected void narrow(final Stream stream) {
-        Dao<Message, Integer> messageDao = app.getDao(Message.class);
-
         try {
             final SelectArg streamArg = new SelectArg();
 
