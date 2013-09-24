@@ -30,6 +30,8 @@ class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
      */
     interface AsyncTaskCompleteListener {
         public void onTaskComplete(String result);
+
+        public void onTaskFailure(String result);
     }
 
     /**
@@ -45,6 +47,9 @@ class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
             public void onTaskComplete(String result) {
                 // Dummy method which does nothing
 
+            }
+
+            public void onTaskFailure(String result) {
             }
         };
         this.request = new HTTPRequest(app);

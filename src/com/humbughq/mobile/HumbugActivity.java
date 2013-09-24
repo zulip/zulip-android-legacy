@@ -944,6 +944,10 @@ public class HumbugActivity extends Activity {
                 loadingMessages = false;
                 showLoadIndicatorTop(false);
             }
+
+            public void onTaskFailure(String result) {
+
+            }
         });
 
     }
@@ -1065,6 +1069,10 @@ public class HumbugActivity extends Activity {
         oldMessagesReq.setCallback(new AsyncTaskCompleteListener() {
             @Override
             public void onTaskComplete(String result) {
+                loadingMessages = false;
+            }
+
+            public void onTaskFailure(String result) {
                 loadingMessages = false;
             }
         });

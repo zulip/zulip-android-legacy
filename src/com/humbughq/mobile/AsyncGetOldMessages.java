@@ -91,4 +91,8 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
         }
         callback.onTaskComplete(result);
     }
+
+    protected void onCancelled(String result) {
+        callback.onTaskFailure(result);
+    }
 }
