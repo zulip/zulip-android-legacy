@@ -24,16 +24,6 @@
             android:layout_height="fill_parent"
             android:background="#f0f8ff"
             android:visibility="gone" />
-
-        <TextView
-            android:id="@+id/listFYI"
-            android:layout_width="match_parent"
-            android:layout_height="fill_parent"
-            android:paddingLeft="10dp"
-            android:paddingTop="10dp"
-            android:text="Loading messages from Zulip..."
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:visibility="gone" />
     </LinearLayout>
     <!-- The navigation drawer -->
 

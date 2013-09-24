@@ -147,6 +147,9 @@ public class HumbugActivity extends Activity {
 
     protected RefreshableCursorAdapter peopleAdapter;
 
+    View loadIndicatorTop;
+    View loadIndicatorBottom;
+
     /** Called when the activity is first created. */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     @Override
@@ -174,14 +177,20 @@ public class HumbugActivity extends Activity {
 
         setContentView(R.layout.main);
         listView = (ListView) findViewById(R.id.listview);
+        loadIndicatorTop = getLayoutInflater().inflate(R.layout.list_loading,
+                null);
+        loadIndicatorBottom = getLayoutInflater().inflate(
+                R.layout.list_loading, null);
+        listView.addHeaderView(loadIndicatorTop, null, false);
+        listView.addFooterView(loadIndicatorBottom, null, false);
+        showLoadIndicatorTop(true);
+
         narrowedListView = (ListView) findViewById(R.id.narrowed_listview);
 
         this.bottom_list_spacer = new ImageView(this);
         this.size_bottom_spacer();
         listView.addFooterView(this.bottom_list_spacer);
         narrowedListView.addFooterView(this.bottom_list_spacer);
-
-        listView.setEmptyView(findViewById(R.id.listFYI));
 
         adapter = new MessageAdapter(this, new ArrayList<Message>());
         listView.setAdapter(adapter);
@@ -359,7 +368,14 @@ public class HumbugActivity extends Activity {
             getActionBar().setDisplayHomeAsUpEnabled(true);
             getActionBar().setHomeButtonEnabled(true);
         }
+    }
 
+    void showLoadIndicatorBottom(boolean show) {
+        loadIndicatorBottom.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    void showLoadIndicatorTop(boolean show) {
+        loadIndicatorTop.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     private void processParams() {
@@ -864,6 +880,7 @@ public class HumbugActivity extends Activity {
             event_poll.abort();
         }
         loadingMessages = true;
+        showLoadIndicatorTop(true);
         event_poll = new AsyncGetEvents(this);
         event_poll.start();
     }
@@ -928,6 +945,7 @@ public class HumbugActivity extends Activity {
             public void onTaskComplete(String result) {
                 that.selectMessage(that.getMessageById(app.pointer));
                 loadingMessages = false;
+                showLoadIndicatorTop(false);
             }
         });
 
@@ -940,6 +958,11 @@ public class HumbugActivity extends Activity {
         int topPosBefore = listView.getFirstVisiblePosition();
         View topView = listView.getChildAt(0);
         int topOffsetBefore = (topView != null) ? topView.getTop() : 0;
+        if (topOffsetBefore >= 0) {
+            // If the loading indicator was visible, show a new message in the
+            // space it took up. If it was not visible, avoid jumping.
+            topOffsetBefore -= loadIndicatorTop.getHeight();
+        }
         int addedCount = 0;
 
         if (pos == LoadPosition.NEW) {
@@ -1000,9 +1023,16 @@ public class HumbugActivity extends Activity {
         }
 
         if (pos == LoadPosition.ABOVE) {
+            showLoadIndicatorTop(false);
+            Log.i("Header",
+                    loadIndicatorTop.getTop() + " "
+                            + loadIndicatorTop.getHeight() + " "
+                            + topOffsetBefore);
             // Restore the position of the top item
             this.listView.setSelectionFromTop(topPosBefore + addedCount,
                     topOffsetBefore);
+        } else if (pos == LoadPosition.BELOW) {
+            showLoadIndicatorBottom(false);
         }
     }
 
@@ -1018,9 +1048,11 @@ public class HumbugActivity extends Activity {
         if (pos == LoadPosition.ABOVE) {
             above = 100;
             around = firstMessageId;
+            showLoadIndicatorTop(true);
         } else if (pos == LoadPosition.BELOW) {
             below = 100;
             around = lastMessageId;
+            showLoadIndicatorBottom(true);
         } else {
             Log.e("loadMoreMessages", "Invalid position");
             return;

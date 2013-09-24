@@ -24,6 +24,8 @@
     <string name="title_activity_legal">Legal</string>
     <string name="streams_open">Open stream sidebar</string>
     <string name="streams_close">Close stream sidebar</string>
-    
+
+    <!-- Used on the indicator when loading messages -->
+    <string name="loading_messages">Loading messages</string>
 
 </resources>
