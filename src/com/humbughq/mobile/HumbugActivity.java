@@ -7,11 +7,8 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -21,6 +18,8 @@ import android.graphics.PorterDuff.Mode;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
@@ -28,20 +27,17 @@ import android.util.SparseArray;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -52,7 +48,7 @@ import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.stmt.SelectArg;
 import com.j256.ormlite.stmt.Where;
 
-public class HumbugActivity extends Activity {
+public class HumbugActivity extends FragmentActivity {
     ZulipApp app;
 
     ListView listView;
@@ -93,7 +89,6 @@ public class HumbugActivity extends Activity {
     protected int mIDSelected;
     private Menu menu;
     public Person you;
-    private View composeView;
 
     protected HashMap<String, Bitmap> gravatars = new HashMap<String, Bitmap>();
 
@@ -108,8 +103,8 @@ public class HumbugActivity extends Activity {
                 long id) {
             try {
                 Message m = (Message) parent.getItemAtPosition(position);
-                openCompose(m.getType(), m.getStream(), m.getSubject(),
-                        m.getReplyTo(app));
+                openCompose(m.getType(), m.getStream().getName(),
+                        m.getSubject(), m.getReplyTo(app));
             } catch (IndexOutOfBoundsException e) {
                 // We can ignore this because its probably before the data
                 // has been fetched.
@@ -605,9 +600,9 @@ public class HumbugActivity extends Activity {
             doUnnarrow();
             break;
         case R.id.compose_stream:
-            Stream stream = null;
+            String stream = null;
             if (narrowFilter != null) {
-                stream = narrowFilter.getComposeStream();
+                stream = narrowFilter.getComposeStream().getName();
             }
             openCompose(MessageType.STREAM_MESSAGE, stream, null, null);
             break;
@@ -636,146 +631,25 @@ public class HumbugActivity extends Activity {
         return true;
     }
 
-    /**
-     * Switches the compose window's state to compose a personal message.
-     */
-    protected void switchToPersonal() {
-        EditText recipient = (EditText) composeView
-                .findViewById(R.id.composeRecipient);
-        EditText subject = (EditText) composeView
-                .findViewById(R.id.composeSubject);
-
-        subject.setVisibility(View.GONE);
-        recipient.setGravity(Gravity.FILL_HORIZONTAL);
-        recipient.setHint(R.string.pm_prompt);
-    }
-
-    /**
-     * Switches the compose window's state to compose a stream message.
-     */
-    protected void switchToStream() {
-        EditText recipient = (EditText) composeView
-                .findViewById(R.id.composeRecipient);
-        EditText subject = (EditText) composeView
-                .findViewById(R.id.composeSubject);
-
-        subject.setVisibility(View.VISIBLE);
-        recipient.setGravity(Gravity.NO_GRAVITY);
-        recipient.setHint(R.string.stream);
-    }
-
     protected void openCompose(MessageType type) {
         openCompose(type, null, null, null);
     }
 
     protected void openCompose(Stream stream, String topic) {
-        openCompose(MessageType.STREAM_MESSAGE, stream, topic, null);
+        openCompose(MessageType.STREAM_MESSAGE, stream.getName(), topic, null);
     }
 
     protected void openCompose(String pmRecipients) {
         openCompose(MessageType.PRIVATE_MESSAGE, null, null, pmRecipients);
     }
 
-    private void openCompose(final MessageType type, Stream stream,
+    private void openCompose(final MessageType type, String stream,
             String topic, String pmRecipients) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        LayoutInflater inflater = this.getLayoutInflater();
 
-        composeView = inflater.inflate(R.layout.compose, null);
-        final EditText recipient = (EditText) composeView
-                .findViewById(R.id.composeRecipient);
-
-        final EditText subject = (EditText) composeView
-                .findViewById(R.id.composeSubject);
-
-        final EditText body = (EditText) composeView
-                .findViewById(R.id.composeText);
-
-        AlertDialog composeWindow = builder
-                .setView(composeView)
-                .setTitle("Compose")
-                .setPositiveButton(R.string.send,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface d, int id) {
-                                if (type == MessageType.STREAM_MESSAGE) {
-                                    requireFilled(subject, "subject");
-                                    requireFilled(recipient, "recipient"); // stream
-                                } else if (type == MessageType.PRIVATE_MESSAGE) {
-                                    requireFilled(recipient, "recipient");
-                                }
-
-                                requireFilled(body, "message body");
-
-                                Message msg = new Message(that.app);
-                                msg.setSender(that.you);
-
-                                if (type == MessageType.STREAM_MESSAGE) {
-                                    msg.setType(MessageType.STREAM_MESSAGE);
-                                    msg.setStream(new Stream(recipient
-                                            .getText().toString()));
-                                    msg.setSubject(subject.getText().toString());
-                                } else if (type == MessageType.PRIVATE_MESSAGE) {
-                                    msg.setType(MessageType.PRIVATE_MESSAGE);
-                                    msg.setRecipient(recipient.getText()
-                                            .toString().split(","));
-                                }
-
-                                msg.setContent(body.getText().toString());
-
-                                AsyncSend sender = new AsyncSend(that, msg);
-                                sender.execute();
-                            }
-                        })
-                .setNegativeButton(android.R.string.cancel,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface d, int id) {
-                                d.dismiss();
-                            }
-                        }).create();
-
-        if (type == MessageType.STREAM_MESSAGE) {
-            this.switchToStream();
-            if (stream != null) {
-                recipient.setText(stream.getName());
-                if (topic != null) {
-                    subject.setText(topic);
-                    body.requestFocus();
-                } else {
-                    subject.setText("");
-                    subject.requestFocus();
-                }
-            } else {
-                recipient.setText("");
-                recipient.requestFocus();
-            }
-        } else {
-            this.switchToPersonal();
-            if (pmRecipients != null) {
-                recipient.setText(pmRecipients);
-                body.requestFocus();
-            } else {
-                recipient.setText("");
-                recipient.requestFocus();
-            }
-        }
-
-        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,
-                InputMethodManager.HIDE_IMPLICIT_ONLY);
-
-        composeWindow
-                .setOnDismissListener(new DialogInterface.OnDismissListener() {
-                    @Override
-                    public void onDismiss(DialogInterface dialog) {
-                        // Hide physical keyboard if present.
-                        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                        imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
-
-                    }
-                });
-        composeWindow.show();
+        FragmentManager fm = getSupportFragmentManager();
+        ComposeDialog dialog = ComposeDialog.newInstance(type, stream, topic,
+                pmRecipients);
+        dialog.show(fm, "fragment_compose");
     }
 
     @SuppressWarnings("deprecation")
@@ -789,25 +663,6 @@ public class HumbugActivity extends Activity {
             android.text.ClipboardManager clipboard = (android.text.ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
             clipboard.setText(msg.getContent());
         }
-    }
-
-    /**
-     * Check if a field is nonempty and mark fields as invalid if they are.
-     * 
-     * @param field
-     *            The field to check
-     * @param fieldName
-     *            The human-readable name of the field
-     * @return Whether the field correctly validated.
-     */
-    protected boolean requireFilled(EditText field, String fieldName) {
-        if (field.getText().toString().equals("")) {
-            field.setError("You must specify a " + fieldName);
-            field.requestFocus();
-            return false;
-        }
-        return true;
-
     }
 
     /**
