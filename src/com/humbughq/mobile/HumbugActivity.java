@@ -594,6 +594,8 @@ public class HumbugActivity extends Activity {
         // Pass the event to ActionBarDrawerToggle, if it returns
         // true, then it has handled the app icon touch event
         if (drawerToggle.onOptionsItemSelected(item)) {
+            // Close the right drawer if we opened the left one
+            drawerLayout.closeDrawer(Gravity.RIGHT);
             return true;
         }
 
