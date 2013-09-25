@@ -9,10 +9,15 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.EditText;
 
 public class ComposeDialog extends DialogFragment {
+    HumbugActivity activity;
+    ZulipApp app;
+    private MessageType type;
+
     private View view;
     private EditText recipient;
     private EditText subject;
@@ -80,7 +85,7 @@ public class ComposeDialog extends DialogFragment {
         view = inflater.inflate(R.layout.compose, null);
 
         Bundle bundle = getArguments();
-        final MessageType type = (MessageType) bundle.getSerializable("type");
+        type = (MessageType) bundle.getSerializable("type");
         final String stream = bundle.getString("stream");
         final String topic = bundle.getString("topic");
         final String pmRecipients = bundle.getString("pmRecipients");
@@ -92,52 +97,12 @@ public class ComposeDialog extends DialogFragment {
         subject = (EditText) view.findViewById(R.id.composeSubject);
         body = (EditText) view.findViewById(R.id.composeText);
 
-        final HumbugActivity activity = ((HumbugActivity) getActivity());
-        final ZulipApp app = activity.app;
+        activity = ((HumbugActivity) getActivity());
+        app = activity.app;
 
-        Dialog dialog = builder
-                .setView(view)
-                .setTitle("Compose")
-                .setPositiveButton(R.string.send,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface d, int id) {
-                                if (type == MessageType.STREAM_MESSAGE) {
-                                    requireFilled(subject, "subject");
-                                    requireFilled(recipient, "recipient"); // stream
-                                } else if (type == MessageType.PRIVATE_MESSAGE) {
-                                    requireFilled(recipient, "recipient");
-                                }
-
-                                requireFilled(body, "message body");
-
-                                Message msg = new Message(app);
-                                msg.setSender(app.you);
-
-                                if (type == MessageType.STREAM_MESSAGE) {
-                                    msg.setType(MessageType.STREAM_MESSAGE);
-                                    msg.setStream(new Stream(recipient
-                                            .getText().toString()));
-                                    msg.setSubject(subject.getText().toString());
-                                } else if (type == MessageType.PRIVATE_MESSAGE) {
-                                    msg.setType(MessageType.PRIVATE_MESSAGE);
-                                    msg.setRecipient(recipient.getText()
-                                            .toString().split(","));
-                                }
-
-                                msg.setContent(body.getText().toString());
-
-                                AsyncSend sender = new AsyncSend(activity, msg);
-                                sender.execute();
-                            }
-                        })
-                .setNegativeButton(android.R.string.cancel,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface d, int id) {
-                                d.dismiss();
-                            }
-                        }).create();
+        AlertDialog dialog = builder.setView(view).setTitle("Compose")
+                .setPositiveButton(R.string.send, null)
+                .setNegativeButton(android.R.string.cancel, null).create();
 
         if (type == MessageType.STREAM_MESSAGE) {
             this.switchToStream();
@@ -169,5 +134,45 @@ public class ComposeDialog extends DialogFragment {
                 WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 
         return dialog;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // getButton only works after the view is shown
+        ((AlertDialog) getDialog()).getButton(DialogInterface.BUTTON_POSITIVE)
+                .setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (type == MessageType.STREAM_MESSAGE) {
+                            requireFilled(subject, "subject");
+                            requireFilled(recipient, "recipient"); // stream
+                        } else if (type == MessageType.PRIVATE_MESSAGE) {
+                            requireFilled(recipient, "recipient");
+                        }
+
+                        requireFilled(body, "message body");
+
+                        Message msg = new Message(app);
+                        msg.setSender(app.you);
+
+                        if (type == MessageType.STREAM_MESSAGE) {
+                            msg.setType(MessageType.STREAM_MESSAGE);
+                            msg.setStream(new Stream(recipient.getText()
+                                    .toString()));
+                            msg.setSubject(subject.getText().toString());
+                        } else if (type == MessageType.PRIVATE_MESSAGE) {
+                            msg.setType(MessageType.PRIVATE_MESSAGE);
+                            msg.setRecipient(recipient.getText().toString()
+                                    .split(","));
+                        }
+
+                        msg.setContent(body.getText().toString());
+
+                        AsyncSend sender = new AsyncSend(activity, msg);
+                        sender.execute();
+                        dismiss();
+                    }
+                });
     }
 }
