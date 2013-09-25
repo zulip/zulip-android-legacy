@@ -127,4 +127,9 @@ public class ZulipApp extends Application {
             return null;
         }
     }
+
+    public void setContext(Context targetContext) {
+        this.attachBaseContext(targetContext);
+
+    }
 }
