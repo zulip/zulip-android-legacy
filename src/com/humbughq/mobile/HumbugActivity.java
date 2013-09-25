@@ -406,6 +406,15 @@ public class HumbugActivity extends Activity {
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        if (narrowFilter != null) {
+            doUnnarrow();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
     protected void narrow(final Stream stream) {
         try {
             final SelectArg streamArg = new SelectArg();
