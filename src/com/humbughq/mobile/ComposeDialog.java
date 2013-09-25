@@ -144,34 +144,38 @@ public class ComposeDialog extends DialogFragment {
                 .setOnClickListener(new OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (type == MessageType.STREAM_MESSAGE) {
-                            requireFilled(subject, "subject");
-                            requireFilled(recipient, "recipient"); // stream
-                        } else if (type == MessageType.PRIVATE_MESSAGE) {
-                            requireFilled(recipient, "recipient");
-                        }
-
-                        requireFilled(body, "message body");
-
-                        Message msg = new Message(app);
-                        msg.setSender(app.you);
+                        boolean valid = true;
 
                         if (type == MessageType.STREAM_MESSAGE) {
-                            msg.setType(MessageType.STREAM_MESSAGE);
-                            msg.setStream(new Stream(recipient.getText()
-                                    .toString()));
-                            msg.setSubject(subject.getText().toString());
+                            valid &= requireFilled(subject, "subject");
+                            valid &= requireFilled(recipient, "recipient"); // stream
                         } else if (type == MessageType.PRIVATE_MESSAGE) {
-                            msg.setType(MessageType.PRIVATE_MESSAGE);
-                            msg.setRecipient(recipient.getText().toString()
-                                    .split(","));
+                            valid &= requireFilled(recipient, "recipient");
                         }
 
-                        msg.setContent(body.getText().toString());
+                        valid &= requireFilled(body, "message body");
 
-                        AsyncSend sender = new AsyncSend(activity, msg);
-                        sender.execute();
-                        dismiss();
+                        if (valid) {
+                            Message msg = new Message(app);
+                            msg.setSender(app.you);
+
+                            if (type == MessageType.STREAM_MESSAGE) {
+                                msg.setType(MessageType.STREAM_MESSAGE);
+                                msg.setStream(new Stream(recipient.getText()
+                                        .toString()));
+                                msg.setSubject(subject.getText().toString());
+                            } else if (type == MessageType.PRIVATE_MESSAGE) {
+                                msg.setType(MessageType.PRIVATE_MESSAGE);
+                                msg.setRecipient(recipient.getText().toString()
+                                        .split(","));
+                            }
+
+                            msg.setContent(body.getText().toString());
+
+                            AsyncSend sender = new AsyncSend(activity, msg);
+                            sender.execute();
+                            dismiss();
+                        }
                     }
                 });
     }
