@@ -2,6 +2,9 @@ package com.humbughq.mobile;
 
 import java.sql.SQLException;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.j256.ormlite.stmt.SelectArg;
 import com.j256.ormlite.stmt.Where;
 
@@ -14,6 +17,25 @@ public class NarrowFilterPM implements NarrowFilter {
         this.recipientString = Message.recipientList(new Person[] { person,
                 ZulipApp.get().you });
     }
+
+    public int describeContents() {
+        return 0;
+    }
+
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(person.getEmail());
+    }
+
+    public static final Parcelable.Creator<NarrowFilterPM> CREATOR = new Parcelable.Creator<NarrowFilterPM>() {
+        public NarrowFilterPM createFromParcel(Parcel in) {
+            return new NarrowFilterPM(Person.getByEmail(ZulipApp.get(),
+                    in.readString()));
+        }
+
+        public NarrowFilterPM[] newArray(int size) {
+            return new NarrowFilterPM[size];
+        }
+    };
 
     @Override
     public Where<Message, Object> modWhere(Where<Message, Object> where)

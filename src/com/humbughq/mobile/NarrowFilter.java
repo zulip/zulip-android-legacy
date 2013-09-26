@@ -2,12 +2,14 @@ package com.humbughq.mobile;
 
 import java.sql.SQLException;
 
+import android.os.Parcelable;
+
 import com.j256.ormlite.stmt.Where;
 
 /**
  * Mutates a Where object to implement the desired narrowing filter.
  */
-public interface NarrowFilter {
+public interface NarrowFilter extends Parcelable {
     public Where<Message, Object> modWhere(Where<Message, Object> where)
             throws SQLException;
 
