@@ -37,8 +37,8 @@ public class AsyncGetEvents extends Thread {
     public void start() {
         registeredOrGotEventsThisRun = false;
 
-        if (this.app.getPointer() > 0 && this.activity.currentRange == null) {
-            this.activity.populateCurrentRange();
+        if (this.app.getPointer() > 0 && activity.homeList.currentRange == null) {
+            activity.homeList.populateCurrentRange();
         }
 
         onRegisterHandler = new Handler() {
@@ -170,7 +170,7 @@ public class AsyncGetEvents extends Thread {
             app.setPointer(response.getInt("pointer"));
             app.setMaxMessageId(response.getInt("max_message_id"));
 
-            activity.populateCurrentRange();
+            activity.homeList.populateCurrentRange();
 
             // Get subscriptions
             JSONArray subscriptions = response.getJSONArray("subscriptions");
@@ -241,9 +241,9 @@ public class AsyncGetEvents extends Thread {
         try {
             Dao<Message, Integer> messages = this.app.getDao(Message.class);
             messages.createOrUpdate(message);
-            if (this.activity.currentRange.high <= message.getID()) {
+            if (this.activity.homeList.currentRange.high <= message.getID()) {
                 this.app.getDao(MessageRange.class).createOrUpdate(
-                        this.activity.currentRange);
+                        this.activity.homeList.currentRange);
             }
         } catch (SQLException e) {
             // Awkward. (TODO)

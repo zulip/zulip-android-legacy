@@ -6,25 +6,12 @@
 
     <!-- The main content view -->
 
-    <LinearLayout
+    <FrameLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:orientation="vertical" >
+        android:id="@+id/list_fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
-        <ListView
-            android:id="@+id/listview"
-            android:layout_width="match_parent"
-            android:layout_height="fill_parent" >
-        </ListView>
-
-        <ListView
-            android:id="@+id/narrowed_listview"
-            android:layout_width="match_parent"
-            android:layout_height="fill_parent"
-            android:background="#f0f8ff"
-            android:visibility="gone" />
-    </LinearLayout>
     <!-- The navigation drawer -->
 
     <ListView

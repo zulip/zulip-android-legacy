@@ -18,8 +18,9 @@ import com.j256.ormlite.misc.TransactionManager;
 import com.j256.ormlite.stmt.Where;
 
 public class AsyncGetOldMessages extends HumbugAsyncPushTask {
-    HumbugActivity activity;
+    MessageListFragment fragment;
     private ArrayList<Message> receivedMessages;
+
     HumbugActivity.LoadPosition position;
     protected MessageRange rng;
     protected int mainAnchor;
@@ -28,9 +29,9 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
     private int after;
     AsyncGetOldMessages that = this;
 
-    public AsyncGetOldMessages(HumbugActivity humbugActivity) {
-        super(humbugActivity.app);
-        activity = humbugActivity;
+    public AsyncGetOldMessages(MessageListFragment fragment) {
+        super(fragment.app);
+        this.fragment = fragment;
         rng = null;
     }
 
@@ -59,10 +60,9 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
     @Override
     protected String doInBackground(String... params) {
         // Lets see whether we have this cached already
-        final Dao<MessageRange, Integer> messageRangeDao = this.activity.app
+        final Dao<MessageRange, Integer> messageRangeDao = app
                 .getDao(MessageRange.class);
-        Dao<Message, Integer> messageDao = this.activity.app
-                .getDao(Message.class);
+        Dao<Message, Integer> messageDao = app.getDao(Message.class);
         try {
             if (rng == null) {
                 // We haven't been passed a range, see if we have a range cached
@@ -101,7 +101,7 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
                             || upperCachedMessages.size() > 0) {
                         if (before > 0) {
                             AsyncGetOldMessages beforeTask = new AsyncGetOldMessages(
-                                    activity);
+                                    fragment);
                             beforeTask.rng = rng;
                             beforeTask.execute(mainAnchor,
                                     HumbugActivity.LoadPosition.ABOVE, before,
@@ -110,7 +110,7 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
                         if (after > 0) {
 
                             AsyncGetOldMessages afterTask = new AsyncGetOldMessages(
-                                    activity);
+                                    fragment);
                             afterTask.rng = rng;
                             afterTask
                                     .execute(afterAnchor,
@@ -251,7 +251,8 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
     protected void onPostExecute(String result) {
         if (receivedMessages != null && receivedMessages.size() != 0) {
             Log.v("poll", "Processing messages received.");
-            activity.onMessages(receivedMessages.toArray(new Message[0]),
+
+            fragment.onMessages(receivedMessages.toArray(new Message[0]),
                     position);
         } else {
             Log.v("poll", "No messages returned.");

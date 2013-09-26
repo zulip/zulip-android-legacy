@@ -1,14 +1,10 @@
 package com.humbughq.mobile;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.Callable;
 
 import android.annotation.TargetApi;
-import android.content.ClipData;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -20,63 +16,38 @@ import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
-import android.util.SparseArray;
-import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
-import android.widget.AbsListView;
-import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
-import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.humbughq.mobile.HumbugAsyncPushTask.AsyncTaskCompleteListener;
 import com.j256.ormlite.android.AndroidDatabaseResults;
-import com.j256.ormlite.dao.Dao;
-import com.j256.ormlite.stmt.QueryBuilder;
-import com.j256.ormlite.stmt.Where;
 
-public class HumbugActivity extends FragmentActivity {
+public class HumbugActivity extends FragmentActivity implements
+        MessageListFragment.Listener {
+
     ZulipApp app;
-
-    ListView listView;
 
     // Intent Extra constants
     public enum Flag {
         RESET_DATABASE,
     }
 
-    SparseArray<Message> messageIndex;
-    MessageAdapter adapter;
-    MessageAdapter narrowedAdapter;
-
     public enum LoadPosition {
         ABOVE, BELOW, NEW, INITIAL,
     }
 
-    int firstMessageId = -1;
-    int lastMessageId = -1;
-    boolean loadingMessages = true;
-
     boolean suspended = false;
-
     boolean logged_in = false;
-
-    String api_key;
-
-    View bottom_list_spacer;
 
     HumbugActivity that = this; // self-ref
     SharedPreferences settings;
@@ -92,25 +63,9 @@ public class HumbugActivity extends FragmentActivity {
 
     private AsyncGetEvents event_poll;
 
-    private ListView narrowedListView;
-
-    private OnItemClickListener tileClickListener = new OnItemClickListener() {
-
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position,
-                long id) {
-            try {
-                Message m = (Message) parent.getItemAtPosition(position);
-                openCompose(m.getType(), m.getStream().getName(),
-                        m.getSubject(), m.getReplyTo(app));
-            } catch (IndexOutOfBoundsException e) {
-                // We can ignore this because its probably before the data
-                // has been fetched.
-            }
-
-        }
-
-    };
+    MessageListFragment currentList;
+    MessageListFragment narrowedList;
+    MessageListFragment homeList;
 
     private SimpleCursorAdapter.ViewBinder streamBinder = new SimpleCursorAdapter.ViewBinder() {
 
@@ -133,16 +88,8 @@ public class HumbugActivity extends FragmentActivity {
 
     };
 
-    private NarrowFilter narrowFilter;
-
     protected RefreshableCursorAdapter streamsAdapter;
-
     protected RefreshableCursorAdapter peopleAdapter;
-
-    View loadIndicatorTop;
-    View loadIndicatorBottom;
-
-    protected MessageRange currentRange;
 
     /** Called when the activity is first created. */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
@@ -162,106 +109,8 @@ public class HumbugActivity extends FragmentActivity {
         this.onPrepareOptionsMenu(menu);
 
         this.logged_in = true;
-        messageIndex = new SparseArray<Message>();
 
         setContentView(R.layout.main);
-        listView = (ListView) findViewById(R.id.listview);
-        loadIndicatorTop = getLayoutInflater().inflate(R.layout.list_loading,
-                null);
-        loadIndicatorBottom = getLayoutInflater().inflate(
-                R.layout.list_loading, null);
-        listView.addHeaderView(loadIndicatorTop, null, false);
-        listView.addFooterView(loadIndicatorBottom, null, false);
-        showLoadIndicatorTop(true);
-
-        narrowedListView = (ListView) findViewById(R.id.narrowed_listview);
-
-        this.bottom_list_spacer = new ImageView(this);
-        this.size_bottom_spacer();
-        listView.addFooterView(this.bottom_list_spacer);
-        narrowedListView.addFooterView(this.bottom_list_spacer);
-
-        adapter = new MessageAdapter(this, new ArrayList<Message>());
-        listView.setAdapter(adapter);
-
-        // We want blue highlights when you longpress
-        listView.setDrawSelectorOnTop(true);
-
-        registerForContextMenu(listView);
-
-        listView.setOnScrollListener(new OnScrollListener() {
-
-            @Override
-            public void onScroll(AbsListView view, int firstVisibleItem,
-                    int visibleItemCount, int totalItemCount) {
-
-                final int near = 6;
-
-                if (!loadingMessages && firstMessageId > 0 && lastMessageId > 0) {
-                    if (firstVisibleItem + visibleItemCount > totalItemCount
-                            - near) {
-                        Log.i("scroll", "at bottom " + loadingMessages + " "
-                                + listHasMostRecent() + " " + lastMessageId
-                                + " " + app.getMaxMessageId());
-                        // At the bottom of the list
-                        if (!listHasMostRecent()) {
-                            loadMoreMessages(LoadPosition.BELOW);
-                        }
-                    }
-                    if (firstVisibleItem < near) {
-                        Log.i("scroll", "at top" + firstVisibleItem + " "
-                                + visibleItemCount + " " + totalItemCount);
-                        loadMoreMessages(LoadPosition.ABOVE);
-                    }
-                }
-
-            }
-
-            @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) {
-                try {
-                    // Scrolling messages isn't meaningful unless we have
-                    // messages to scroll.
-                    int mID = ((Message) view.getItemAtPosition(view
-                            .getFirstVisiblePosition())).getID();
-                    if (app.getPointer() < mID) {
-                        Log.i("scrolling", "Now at " + mID);
-                        (new AsyncPointerUpdate(app)).execute(mID);
-                        app.setPointer(mID);
-                    }
-                } catch (NullPointerException e) {
-                    Log.w("scrolling",
-                            "Could not find a location to scroll to!");
-                }
-            }
-        });
-
-        listView.setOnItemClickListener(tileClickListener);
-        listView.setOnItemSelectedListener(new OnItemSelectedListener() {
-
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view,
-                    int position, long id) {
-                try {
-                    int mID = (Integer) view.getTag(R.id.messageID);
-                    if (app.getPointer() < mID) {
-                        Log.i("keyboard", "Now at " + mID);
-                        (new AsyncPointerUpdate(app)).execute(mID);
-                        app.setPointer(mID);
-                    }
-                } catch (NullPointerException e) {
-                    Log.e("selected", "None, because we couldn't find the tag.");
-                }
-
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                // pass
-
-            }
-
-        });
 
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
@@ -357,14 +206,21 @@ public class HumbugActivity extends FragmentActivity {
             getActionBar().setDisplayHomeAsUpEnabled(true);
             getActionBar().setHomeButtonEnabled(true);
         }
+
+        homeList = MessageListFragment.newInstance(null);
+        pushListFragment(homeList, false);
     }
 
-    void showLoadIndicatorBottom(boolean show) {
-        loadIndicatorBottom.setVisibility(show ? View.VISIBLE : View.GONE);
-    }
-
-    void showLoadIndicatorTop(boolean show) {
-        loadIndicatorTop.setVisibility(show ? View.VISIBLE : View.GONE);
+    private void pushListFragment(MessageListFragment list, boolean back) {
+        currentList = list;
+        FragmentTransaction transaction = getSupportFragmentManager()
+                .beginTransaction();
+        transaction.replace(R.id.list_fragment_container, list);
+        if (back) {
+            transaction.addToBackStack(null);
+        }
+        transaction.commit();
+        getSupportFragmentManager().executePendingTransactions();
     }
 
     private void processParams() {
@@ -396,74 +252,41 @@ public class HumbugActivity extends FragmentActivity {
         }
     }
 
-    @Override
-    public void onBackPressed() {
-        if (narrowFilter != null) {
-            doUnnarrow();
-        } else {
-            super.onBackPressed();
-        }
-    }
-
     protected void narrow(final Stream stream) {
-        try {
-            doNarrow(new NarrowFilterStream(stream));
-        } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        doNarrow(new NarrowFilterStream(stream));
     }
 
     protected void narrow_pm_with(final Person person) {
-        try {
-            doNarrow(new NarrowFilterPM(person));
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        doNarrow(new NarrowFilterPM(person));
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    private void doNarrow(NarrowFilter filter) throws SQLException {
-        Where<Message, Object> filteredWhere = filter.modWhere(app
-                .getDao(Message.class).queryBuilder().where());
-        List<Message> messages = filteredWhere.query();
+    public void onListResume(MessageListFragment list) {
+        currentList = list;
 
-        this.narrowedAdapter = new MessageAdapter(this, messages);
-        this.narrowedListView.setAdapter(this.narrowedAdapter);
-        this.narrowFilter = filter;
+        NarrowFilter filter = list.filter;
 
-        filteredWhere.and().le(Message.ID_FIELD, app.getPointer());
-
-        QueryBuilder<Message, Object> closestQuery = app.getDao(Message.class)
-                .queryBuilder();
-
-        closestQuery.orderBy(Message.TIMESTAMP_FIELD, false).setWhere(
-                filteredWhere);
-        this.narrowedListView.setSelection(this.narrowedAdapter
-                .getPosition(closestQuery.queryForFirst()));
-        this.listView.setVisibility(View.GONE);
-        this.narrowedListView.setVisibility(View.VISIBLE);
-
-        String title = filter.getTitle();
-        if (title != null) {
-            getActionBar().setTitle(title);
+        if (filter == null) {
+            getActionBar().setTitle("Zulip");
+            getActionBar().setSubtitle(null);
+            this.drawerToggle.setDrawerIndicatorEnabled(true);
+        } else {
+            String title = list.filter.getTitle();
+            if (title != null) {
+                getActionBar().setTitle(title);
+            }
+            getActionBar().setSubtitle(list.filter.getSubtitle());
+            this.drawerToggle.setDrawerIndicatorEnabled(false);
         }
-        getActionBar().setSubtitle(filter.getSubtitle());
-        this.narrowedListView.setOnItemClickListener(tileClickListener);
-        this.drawerToggle.setDrawerIndicatorEnabled(false);
+
         this.drawerLayout.closeDrawers();
-
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    private void doUnnarrow() {
-        this.narrowedAdapter.clear();
-        this.narrowedListView.setVisibility(View.GONE);
-        this.listView.setVisibility(View.VISIBLE);
-        this.drawerToggle.setDrawerIndicatorEnabled(true);
-        getActionBar().setTitle("Zulip");
-        getActionBar().setSubtitle(null);
-        this.narrowFilter = null;
+    protected void doNarrow(NarrowFilter filter) {
+        narrowedList = MessageListFragment.newInstance(filter);
+        // Push to the back stack if we are not already narrowed
+        pushListFragment(narrowedList, currentList == homeList);
+        narrowedList.onReadyToDisplay();
     }
 
     @Override
@@ -507,19 +330,19 @@ public class HumbugActivity extends FragmentActivity {
         // Handle item selection
         switch (item.getItemId()) {
         case android.R.id.home:
-            doUnnarrow();
+            getSupportFragmentManager().popBackStack();
             break;
         case R.id.compose_stream:
             String stream = null;
-            if (narrowFilter != null) {
-                stream = narrowFilter.getComposeStream().getName();
+            if (currentList.filter != null) {
+                stream = currentList.filter.getComposeStream().getName();
             }
             openCompose(MessageType.STREAM_MESSAGE, stream, null, null);
             break;
         case R.id.compose_pm:
             String recipient = null;
-            if (narrowFilter != null) {
-                recipient = narrowFilter.getComposePMRecipient();
+            if (currentList.filter != null) {
+                recipient = currentList.filter.getComposePMRecipient();
             }
             openCompose(MessageType.PRIVATE_MESSAGE, null, null, recipient);
             break;
@@ -541,38 +364,25 @@ public class HumbugActivity extends FragmentActivity {
         return true;
     }
 
-    protected void openCompose(MessageType type) {
+    public void openCompose(MessageType type) {
         openCompose(type, null, null, null);
     }
 
-    protected void openCompose(Stream stream, String topic) {
+    public void openCompose(Stream stream, String topic) {
         openCompose(MessageType.STREAM_MESSAGE, stream.getName(), topic, null);
     }
 
-    protected void openCompose(String pmRecipients) {
+    public void openCompose(String pmRecipients) {
         openCompose(MessageType.PRIVATE_MESSAGE, null, null, pmRecipients);
     }
 
-    private void openCompose(final MessageType type, String stream,
+    public void openCompose(final MessageType type, String stream,
             String topic, String pmRecipients) {
 
         FragmentManager fm = getSupportFragmentManager();
         ComposeDialog dialog = ComposeDialog.newInstance(type, stream, topic,
                 pmRecipients);
         dialog.show(fm, "fragment_compose");
-    }
-
-    @SuppressWarnings("deprecation")
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    private void copyMessage(Message msg) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-            clipboard.setPrimaryClip(ClipData.newPlainText("Zulip Message",
-                    msg.getContent()));
-        } else {
-            android.text.ClipboardManager clipboard = (android.text.ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-            clipboard.setText(msg.getContent());
-        }
     }
 
     /**
@@ -599,23 +409,11 @@ public class HumbugActivity extends FragmentActivity {
         startActivityForResult(i, 0);
     }
 
-    private void size_bottom_spacer() {
-        @SuppressWarnings("deprecation")
-        // needed for compat with API <13
-        int windowHeight = ((WindowManager) this
-                .getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay()
-                .getHeight();
-
-        AbsListView.LayoutParams params = new AbsListView.LayoutParams(0, 0);
-        params.height = windowHeight / 2;
-        this.bottom_list_spacer.setLayoutParams(params);
-    }
-
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
         // our display has changed, lets recalculate the spacer
-        this.size_bottom_spacer();
+        // this.size_bottom_spacer();
 
         drawerToggle.onConfigurationChanged(newConfig);
     }
@@ -652,231 +450,19 @@ public class HumbugActivity extends FragmentActivity {
         if (event_poll != null) {
             event_poll.abort();
         }
-        loadingMessages = true;
-        showLoadIndicatorTop(true);
+
         event_poll = new AsyncGetEvents(this);
         event_poll.start();
     }
 
-    private Message itemFromMenuInfo(ContextMenuInfo menuInfo) {
-        AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
-        // Subtract 1 because it counts the header
-        return adapter.getItem(info.position - 1);
-    }
-
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v,
-            ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        Message msg = itemFromMenuInfo(menuInfo);
-        if (msg == null) {
-            return;
-        }
-        if (msg.getType().equals(MessageType.STREAM_MESSAGE)) {
-            MenuInflater inflater = getMenuInflater();
-            inflater.inflate(R.menu.context_stream, menu);
-        } else if (msg.getPersonalReplyTo(app).length > 1) {
-            MenuInflater inflater = getMenuInflater();
-            inflater.inflate(R.menu.context_private, menu);
-        } else {
-            MenuInflater inflater = getMenuInflater();
-            inflater.inflate(R.menu.context_single_private, menu);
-        }
-    }
-
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        Message message = itemFromMenuInfo((AdapterContextMenuInfo) item
-                .getMenuInfo());
-        switch (item.getItemId()) {
-        case R.id.reply_to_stream:
-            openCompose(message.getStream(), message.getSubject());
-            return true;
-        case R.id.reply_to_private:
-            openCompose(message.getReplyTo(app));
-            return true;
-        case R.id.reply_to_sender:
-            openCompose(message.getSender().getEmail());
-            return true;
-        case R.id.copy_message:
-            copyMessage(message);
-            return true;
-        default:
-            return super.onContextItemSelected(item);
-        }
-    }
-
     public void onReadyToDisplay() {
-        adapter.clear();
-        messageIndex.clear();
-
-        firstMessageId = -1;
-        lastMessageId = -1;
-
-        that.populateCurrentRange();
-        final AsyncGetOldMessages oldMessagesReq = new AsyncGetOldMessages(this);
-
-        oldMessagesReq
-                .execute(app.getPointer(), LoadPosition.INITIAL, 100, 100);
-        oldMessagesReq.setCallback(new AsyncTaskCompleteListener() {
-            @Override
-            public void onTaskComplete(String result) {
-                int anc = app.getPointer();
-                that.selectMessage(that.getMessageById(anc));
-                loadingMessages = false;
-                showLoadIndicatorTop(false);
-            }
-
-            public void onTaskFailure(String result) {
-
-            }
-        });
-
+        homeList.onReadyToDisplay();
     }
 
     public void onMessages(Message[] messages, LoadPosition pos) {
-        Log.i("onMessages", "Adding " + messages.length + " messages at " + pos);
-
-        // Collect state used to maintain scroll position
-        int topPosBefore = listView.getFirstVisiblePosition();
-        View topView = listView.getChildAt(0);
-        int topOffsetBefore = (topView != null) ? topView.getTop() : 0;
-        if (topOffsetBefore >= 0) {
-            // If the loading indicator was visible, show a new message in the
-            // space it took up. If it was not visible, avoid jumping.
-            topOffsetBefore -= loadIndicatorTop.getHeight();
-        }
-        int addedCount = 0;
-
-        if (pos == LoadPosition.NEW) {
-            // listHasMostRecent check needs to occur before updating
-            // lastAvailableMessageId
-            boolean hasMostRecent = listHasMostRecent();
-            app.setMaxMessageId(messages[messages.length - 1].getID());
-            if (!hasMostRecent) {
-                // If we don't have intermediate messages loaded, don't add new
-                // messages -- they'll be loaded when we scroll down.
-                Log.i("onMessage",
-                        "skipping new message " + messages[0].getID() + " "
-                                + app.getMaxMessageId());
-                return;
-            }
-        }
-
-        for (int i = 0; i < messages.length; i++) {
-            Message message = messages[i];
-
-            if (this.messageIndex.get(message.getID()) != null) {
-                // Already have this message.
-                Log.i("onMessage", "Already have " + message.getID());
-                continue;
-            }
-
-            this.messageIndex.append(message.getID(), message);
-            Stream stream = message.getStream();
-
-            if (stream == null || stream.getInHomeView()) {
-                if (pos == LoadPosition.NEW || pos == LoadPosition.BELOW) {
-                    this.adapter.add(message);
-
-                    if (this.narrowFilter != null) {
-                        // For some reason calling adapter.add above shows the
-                        // main message list. Lets explicitly re-hide it here.
-                        this.listView.setVisibility(View.GONE);
-
-                        if (this.narrowFilter.matches(message)) {
-                            this.narrowedAdapter.add(message);
-                        }
-                    }
-                } else if (pos == LoadPosition.ABOVE
-                        || pos == LoadPosition.INITIAL) {
-                    // TODO: Does this copy the array every time?
-                    this.adapter.insert(message, addedCount);
-                    addedCount++;
-                }
-
-                if (message.getID() > lastMessageId) {
-                    lastMessageId = message.getID();
-                }
-
-                if (message.getID() < firstMessageId || firstMessageId == -1) {
-                    firstMessageId = message.getID();
-                }
-            }
-        }
-
-        if (pos == LoadPosition.ABOVE) {
-            showLoadIndicatorTop(false);
-            Log.i("Header",
-                    loadIndicatorTop.getTop() + " "
-                            + loadIndicatorTop.getHeight() + " "
-                            + topOffsetBefore);
-            // Restore the position of the top item
-            this.listView.setSelectionFromTop(topPosBefore + addedCount,
-                    topOffsetBefore);
-        } else if (pos == LoadPosition.BELOW) {
-            showLoadIndicatorBottom(false);
-        }
-    }
-
-    public Boolean listHasMostRecent() {
-        return lastMessageId == app.getMaxMessageId();
-    }
-
-    public void loadMoreMessages(LoadPosition pos) {
-        int above = 0;
-        int below = 0;
-        int around;
-
-        if (pos == LoadPosition.ABOVE) {
-            above = 100;
-            around = firstMessageId;
-            showLoadIndicatorTop(true);
-        } else if (pos == LoadPosition.BELOW) {
-            below = 100;
-            around = lastMessageId;
-            showLoadIndicatorBottom(true);
-        } else {
-            Log.e("loadMoreMessages", "Invalid position");
-            return;
-        }
-
-        Log.i("loadMoreMessages", "" + around + " " + pos + " " + above + " "
-                + below);
-
-        loadingMessages = true;
-
-        AsyncGetOldMessages oldMessagesReq = new AsyncGetOldMessages(this);
-        oldMessagesReq.execute(around, pos, above, below);
-        oldMessagesReq.setCallback(new AsyncTaskCompleteListener() {
-            @Override
-            public void onTaskComplete(String result) {
-                loadingMessages = false;
-            }
-
-            public void onTaskFailure(String result) {
-                loadingMessages = false;
-            }
-        });
-    }
-
-    public void selectMessage(final Message message) {
-        listView.setSelection(adapter.getPosition(message));
-    }
-
-    public Message getMessageById(int id) {
-        return this.messageIndex.get(id);
-    }
-
-    public void populateCurrentRange() {
-        Dao<MessageRange, Integer> messageRangeDao = app
-                .getDao(MessageRange.class);
-        this.currentRange = MessageRange.getRangeContaining(app.getPointer(),
-                messageRangeDao);
-        if (this.currentRange == null) {
-            this.currentRange = new MessageRange(app.getPointer(),
-                    app.getPointer());
-            // Does not get saved until we actually have messages here
+        homeList.onMessages(messages, pos);
+        if (narrowedList != null) {
+            narrowedList.onMessages(messages, pos);
         }
     }
 }
