@@ -13,6 +13,7 @@ import org.json.JSONObject;
 
 import android.util.Log;
 
+import com.humbughq.mobile.HumbugActivity.LoadPosition;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.misc.TransactionManager;
 import com.j256.ormlite.stmt.Where;
@@ -100,23 +101,12 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
                     if (lowerCachedMessages.size() > 0
                             || upperCachedMessages.size() > 0) {
                         if (before > 0) {
-                            AsyncGetOldMessages beforeTask = new AsyncGetOldMessages(
-                                    fragment);
-                            beforeTask.rng = rng;
-                            beforeTask.execute(mainAnchor,
-                                    HumbugActivity.LoadPosition.ABOVE, before,
-                                    0);
+                            this.recurse(HumbugActivity.LoadPosition.ABOVE,
+                                    before, rng, mainAnchor);
                         }
                         if (after > 0) {
-
-                            AsyncGetOldMessages afterTask = new AsyncGetOldMessages(
-                                    fragment);
-                            afterTask.rng = rng;
-                            afterTask
-                                    .execute(afterAnchor,
-                                            HumbugActivity.LoadPosition.BELOW,
-                                            0, after);
-                            Log.e("AGOM", "bck done");
+                            this.recurse(HumbugActivity.LoadPosition.BELOW,
+                                    before, rng, afterAnchor);
                         }
                     }
                     return null;
@@ -193,6 +183,23 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
         }
 
         return null; // since onPostExecute doesn't use the String result
+    }
+
+    protected void recurse(LoadPosition position, int amount, MessageRange rng,
+            int anchor) {
+        AsyncGetOldMessages task = new AsyncGetOldMessages(fragment);
+        task.rng = rng;
+        switch (position) {
+        case ABOVE:
+            task.execute(anchor, position, amount, 0);
+            break;
+        case BELOW:
+            task.execute(anchor, position, 0, amount);
+        default:
+            Log.wtf("AGOM", "recurse passed unexpected load position!");
+            break;
+        }
+
     }
 
     protected boolean fetchMessages(int anchor, int num_before, int num_after,
