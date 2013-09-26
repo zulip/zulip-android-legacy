@@ -45,8 +45,11 @@ public class UnsortedTests extends ActivityUnitTestCase<HumbugActivity> {
                 HumbugActivity.class), null, null);
         this.getInstrumentation().waitForIdleSync();
         app.setContext(getInstrumentation().getTargetContext());
-        ((ZulipApp) getActivity().getApplication())
-                .setEmail("testuser@example.com");
+        // Need to setEmail twice to reinitialise the database after destroying
+        // it.
+        app.setEmail("testuser@example.com");
+        app.deleteDatabase(app.getDatabaseHelper().getDatabaseName());
+        app.setEmail("testuser@example.com");
 
     }
 
