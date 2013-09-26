@@ -22,6 +22,7 @@ import com.j256.ormlite.table.DatabaseTable;
 @DatabaseTable(tableName = "messages")
 public class Message {
 
+    public static final String ID_FIELD = "id";
     public static final String SENDER_FIELD = "sender";
     public static final String TYPE_FIELD = "type";
     public static final String CONTENT_FIELD = "content";
@@ -43,7 +44,7 @@ public class Message {
     @DatabaseField(columnName = RECIPIENTS_FIELD, index = true)
     private String recipients;
     private Person[] recipientsCache;
-    @DatabaseField(id = true)
+    @DatabaseField(id = true, columnName = ID_FIELD)
     private int id;
     @DatabaseField(foreign = true, columnName = STREAM_FIELD, foreignAutoRefresh = true)
     private Stream stream;
