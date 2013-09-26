@@ -25,7 +25,7 @@ public class UnsortedTests extends ActivityUnitTestCase<HumbugActivity> {
     }
 
     public void testMessageCreation() throws JSONException {
-        testInit();
+        prepTests();
         JSONObject jsonObject;
         jsonObject = new JSONObject(
                 "{\"recipient_id\": 314, \"sender_email\": \"lfaraone@zulip.com\", \"timestamp\": 1379966441, \"display_recipient\": \"test\", \"sender_id\": 15, \"sender_full_name\": \"Luke Faraone\", \"sender_domain\": \"zulip.com\", \"content\": \"Hello!\", \"gravatar_hash\": \"9cd8e1981dc89f3221c5077dd8a22515\", \"avatar_url\": \"https://secure.gravatar.com/avatar/9cd8e1981dc89f3221c5077dd8a22515?d=identicon\", \"client\": \"website\", \"content_type\": \"text/x-markdown\", \"subject_links\": [], \"sender_short_name\": \"lfaraone\", \"type\": \"stream\", \"id\": 10594623, \"subject\": \"toast\"}");
@@ -39,7 +39,7 @@ public class UnsortedTests extends ActivityUnitTestCase<HumbugActivity> {
     /**
      * Run this before each test to set up the activity.
      */
-    private void testInit() {
+    protected void prepTests() {
         setApplication(app);
         this.startActivity(new Intent(getInstrumentation().getTargetContext(),
                 HumbugActivity.class), null, null);
