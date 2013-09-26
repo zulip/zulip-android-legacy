@@ -46,7 +46,6 @@ import com.humbughq.mobile.HumbugAsyncPushTask.AsyncTaskCompleteListener;
 import com.j256.ormlite.android.AndroidDatabaseResults;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.stmt.QueryBuilder;
-import com.j256.ormlite.stmt.SelectArg;
 import com.j256.ormlite.stmt.Where;
 
 public class HumbugActivity extends FragmentActivity {
@@ -408,103 +407,19 @@ public class HumbugActivity extends FragmentActivity {
 
     protected void narrow(final Stream stream) {
         try {
-            final SelectArg streamArg = new SelectArg();
-
-            NarrowFilter streamNarrow = new NarrowFilter() {
-                @Override
-                public Where<Message, Object> modWhere(
-                        Where<Message, Object> where) throws SQLException {
-                    where.eq(Message.STREAM_FIELD, streamArg);
-
-                    streamArg.setValue(stream);
-                    return where;
-                }
-
-                @Override
-                public boolean matches(Message msg) {
-                    return msg.getType() == MessageType.STREAM_MESSAGE
-                            && msg.getStream().equals(stream);
-                }
-
-                @Override
-                public String getTitle() {
-                    return stream.getName();
-                }
-
-                @Override
-                public String getSubtitle() {
-                    return null;
-                }
-
-                @Override
-                public Stream getComposeStream() {
-                    return stream;
-                }
-
-                @Override
-                public String getComposePMRecipient() {
-                    return null;
-                }
-
-            };
-
-            doNarrow(streamNarrow);
+            doNarrow(new NarrowFilterStream(stream));
         } catch (SQLException e) {
+            // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
     }
 
     protected void narrow_pm_with(final Person person) {
         try {
-            final String recipientString = Message.recipientList(new Person[] {
-                    person, app.you });
-            NarrowFilter pmNarrow = new NarrowFilter() {
-                @Override
-                public Where<Message, Object> modWhere(
-                        Where<Message, Object> where) throws SQLException {
-
-                    final SelectArg recipientsArg = new SelectArg(
-                            recipientString);
-                    where.eq(Message.RECIPIENTS_FIELD, recipientsArg);
-                    return where;
-                }
-
-                @Override
-                public boolean matches(Message msg) {
-                    if (msg.getType() == MessageType.PRIVATE_MESSAGE) {
-                        return msg.getRawRecipients().equals(recipientString);
-                    }
-                    return false;
-                }
-
-                @Override
-                public String getTitle() {
-                    return person.getName();
-                }
-
-                @Override
-                public String getSubtitle() {
-                    return null;
-                }
-
-                @Override
-                public Stream getComposeStream() {
-                    return null;
-                }
-
-                @Override
-                public String getComposePMRecipient() {
-                    return person.getEmail();
-                }
-
-            };
-
-            doNarrow(pmNarrow);
+            doNarrow(new NarrowFilterPM(person));
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
