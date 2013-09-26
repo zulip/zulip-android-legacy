@@ -12,6 +12,7 @@ import android.util.Log;
 import com.j256.ormlite.dao.Dao;
 
 public class ZulipApp extends Application {
+    private static ZulipApp instance;
     private static final String USER_AGENT = "ZulipMobile";
     Person you;
     SharedPreferences settings;
@@ -24,9 +25,14 @@ public class ZulipApp extends Application {
 
     private int pointer;
 
+    public static ZulipApp get() {
+        return instance;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
+        ZulipApp.instance = this;
 
         // This used to be from HumbugActivity.getPreferences, so we keep that
         // file name.
