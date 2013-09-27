@@ -658,13 +658,17 @@ public class HumbugActivity extends FragmentActivity {
         event_poll.start();
     }
 
+    private Message itemFromMenuInfo(ContextMenuInfo menuInfo) {
+        AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
+        // Subtract 1 because it counts the header
+        return adapter.getItem(info.position - 1);
+    }
+
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v,
             ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
-        // Using menuInfo, determine which menu to show (stream or private)
-        AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
-        Message msg = messageIndex.get((int) info.id);
+        Message msg = itemFromMenuInfo(menuInfo);
         if (msg == null) {
             return;
         }
@@ -682,9 +686,8 @@ public class HumbugActivity extends FragmentActivity {
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
-                .getMenuInfo();
-        Message message = messageIndex.get((int) info.id);
+        Message message = itemFromMenuInfo((AdapterContextMenuInfo) item
+                .getMenuInfo());
         switch (item.getItemId()) {
         case R.id.reply_to_stream:
             openCompose(message.getStream(), message.getSubject());
