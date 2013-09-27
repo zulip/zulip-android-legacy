@@ -42,10 +42,6 @@ public class HumbugActivity extends FragmentActivity implements
         RESET_DATABASE,
     }
 
-    public enum LoadPosition {
-        ABOVE, BELOW, NEW, INITIAL,
-    }
-
     boolean suspended = false;
     boolean logged_in = false;
 
@@ -459,7 +455,7 @@ public class HumbugActivity extends FragmentActivity implements
         homeList.onReadyToDisplay();
     }
 
-    public void onMessages(Message[] messages, LoadPosition pos) {
+    public void onMessages(Message[] messages, MessageListener.LoadPosition pos) {
         homeList.onMessages(messages, pos);
         if (narrowedList != null) {
             narrowedList.onMessages(messages, pos);

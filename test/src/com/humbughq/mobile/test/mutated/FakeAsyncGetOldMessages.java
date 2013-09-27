@@ -3,11 +3,10 @@ package com.humbughq.mobile.test.mutated;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.humbughq.mobile.HumbugActivity;
 import com.humbughq.mobile.Message;
 import com.humbughq.mobile.MessageListFragment;
+import com.humbughq.mobile.MessageListener.LoadPosition;
 import com.humbughq.mobile.MessageRange;
-import com.humbughq.mobile.HumbugActivity.LoadPosition;
 
 public class FakeAsyncGetOldMessages extends
         com.humbughq.mobile.AsyncGetOldMessages {
@@ -32,8 +31,8 @@ public class FakeAsyncGetOldMessages extends
 
     public void executeBasedOnPresetValues() {
         // LP doesn't matter, so just go with INITIAL
-        this.execute(fmAnchor, HumbugActivity.LoadPosition.INITIAL,
-                fmNumBefore, fmNumAfter, filter);
+        this.execute(fmAnchor, LoadPosition.INITIAL, fmNumBefore, fmNumAfter,
+                filter);
     }
 
     @Override
@@ -54,7 +53,7 @@ public class FakeAsyncGetOldMessages extends
             int anchor) {
         FakeAsyncGetOldMessages task = new FakeAsyncGetOldMessages(myfragment);
         task.rng = rng;
-        if (position == HumbugActivity.LoadPosition.ABOVE) {
+        if (position == LoadPosition.ABOVE) {
             task.fmNumBefore = amount;
         } else {
             task.fmNumAfter = amount;

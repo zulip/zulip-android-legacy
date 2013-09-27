@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Log;
 
+import com.humbughq.mobile.MessageListener.LoadPosition;
 import com.j256.ormlite.dao.Dao;
 
 public class AsyncGetEvents extends Thread {
@@ -250,6 +251,6 @@ public class AsyncGetEvents extends Thread {
             e.printStackTrace();
         }
         Message[] messages = { message };
-        this.activity.onMessages(messages, HumbugActivity.LoadPosition.NEW);
+        this.activity.onMessages(messages, LoadPosition.NEW);
     }
 }

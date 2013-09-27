@@ -29,8 +29,8 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ImageView;
 import android.widget.ListView;
 
-import com.humbughq.mobile.HumbugActivity.LoadPosition;
 import com.humbughq.mobile.HumbugAsyncPushTask.AsyncTaskCompleteListener;
+import com.humbughq.mobile.MessageListener.LoadPosition;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.stmt.Where;

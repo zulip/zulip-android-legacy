@@ -8,19 +8,19 @@ import java.util.concurrent.ExecutionException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.Intent;
+import android.test.ActivityUnitTestCase;
+
 import com.humbughq.mobile.HumbugActivity;
-import com.humbughq.mobile.HumbugActivity.LoadPosition;
 import com.humbughq.mobile.Message;
 import com.humbughq.mobile.MessageListFragment;
+import com.humbughq.mobile.MessageListener.LoadPosition;
 import com.humbughq.mobile.MessageRange;
 import com.humbughq.mobile.MessageType;
 import com.humbughq.mobile.Person;
 import com.humbughq.mobile.ZulipApp;
 import com.humbughq.mobile.test.mutated.FakeAsyncGetOldMessages;
 import com.j256.ormlite.dao.Dao;
-
-import android.content.Intent;
-import android.test.ActivityUnitTestCase;
 
 public class UnsortedTests extends ActivityUnitTestCase<HumbugActivity> {
 

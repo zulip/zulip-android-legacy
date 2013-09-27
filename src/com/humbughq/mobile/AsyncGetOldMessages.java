@@ -13,7 +13,7 @@ import org.json.JSONObject;
 
 import android.util.Log;
 
-import com.humbughq.mobile.HumbugActivity.LoadPosition;
+import com.humbughq.mobile.MessageListener.LoadPosition;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.misc.TransactionManager;
 import com.j256.ormlite.stmt.Where;
@@ -21,7 +21,7 @@ import com.j256.ormlite.stmt.Where;
 public class AsyncGetOldMessages extends HumbugAsyncPushTask {
     MessageListFragment fragment;
     public ArrayList<Message> receivedMessages;
-    HumbugActivity.LoadPosition position;
+    MessageListener.LoadPosition position;
     protected MessageRange rng;
     protected int mainAnchor;
     protected NarrowFilter filter;
@@ -47,8 +47,8 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
      * @param after
      *            Number of messages before the anchor to return
      */
-    public final void execute(int anchor, HumbugActivity.LoadPosition pos,
-            int before, int after, NarrowFilter filter) {
+    public final void execute(int anchor, LoadPosition pos, int before,
+            int after, NarrowFilter filter) {
         this.mainAnchor = anchor;
         this.before = before;
         this.afterAnchor = mainAnchor + 1;
@@ -116,12 +116,12 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
                     if (lowerCachedMessages.size() > 0
                             || upperCachedMessages.size() > 0) {
                         if (before > 0) {
-                            this.recurse(HumbugActivity.LoadPosition.ABOVE,
-                                    before, rng, mainAnchor);
+                            this.recurse(LoadPosition.ABOVE, before, rng,
+                                    mainAnchor);
                         }
                         if (after > 0) {
-                            this.recurse(HumbugActivity.LoadPosition.BELOW,
-                                    after, rng, afterAnchor);
+                            this.recurse(LoadPosition.BELOW, after, rng,
+                                    afterAnchor);
                         }
                     }
                     return null;
