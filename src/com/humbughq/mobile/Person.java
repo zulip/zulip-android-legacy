@@ -126,7 +126,7 @@ public class Person {
         }
     }
 
-    static Person getOrUpdate(ZulipApp app, String email, String name,
+    public static Person getOrUpdate(ZulipApp app, String email, String name,
             String avatarURL) {
         Person person = getByEmail(app, email);
         if (person == null) {

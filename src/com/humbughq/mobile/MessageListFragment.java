@@ -67,7 +67,7 @@ public class MessageListFragment extends Fragment {
     private View loadIndicatorBottom;
     private View bottom_list_spacer;
 
-    final ZulipApp app;
+    public ZulipApp app;
 
     SparseArray<Message> messageIndex;
     MessageAdapter adapter;

@@ -20,8 +20,7 @@ import com.j256.ormlite.stmt.Where;
 
 public class AsyncGetOldMessages extends HumbugAsyncPushTask {
     MessageListFragment fragment;
-    private ArrayList<Message> receivedMessages;
-
+    public ArrayList<Message> receivedMessages;
     HumbugActivity.LoadPosition position;
     protected MessageRange rng;
     protected int mainAnchor;

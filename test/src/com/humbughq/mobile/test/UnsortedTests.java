@@ -1,12 +1,23 @@
 package com.humbughq.mobile.test;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.humbughq.mobile.HumbugActivity;
+import com.humbughq.mobile.HumbugActivity.LoadPosition;
 import com.humbughq.mobile.Message;
+import com.humbughq.mobile.MessageListFragment;
+import com.humbughq.mobile.MessageRange;
+import com.humbughq.mobile.MessageType;
 import com.humbughq.mobile.Person;
 import com.humbughq.mobile.ZulipApp;
+import com.humbughq.mobile.test.mutated.FakeAsyncGetOldMessages;
+import com.j256.ormlite.dao.Dao;
 
 import android.content.Intent;
 import android.test.ActivityUnitTestCase;
@@ -14,6 +25,7 @@ import android.test.ActivityUnitTestCase;
 public class UnsortedTests extends ActivityUnitTestCase<HumbugActivity> {
 
     private ZulipApp app;
+    Dao<Message, Integer> messageDao;
 
     public UnsortedTests() {
         super(HumbugActivity.class);
@@ -22,6 +34,7 @@ public class UnsortedTests extends ActivityUnitTestCase<HumbugActivity> {
     protected void setUp() throws Exception {
         super.setUp();
         app = new ZulipApp();
+
     }
 
     public void testMessageCreation() throws JSONException {
@@ -34,6 +47,94 @@ public class UnsortedTests extends ActivityUnitTestCase<HumbugActivity> {
         assertEquals(msg.getID(), 10594623);
         assertEquals(msg.getSender(), new Person("Luke Faraone",
                 "lfaraone@zulip.com"));
+    }
+
+    public void testAGOMFetch() throws SQLException, InterruptedException,
+            ExecutionException {
+        prepTests();
+        MessageListFragment fragment = MessageListFragment.newInstance(null);
+        fragment.app = app;
+        FakeAsyncGetOldMessages request = new FakeAsyncGetOldMessages(fragment);
+        request.shouldFmSucceed = true;
+        request.appendTheseMessages = new ArrayList<Message>();
+        Message m1 = sampleMessage(app, 40);
+        Message m2 = sampleMessage(app, 45);
+        Message m3 = sampleMessage(app, 60);
+        request.appendTheseMessages.add(m1);
+        request.appendTheseMessages.add(m2);
+        request.appendTheseMessages.add(m3);
+        request.execute(50, LoadPosition.INITIAL, 10, 10);
+        request.get();
+        // Should result in a MR of 40, 60
+
+        MessageRange mr = app.getDao(MessageRange.class).queryForAll().get(0);
+        assertEquals(40, mr.low);
+        assertEquals(60, mr.high);
+
+        // Now fetching inside that range should be safe.
+        request = new FakeAsyncGetOldMessages(fragment);
+        request.execute(45, LoadPosition.INITIAL, 1, 0);
+        request.get();
+        assertFalse(request.fmCalled);
+        assertEquals(2, request.receivedMessages.size());
+
+        // Now let's test coalescing...
+        // The fetch won't be in cache here, but one message will already be
+        // retrieved.
+        request = new FakeAsyncGetOldMessages(fragment);
+        request.shouldFmSucceed = true;
+        request.appendTheseMessages = new ArrayList<Message>();
+        Message m0 = sampleMessage(app, 35);
+        request.appendTheseMessages.add(m0);
+        request.appendTheseMessages.add(m1);
+        request.execute(36, LoadPosition.INITIAL, 1, 1);
+        request.get();
+        assertEquals(2, request.receivedMessages.size());
+        List<MessageRange> mrs = app.getDao(MessageRange.class).queryForAll();
+        assertEquals(1, mrs.size());
+        assertEquals(35, mrs.get(0).low);
+        assertEquals(60, mrs.get(0).high);
+
+        // And test partial hits for good measure!
+
+        request = new FakeAsyncGetOldMessages(fragment);
+        request.shouldFmSucceed = true;
+        request.execute(36, LoadPosition.INITIAL, 2, 0);
+        request.get();
+
+        // 35 should be in cache
+        assertEquals(1, request.receivedMessages.size());
+        assertEquals(false, request.fmCalled);
+        // Recursing in one direction
+        assertEquals(1, request.recurseRequestsReceived.size());
+
+        request = request.recurseRequestsReceived.get(0);
+        request.shouldFmSucceed = true;
+        assertEquals(1, request.fmNumBefore);
+        request.appendTheseMessages = new ArrayList<Message>();
+        Message mn1 = sampleMessage(app, 33);
+        request.appendTheseMessages.add(mn1);
+        request.executeBasedOnPresetValues();
+        request.get();
+
+        assertEquals(true, request.fmCalled);
+        assertEquals(1, request.receivedMessages.size());
+        mrs = app.getDao(MessageRange.class).queryForAll();
+        assertEquals(1, mrs.size());
+        assertEquals(33, mrs.get(0).low);
+
+    }
+
+    protected Message sampleMessage(ZulipApp app, int id) throws SQLException {
+        Message rtr = new Message(app);
+        rtr.setSender(Person.getOrUpdate(app, "Test User",
+                "testuser@example.com", ""));
+        rtr.setContent("Test message");
+        rtr.setType(MessageType.PRIVATE_MESSAGE);
+        rtr.setRecipient(new String[] { "testuser@example.com" });
+        rtr.setID(id);
+        messageDao.create(rtr);
+        return rtr;
     }
 
     /**
@@ -50,6 +151,7 @@ public class UnsortedTests extends ActivityUnitTestCase<HumbugActivity> {
         app.setEmail("testuser@example.com");
         app.deleteDatabase(app.getDatabaseHelper().getDatabaseName());
         app.setEmail("testuser@example.com");
+        messageDao = app.getDao(Message.class);
 
     }
 
