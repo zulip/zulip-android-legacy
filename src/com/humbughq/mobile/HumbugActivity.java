@@ -226,7 +226,7 @@ public class HumbugActivity extends FragmentActivity {
                             .getFirstVisiblePosition())).getID();
                     if (app.getPointer() < mID) {
                         Log.i("scrolling", "Now at " + mID);
-                        (new AsyncPointerUpdate(that)).execute(mID);
+                        (new AsyncPointerUpdate(app)).execute(mID);
                         app.setPointer(mID);
                     }
                 } catch (NullPointerException e) {
@@ -246,7 +246,7 @@ public class HumbugActivity extends FragmentActivity {
                     int mID = (Integer) view.getTag(R.id.messageID);
                     if (app.getPointer() < mID) {
                         Log.i("keyboard", "Now at " + mID);
-                        (new AsyncPointerUpdate(that)).execute(mID);
+                        (new AsyncPointerUpdate(app)).execute(mID);
                         app.setPointer(mID);
                     }
                 } catch (NullPointerException e) {
