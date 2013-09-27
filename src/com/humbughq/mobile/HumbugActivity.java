@@ -432,8 +432,7 @@ public class HumbugActivity extends FragmentActivity {
         this.narrowedListView.setAdapter(this.narrowedAdapter);
         this.narrowFilter = filter;
 
-        filteredWhere.and().le(Message.TIMESTAMP_FIELD,
-                this.getMessageById(app.getPointer()).getTimestamp());
+        filteredWhere.and().le(Message.ID_FIELD, app.getPointer());
 
         QueryBuilder<Message, Object> closestQuery = app.getDao(Message.class)
                 .queryBuilder();
