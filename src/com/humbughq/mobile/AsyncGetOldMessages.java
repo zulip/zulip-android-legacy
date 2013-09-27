@@ -116,6 +116,9 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
                 }
             }
             if (fetchMessages(mainAnchor, before, after, params)) {
+                int lowest = receivedMessages.get(0).getID();
+                int highest = receivedMessages.get(receivedMessages.size() - 1)
+                        .getID();
                 if (rng != null) {
                     try {
                         rng.refresh();
@@ -124,16 +127,14 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
                         Log.w("AGOM",
                                 "Couldn't refresh rng, maybe not in database?");
                     }
-                    if (before < rng.low) {
-                        rng.low = before;
+                    if (lowest < rng.low) {
+                        rng.low = lowest;
                     }
-                    if (after > rng.high) {
-                        rng.high = after;
+                    if (highest > rng.high) {
+                        rng.high = highest;
                     }
                 } else {
-                    rng = new MessageRange(receivedMessages.get(0).getID(),
-                            receivedMessages.get(receivedMessages.size() - 1)
-                                    .getID());
+                    rng = new MessageRange(lowest, highest);
                 }
 
                 // Consolidate ranges
