@@ -22,6 +22,7 @@ public class FakeAsyncGetOldMessages extends
 
     public FakeAsyncGetOldMessages(MessageListFragment fragment) {
         super(fragment);
+        this.app = fragment.app;
         myfragment = fragment;
         fmCalled = false;
         shouldFmSucceed = false;

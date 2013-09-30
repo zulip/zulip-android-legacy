@@ -15,7 +15,7 @@ import android.os.Build;
  */
 class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
 
-    ZulipApp app;
+    public ZulipApp app;
     HTTPRequest request;
     AsyncTaskCompleteListener callback;
 
