@@ -9,4 +9,5 @@ public interface MessageListener {
     void onMessages(Message[] messages, LoadPosition pos, boolean moreAbove,
             boolean moreBelow);
 
+    void onMessageError(LoadPosition pos);
 }

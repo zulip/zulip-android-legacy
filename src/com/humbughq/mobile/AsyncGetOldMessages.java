@@ -295,12 +295,14 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
             listener.onMessages(receivedMessages.toArray(new Message[0]),
                     position, recursedAbove, recursedBelow);
         } else {
+            listener.onMessageError(position);
             Log.v("poll", "No messages returned.");
         }
         callback.onTaskComplete(result);
     }
 
     protected void onCancelled(String result) {
+        listener.onMessageError(position);
         callback.onTaskFailure(result);
     }
 }

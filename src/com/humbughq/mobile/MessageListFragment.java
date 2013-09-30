@@ -29,7 +29,6 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ImageView;
 import android.widget.ListView;
 
-import com.humbughq.mobile.HumbugAsyncPushTask.AsyncTaskCompleteListener;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.stmt.Where;
@@ -318,17 +317,6 @@ public class MessageListFragment extends Fragment implements MessageListener {
         final AsyncGetOldMessages oldMessagesReq = new AsyncGetOldMessages(this);
         oldMessagesReq.execute(app.getPointer(), LoadPosition.INITIAL, 100,
                 100, filter);
-
-        oldMessagesReq.setCallback(new AsyncTaskCompleteListener() {
-            @Override
-            public void onTaskComplete(String result) {
-                selectPointer();
-            }
-
-            public void onTaskFailure(String result) {
-
-            }
-        });
     }
 
     private void selectPointer() {
@@ -459,11 +447,19 @@ public class MessageListFragment extends Fragment implements MessageListener {
         } else if (pos == LoadPosition.BELOW) {
             showLoadIndicatorBottom(moreBelow);
         } else if (pos == LoadPosition.INITIAL) {
+            selectPointer();
+
             showLoadIndicatorTop(moreAbove);
             showLoadIndicatorBottom(moreBelow);
         }
 
         loadingMessages = moreAbove || moreBelow;
+    }
+
+    public void onMessageError(LoadPosition pos) {
+        loadingMessages = false;
+        // Keep the loading indicator there to indicate that it was not
+        // successful
     }
 
     public void loadMoreMessages(LoadPosition pos) {
@@ -491,15 +487,6 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
         AsyncGetOldMessages oldMessagesReq = new AsyncGetOldMessages(this);
         oldMessagesReq.execute(around, pos, above, below, filter);
-        oldMessagesReq.setCallback(new AsyncTaskCompleteListener() {
-            @Override
-            public void onTaskComplete(String result) {
-            }
-
-            public void onTaskFailure(String result) {
-                loadingMessages = false;
-            }
-        });
     }
 
     public Boolean listHasMostRecent() {
