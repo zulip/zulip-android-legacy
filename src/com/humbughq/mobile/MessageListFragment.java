@@ -312,25 +312,45 @@ public class MessageListFragment extends Fragment {
         loadingMessages = true;
         showLoadIndicatorTop(true);
 
-        if (filter != null) {
-            fetchNarrowed();
-        } else {
-            fetchHome();
-        }
+        fetch();
     }
 
-    private void fetchHome() {
+    private void fetch() {
         this.populateCurrentRange();
         final AsyncGetOldMessages oldMessagesReq = new AsyncGetOldMessages(this);
 
-        oldMessagesReq
-                .execute(app.getPointer(), LoadPosition.INITIAL, 100, 100);
+        oldMessagesReq.execute(app.getPointer(), LoadPosition.INITIAL, 100,
+                100, filter);
         oldMessagesReq.setCallback(new AsyncTaskCompleteListener() {
             @Override
             public void onTaskComplete(String result) {
-                int anc = app.getPointer();
-                selectMessage(getMessageById(anc));
-                loadingMessages = false;
+                if (filter != null) {
+
+                    Where<Message, Object> filteredWhere;
+                    try {
+                        filteredWhere = filter.modWhere(app
+                                .getDao(Message.class).queryBuilder().where());
+
+                        filteredWhere.and().le(Message.ID_FIELD,
+                                app.getPointer());
+
+                        QueryBuilder<Message, Object> closestQuery = app
+                                .getDao(Message.class).queryBuilder();
+
+                        closestQuery.orderBy(Message.TIMESTAMP_FIELD, false)
+                                .setWhere(filteredWhere);
+                        listView.setSelection(adapter.getPosition(closestQuery
+                                .queryForFirst()));
+
+                    } catch (SQLException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                } else {
+                    int anc = app.getPointer();
+                    selectMessage(getMessageById(anc));
+                    loadingMessages = false;
+                }
                 showLoadIndicatorTop(false);
             }
 
@@ -338,33 +358,6 @@ public class MessageListFragment extends Fragment {
 
             }
         });
-    }
-
-    private void fetchNarrowed() {
-        try {
-            // TODO: this goes in AGOM (which means in a background thread)
-            Where<Message, Object> filteredWhere = filter.modWhere(app
-                    .getDao(Message.class).queryBuilder().where());
-
-            adapter.addAll(filteredWhere.query());
-
-            filteredWhere.and().le(Message.ID_FIELD, app.getPointer());
-
-            QueryBuilder<Message, Object> closestQuery = app.getDao(
-                    Message.class).queryBuilder();
-
-            closestQuery.orderBy(Message.TIMESTAMP_FIELD, false).setWhere(
-                    filteredWhere);
-            listView.setSelection(adapter.getPosition(closestQuery
-                    .queryForFirst()));
-
-            // Query is a blocking call, so it doesn't actually get a chance to
-            // spin, but as a reminder to include it later...
-            showLoadIndicatorTop(false);
-        } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
     }
 
     private void size_bottom_spacer() {
@@ -497,7 +490,7 @@ public class MessageListFragment extends Fragment {
         loadingMessages = true;
 
         AsyncGetOldMessages oldMessagesReq = new AsyncGetOldMessages(this);
-        oldMessagesReq.execute(around, pos, above, below);
+        oldMessagesReq.execute(around, pos, above, below, filter);
         oldMessagesReq.setCallback(new AsyncTaskCompleteListener() {
             @Override
             public void onTaskComplete(String result) {

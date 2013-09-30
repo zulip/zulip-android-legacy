@@ -1,6 +1,10 @@
 package com.humbughq.mobile;
 
 import java.sql.SQLException;
+import java.util.Arrays;
+
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -65,5 +69,12 @@ public class NarrowFilterStream implements NarrowFilter {
     @Override
     public String getComposePMRecipient() {
         return null;
+    }
+
+    @Override
+    public String getJsonFilter() throws JSONException {
+        return (new JSONArray()).put(
+                new JSONArray(Arrays.asList("stream", this.stream.getName())))
+                .toString();
     }
 }

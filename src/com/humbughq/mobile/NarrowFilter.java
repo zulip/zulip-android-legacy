@@ -2,6 +2,8 @@ package com.humbughq.mobile;
 
 import java.sql.SQLException;
 
+import org.json.JSONException;
+
 import android.os.Parcelable;
 
 import com.j256.ormlite.stmt.Where;
@@ -22,4 +24,6 @@ public interface NarrowFilter extends Parcelable {
     public Stream getComposeStream();
 
     public String getComposePMRecipient();
+
+    public String getJsonFilter() throws JSONException;
 }

@@ -27,12 +27,13 @@ public class FakeAsyncGetOldMessages extends
         fmCalled = false;
         shouldFmSucceed = false;
         recurseRequestsReceived = new ArrayList<FakeAsyncGetOldMessages>();
+        filter = null;
     }
 
     public void executeBasedOnPresetValues() {
         // LP doesn't matter, so just go with INITIAL
         this.execute(fmAnchor, HumbugActivity.LoadPosition.INITIAL,
-                fmNumBefore, fmNumAfter);
+                fmNumBefore, fmNumAfter, filter);
     }
 
     @Override

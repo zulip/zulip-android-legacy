@@ -63,7 +63,7 @@ public class UnsortedTests extends ActivityUnitTestCase<HumbugActivity> {
         request.appendTheseMessages.add(m1);
         request.appendTheseMessages.add(m2);
         request.appendTheseMessages.add(m3);
-        request.execute(50, LoadPosition.INITIAL, 10, 10);
+        request.execute(50, LoadPosition.INITIAL, 10, 10, null);
         request.get();
         // Should result in a MR of 40, 60
 
@@ -73,7 +73,7 @@ public class UnsortedTests extends ActivityUnitTestCase<HumbugActivity> {
 
         // Now fetching inside that range should be safe.
         request = new FakeAsyncGetOldMessages(fragment);
-        request.execute(45, LoadPosition.INITIAL, 1, 0);
+        request.execute(45, LoadPosition.INITIAL, 1, 0, null);
         request.get();
         assertFalse(request.fmCalled);
         assertEquals(2, request.receivedMessages.size());
@@ -87,7 +87,7 @@ public class UnsortedTests extends ActivityUnitTestCase<HumbugActivity> {
         Message m0 = sampleMessage(app, 35);
         request.appendTheseMessages.add(m0);
         request.appendTheseMessages.add(m1);
-        request.execute(36, LoadPosition.INITIAL, 1, 1);
+        request.execute(36, LoadPosition.INITIAL, 1, 1, null);
         request.get();
         assertEquals(2, request.receivedMessages.size());
         List<MessageRange> mrs = app.getDao(MessageRange.class).queryForAll();
@@ -99,7 +99,7 @@ public class UnsortedTests extends ActivityUnitTestCase<HumbugActivity> {
 
         request = new FakeAsyncGetOldMessages(fragment);
         request.shouldFmSucceed = true;
-        request.execute(36, LoadPosition.INITIAL, 2, 0);
+        request.execute(36, LoadPosition.INITIAL, 2, 0, null);
         request.get();
 
         // 35 should be in cache

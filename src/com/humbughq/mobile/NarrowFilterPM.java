@@ -2,6 +2,9 @@ package com.humbughq.mobile;
 
 import java.sql.SQLException;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -71,5 +74,11 @@ public class NarrowFilterPM implements NarrowFilter {
     @Override
     public String getComposePMRecipient() {
         return person.getEmail();
+    }
+
+    @Override
+    public String getJsonFilter() throws JSONException {
+        return (new JSONObject()).put("pm-with", this.person.getEmail())
+                .toString();
     }
 }

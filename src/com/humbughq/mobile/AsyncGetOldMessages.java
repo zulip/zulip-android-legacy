@@ -24,6 +24,7 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
     HumbugActivity.LoadPosition position;
     protected MessageRange rng;
     protected int mainAnchor;
+    protected NarrowFilter filter;
     private int before;
     private int afterAnchor;
     private int after;
@@ -47,11 +48,12 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
      *            Number of messages before the anchor to return
      */
     public final void execute(int anchor, HumbugActivity.LoadPosition pos,
-            int before, int after) {
+            int before, int after, NarrowFilter filter) {
         this.mainAnchor = anchor;
         this.before = before;
         this.afterAnchor = mainAnchor + 1;
         this.after = after;
+        this.filter = filter;
         position = pos;
         this.receivedMessages = new ArrayList<Message>();
         execute("GET", "v1/messages");
@@ -62,7 +64,7 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
         // Lets see whether we have this cached already
         final Dao<MessageRange, Integer> messageRangeDao = app
                 .getDao(MessageRange.class);
-        Dao<Message, Integer> messageDao = app.getDao(Message.class);
+        Dao<Message, Object> messageDao = app.getDao(Message.class);
         try {
             if (rng == null) {
                 // We haven't been passed a range, see if we have a range cached
@@ -74,16 +76,30 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
                     // cache
                     rng = protoRng;
                     // we order by decending so that our limit query DTRT
-                    List<Message> lowerCachedMessages = messageDao
-                            .queryBuilder().limit((long) before + 1)
-                            .orderBy("id", false).where().le("id", mainAnchor)
-                            .and().ge("id", rng.low).query();
+
+                    Where<Message, Object> filteredWhere = messageDao
+                            .queryBuilder().orderBy(Message.ID_FIELD, false)
+                            .limit((long) before + 1).where();
+                    if (filter != null) {
+                        filter.modWhere(filteredWhere);
+                        filteredWhere.and();
+                    }
+                    List<Message> lowerCachedMessages = filteredWhere
+                            .le(Message.ID_FIELD, mainAnchor).and()
+                            .ge(Message.ID_FIELD, rng.low).query();
                     // however because of this we need to flip the ordering
                     Collections.reverse(lowerCachedMessages);
-                    List<Message> upperCachedMessages = messageDao
-                            .queryBuilder().limit((long) after)
-                            .orderBy("id", true).where().gt("id", mainAnchor)
-                            .and().le("id", rng.high).query();
+
+                    filteredWhere = messageDao.queryBuilder()
+                            .orderBy(Message.ID_FIELD, true)
+                            .limit((long) after).where();
+                    if (filter != null) {
+                        filter.modWhere(filteredWhere);
+                        filteredWhere.and();
+                    }
+                    List<Message> upperCachedMessages = filteredWhere
+                            .gt("id", mainAnchor).and().le("id", rng.high)
+                            .query();
                     before -= lowerCachedMessages.size();
                     // One more than size to account for missing anchor
                     after -= upperCachedMessages.size() + 1;
@@ -136,46 +152,50 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
                     rng = new MessageRange(lowest, highest);
                 }
 
-                // Consolidate ranges
+                // Consolidate ranges, except in a narrow
 
-                TransactionManager.callInTransaction(this.app
-                        .getDatabaseHelper().getConnectionSource(),
-                        new Callable<Void>() {
-                            public Void call() throws Exception {
-                                Where<MessageRange, Integer> where = messageRangeDao
-                                        .queryBuilder().orderBy("low", true)
-                                        .where();
-                                @SuppressWarnings("unchecked")
-                                List<MessageRange> ranges = where.or(
-                                        where.and(where.ge("high", rng.low),
-                                                where.le("high", rng.high)),
-                                        where.and(where.ge("low", rng.low),
-                                                where.le("low", rng.high)))
-                                        .query();
+                if (filter == null) {
+                    TransactionManager.callInTransaction(this.app
+                            .getDatabaseHelper().getConnectionSource(),
+                            new Callable<Void>() {
+                                public Void call() throws Exception {
+                                    Where<MessageRange, Integer> where = messageRangeDao
+                                            .queryBuilder()
+                                            .orderBy("low", true).where();
+                                    @SuppressWarnings("unchecked")
+                                    List<MessageRange> ranges = where
+                                            .or(where.and(
+                                                    where.ge("high", rng.low),
+                                                    where.le("high", rng.high)),
+                                                    where.and(where.ge("low",
+                                                            rng.low), where.le(
+                                                            "low", rng.high)))
+                                            .query();
 
-                                if (ranges.size() == 0) {
-                                    // Nothing to consolidate
+                                    if (ranges.size() == 0) {
+                                        // Nothing to consolidate
+                                        messageRangeDao.createOrUpdate(rng);
+                                        return null;
+                                    }
+                                    Log.i("", "our low: " + rng.low
+                                            + ", our high: " + rng.high);
+                                    int db_low = ranges.get(0).low;
+                                    int db_high = ranges.get(ranges.size() - 1).high;
+                                    Log.i("", "their low: " + db_low
+                                            + ", their high: " + db_high);
+                                    if (db_low < rng.low) {
+                                        rng.low = db_low;
+                                    }
+                                    if (db_high > rng.high) {
+                                        rng.high = db_high;
+                                    }
+                                    messageRangeDao.delete(ranges);
                                     messageRangeDao.createOrUpdate(rng);
+
                                     return null;
                                 }
-                                Log.i("", "our low: " + rng.low
-                                        + ", our high: " + rng.high);
-                                int db_low = ranges.get(0).low;
-                                int db_high = ranges.get(ranges.size() - 1).high;
-                                Log.i("", "their low: " + db_low
-                                        + ", their high: " + db_high);
-                                if (db_low < rng.low) {
-                                    rng.low = db_low;
-                                }
-                                if (db_high > rng.high) {
-                                    rng.high = db_high;
-                                }
-                                messageRangeDao.delete(ranges);
-                                messageRangeDao.createOrUpdate(rng);
-
-                                return null;
-                            }
-                        });
+                            });
+                }
             }
         } catch (SQLException e) {
             // Still welp.
@@ -191,10 +211,10 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
         task.rng = rng;
         switch (position) {
         case ABOVE:
-            task.execute(anchor, position, amount, 0);
+            task.execute(anchor, position, amount, 0, filter);
             break;
         case BELOW:
-            task.execute(anchor, position, 0, amount);
+            task.execute(anchor, position, 0, amount, filter);
         default:
             Log.wtf("AGOM", "recurse passed unexpected load position!");
             break;
@@ -211,7 +231,15 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
         this.setProperty("apply_markdown", "false");
         // We don't support narrowing at all, so always specify we're
         // unnarrowed.
-        this.setProperty("narrow", "{}");
+        if (filter != null) {
+            try {
+                this.setProperty("narrow", filter.getJsonFilter());
+            } catch (JSONException e) {
+                Log.wtf("fm", e);
+            }
+        } else {
+            this.setProperty("narrow", "{}");
+        }
 
         String result = super.doInBackground(params);
 
