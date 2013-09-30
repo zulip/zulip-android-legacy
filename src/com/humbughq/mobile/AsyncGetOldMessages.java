@@ -126,8 +126,8 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
                             this.recurse(LoadPosition.BELOW, after, rng,
                                     afterAnchor);
                         }
+                        return null;
                     }
-                    return null;
                 } else {
                     // We don't have anything cached
                     Log.e("db_gom", "No messages found in specified range!");
