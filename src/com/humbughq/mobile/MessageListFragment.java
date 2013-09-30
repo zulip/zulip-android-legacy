@@ -316,43 +316,46 @@ public class MessageListFragment extends Fragment implements MessageListener {
     private void fetch() {
         this.populateCurrentRange();
         final AsyncGetOldMessages oldMessagesReq = new AsyncGetOldMessages(this);
-
         oldMessagesReq.execute(app.getPointer(), LoadPosition.INITIAL, 100,
                 100, filter);
+
         oldMessagesReq.setCallback(new AsyncTaskCompleteListener() {
             @Override
             public void onTaskComplete(String result) {
-                if (filter != null) {
-                    Where<Message, Object> filteredWhere;
-                    try {
-                        filteredWhere = filter.modWhere(app
-                                .getDao(Message.class).queryBuilder().where());
-
-                        filteredWhere.and().le(Message.ID_FIELD,
-                                app.getPointer());
-
-                        QueryBuilder<Message, Object> closestQuery = app
-                                .getDao(Message.class).queryBuilder();
-
-                        closestQuery.orderBy(Message.TIMESTAMP_FIELD, false)
-                                .setWhere(filteredWhere);
-                        listView.setSelection(adapter.getPosition(closestQuery
-                                .queryForFirst()));
-
-                    } catch (SQLException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                } else {
-                    int anc = app.getPointer();
-                    selectMessage(getMessageById(anc));
-                }
+                selectPointer();
             }
 
             public void onTaskFailure(String result) {
 
             }
         });
+    }
+
+    private void selectPointer() {
+        if (filter != null) {
+            Where<Message, Object> filteredWhere;
+            try {
+                filteredWhere = filter.modWhere(app.getDao(Message.class)
+                        .queryBuilder().where());
+
+                filteredWhere.and().le(Message.ID_FIELD, app.getPointer());
+
+                QueryBuilder<Message, Object> closestQuery = app.getDao(
+                        Message.class).queryBuilder();
+
+                closestQuery.orderBy(Message.TIMESTAMP_FIELD, false).setWhere(
+                        filteredWhere);
+                listView.setSelection(adapter.getPosition(closestQuery
+                        .queryForFirst()));
+
+            } catch (SQLException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        } else {
+            int anc = app.getPointer();
+            selectMessage(getMessageById(anc));
+        }
     }
 
     private void size_bottom_spacer() {
