@@ -27,6 +27,7 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.j256.ormlite.dao.Dao;
@@ -118,10 +119,12 @@ public class MessageListFragment extends Fragment implements MessageListener {
         listView = (ListView) view.findViewById(R.id.listview);
 
         // Load indicator
-        loadIndicatorTop = inflater.inflate(R.layout.list_loading, null);
-        loadIndicatorBottom = inflater.inflate(R.layout.list_loading, null);
-        listView.addHeaderView(loadIndicatorTop, null, false);
-        listView.addFooterView(loadIndicatorBottom, null, false);
+        View loadTopParent = inflater.inflate(R.layout.list_loading, null);
+        View loadBottomParent = inflater.inflate(R.layout.list_loading, null);
+        loadIndicatorTop = ((LinearLayout) loadTopParent).getChildAt(0);
+        loadIndicatorBottom = ((LinearLayout) loadBottomParent).getChildAt(0);
+        listView.addHeaderView(loadTopParent, null, false);
+        listView.addFooterView(loadBottomParent, null, false);
 
         // Spacer
         bottom_list_spacer = new ImageView(getActivity());
