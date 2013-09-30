@@ -19,7 +19,7 @@ import com.j256.ormlite.misc.TransactionManager;
 import com.j256.ormlite.stmt.Where;
 
 public class AsyncGetOldMessages extends HumbugAsyncPushTask {
-    MessageListFragment fragment;
+    MessageListener listener;
     public ArrayList<Message> receivedMessages;
     MessageListener.LoadPosition position;
     protected MessageRange rng;
@@ -30,9 +30,9 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
     private int after;
     AsyncGetOldMessages that = this;
 
-    public AsyncGetOldMessages(MessageListFragment fragment) {
-        super(fragment.app);
-        this.fragment = fragment;
+    public AsyncGetOldMessages(MessageListener listener) {
+        super(ZulipApp.get());
+        this.listener = listener;
         rng = null;
     }
 
@@ -207,7 +207,7 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
 
     protected void recurse(LoadPosition position, int amount, MessageRange rng,
             int anchor) {
-        AsyncGetOldMessages task = new AsyncGetOldMessages(fragment);
+        AsyncGetOldMessages task = new AsyncGetOldMessages(listener);
         task.rng = rng;
         switch (position) {
         case ABOVE:
@@ -287,7 +287,7 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
         if (receivedMessages != null && receivedMessages.size() != 0) {
             Log.v("poll", "Processing messages received.");
 
-            fragment.onMessages(receivedMessages.toArray(new Message[0]),
+            listener.onMessages(receivedMessages.toArray(new Message[0]),
                     position);
         } else {
             Log.v("poll", "No messages returned.");

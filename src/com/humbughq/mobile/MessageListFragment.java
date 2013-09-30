@@ -30,12 +30,11 @@ import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.humbughq.mobile.HumbugAsyncPushTask.AsyncTaskCompleteListener;
-import com.humbughq.mobile.MessageListener.LoadPosition;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.stmt.Where;
 
-public class MessageListFragment extends Fragment {
+public class MessageListFragment extends Fragment implements MessageListener {
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated to
