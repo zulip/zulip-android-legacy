@@ -30,6 +30,9 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
     private int after;
     AsyncGetOldMessages that = this;
 
+    boolean recursedAbove = false;
+    boolean recursedBelow = false;
+
     public AsyncGetOldMessages(MessageListener listener) {
         super(ZulipApp.get());
         this.listener = listener;
@@ -211,10 +214,12 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
         task.rng = rng;
         switch (position) {
         case ABOVE:
+            recursedAbove = true;
             task.execute(anchor, position, amount, 0, filter);
             break;
         case BELOW:
             task.execute(anchor, position, 0, amount, filter);
+            recursedBelow = true;
         default:
             Log.wtf("AGOM", "recurse passed unexpected load position!");
             break;
@@ -284,11 +289,11 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
 
     @Override
     protected void onPostExecute(String result) {
-        if (receivedMessages != null && receivedMessages.size() != 0) {
+        if (receivedMessages != null) {
             Log.v("poll", "Processing messages received.");
 
             listener.onMessages(receivedMessages.toArray(new Message[0]),
-                    position);
+                    position, recursedAbove, recursedBelow);
         } else {
             Log.v("poll", "No messages returned.");
         }

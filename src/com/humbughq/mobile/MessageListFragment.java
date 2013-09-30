@@ -323,7 +323,6 @@ public class MessageListFragment extends Fragment implements MessageListener {
             @Override
             public void onTaskComplete(String result) {
                 if (filter != null) {
-
                     Where<Message, Object> filteredWhere;
                     try {
                         filteredWhere = filter.modWhere(app
@@ -347,9 +346,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
                 } else {
                     int anc = app.getPointer();
                     selectMessage(getMessageById(anc));
-                    loadingMessages = false;
                 }
-                showLoadIndicatorTop(false);
             }
 
             public void onTaskFailure(String result) {
@@ -385,14 +382,15 @@ public class MessageListFragment extends Fragment implements MessageListener {
         }
     }
 
-    public void onMessages(Message[] messages, LoadPosition pos) {
+    public void onMessages(Message[] messages, LoadPosition pos,
+            boolean moreAbove, boolean moreBelow) {
         Log.i("onMessages", "Adding " + messages.length + " messages at " + pos);
 
         // Collect state used to maintain scroll position
         int topPosBefore = listView.getFirstVisiblePosition();
         View topView = listView.getChildAt(0);
         int topOffsetBefore = (topView != null) ? topView.getTop() : 0;
-        if (topOffsetBefore >= 0) {
+        if (topOffsetBefore >= 0 && !moreAbove) {
             // If the loading indicator was visible, show a new message in the
             // space it took up. If it was not visible, avoid jumping.
             topOffsetBefore -= loadIndicatorTop.getHeight();
@@ -451,17 +449,18 @@ public class MessageListFragment extends Fragment implements MessageListener {
         }
 
         if (pos == LoadPosition.ABOVE) {
-            showLoadIndicatorTop(false);
-            Log.i("Header",
-                    loadIndicatorTop.getTop() + " "
-                            + loadIndicatorTop.getHeight() + " "
-                            + topOffsetBefore);
+            showLoadIndicatorTop(moreAbove);
             // Restore the position of the top item
             this.listView.setSelectionFromTop(topPosBefore + addedCount,
                     topOffsetBefore);
         } else if (pos == LoadPosition.BELOW) {
-            showLoadIndicatorBottom(false);
+            showLoadIndicatorBottom(moreBelow);
+        } else if (pos == LoadPosition.INITIAL) {
+            showLoadIndicatorTop(moreAbove);
+            showLoadIndicatorBottom(moreBelow);
         }
+
+        loadingMessages = moreAbove || moreBelow;
     }
 
     public void loadMoreMessages(LoadPosition pos) {
@@ -492,7 +491,6 @@ public class MessageListFragment extends Fragment implements MessageListener {
         oldMessagesReq.setCallback(new AsyncTaskCompleteListener() {
             @Override
             public void onTaskComplete(String result) {
-                loadingMessages = false;
             }
 
             public void onTaskFailure(String result) {

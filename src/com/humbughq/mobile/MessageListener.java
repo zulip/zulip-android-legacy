@@ -6,6 +6,7 @@ public interface MessageListener {
         ABOVE, BELOW, NEW, INITIAL,
     }
 
-    void onMessages(Message[] messages, LoadPosition pos);
+    void onMessages(Message[] messages, LoadPosition pos, boolean moreAbove,
+            boolean moreBelow);
 
 }
