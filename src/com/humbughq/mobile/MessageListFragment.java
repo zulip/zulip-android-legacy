@@ -71,6 +71,10 @@ public class MessageListFragment extends Fragment implements MessageListener {
     MessageAdapter adapter;
     boolean loadingMessages = true;
 
+    // Whether we've loaded all available messages in that direction
+    boolean loadedToTop = false;
+    boolean loadedToBottom = false;
+
     int firstMessageId = -1;
     int lastMessageId = -1;
 
@@ -143,17 +147,20 @@ public class MessageListFragment extends Fragment implements MessageListener {
                     if (firstVisibleItem + visibleItemCount > totalItemCount
                             - near) {
                         Log.i("scroll", "at bottom " + loadingMessages + " "
-                                + listHasMostRecent() + " " + lastMessageId
-                                + " " + app.getMaxMessageId());
+                                + loadedToBottom + " " + lastMessageId + " "
+                                + app.getMaxMessageId());
                         // At the bottom of the list
-                        if (!listHasMostRecent()) {
+                        if (!loadedToBottom) {
                             loadMoreMessages(LoadPosition.BELOW);
                         }
                     }
                     if (firstVisibleItem < near) {
                         Log.i("scroll", "at top" + firstVisibleItem + " "
-                                + visibleItemCount + " " + totalItemCount);
-                        loadMoreMessages(LoadPosition.ABOVE);
+                                + loadedToTop + " " + visibleItemCount + " "
+                                + totalItemCount);
+                        if (!loadedToTop) {
+                            loadMoreMessages(LoadPosition.ABOVE);
+                        }
                     }
                 }
 
@@ -426,8 +433,9 @@ public class MessageListFragment extends Fragment implements MessageListener {
                         || pos == LoadPosition.INITIAL) {
                     // TODO: Does this copy the array every time?
                     this.adapter.insert(message, addedCount);
-                    addedCount++;
                 }
+
+                addedCount++;
 
                 if (message.getID() > lastMessageId) {
                     lastMessageId = message.getID();
@@ -444,8 +452,16 @@ public class MessageListFragment extends Fragment implements MessageListener {
             // Restore the position of the top item
             this.listView.setSelectionFromTop(topPosBefore + addedCount,
                     topOffsetBefore);
+
+            if (addedCount == 0) {
+                loadedToTop = true;
+            }
         } else if (pos == LoadPosition.BELOW) {
             showLoadIndicatorBottom(moreBelow);
+
+            if (addedCount == 0 || listHasMostRecent()) {
+                loadedToBottom = true;
+            }
         } else if (pos == LoadPosition.INITIAL) {
             selectPointer();
 
