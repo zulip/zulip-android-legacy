@@ -121,7 +121,7 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
                         }
                         if (after > 0) {
                             this.recurse(HumbugActivity.LoadPosition.BELOW,
-                                    before, rng, afterAnchor);
+                                    after, rng, afterAnchor);
                         }
                     }
                     return null;
