@@ -75,7 +75,7 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
                     // We found a range, lets get relevant messages from the
                     // cache
                     rng = protoRng;
-                    // we order by decending so that our limit query DTRT
+                    // we order by descending so that our limit query DTRT
 
                     Where<Message, Object> filteredWhere = messageDao
                             .queryBuilder().orderBy(Message.ID_FIELD, false)
