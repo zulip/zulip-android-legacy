@@ -220,6 +220,7 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
         case BELOW:
             task.execute(anchor, position, 0, amount, filter);
             recursedBelow = true;
+            break;
         default:
             Log.wtf("AGOM", "recurse passed unexpected load position!");
             break;
