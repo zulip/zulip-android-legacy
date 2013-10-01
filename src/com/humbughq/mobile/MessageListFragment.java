@@ -429,24 +429,25 @@ public class MessageListFragment extends Fragment implements MessageListener {
             this.messageIndex.append(message.getID(), message);
             Stream stream = message.getStream();
 
-            if (stream == null || stream.getInHomeView()) {
-                if (pos == LoadPosition.NEW || pos == LoadPosition.BELOW) {
-                    this.adapter.add(message);
-                } else if (pos == LoadPosition.ABOVE
-                        || pos == LoadPosition.INITIAL) {
-                    // TODO: Does this copy the array every time?
-                    this.adapter.insert(message, addedCount);
-                }
+            if (filter == null && stream != null && !stream.getInHomeView()) {
+                continue;
+            }
 
-                addedCount++;
+            if (pos == LoadPosition.NEW || pos == LoadPosition.BELOW) {
+                this.adapter.add(message);
+            } else if (pos == LoadPosition.ABOVE || pos == LoadPosition.INITIAL) {
+                // TODO: Does this copy the array every time?
+                this.adapter.insert(message, addedCount);
+            }
 
-                if (message.getID() > lastMessageId) {
-                    lastMessageId = message.getID();
-                }
+            addedCount++;
 
-                if (message.getID() < firstMessageId || firstMessageId == -1) {
-                    firstMessageId = message.getID();
-                }
+            if (message.getID() > lastMessageId) {
+                lastMessageId = message.getID();
+            }
+
+            if (message.getID() < firstMessageId || firstMessageId == -1) {
+                firstMessageId = message.getID();
             }
         }
 
