@@ -437,6 +437,8 @@ public class HumbugActivity extends FragmentActivity implements
             event_poll.abort();
         }
         app.clearConnectionState();
+        app.resetDatabase();
+        app.setEmail(app.you.getEmail());
         startRequests();
     }
 
