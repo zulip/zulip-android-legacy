@@ -384,14 +384,14 @@ public class MessageListFragment extends Fragment implements MessageListener {
     }
 
     public void onMessages(Message[] messages, LoadPosition pos,
-            boolean moreAbove, boolean moreBelow) {
+            boolean moreAbove, boolean moreBelow, boolean noFurtherMessages) {
         Log.i("onMessages", "Adding " + messages.length + " messages at " + pos);
 
         // Collect state used to maintain scroll position
         int topPosBefore = listView.getFirstVisiblePosition();
         View topView = listView.getChildAt(0);
         int topOffsetBefore = (topView != null) ? topView.getTop() : 0;
-        if (topOffsetBefore >= 0 && !moreAbove) {
+        if (topOffsetBefore >= 0 && !moreAbove && !noFurtherMessages) {
             // If the loading indicator was visible, show a new message in the
             // space it took up. If it was not visible, avoid jumping.
             topOffsetBefore -= loadIndicatorTop.getHeight();
@@ -438,9 +438,8 @@ public class MessageListFragment extends Fragment implements MessageListener {
             } else if (pos == LoadPosition.ABOVE || pos == LoadPosition.INITIAL) {
                 // TODO: Does this copy the array every time?
                 this.adapter.insert(message, addedCount);
+                addedCount++;
             }
-
-            addedCount++;
 
             if (message.getID() > lastMessageId) {
                 lastMessageId = message.getID();
@@ -457,13 +456,13 @@ public class MessageListFragment extends Fragment implements MessageListener {
             this.listView.setSelectionFromTop(topPosBefore + addedCount,
                     topOffsetBefore);
 
-            if (addedCount == 0) {
+            if (noFurtherMessages) {
                 loadedToTop = true;
             }
         } else if (pos == LoadPosition.BELOW) {
             showLoadIndicatorBottom(moreBelow);
 
-            if (addedCount == 0 || listHasMostRecent()) {
+            if (noFurtherMessages || listHasMostRecent()) {
                 loadedToBottom = true;
             }
         } else if (pos == LoadPosition.INITIAL) {

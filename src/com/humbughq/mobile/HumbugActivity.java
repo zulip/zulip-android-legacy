@@ -458,9 +458,9 @@ public class HumbugActivity extends FragmentActivity implements
     }
 
     public void onMessages(Message[] messages, MessageListener.LoadPosition pos) {
-        homeList.onMessages(messages, pos, false, false);
+        homeList.onMessages(messages, pos, false, false, false);
         if (narrowedList != null) {
-            narrowedList.onMessages(messages, pos, false, false);
+            narrowedList.onMessages(messages, pos, false, false, false);
         }
     }
 }

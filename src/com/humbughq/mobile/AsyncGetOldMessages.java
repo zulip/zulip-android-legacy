@@ -33,6 +33,8 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
     boolean recursedAbove = false;
     boolean recursedBelow = false;
 
+    boolean noFurtherMessages = false;
+
     public AsyncGetOldMessages(MessageListener listener) {
         super(ZulipApp.get());
         this.listener = listener;
@@ -271,6 +273,11 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
                 } else {
                     receivedMessages.addAll(Arrays.asList(fetchedMessages));
                 }
+
+                if (receivedMessages.size() < num_before + num_after) {
+                    noFurtherMessages = true;
+                }
+
                 return receivedMessages.size() > 0;
             } catch (JSONException e) {
                 Log.e("json", "parsing error");
@@ -294,7 +301,7 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
             Log.v("poll", "Processing messages received.");
 
             listener.onMessages(receivedMessages.toArray(new Message[0]),
-                    position, recursedAbove, recursedBelow);
+                    position, recursedAbove, recursedBelow, noFurtherMessages);
         } else {
             listener.onMessageError(position);
             Log.v("poll", "No messages returned.");

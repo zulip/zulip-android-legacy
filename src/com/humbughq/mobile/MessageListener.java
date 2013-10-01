@@ -7,7 +7,7 @@ public interface MessageListener {
     }
 
     void onMessages(Message[] messages, LoadPosition pos, boolean moreAbove,
-            boolean moreBelow);
+            boolean moreBelow, boolean noFurtherMessages);
 
     void onMessageError(LoadPosition pos);
 }
