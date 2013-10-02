@@ -4,7 +4,7 @@
     <string name="app_name">Zulip</string>
     <string name="login_welcome_blurb">Welcome to Zulip!</string>
     <string name="login_button">Log in</string>
-    <string name="username">Username</string>
+    <string name="username">Email</string>
     <string name="password">Password</string>
     <string name="legal">Legal information</string>
     <string name="logout">Log out</string>
