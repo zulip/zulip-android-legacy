@@ -30,7 +30,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 
-import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.stmt.Where;
 
@@ -78,8 +77,6 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
     int firstMessageId = -1;
     int lastMessageId = -1;
-
-    protected MessageRange currentRange;
 
     public static MessageListFragment newInstance(NarrowFilter filter) {
         MessageListFragment fragment = new MessageListFragment();
@@ -323,7 +320,6 @@ public class MessageListFragment extends Fragment implements MessageListener {
     }
 
     private void fetch() {
-        this.populateCurrentRange();
         final AsyncGetOldMessages oldMessagesReq = new AsyncGetOldMessages(this);
         oldMessagesReq.execute(app.getPointer(), LoadPosition.INITIAL, 100,
                 100, filter);
@@ -514,17 +510,5 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
     public Message getMessageById(int id) {
         return this.messageIndex.get(id);
-    }
-
-    public void populateCurrentRange() {
-        RuntimeExceptionDao<MessageRange, Integer> messageRangeDao = app
-                .getDao(MessageRange.class);
-        this.currentRange = MessageRange.getRangeContaining(app.getPointer(),
-                messageRangeDao);
-        if (this.currentRange == null) {
-            this.currentRange = new MessageRange(app.getPointer(),
-                    app.getPointer());
-            // Does not get saved until we actually have messages here
-        }
     }
 }

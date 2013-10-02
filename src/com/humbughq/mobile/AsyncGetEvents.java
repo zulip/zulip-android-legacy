@@ -23,6 +23,8 @@ public class AsyncGetEvents extends Thread {
     Handler onEventsHandler;
     HTTPRequest request;
 
+    MessageRange currentRange;
+
     AsyncGetEvents that = this;
     int failures = 0;
     boolean registeredOrGotEventsThisRun;
@@ -36,10 +38,6 @@ public class AsyncGetEvents extends Thread {
 
     public void start() {
         registeredOrGotEventsThisRun = false;
-
-        if (this.app.getPointer() > 0 && activity.homeList.currentRange == null) {
-            activity.homeList.populateCurrentRange();
-        }
 
         onRegisterHandler = new Handler() {
             public void handleMessage(android.os.Message msg) {
@@ -170,8 +168,6 @@ public class AsyncGetEvents extends Thread {
             app.setPointer(response.getInt("pointer"));
             app.setMaxMessageId(response.getInt("max_message_id"));
 
-            activity.homeList.populateCurrentRange();
-
             // Get subscriptions
             JSONArray subscriptions = response.getJSONArray("subscriptions");
             RuntimeExceptionDao<Stream, Object> streamDao = this.app
@@ -198,6 +194,8 @@ public class AsyncGetEvents extends Thread {
                 personDao.createOrUpdate(person);
             }
             that.activity.peopleAdapter.refresh();
+
+            initCurrentRange();
 
             that.activity.onReadyToDisplay();
         } catch (JSONException e) {
@@ -228,12 +226,27 @@ public class AsyncGetEvents extends Thread {
         RuntimeExceptionDao<Message, Object> messageDao = this.app
                 .getDao(Message.class);
         messageDao.createOrUpdate(message);
-        if (this.activity.homeList.currentRange.high <= message.getID()) {
-            this.app.getDao(MessageRange.class).createOrUpdate(
-                    this.activity.homeList.currentRange);
+
+        if (currentRange == null) {
+            initCurrentRange();
+        }
+        if (currentRange.high <= message.getID()) {
+            this.app.getDao(MessageRange.class).createOrUpdate(currentRange);
         }
         app.setMaxMessageId(message.getID());
         Message[] messages = { message };
         this.activity.onMessages(messages, LoadPosition.NEW);
+    }
+
+    private void initCurrentRange() {
+        RuntimeExceptionDao<MessageRange, Integer> messageRangeDao = app
+                .getDao(MessageRange.class);
+
+        currentRange = MessageRange.getRangeContaining(app.getPointer(),
+                messageRangeDao);
+        if (currentRange == null) {
+            currentRange = new MessageRange(app.getPointer(), app.getPointer());
+            // Does not get saved until we actually have messages here
+        }
     }
 }
