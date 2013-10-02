@@ -231,6 +231,7 @@ public class AsyncGetEvents extends Thread {
             initCurrentRange();
         }
         if (currentRange.high <= message.getID()) {
+            currentRange.high = message.getID();
             this.app.getDao(MessageRange.class).createOrUpdate(currentRange);
         }
         app.setMaxMessageId(message.getID());
