@@ -232,6 +232,7 @@ public class AsyncGetEvents extends Thread {
             this.app.getDao(MessageRange.class).createOrUpdate(
                     this.activity.homeList.currentRange);
         }
+        app.setMaxMessageId(message.getID());
         Message[] messages = { message };
         this.activity.onMessages(messages, LoadPosition.NEW);
     }

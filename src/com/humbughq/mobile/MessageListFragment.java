@@ -399,11 +399,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
         int addedCount = 0;
 
         if (pos == LoadPosition.NEW) {
-            // listHasMostRecent check needs to occur before updating
-            // lastAvailableMessageId
-            boolean hasMostRecent = listHasMostRecent();
-            app.setMaxMessageId(messages[messages.length - 1].getID());
-            if (!hasMostRecent) {
+            if (!loadedToBottom) {
                 // If we don't have intermediate messages loaded, don't add new
                 // messages -- they'll be loaded when we scroll down.
                 Log.i("onMessage",
