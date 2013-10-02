@@ -18,3 +18,6 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+# For Crashlytics, per http://support.crashlytics.com/knowledgebase/articles/202143-eclipse-and-proguard
+-keepattributes SourceFile,LineNumberTable

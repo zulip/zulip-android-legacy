@@ -7,3 +7,4 @@ bin/
 *-javadoc.jar
 *.log
 /local.properties
+res/values/com_crashlytics_export_strings.xml

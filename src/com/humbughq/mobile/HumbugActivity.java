@@ -30,6 +30,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.crashlytics.android.Crashlytics;
 import com.j256.ormlite.android.AndroidDatabaseResults;
 
 public class HumbugActivity extends FragmentActivity implements
@@ -92,6 +93,13 @@ public class HumbugActivity extends FragmentActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (Build.HARDWARE.contains("goldfish")) {
+            Log.i("hardware", "running in emulator");
+        } else {
+            Crashlytics.start(this);
+        }
+
         app = (ZulipApp) getApplicationContext();
         settings = app.settings;
 
