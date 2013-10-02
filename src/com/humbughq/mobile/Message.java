@@ -1,6 +1,5 @@
 package com.humbughq.mobile;
 
-import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -115,13 +114,7 @@ public class Message {
         }
 
         this.setTimestamp(new Date(message.getLong("timestamp") * 1000));
-        try {
-            app.getDatabaseHelper().getDao(Message.class)
-                    .createIfNotExists(this);
-        } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        app.getDao(Message.class).createIfNotExists(this);
     }
 
     public int hashCode() {

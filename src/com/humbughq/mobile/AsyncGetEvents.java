@@ -2,7 +2,6 @@ package com.humbughq.mobile;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
-import java.sql.SQLException;
 
 import org.apache.http.client.HttpResponseException;
 import org.json.JSONArray;
@@ -14,7 +13,7 @@ import android.os.SystemClock;
 import android.util.Log;
 
 import com.humbughq.mobile.MessageListener.LoadPosition;
-import com.j256.ormlite.dao.Dao;
+import com.j256.ormlite.dao.RuntimeExceptionDao;
 
 public class AsyncGetEvents extends Thread {
     HumbugActivity activity;
@@ -175,7 +174,8 @@ public class AsyncGetEvents extends Thread {
 
             // Get subscriptions
             JSONArray subscriptions = response.getJSONArray("subscriptions");
-            Dao<Stream, String> streamDao = this.app.getDao(Stream.class);
+            RuntimeExceptionDao<Stream, Object> streamDao = this.app
+                    .getDao(Stream.class);
             Log.i("stream", "" + subscriptions.length() + " streams");
 
             for (int i = 0; i < subscriptions.length(); i++) {
@@ -183,33 +183,19 @@ public class AsyncGetEvents extends Thread {
                         subscriptions.getJSONObject(i));
                 Log.i("stream", "" + stream);
 
-                try {
-                    streamDao.createOrUpdate(stream);
-                } catch (SQLException e) {
-                    // This isn't totally fatal, because while a lack of
-                    // stream data is depressing our app will still
-                    // mostly function without it.
-                    Log.e("ALP",
-                            "Could not create or update stream in database.");
-                    e.printStackTrace();
-                }
+                streamDao.createOrUpdate(stream);
             }
             that.activity.streamsAdapter.refresh();
 
             // Get people
             JSONArray people = response.getJSONArray("realm_users");
-            Dao<Person, String> personDao = this.app.getDao(Person.class);
+            RuntimeExceptionDao<Person, Object> personDao = this.app
+                    .getDao(Person.class);
             for (int i = 0; i < people.length(); i++) {
                 Person person = Person
                         .getFromJSON(app, people.getJSONObject(i));
                 Log.i("person", "" + person);
-                try {
-                    personDao.createOrUpdate(person);
-                } catch (SQLException e) {
-                    Log.e("ALP",
-                            "Could not create or update person in database");
-                    e.printStackTrace();
-                }
+                personDao.createOrUpdate(person);
             }
             that.activity.peopleAdapter.refresh();
 
@@ -239,16 +225,12 @@ public class AsyncGetEvents extends Thread {
 
     protected void onMessage(JSONObject m) throws JSONException {
         final Message message = new Message(this.app, m);
-        try {
-            Dao<Message, Integer> messages = this.app.getDao(Message.class);
-            messages.createOrUpdate(message);
-            if (this.activity.homeList.currentRange.high <= message.getID()) {
-                this.app.getDao(MessageRange.class).createOrUpdate(
-                        this.activity.homeList.currentRange);
-            }
-        } catch (SQLException e) {
-            // Awkward. (TODO)
-            e.printStackTrace();
+        RuntimeExceptionDao<Message, Object> messageDao = this.app
+                .getDao(Message.class);
+        messageDao.createOrUpdate(message);
+        if (this.activity.homeList.currentRange.high <= message.getID()) {
+            this.app.getDao(MessageRange.class).createOrUpdate(
+                    this.activity.homeList.currentRange);
         }
         Message[] messages = { message };
         this.activity.onMessages(messages, LoadPosition.NEW);

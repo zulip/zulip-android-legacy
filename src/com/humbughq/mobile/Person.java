@@ -7,6 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.j256.ormlite.dao.Dao;
+import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.stmt.SelectArg;
 import com.j256.ormlite.table.DatabaseTable;
@@ -131,11 +132,7 @@ public class Person {
         Person person = getByEmail(app, email);
         if (person == null) {
             person = new Person(name, email, avatarURL);
-            try {
-                app.getDao(Person.class).create(person);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            app.getDao(Person.class).create(person);
         } else {
             boolean changed = false;
             if (name != null && !name.equals(person.name)) {
@@ -147,11 +144,7 @@ public class Person {
                 changed = true;
             }
             if (changed) {
-                try {
-                    app.getDao(Person.class).update(person);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+                app.getDao(Person.class).update(person);
             }
         }
         return person;
@@ -175,14 +168,7 @@ public class Person {
     }
 
     public static Person getById(ZulipApp app, int id) {
-        try {
-            Dao<Person, Integer> dao = app.getDatabaseHelper().getDao(
-                    Person.class);
-            return dao.queryForId(id);
-        } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            return null;
-        }
+        RuntimeExceptionDao<Person, Object> dao = app.getDao(Person.class);
+        return dao.queryForId(id);
     }
 }

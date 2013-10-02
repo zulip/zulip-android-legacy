@@ -8,7 +8,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import android.util.Log;
 
-import com.j256.ormlite.dao.Dao;
+import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.misc.BaseDaoEnabled;
 import com.j256.ormlite.table.DatabaseTable;
@@ -36,11 +36,11 @@ public class MessageRange extends BaseDaoEnabled<MessageRange, Integer> {
     }
 
     public static MessageRange getRangeContaining(int value,
-            Dao<MessageRange, Integer> dao) {
+            RuntimeExceptionDao<MessageRange, Integer> messageRangeDao) {
         List<MessageRange> ranges;
         try {
-            ranges = dao.queryBuilder().where().le("low", value).and()
-                    .ge("high", value).query();
+            ranges = messageRangeDao.queryBuilder().where().le("low", value)
+                    .and().ge("high", value).query();
             if (ranges.size() == 1) {
                 return ranges.get(0);
             } else if (ranges.size() != 0) {

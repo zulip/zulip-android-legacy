@@ -10,6 +10,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.util.Log;
 
 import com.j256.ormlite.dao.Dao;
+import com.j256.ormlite.dao.RuntimeExceptionDao;
 
 public class ZulipApp extends Application {
     private static ZulipApp instance;
@@ -127,9 +128,10 @@ public class ZulipApp extends Application {
         return databaseHelper;
     }
 
-    public <C, T> Dao<C, T> getDao(Class<C> cls) {
+    public <C, T> RuntimeExceptionDao<C, T> getDao(Class<C> cls) {
         try {
-            return databaseHelper.getDao(cls);
+            return new RuntimeExceptionDao<C, T>(
+                    (Dao<C, T>) databaseHelper.getDao(cls));
         } catch (SQLException e) {
             // Well that's sort of awkward.
             e.printStackTrace();

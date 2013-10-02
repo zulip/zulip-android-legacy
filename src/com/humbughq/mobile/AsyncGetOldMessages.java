@@ -15,6 +15,7 @@ import android.util.Log;
 
 import com.humbughq.mobile.MessageListener.LoadPosition;
 import com.j256.ormlite.dao.Dao;
+import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.misc.TransactionManager;
 import com.j256.ormlite.stmt.Where;
 
@@ -67,9 +68,10 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
     @Override
     protected String doInBackground(String... params) {
         // Lets see whether we have this cached already
-        final Dao<MessageRange, Integer> messageRangeDao = app
+        final RuntimeExceptionDao<MessageRange, Integer> messageRangeDao = app
                 .getDao(MessageRange.class);
-        Dao<Message, Object> messageDao = app.getDao(Message.class);
+        RuntimeExceptionDao<Message, Object> messageDao = app
+                .getDao(Message.class);
         try {
             if (rng == null) {
                 // We haven't been passed a range, see if we have a range cached

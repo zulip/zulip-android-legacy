@@ -30,7 +30,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 
-import com.j256.ormlite.dao.Dao;
+import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.stmt.Where;
 
@@ -521,7 +521,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
     }
 
     public void populateCurrentRange() {
-        Dao<MessageRange, Integer> messageRangeDao = app
+        RuntimeExceptionDao<MessageRange, Integer> messageRangeDao = app
                 .getDao(MessageRange.class);
         this.currentRange = MessageRange.getRangeContaining(app.getPointer(),
                 messageRangeDao);

@@ -12,6 +12,7 @@ import android.util.Log;
 
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.ForeignCollection;
+import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.stmt.SelectArg;
@@ -114,8 +115,8 @@ public class Stream {
     static Stream getByName(ZulipApp app, String name) {
         Stream stream = null;
         try {
-            Dao<Stream, String> streams = app.getDatabaseHelper().getDao(
-                    Stream.class);
+            RuntimeExceptionDao<Stream, Object> streams = app
+                    .getDao(Stream.class);
             stream = streams.queryBuilder().where()
                     .eq(Stream.NAME_FIELD, new SelectArg(name)).queryForFirst();
 
@@ -156,12 +157,7 @@ public class Stream {
         String name = message.getString("name");
         Stream stream = getByName(app, name);
         stream.updateFromJSON(message);
-        try {
-            app.getDao(Stream.class).update(stream);
-        } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        app.getDao(Stream.class).update(stream);
         return stream;
     }
 }
