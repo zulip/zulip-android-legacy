@@ -428,6 +428,7 @@ public class HumbugActivity extends FragmentActivity implements
         this.suspended = true;
         if (event_poll != null) {
             event_poll.abort();
+            event_poll = null;
         }
     }
 
@@ -443,6 +444,7 @@ public class HumbugActivity extends FragmentActivity implements
 
         if (event_poll != null) {
             event_poll.abort();
+            event_poll = null;
         }
         app.clearConnectionState();
         app.resetDatabase();
