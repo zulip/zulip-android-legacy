@@ -78,6 +78,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
     int firstMessageId = -1;
     int lastMessageId = -1;
 
+    boolean paused = false;
     boolean initialized = false;
 
     public static MessageListFragment newInstance(NarrowFilter filter) {
@@ -104,9 +105,15 @@ public class MessageListFragment extends Fragment implements MessageListener {
         adapter = new MessageAdapter(getActivity(), new ArrayList<Message>());
     }
 
+    public void onPause() {
+        super.onPause();
+        paused = true;
+    }
+
     public void onResume() {
         super.onResume();
         mListener.onListResume(this);
+        paused = false;
     }
 
     public void onActivityResume() {
@@ -152,7 +159,8 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
                 final int near = 6;
 
-                if (!loadingMessages && firstMessageId > 0 && lastMessageId > 0) {
+                if (!paused && !loadingMessages && firstMessageId > 0
+                        && lastMessageId > 0) {
                     if (firstVisibleItem + visibleItemCount > totalItemCount
                             - near) {
                         // At the bottom of the list
