@@ -35,6 +35,7 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
     boolean recursedBelow = false;
 
     boolean noFurtherMessages = false;
+    int rangeHigh = -2;
 
     public AsyncGetOldMessages(MessageListener listener) {
         super(ZulipApp.get());
@@ -82,6 +83,8 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
                     // We found a range, lets get relevant messages from the
                     // cache
                     rng = protoRng;
+                    rangeHigh = rng.high;
+
                     // we order by descending so that our limit query DTRT
 
                     Where<Message, Object> filteredWhere = messageDao
@@ -126,7 +129,14 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
                             this.recurse(LoadPosition.ABOVE, before, rng,
                                     mainAnchor);
                         }
-                        if (after > 0) {
+
+                        // Don't fetch past the max message ID because we won't
+                        // find anything there. However, leave the final
+                        // determination up to the UI thread, because it has a
+                        // consistent view around events. With this, at
+                        // worst it has to do another fetch to get the new
+                        // messages.
+                        if (after > 0 && rng.high != app.getMaxMessageId()) {
                             this.recurse(LoadPosition.BELOW, after, rng,
                                     afterAnchor);
                         }
@@ -303,6 +313,11 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
     protected void onPostExecute(String result) {
         if (receivedMessages != null) {
             Log.v("poll", "Processing messages received.");
+
+            if ((position == LoadPosition.BELOW || position == LoadPosition.INITIAL)
+                    && app.getMaxMessageId() == rangeHigh) {
+                noFurtherMessages = true;
+            }
 
             listener.onMessages(receivedMessages.toArray(new Message[0]),
                     position, recursedAbove, recursedBelow, noFurtherMessages);
