@@ -288,7 +288,8 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
                     receivedMessages.addAll(Arrays.asList(fetchedMessages));
                 }
 
-                if (receivedMessages.size() < num_before + num_after) {
+                if ((position == LoadPosition.ABOVE || position == LoadPosition.BELOW)
+                        && receivedMessages.size() < num_before + num_after) {
                     noFurtherMessages = true;
                 }
 

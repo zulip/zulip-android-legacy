@@ -490,6 +490,10 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
             showLoadIndicatorTop(moreAbove);
             showLoadIndicatorBottom(moreBelow);
+
+            if (noFurtherMessages || listHasMostRecent()) {
+                loadedToBottom = true;
+            }
         }
 
         loadingMessages = moreAbove || moreBelow;
