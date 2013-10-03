@@ -109,6 +109,13 @@ public class MessageListFragment extends Fragment implements MessageListener {
         mListener.onListResume(this);
     }
 
+    public void onActivityResume() {
+        // Only when the activity resumes, not when the fragment is brought to
+        // the top
+        showLoadIndicatorBottom(true);
+        loadingMessages = true;
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
@@ -312,6 +319,8 @@ public class MessageListFragment extends Fragment implements MessageListener {
         if (initialized && !registered) {
             // Already have state, and already processed any events that came in
             // when resuming the existing queue.
+            showLoadIndicatorBottom(false);
+            loadingMessages = false;
             Log.i("onReadyToDisplay", "just a resume");
             return;
         }
@@ -323,7 +332,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
         lastMessageId = -1;
 
         loadingMessages = true;
-        showLoadIndicatorTop(true);
+        showLoadIndicatorBottom(true);
 
         fetch();
         initialized = true;

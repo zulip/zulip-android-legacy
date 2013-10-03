@@ -436,6 +436,10 @@ public class HumbugActivity extends FragmentActivity implements
         super.onResume();
         Log.i("status", "resume");
         this.suspended = false;
+        homeList.onActivityResume();
+        if (narrowedList != null) {
+            narrowedList.onActivityResume();
+        }
         startRequests();
     }
 
