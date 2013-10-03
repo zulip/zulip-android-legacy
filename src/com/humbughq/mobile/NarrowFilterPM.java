@@ -1,9 +1,10 @@
 package com.humbughq.mobile;
 
 import java.sql.SQLException;
+import java.util.Arrays;
 
+import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -78,7 +79,8 @@ public class NarrowFilterPM implements NarrowFilter {
 
     @Override
     public String getJsonFilter() throws JSONException {
-        return (new JSONObject()).put("pm-with", this.person.getEmail())
-                .toString();
+        return (new JSONArray())
+                .put(new JSONArray(Arrays.asList("pm-with",
+                        this.person.getEmail()))).toString();
     }
 }
