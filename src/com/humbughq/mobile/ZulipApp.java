@@ -26,6 +26,10 @@ public class ZulipApp extends Application {
 
     private int pointer;
 
+    // This object's intrinsic lock is used to prevent multiple threads from
+    // making conflicting updates to ranges
+    public Object updateRangeLock = new Object();
+
     public static ZulipApp get() {
         return instance;
     }

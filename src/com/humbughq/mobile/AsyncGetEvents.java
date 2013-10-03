@@ -195,8 +195,6 @@ public class AsyncGetEvents extends Thread {
             }
             that.activity.peopleAdapter.refresh();
 
-            initCurrentRange();
-
             that.activity.onReadyToDisplay(true);
         } catch (JSONException e) {
             // TODO Auto-generated catch block
@@ -227,27 +225,25 @@ public class AsyncGetEvents extends Thread {
                 .getDao(Message.class);
         messageDao.createOrUpdate(message);
 
-        if (currentRange == null) {
-            initCurrentRange();
+        synchronized (app.updateRangeLock) {
+            RuntimeExceptionDao<MessageRange, Integer> rangeDao = app
+                    .getDao(MessageRange.class);
+
+            currentRange = MessageRange.getRangeContaining(app.getPointer(),
+                    rangeDao);
+            if (currentRange == null) {
+                currentRange = new MessageRange(app.getPointer(),
+                        app.getPointer());
+            }
+
+            if (currentRange.high <= message.getID()) {
+                currentRange.high = message.getID();
+                rangeDao.createOrUpdate(currentRange);
+            }
         }
-        if (currentRange.high <= message.getID()) {
-            currentRange.high = message.getID();
-            this.app.getDao(MessageRange.class).createOrUpdate(currentRange);
-        }
+
         app.setMaxMessageId(message.getID());
         Message[] messages = { message };
         this.activity.onMessages(messages, LoadPosition.NEW);
-    }
-
-    private void initCurrentRange() {
-        RuntimeExceptionDao<MessageRange, Integer> messageRangeDao = app
-                .getDao(MessageRange.class);
-
-        currentRange = MessageRange.getRangeContaining(app.getPointer(),
-                messageRangeDao);
-        if (currentRange == null) {
-            currentRange = new MessageRange(app.getPointer(), app.getPointer());
-            // Does not get saved until we actually have messages here
-        }
     }
 }

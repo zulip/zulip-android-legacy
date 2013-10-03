@@ -162,46 +162,48 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
                 // Consolidate ranges, except in a narrow
 
                 if (filter == null) {
-                    TransactionManager.callInTransaction(this.app
-                            .getDatabaseHelper().getConnectionSource(),
-                            new Callable<Void>() {
-                                public Void call() throws Exception {
-                                    Where<MessageRange, Integer> where = messageRangeDao
-                                            .queryBuilder()
-                                            .orderBy("low", true).where();
-                                    @SuppressWarnings("unchecked")
-                                    List<MessageRange> ranges = where
-                                            .or(where.and(
-                                                    where.ge("high", rng.low),
-                                                    where.le("high", rng.high)),
-                                                    where.and(where.ge("low",
-                                                            rng.low), where.le(
-                                                            "low", rng.high)))
-                                            .query();
+                    synchronized (app.updateRangeLock) {
+                        TransactionManager.callInTransaction(this.app
+                                .getDatabaseHelper().getConnectionSource(),
+                                new Callable<Void>() {
+                                    public Void call() throws Exception {
+                                        Where<MessageRange, Integer> where = messageRangeDao
+                                                .queryBuilder()
+                                                .orderBy("low", true).where();
+                                        @SuppressWarnings("unchecked")
+                                        List<MessageRange> ranges = where.or(
+                                                where.and(where.ge("high",
+                                                        rng.low), where.le(
+                                                        "high", rng.high)),
+                                                where.and(where.ge("low",
+                                                        rng.low), where.le(
+                                                        "low", rng.high)))
+                                                .query();
 
-                                    if (ranges.size() == 0) {
-                                        // Nothing to consolidate
+                                        if (ranges.size() == 0) {
+                                            // Nothing to consolidate
+                                            messageRangeDao.createOrUpdate(rng);
+                                            return null;
+                                        }
+                                        Log.i("", "our low: " + rng.low
+                                                + ", our high: " + rng.high);
+                                        int db_low = ranges.get(0).low;
+                                        int db_high = ranges.get(ranges.size() - 1).high;
+                                        Log.i("", "their low: " + db_low
+                                                + ", their high: " + db_high);
+                                        if (db_low < rng.low) {
+                                            rng.low = db_low;
+                                        }
+                                        if (db_high > rng.high) {
+                                            rng.high = db_high;
+                                        }
+                                        messageRangeDao.delete(ranges);
                                         messageRangeDao.createOrUpdate(rng);
+
                                         return null;
                                     }
-                                    Log.i("", "our low: " + rng.low
-                                            + ", our high: " + rng.high);
-                                    int db_low = ranges.get(0).low;
-                                    int db_high = ranges.get(ranges.size() - 1).high;
-                                    Log.i("", "their low: " + db_low
-                                            + ", their high: " + db_high);
-                                    if (db_low < rng.low) {
-                                        rng.low = db_low;
-                                    }
-                                    if (db_high > rng.high) {
-                                        rng.high = db_high;
-                                    }
-                                    messageRangeDao.delete(ranges);
-                                    messageRangeDao.createOrUpdate(rng);
-
-                                    return null;
-                                }
-                            });
+                                });
+                    }
                 }
             }
         } catch (SQLException e) {
