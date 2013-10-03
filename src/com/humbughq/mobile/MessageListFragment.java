@@ -155,19 +155,16 @@ public class MessageListFragment extends Fragment implements MessageListener {
                 if (!loadingMessages && firstMessageId > 0 && lastMessageId > 0) {
                     if (firstVisibleItem + visibleItemCount > totalItemCount
                             - near) {
-                        Log.i("scroll", "at bottom " + loadingMessages + " "
-                                + loadedToBottom + " " + lastMessageId + " "
-                                + app.getMaxMessageId());
                         // At the bottom of the list
                         if (!loadedToBottom) {
+                            Log.i("scroll", "Starting request below");
                             loadMoreMessages(LoadPosition.BELOW);
                         }
                     }
                     if (firstVisibleItem < near) {
-                        Log.i("scroll", "at top" + firstVisibleItem + " "
-                                + loadedToTop + " " + visibleItemCount + " "
-                                + totalItemCount);
+                        // At the top of the list
                         if (!loadedToTop) {
+                            Log.i("scroll", "Starting request above");
                             loadMoreMessages(LoadPosition.ABOVE);
                         }
                     }

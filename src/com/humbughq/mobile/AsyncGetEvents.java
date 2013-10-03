@@ -176,7 +176,6 @@ public class AsyncGetEvents extends Thread {
             for (int i = 0; i < subscriptions.length(); i++) {
                 Stream stream = Stream.getFromJSON(app,
                         subscriptions.getJSONObject(i));
-                Log.i("stream", "" + stream);
 
                 streamDao.createOrUpdate(stream);
             }
@@ -189,7 +188,6 @@ public class AsyncGetEvents extends Thread {
             for (int i = 0; i < people.length(); i++) {
                 Person person = Person
                         .getFromJSON(app, people.getJSONObject(i));
-                Log.i("person", "" + person);
                 personDao.createOrUpdate(person);
             }
             that.activity.peopleAdapter.refresh();

@@ -61,7 +61,6 @@ class GravatarAsyncFetchTask extends AsyncTask<URL, Void, Bitmap> {
             final ImageView imageView = imageViewReference.get();
             final GravatarAsyncFetchTask bitmapWorkerTask = getBitmapWorkerTask(imageView);
             if (this == bitmapWorkerTask && imageView != null) {
-                Log.i("GAFT.done", "Setting " + imageView + " to " + bitmap);
                 imageView.setImageBitmap(bitmap);
                 context.gravatars.put(person.getEmail(), bitmap);
             }

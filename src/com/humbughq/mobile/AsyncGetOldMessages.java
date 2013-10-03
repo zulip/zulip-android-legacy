@@ -78,7 +78,7 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
                 // We haven't been passed a range, see if we have a range cached
                 MessageRange protoRng = MessageRange.getRangeContaining(
                         mainAnchor, messageRangeDao);
-                Log.e("AGOM", "rng retreived");
+                Log.i("AGOM", "rng retreived");
                 if (protoRng != null) {
                     // We found a range, lets get relevant messages from the
                     // cache
@@ -144,7 +144,7 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
                     }
                 } else {
                     // We don't have anything cached
-                    Log.e("db_gom", "No messages found in specified range!");
+                    Log.w("db_gom", "No messages found in specified range!");
                 }
             }
             if (fetchMessages(mainAnchor, before, after, params)) {
