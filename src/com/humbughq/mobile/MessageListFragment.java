@@ -78,6 +78,8 @@ public class MessageListFragment extends Fragment implements MessageListener {
     int firstMessageId = -1;
     int lastMessageId = -1;
 
+    boolean initialized = false;
+
     public static MessageListFragment newInstance(NarrowFilter filter) {
         MessageListFragment fragment = new MessageListFragment();
         Bundle args = new Bundle();
@@ -306,7 +308,14 @@ public class MessageListFragment extends Fragment implements MessageListener {
         }
     }
 
-    public void onReadyToDisplay() {
+    public void onReadyToDisplay(boolean registered) {
+        if (initialized && !registered) {
+            // Already have state, and already processed any events that came in
+            // when resuming the existing queue.
+            Log.i("onReadyToDisplay", "just a resume");
+            return;
+        }
+
         adapter.clear();
         messageIndex.clear();
 
@@ -317,6 +326,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
         showLoadIndicatorTop(true);
 
         fetch();
+        initialized = true;
     }
 
     private void fetch() {
@@ -381,6 +391,11 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
     public void onMessages(Message[] messages, LoadPosition pos,
             boolean moreAbove, boolean moreBelow, boolean noFurtherMessages) {
+
+        if (!initialized) {
+            return;
+        }
+
         Log.i("onMessages", "Adding " + messages.length + " messages at " + pos);
 
         // Collect state used to maintain scroll position

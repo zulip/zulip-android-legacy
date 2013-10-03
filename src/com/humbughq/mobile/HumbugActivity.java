@@ -290,7 +290,7 @@ public class HumbugActivity extends FragmentActivity implements
         narrowedList = MessageListFragment.newInstance(filter);
         // Push to the back stack if we are not already narrowed
         pushListFragment(narrowedList, currentList == homeList);
-        narrowedList.onReadyToDisplay();
+        narrowedList.onReadyToDisplay(true);
     }
 
     @Override
@@ -463,8 +463,11 @@ public class HumbugActivity extends FragmentActivity implements
         event_poll.start();
     }
 
-    public void onReadyToDisplay() {
-        homeList.onReadyToDisplay();
+    public void onReadyToDisplay(boolean registered) {
+        homeList.onReadyToDisplay(registered);
+        if (narrowedList != null) {
+            narrowedList.onReadyToDisplay(registered);
+        }
     }
 
     public void onMessages(Message[] messages, MessageListener.LoadPosition pos) {

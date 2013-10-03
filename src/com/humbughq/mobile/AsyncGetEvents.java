@@ -127,7 +127,7 @@ public class AsyncGetEvents extends Thread {
                         activity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                activity.onReadyToDisplay();
+                                activity.onReadyToDisplay(false);
                             }
                         });
                     }
@@ -197,7 +197,7 @@ public class AsyncGetEvents extends Thread {
 
             initCurrentRange();
 
-            that.activity.onReadyToDisplay();
+            that.activity.onReadyToDisplay(true);
         } catch (JSONException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
