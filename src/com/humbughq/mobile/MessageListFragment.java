@@ -398,6 +398,10 @@ public class MessageListFragment extends Fragment implements MessageListener {
         }
     }
 
+    public void onNewMessages(Message[] messages) {
+        onMessages(messages, LoadPosition.NEW, false, false, false);
+    }
+
     public void onMessages(Message[] messages, LoadPosition pos,
             boolean moreAbove, boolean moreBelow, boolean noFurtherMessages) {
 

@@ -12,7 +12,6 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Log;
 
-import com.humbughq.mobile.MessageListener.LoadPosition;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 
 public class AsyncGetEvents extends Thread {
@@ -244,6 +243,6 @@ public class AsyncGetEvents extends Thread {
 
         app.setMaxMessageId(message.getID());
         Message[] messages = { message };
-        this.activity.onMessages(messages, LoadPosition.NEW);
+        this.activity.onNewMessages(messages);
     }
 }
