@@ -1,3 +1,9 @@
+com.humbughq.mobile (0.7.0) stable; urgency=low
+
+  * Narrowing support.
+
+ -- Luke Faraone <lfaraone@zulip.com>  Thu, 03 Oct 2013 17:56:02 -0400
+
 com.humbughq.mobile (0.6.0) testing; urgency=low
 
   [ Luke Faraone ]
