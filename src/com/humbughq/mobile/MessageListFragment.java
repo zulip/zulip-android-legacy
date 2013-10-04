@@ -372,8 +372,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
                         .queryForFirst()));
 
             } catch (SQLException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
         } else {
             int anc = app.getPointer();

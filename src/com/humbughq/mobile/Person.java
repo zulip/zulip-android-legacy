@@ -121,9 +121,7 @@ public class Person {
                     .eq(Person.EMAIL_FIELD, new SelectArg(email.toLowerCase()))
                     .queryForFirst();
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            return null;
+            throw new RuntimeException(e);
         }
     }
 

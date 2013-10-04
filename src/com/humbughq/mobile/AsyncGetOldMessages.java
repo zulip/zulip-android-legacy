@@ -218,7 +218,7 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
             }
         } catch (SQLException e) {
             // Still welp.
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
 
         return null; // since onPostExecute doesn't use the String result
@@ -296,13 +296,13 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
                 return receivedMessages.size() > 0;
             } catch (JSONException e) {
                 Log.e("json", "parsing error");
-                e.printStackTrace();
+                ZLog.logException(e);
             } catch (NullPointerException e) {
                 Log.e("poll", "No data returned?");
-                e.printStackTrace();
+                ZLog.logException(e);
             } catch (SQLException e) {
                 // Awkward. (TODO)
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
         } else {
             Log.i("poll", "got nothing from the server");

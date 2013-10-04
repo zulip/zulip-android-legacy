@@ -24,8 +24,7 @@ public class AsyncCursorAdapterUpdater extends
         try {
             return this.cursorGenerator.call();
         } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            ZLog.logException(e);
         }
         return null;
     }

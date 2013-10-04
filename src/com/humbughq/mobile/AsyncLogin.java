@@ -42,8 +42,7 @@ class AsyncLogin extends HumbugAsyncPushTask {
                     return;
                 }
             } catch (JSONException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                ZLog.logException(e);
             }
         }
         TextView errorText = (TextView) this.context

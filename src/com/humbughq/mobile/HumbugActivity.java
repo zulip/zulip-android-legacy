@@ -179,11 +179,9 @@ public class HumbugActivity extends FragmentActivity implements
 
             peopleDrawer.setAdapter(peopleAdapter);
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new RuntimeException(e);
         } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            ZLog.logException(e);
         }
 
         streamsDrawer.setOnItemClickListener(new OnItemClickListener() {

@@ -50,7 +50,7 @@ public class MessageRange extends BaseDaoEnabled<MessageRange, Integer> {
             }
         } catch (SQLException e) {
             // This is nonfatal.
-            e.printStackTrace();
+            ZLog.logException(e);
         }
 
         return null;

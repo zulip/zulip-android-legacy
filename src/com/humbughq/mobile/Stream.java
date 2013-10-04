@@ -127,8 +127,7 @@ public class Stream {
                 app.getDao(Stream.class).createIfNotExists(stream);
             }
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
 
         return stream;
@@ -140,9 +139,7 @@ public class Stream {
                     Stream.class);
             return streams.queryForId(id);
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            return null;
+            throw new RuntimeException(e);
         }
     }
 

@@ -53,8 +53,7 @@ public class AsyncGetEvents extends Thread {
                         that.onEvent(events.getJSONObject(i));
                     }
                 } catch (JSONException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    ZLog.logException(e);
                 }
             }
         };
@@ -71,7 +70,7 @@ public class AsyncGetEvents extends Thread {
 
     private void backoff(Exception e) {
         if (e != null) {
-            e.printStackTrace();
+            ZLog.logException(e);
         }
         failures += 1;
         long backoff = (long) (Math.exp(failures / 2.0) * 1000);
@@ -157,7 +156,7 @@ public class AsyncGetEvents extends Thread {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            ZLog.logException(e);
         }
     }
 
@@ -194,8 +193,7 @@ public class AsyncGetEvents extends Thread {
 
             that.activity.onReadyToDisplay(true);
         } catch (JSONException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            ZLog.logException(e);
         }
     }
 
@@ -211,8 +209,7 @@ public class AsyncGetEvents extends Thread {
                 app.setPointer(event.getInt("pointer"));
             }
         } catch (JSONException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            ZLog.logException(e);
         }
     }
 

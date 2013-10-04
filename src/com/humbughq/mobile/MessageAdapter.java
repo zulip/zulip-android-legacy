@@ -112,7 +112,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
                         context, gravatar, message.getSender());
                 task.loadBitmap(context, url, gravatar, message.getSender());
             } catch (MalformedURLException e) {
-                e.printStackTrace();
+                ZLog.logException(e);
             }
         }
 

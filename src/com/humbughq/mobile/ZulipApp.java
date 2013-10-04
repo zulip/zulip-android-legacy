@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.util.Log;
 
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
@@ -96,7 +95,7 @@ public class ZulipApp extends Application {
                     + getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
         } catch (NameNotFoundException e) {
             // This should… never happen, but okay.
-            e.printStackTrace();
+            ZLog.logException(e);
             return ZulipApp.USER_AGENT + "/unknown";
         }
     }
@@ -138,9 +137,7 @@ public class ZulipApp extends Application {
                     (Dao<C, T>) databaseHelper.getDao(cls));
         } catch (SQLException e) {
             // Well that's sort of awkward.
-            e.printStackTrace();
-            Log.e("ZulipApp", "Could not initialise database");
-            return null;
+            throw new RuntimeException(e);
         }
     }
 

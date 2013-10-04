@@ -45,7 +45,7 @@ class GravatarAsyncFetchTask extends AsyncTask<URL, Void, Bitmap> {
                 return BitmapFactory.decodeStream((InputStream) response);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            ZLog.logException(e);
         }
         return null;
     }

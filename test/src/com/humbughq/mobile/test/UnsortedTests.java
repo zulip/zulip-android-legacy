@@ -20,7 +20,6 @@ import com.humbughq.mobile.MessageType;
 import com.humbughq.mobile.Person;
 import com.humbughq.mobile.ZulipApp;
 import com.humbughq.mobile.test.mutated.FakeAsyncGetOldMessages;
-import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 
 public class UnsortedTests extends ActivityUnitTestCase<HumbugActivity> {

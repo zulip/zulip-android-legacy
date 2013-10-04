@@ -110,7 +110,7 @@ class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
      *            the Exception that triggered this handler
      */
     protected void handleError(Exception e) {
-        e.printStackTrace();
+        ZLog.logException(e);
         this.cancel(true);
     }
 
