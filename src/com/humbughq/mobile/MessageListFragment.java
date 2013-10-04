@@ -206,8 +206,13 @@ public class MessageListFragment extends Fragment implements MessageListener {
                     int position, long id) {
                 try {
                     Message m = (Message) parent.getItemAtPosition(position);
-                    mListener.openCompose(m.getType(), m.getStream().getName(),
-                            m.getSubject(), m.getReplyTo(app));
+                    if (m.getType() == MessageType.STREAM_MESSAGE) {
+                        mListener.openCompose(m.getType(), m.getStream()
+                                .getName(), m.getSubject(), null);
+                    } else {
+                        mListener.openCompose(m.getType(), null, null,
+                                m.getReplyTo(app));
+                    }
                 } catch (IndexOutOfBoundsException e) {
                     // We can ignore this because its probably before the data
                     // has been fetched.
