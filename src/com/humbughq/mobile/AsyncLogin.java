@@ -1,6 +1,7 @@
 package com.humbughq.mobile;
 
 import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpResponseException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -52,14 +53,14 @@ class AsyncLogin extends HumbugAsyncPushTask {
     }
 
     @Override
-    protected void handleHTTPError(final int statusCode, String responseString) {
+    protected void handleHTTPError(final HttpResponseException e) {
         final TextView errorText = (TextView) this.context
                 .findViewById(R.id.error_text);
         errorText.post(new Runnable() {
 
             @Override
             public void run() {
-                if (statusCode == HttpStatus.SC_FORBIDDEN) {
+                if (e.getStatusCode() == HttpStatus.SC_FORBIDDEN) {
                     errorText.setText("Incorrect username or password");
                 } else {
                     errorText.setText("Unknown error");

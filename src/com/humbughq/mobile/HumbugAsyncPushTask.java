@@ -91,7 +91,7 @@ class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
         try {
             return request.execute(api_path[0], api_path[1]);
         } catch (HttpResponseException e) {
-            handleHTTPError(e.getStatusCode(), e.getMessage());
+            handleHTTPError(e);
         } catch (IOException e) {
             handleError(e);
         }
@@ -123,12 +123,10 @@ class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
      * 
      * Override this to specify custom behavior in your task.
      * 
-     * @param statusLine
-     *            The StatusLine produced by the request response
-     * @param responseString
-     *            Data as returned by the server
+     * @param e
+     *            the Exception that triggered this handler
      */
-    protected void handleHTTPError(int statusCode, String responseString) {
+    protected void handleHTTPError(HttpResponseException e) {
         this.cancel(true);
     }
 }
