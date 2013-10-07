@@ -68,7 +68,7 @@ class AsyncLogin extends HumbugAsyncPushTask {
             errorText.post(new Runnable() {
                 @Override
                 public void run() {
-                    errorText.setText("Unknown error");
+                    errorText.setText("Network error");
                 }
             });
             // supermethod invokes cancel for us
