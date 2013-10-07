@@ -1,3 +1,9 @@
+com.humbughq.mobile (0.7.2) precise; urgency=low
+
+  * Reliability improvements.
+
+ -- Luke Faraone <lfaraone@zulip.com>  Mon, 07 Oct 2013 19:33:56 -0400
+
 com.humbughq.mobile (0.7.0) stable; urgency=low
 
   * Narrowing support.
