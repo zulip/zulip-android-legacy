@@ -336,7 +336,8 @@ public class HumbugActivity extends FragmentActivity implements
             break;
         case R.id.compose_stream:
             String stream = null;
-            if (currentList.filter != null) {
+            if (currentList.filter != null
+                    && currentList.filter.getComposeStream() != null) {
                 stream = currentList.filter.getComposeStream().getName();
             }
             openCompose(MessageType.STREAM_MESSAGE, stream, null, null);
