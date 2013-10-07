@@ -210,16 +210,26 @@ public class HumbugActivity extends FragmentActivity implements
         }
 
         homeList = MessageListFragment.newInstance(null);
-        pushListFragment(homeList, false);
+        pushListFragment(homeList, null);
     }
 
-    private void pushListFragment(MessageListFragment list, boolean back) {
+    public void onBackPressed() {
+        if (narrowedList != null) {
+            narrowedList = null;
+            getSupportFragmentManager().popBackStack("narrow",
+                    FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    private void pushListFragment(MessageListFragment list, String back) {
         currentList = list;
         FragmentTransaction transaction = getSupportFragmentManager()
                 .beginTransaction();
         transaction.replace(R.id.list_fragment_container, list);
-        if (back) {
-            transaction.addToBackStack(null);
+        if (back != null) {
+            transaction.addToBackStack(back);
         }
         transaction.commit();
         getSupportFragmentManager().executePendingTransactions();
@@ -287,7 +297,7 @@ public class HumbugActivity extends FragmentActivity implements
     protected void doNarrow(NarrowFilter filter) {
         narrowedList = MessageListFragment.newInstance(filter);
         // Push to the back stack if we are not already narrowed
-        pushListFragment(narrowedList, currentList == homeList);
+        pushListFragment(narrowedList, "narrow");
         narrowedList.onReadyToDisplay(true);
     }
 
@@ -332,7 +342,8 @@ public class HumbugActivity extends FragmentActivity implements
         // Handle item selection
         switch (item.getItemId()) {
         case android.R.id.home:
-            getSupportFragmentManager().popBackStack();
+            getSupportFragmentManager().popBackStack("narrow",
+                    FragmentManager.POP_BACK_STACK_INCLUSIVE);
             break;
         case R.id.compose_stream:
             String stream = null;
