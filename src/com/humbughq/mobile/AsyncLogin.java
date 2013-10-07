@@ -56,18 +56,23 @@ class AsyncLogin extends HumbugAsyncPushTask {
     protected void handleHTTPError(final HttpResponseException e) {
         final TextView errorText = (TextView) this.context
                 .findViewById(R.id.error_text);
-        errorText.post(new Runnable() {
-
-            @Override
-            public void run() {
-                if (e.getStatusCode() == HttpStatus.SC_FORBIDDEN) {
+        if (e.getStatusCode() == HttpStatus.SC_FORBIDDEN) {
+            errorText.post(new Runnable() {
+                @Override
+                public void run() {
                     errorText.setText("Incorrect username or password");
-                } else {
+                }
+            });
+            this.cancel(true);
+        } else {
+            errorText.post(new Runnable() {
+                @Override
+                public void run() {
                     errorText.setText("Unknown error");
                 }
-            }
-        });
-
-        this.cancel(true);
+            });
+            // supermethod invokes cancel for us
+            super.handleHTTPError(e);
+        }
     }
 }

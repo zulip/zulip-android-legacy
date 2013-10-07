@@ -1,12 +1,16 @@
 package com.humbughq.mobile;
 
 import java.io.IOException;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 
+import org.apache.http.NoHttpResponseException;
 import org.apache.http.client.HttpResponseException;
 
 import android.annotation.TargetApi;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.util.Log;
 
 /* General AsyncTask for use in making various web requests to Humbug.
  * 
@@ -110,7 +114,11 @@ class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
      *            the Exception that triggered this handler
      */
     protected void handleError(Exception e) {
-        ZLog.logException(e);
+        // Ignore things that are obviously not our fault
+        if (!(e instanceof UnknownHostException
+                || e instanceof NoHttpResponseException || e instanceof SocketException)) {
+            ZLog.logException(e);
+        }
         this.cancel(true);
     }
 
@@ -127,6 +135,11 @@ class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
      *            the Exception that triggered this handler
      */
     protected void handleHTTPError(HttpResponseException e) {
+        if (e.getStatusCode() < 500 && e.getStatusCode() >= 400) {
+            ZLog.logException(e);
+        } else {
+            Log.i("hapt", "http error", e);
+        }
         this.cancel(true);
     }
 }
