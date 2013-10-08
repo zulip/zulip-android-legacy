@@ -2,6 +2,7 @@ package com.humbughq.mobile;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
+import java.util.ArrayList;
 
 import org.apache.http.client.HttpResponseException;
 import org.json.JSONArray;
@@ -49,9 +50,7 @@ public class AsyncGetEvents extends Thread {
                 JSONArray events;
                 try {
                     events = ((JSONObject) msg.obj).getJSONArray("events");
-                    for (int i = 0; i < events.length(); i++) {
-                        that.onEvent(events.getJSONObject(i));
-                    }
+                    that.onEvents(events);
                 } catch (JSONException e) {
                     ZLog.logException(e);
                 }
@@ -197,27 +196,39 @@ public class AsyncGetEvents extends Thread {
         }
     }
 
-    protected void onEvent(JSONObject event) {
+    protected void onEvents(JSONArray events) {
         try {
-            Log.i("Event:", event.toString());
-            String type = event.getString("type");
+            ArrayList<Message> messages = new ArrayList<Message>();
+            RuntimeExceptionDao<Message, Object> messageDao = this.app
+                    .getDao(Message.class);
 
-            if (type.equals("message")) {
-                onMessage(event.getJSONObject("message"));
-            } else if (type.equals("pointer")) {
-                // Keep our pointer synced with global pointer
-                app.setPointer(event.getInt("pointer"));
+            for (int i = 0; i < events.length(); i++) {
+                JSONObject event = events.getJSONObject(i);
+                Log.i("Event:", event.toString());
+                String type = event.getString("type");
+
+                if (type.equals("message")) {
+                    Message message = new Message(this.app,
+                            event.getJSONObject("message"));
+                    messages.add(message);
+                    messageDao.createOrUpdate(message);
+                } else if (type.equals("pointer")) {
+                    // Keep our pointer synced with global pointer
+                    app.setPointer(event.getInt("pointer"));
+                }
             }
+
+            if (messages.size() > 0) {
+                onMessages(messages);
+            }
+
         } catch (JSONException e) {
             ZLog.logException(e);
         }
     }
 
-    protected void onMessage(JSONObject m) throws JSONException {
-        final Message message = new Message(this.app, m);
-        RuntimeExceptionDao<Message, Object> messageDao = this.app
-                .getDao(Message.class);
-        messageDao.createOrUpdate(message);
+    protected void onMessages(ArrayList<Message> messages) {
+        int lastMessageId = messages.get(messages.size() - 1).getID();
 
         synchronized (app.updateRangeLock) {
             RuntimeExceptionDao<MessageRange, Integer> rangeDao = app
@@ -230,14 +241,13 @@ public class AsyncGetEvents extends Thread {
                         app.getMaxMessageId());
             }
 
-            if (currentRange.high <= message.getID()) {
-                currentRange.high = message.getID();
+            if (currentRange.high <= lastMessageId) {
+                currentRange.high = lastMessageId;
                 rangeDao.createOrUpdate(currentRange);
             }
         }
 
-        app.setMaxMessageId(message.getID());
-        Message[] messages = { message };
-        this.activity.onNewMessages(messages);
+        app.setMaxMessageId(lastMessageId);
+        this.activity.onNewMessages(messages.toArray(new Message[0]));
     }
 }
