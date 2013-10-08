@@ -3,6 +3,7 @@ package com.humbughq.mobile.test;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
 import org.json.JSONException;
@@ -21,6 +22,7 @@ import com.humbughq.mobile.Person;
 import com.humbughq.mobile.ZulipApp;
 import com.humbughq.mobile.test.mutated.FakeAsyncGetOldMessages;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
+import com.j256.ormlite.misc.TransactionManager;
 
 public class UnsortedTests extends ActivityUnitTestCase<HumbugActivity> {
 
@@ -47,6 +49,42 @@ public class UnsortedTests extends ActivityUnitTestCase<HumbugActivity> {
         assertEquals(msg.getID(), 10594623);
         assertEquals(msg.getSender(), new Person("Luke Faraone",
                 "lfaraone@zulip.com"));
+    }
+
+    public void testMessageTrim() throws SQLException {
+        prepTests();
+        TransactionManager.callInTransaction(app.getDatabaseHelper()
+                .getConnectionSource(), new Callable<Void>() {
+            public Void call() throws Exception {
+                for (int i = 1; i <= 300; i++) {
+                    sampleMessage(app, i);
+                }
+
+                for (int i = 501; i <= 800; i++) {
+                    sampleMessage(app, i);
+                }
+
+                app.getDao(MessageRange.class).create(new MessageRange(1, 300));
+                app.getDao(MessageRange.class).create(
+                        new MessageRange(501, 800));
+                return null;
+            }
+        });
+
+        RuntimeExceptionDao<MessageRange, Integer> messageRangeDao = app
+                .getDao(MessageRange.class);
+
+        assertEquals(600, messageDao.countOf());
+        Message.trim(100, app);
+        @SuppressWarnings("unused")
+        List<Message> messages = this.messageDao.queryForAll();
+        assertEquals(100, messageDao.countOf());
+        assertEquals(1, messageRangeDao.countOf());
+        MessageRange r = messageRangeDao.queryBuilder().queryForFirst();
+        // We have messages 701 through 800, which is 100 messages.
+        assertEquals(800, r.high);
+        assertEquals(800 - 99, r.low);
+
     }
 
     public void testAGOMFetch() throws SQLException, InterruptedException,

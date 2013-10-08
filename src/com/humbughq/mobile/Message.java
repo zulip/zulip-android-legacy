@@ -1,11 +1,13 @@
 package com.humbughq.mobile;
 
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.concurrent.Callable;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -14,8 +16,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.text.TextUtils;
+import android.util.Log;
 
+import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.misc.TransactionManager;
+import com.j256.ormlite.stmt.DeleteBuilder;
 import com.j256.ormlite.table.DatabaseTable;
 
 @DatabaseTable(tableName = "messages")
@@ -308,5 +314,60 @@ public class Message {
 
     public void setStream(Stream stream) {
         this.stream = stream;
+    }
+
+    public static void trim(final int olderThan, final ZulipApp app) {
+        final RuntimeExceptionDao<Message, Integer> messageDao = app
+                .<Message, Integer> getDao(Message.class);
+
+        if (messageDao.countOf() <= olderThan) {
+            return;
+        }
+
+        try {
+            synchronized (app.updateRangeLock) {
+                TransactionManager.callInTransaction(app.getDatabaseHelper()
+                        .getConnectionSource(), new Callable<Void>() {
+                    public Void call() throws Exception {
+
+                        int topID = messageDao.queryBuilder()
+                                .orderBy(Message.ID_FIELD, false)
+                                .offset((long) olderThan).limit((long) 1)
+                                .queryForFirst().getID();
+
+                        DeleteBuilder<Message, Integer> messageDeleter = messageDao
+                                .deleteBuilder();
+                        messageDeleter.where().le(ID_FIELD, topID);
+                        messageDeleter.delete();
+
+                        MessageRange rng = MessageRange.getRangeContaining(
+                                topID,
+                                app.<MessageRange, Integer> getDao(MessageRange.class));
+                        if (rng == null) {
+                            Log.wtf("trim",
+                                    "Message in database but not in range!");
+                            return null;
+                        }
+                        if (rng.high == topID) {
+                            rng.delete();
+                        } else {
+                            rng.low = topID + 1;
+                            rng.update();
+                        }
+                        DeleteBuilder<MessageRange, Integer> dB2 = app
+                                .<MessageRange, Integer> getDao(
+                                        MessageRange.class).deleteBuilder();
+
+                        dB2.where().le("high", topID);
+                        dB2.delete();
+
+                        return null;
+                    }
+                });
+            }
+        } catch (SQLException e) {
+            ZLog.logException(e);
+        }
+
     }
 }

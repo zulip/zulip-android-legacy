@@ -165,6 +165,8 @@ public class AsyncGetEvents extends Thread {
             app.setPointer(response.getInt("pointer"));
             app.setMaxMessageId(response.getInt("max_message_id"));
 
+            Message.trim(5000, this.app);
+
             // Get subscriptions
             JSONArray subscriptions = response.getJSONArray("subscriptions");
             RuntimeExceptionDao<Stream, Object> streamDao = this.app
