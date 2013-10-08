@@ -223,11 +223,11 @@ public class AsyncGetEvents extends Thread {
             RuntimeExceptionDao<MessageRange, Integer> rangeDao = app
                     .getDao(MessageRange.class);
 
-            currentRange = MessageRange.getRangeContaining(app.getPointer(),
-                    rangeDao);
+            currentRange = MessageRange.getRangeContaining(
+                    app.getMaxMessageId(), rangeDao);
             if (currentRange == null) {
-                currentRange = new MessageRange(app.getPointer(),
-                        app.getPointer());
+                currentRange = new MessageRange(app.getMaxMessageId(),
+                        app.getMaxMessageId());
             }
 
             if (currentRange.high <= message.getID()) {
