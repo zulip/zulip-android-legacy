@@ -204,7 +204,6 @@ public class AsyncGetEvents extends Thread {
 
             for (int i = 0; i < events.length(); i++) {
                 JSONObject event = events.getJSONObject(i);
-                Log.i("Event:", event.toString());
                 String type = event.getString("type");
 
                 if (type.equals("message")) {
@@ -219,6 +218,8 @@ public class AsyncGetEvents extends Thread {
             }
 
             if (messages.size() > 0) {
+                Log.i("AsyncGetEvents", "Received " + messages.size()
+                        + " messages");
                 onMessages(messages);
             }
 

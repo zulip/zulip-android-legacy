@@ -63,6 +63,7 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
         this.filter = filter;
         position = pos;
         this.receivedMessages = new ArrayList<Message>();
+        Log.i("AGOM", "executing " + anchor + " " + before + " " + after);
         execute("GET", "v1/messages");
     }
 
