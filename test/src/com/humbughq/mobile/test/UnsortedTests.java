@@ -25,7 +25,7 @@ import com.j256.ormlite.dao.RuntimeExceptionDao;
 public class UnsortedTests extends ActivityUnitTestCase<HumbugActivity> {
 
     private ZulipApp app;
-    RuntimeExceptionDao<Message,Object> messageDao;
+    RuntimeExceptionDao<Message, Object> messageDao;
 
     public UnsortedTests() {
         super(HumbugActivity.class);
