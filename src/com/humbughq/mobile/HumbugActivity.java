@@ -203,7 +203,7 @@ public class HumbugActivity extends FragmentActivity implements
             }
         });
 
-        if (getActionBar() != null) {
+        if (android.os.Build.VERSION.SDK_INT >= 11 && getActionBar() != null) {
             // the AB is unavailable when invoked from JUnit
             getActionBar().setDisplayHomeAsUpEnabled(true);
             getActionBar().setHomeButtonEnabled(true);
@@ -279,15 +279,19 @@ public class HumbugActivity extends FragmentActivity implements
         NarrowFilter filter = list.filter;
 
         if (filter == null) {
-            getActionBar().setTitle("Zulip");
-            getActionBar().setSubtitle(null);
+            if (android.os.Build.VERSION.SDK_INT >= 11) {
+                getActionBar().setTitle("Zulip");
+                getActionBar().setSubtitle(null);
+            }
             this.drawerToggle.setDrawerIndicatorEnabled(true);
         } else {
             String title = list.filter.getTitle();
-            if (title != null) {
-                getActionBar().setTitle(title);
+            if (android.os.Build.VERSION.SDK_INT >= 11) {
+                if (title != null) {
+                    getActionBar().setTitle(title);
+                }
+                getActionBar().setSubtitle(list.filter.getSubtitle());
             }
-            getActionBar().setSubtitle(list.filter.getSubtitle());
             this.drawerToggle.setDrawerIndicatorEnabled(false);
         }
 
