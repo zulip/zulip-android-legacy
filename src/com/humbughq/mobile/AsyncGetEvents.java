@@ -23,8 +23,6 @@ public class AsyncGetEvents extends Thread {
     Handler onEventsHandler;
     HTTPRequest request;
 
-    MessageRange currentRange;
-
     AsyncGetEvents that = this;
     int failures = 0;
     boolean registeredOrGotEventsThisRun;
@@ -232,25 +230,7 @@ public class AsyncGetEvents extends Thread {
 
     protected void onMessages(ArrayList<Message> messages) {
         int lastMessageId = messages.get(messages.size() - 1).getID();
-
-        synchronized (app.updateRangeLock) {
-            RuntimeExceptionDao<MessageRange, Integer> rangeDao = app
-                    .getDao(MessageRange.class);
-
-            currentRange = MessageRange.getRangeContaining(
-                    app.getMaxMessageId(), rangeDao);
-            if (currentRange == null) {
-                currentRange = new MessageRange(app.getMaxMessageId(),
-                        app.getMaxMessageId());
-            }
-
-            if (currentRange.high <= lastMessageId) {
-                currentRange.high = lastMessageId;
-                rangeDao.createOrUpdate(currentRange);
-            }
-        }
-
-        app.setMaxMessageId(lastMessageId);
+        MessageRange.updateNewMessagesRange(app, lastMessageId);
         this.activity.onNewMessages(messages.toArray(new Message[0]));
     }
 }

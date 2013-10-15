@@ -2,6 +2,7 @@ package com.humbughq.mobile;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -11,6 +12,8 @@ import android.util.Log;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.misc.BaseDaoEnabled;
+import com.j256.ormlite.misc.TransactionManager;
+import com.j256.ormlite.stmt.Where;
 import com.j256.ormlite.table.DatabaseTable;
 
 /**
@@ -77,4 +80,76 @@ public class MessageRange extends BaseDaoEnabled<MessageRange, Integer> {
         return new EqualsBuilder().append(this.low, rhs.low)
                 .append(this.high, rhs.high).isEquals();
     }
+
+    // / Update or create the final range for new messages from server events
+    static void updateNewMessagesRange(ZulipApp app, int maxId) {
+        synchronized (app.updateRangeLock) {
+            RuntimeExceptionDao<MessageRange, Integer> rangeDao = app
+                    .getDao(MessageRange.class);
+
+            MessageRange currentRange = MessageRange.getRangeContaining(
+                    app.getMaxMessageId(), rangeDao);
+            if (currentRange == null) {
+                currentRange = new MessageRange(app.getMaxMessageId(),
+                        app.getMaxMessageId());
+            }
+
+            if (currentRange.high <= maxId) {
+                currentRange.high = maxId;
+                rangeDao.createOrUpdate(currentRange);
+            }
+        }
+
+        app.setMaxMessageId(maxId);
+    }
+
+    // Create a range for fetched messages, merging with other ranges if
+    // necessary. Has the side effect of committing rng or its replacement to
+    // the DB.
+    static void consolidate(ZulipApp app, final MessageRange rng) {
+        final RuntimeExceptionDao<MessageRange, Integer> messageRangeDao = app
+                .getDao(MessageRange.class);
+        try {
+            synchronized (app.updateRangeLock) {
+                TransactionManager.callInTransaction(app.getDatabaseHelper()
+                        .getConnectionSource(), new Callable<Void>() {
+                    public Void call() throws Exception {
+                        Where<MessageRange, Integer> where = messageRangeDao
+                                .queryBuilder().orderBy("low", true).where();
+                        @SuppressWarnings("unchecked")
+                        List<MessageRange> ranges = where.or(
+                                where.and(where.ge("high", rng.low),
+                                        where.le("high", rng.high)),
+                                where.and(where.ge("low", rng.low),
+                                        where.le("low", rng.high))).query();
+
+                        if (ranges.size() == 0) {
+                            // Nothing to consolidate
+                            messageRangeDao.createOrUpdate(rng);
+                            return null;
+                        }
+                        Log.i("", "our low: " + rng.low + ", our high: "
+                                + rng.high);
+                        int db_low = ranges.get(0).low;
+                        int db_high = ranges.get(ranges.size() - 1).high;
+                        Log.i("", "their low: " + db_low + ", their high: "
+                                + db_high);
+                        if (db_low < rng.low) {
+                            rng.low = db_low;
+                        }
+                        if (db_high > rng.high) {
+                            rng.high = db_high;
+                        }
+                        messageRangeDao.delete(ranges);
+                        messageRangeDao.createOrUpdate(rng);
+
+                        return null;
+                    }
+                });
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }
