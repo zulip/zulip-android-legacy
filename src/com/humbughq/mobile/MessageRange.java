@@ -118,10 +118,10 @@ public class MessageRange extends BaseDaoEnabled<MessageRange, Integer> {
                                 .queryBuilder().orderBy("low", true).where();
                         @SuppressWarnings("unchecked")
                         List<MessageRange> ranges = where.or(
-                                where.and(where.ge("high", rng.low),
-                                        where.le("high", rng.high)),
-                                where.and(where.ge("low", rng.low),
-                                        where.le("low", rng.high))).query();
+                                where.and(where.ge("high", rng.low - 1),
+                                        where.le("high", rng.high + 1)),
+                                where.and(where.ge("low", rng.low - 1),
+                                        where.le("low", rng.high + 1))).query();
 
                         if (ranges.size() == 0) {
                             // Nothing to consolidate
