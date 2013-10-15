@@ -147,30 +147,19 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
                 }
             }
             if (fetchMessages(mainAnchor, before, after, params)) {
-                int lowest = receivedMessages.get(0).getID();
-                int highest = receivedMessages.get(receivedMessages.size() - 1)
-                        .getID();
-                if (rng != null) {
-                    try {
-                        rng.refresh();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                        Log.w("AGOM",
-                                "Couldn't refresh rng, maybe not in database?");
-                    }
-                    if (lowest < rng.low) {
-                        rng.low = lowest;
-                    }
-                    if (highest > rng.high) {
-                        rng.high = highest;
-                    }
-                } else {
-                    rng = new MessageRange(lowest, highest);
-                }
-
-                // Consolidate ranges, except in a narrow
                 if (filter == null) {
-                    MessageRange.consolidate(app, rng);
+                    int lowest = receivedMessages.get(0).getID();
+                    int highest = receivedMessages.get(
+                            receivedMessages.size() - 1).getID();
+
+                    // We know there are no messages between the anchor and what
+                    // we received or we would have fetched them.
+                    if (lowest > mainAnchor)
+                        lowest = mainAnchor;
+                    if (highest < mainAnchor)
+                        highest = mainAnchor;
+
+                    MessageRange.markRange(app, lowest, highest);
                 }
             }
         } catch (SQLException e) {

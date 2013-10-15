@@ -104,9 +104,9 @@ public class MessageRange extends BaseDaoEnabled<MessageRange, Integer> {
     }
 
     // Create a range for fetched messages, merging with other ranges if
-    // necessary. Has the side effect of committing rng or its replacement to
+    // necessary. Messages between low and high (both inclusive) must exist in
     // the DB.
-    static void consolidate(ZulipApp app, final MessageRange rng) {
+    static void markRange(ZulipApp app, final int low, final int high) {
         final RuntimeExceptionDao<MessageRange, Integer> messageRangeDao = app
                 .getDao(MessageRange.class);
         try {
@@ -114,6 +114,7 @@ public class MessageRange extends BaseDaoEnabled<MessageRange, Integer> {
                 TransactionManager.callInTransaction(app.getDatabaseHelper()
                         .getConnectionSource(), new Callable<Void>() {
                     public Void call() throws Exception {
+                        MessageRange rng = new MessageRange(low, high);
                         Where<MessageRange, Integer> where = messageRangeDao
                                 .queryBuilder().orderBy("low", true).where();
                         @SuppressWarnings("unchecked")
