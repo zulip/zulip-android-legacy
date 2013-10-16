@@ -36,25 +36,6 @@ public class AsyncGetEvents extends Thread {
 
     public void start() {
         registeredOrGotEventsThisRun = false;
-
-        onRegisterHandler = new Handler() {
-            public void handleMessage(android.os.Message msg) {
-                that.onRegister((JSONObject) msg.obj);
-            }
-        };
-
-        onEventsHandler = new Handler() {
-            public void handleMessage(android.os.Message msg) {
-                JSONArray events;
-                try {
-                    events = ((JSONObject) msg.obj).getJSONArray("events");
-                    that.onEvents(events);
-                } catch (JSONException e) {
-                    ZLog.logException(e);
-                }
-            }
-        };
-
         super.start();
     }
 
@@ -85,7 +66,7 @@ public class AsyncGetEvents extends Thread {
         app.setEventQueueId(response.getString("queue_id"));
         app.setLastEventId(response.getInt("last_event_id"));
 
-        onRegisterHandler.obtainMessage(0, response).sendToTarget();
+        processRegister(response);
     }
 
     public void run() {
@@ -107,13 +88,12 @@ public class AsyncGetEvents extends Thread {
 
                     JSONArray events = response.getJSONArray("events");
                     if (events.length() > 0) {
+                        this.processEvents(events);
+
                         JSONObject lastEvent = events.getJSONObject(events
                                 .length() - 1);
-
                         app.setLastEventId(lastEvent.getInt("id"));
 
-                        onEventsHandler.obtainMessage(0, response)
-                                .sendToTarget();
                         failures = 0;
                     }
 
@@ -157,9 +137,9 @@ public class AsyncGetEvents extends Thread {
         }
     }
 
-    protected void onRegister(JSONObject response) {
+    protected void processRegister(JSONObject response) {
+        // In task thread
         try {
-
             app.setPointer(response.getInt("pointer"));
             app.setMaxMessageId(response.getInt("max_message_id"));
 
@@ -177,7 +157,6 @@ public class AsyncGetEvents extends Thread {
 
                 streamDao.createOrUpdate(stream);
             }
-            that.activity.streamsAdapter.refresh();
 
             // Get people
             JSONArray people = response.getJSONArray("realm_users");
@@ -188,15 +167,22 @@ public class AsyncGetEvents extends Thread {
                         .getFromJSON(app, people.getJSONObject(i));
                 personDao.createOrUpdate(person);
             }
-            that.activity.peopleAdapter.refresh();
 
-            that.activity.onReadyToDisplay(true);
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    that.activity.peopleAdapter.refresh();
+                    that.activity.streamsAdapter.refresh();
+                    activity.onReadyToDisplay(true);
+                }
+            });
         } catch (JSONException e) {
             ZLog.logException(e);
         }
     }
 
-    protected void onEvents(JSONArray events) {
+    protected void processEvents(JSONArray events) {
+        // In task thread
         try {
             ArrayList<Message> messages = new ArrayList<Message>();
             for (int i = 0; i < events.length(); i++) {
@@ -217,7 +203,7 @@ public class AsyncGetEvents extends Thread {
                 Log.i("AsyncGetEvents", "Received " + messages.size()
                         + " messages");
                 Message.createMessages(app, messages);
-                onMessages(messages);
+                processMessages(messages);
             }
 
         } catch (JSONException e) {
@@ -225,9 +211,16 @@ public class AsyncGetEvents extends Thread {
         }
     }
 
-    protected void onMessages(ArrayList<Message> messages) {
+    protected void processMessages(final ArrayList<Message> messages) {
+        // In task thread
         int lastMessageId = messages.get(messages.size() - 1).getID();
         MessageRange.updateNewMessagesRange(app, lastMessageId);
-        this.activity.onNewMessages(messages.toArray(new Message[0]));
+
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                activity.onNewMessages(messages.toArray(new Message[0]));
+            }
+        });
     }
 }
