@@ -13,6 +13,8 @@ import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.EditText;
 
+import com.humbughq.mobile.HumbugAsyncPushTask.AsyncTaskCompleteListener;
+
 public class ComposeDialog extends DialogFragment {
     HumbugActivity activity;
     ZulipApp app;
@@ -136,6 +138,18 @@ public class ComposeDialog extends DialogFragment {
         return dialog;
     }
 
+    private void sending(boolean isSending) {
+        view.findViewById(R.id.composeStatus).setVisibility(
+                isSending ? View.VISIBLE : View.GONE);
+
+        ((AlertDialog) getDialog()).getButton(DialogInterface.BUTTON_POSITIVE)
+                .setEnabled(!isSending);
+
+        recipient.setEnabled(!isSending);
+        subject.setEnabled(!isSending);
+        body.setEnabled(!isSending);
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -172,9 +186,21 @@ public class ComposeDialog extends DialogFragment {
 
                             msg.setContent(body.getText().toString());
 
+                            sending(true);
+
                             AsyncSend sender = new AsyncSend(activity, msg);
+                            sender.setCallback(new AsyncTaskCompleteListener() {
+                                public void onTaskComplete(String result) {
+                                    dismiss();
+                                }
+
+                                public void onTaskFailure(String result) {
+                                    sending(false);
+                                    body.setError("Error sending message");
+                                }
+                            });
+
                             sender.execute();
-                            dismiss();
                         }
                     }
                 });

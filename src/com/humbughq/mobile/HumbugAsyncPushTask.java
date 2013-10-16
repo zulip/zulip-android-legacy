@@ -142,4 +142,14 @@ class HumbugAsyncPushTask extends AsyncTask<String, String, String> {
         }
         this.cancel(true);
     }
+
+    @Override
+    protected void onPostExecute(String result) {
+        callback.onTaskComplete(result);
+    }
+
+    @Override
+    protected void onCancelled(String result) {
+        callback.onTaskFailure(result);
+    }
 }

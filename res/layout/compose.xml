@@ -31,7 +31,6 @@
             android:hint="@string/subject"
             android:inputType="textNoSuggestions"
             android:maxLines="1" />
-
     </LinearLayout>
 
     <EditText
@@ -40,8 +39,31 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:hint="@string/compose_hint"
+        android:inputType="textCapSentences|textAutoCorrect|textMultiLine"
         android:lines="3"
-        android:textColor="#000000" 
-        android:inputType="textCapSentences|textAutoCorrect|textMultiLine" />
+        android:textColor="#000000" />
+
+    <LinearLayout
+        android:id="@+id/composeStatus"
+        android:layout_width="match_parent"
+        android:layout_height="24dp"
+        android:layout_gravity="center"
+        android:background="#eeeeee"
+        android:gravity="center|center_vertical"
+        android:visibility="gone" >
+
+        <ProgressBar
+            android:id="@+id/composeSpinner"
+            android:layout_width="15dp"
+            android:layout_height="15dp" />
+
+        <TextView
+            android:id="@+id/composeStatusText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="8dp"
+            android:text="@string/sending_message"
+            android:textSize="16sp" />
+    </LinearLayout>
 
 </LinearLayout>

@@ -27,5 +27,6 @@
 
     <!-- Used on the indicator when loading messages -->
     <string name="loading_messages">Loading messages</string>
+    <string name="sending_message">Sending</string>
 
 </resources>
