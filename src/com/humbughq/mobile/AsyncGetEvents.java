@@ -2,7 +2,9 @@ package com.humbughq.mobile;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.concurrent.Callable;
 
 import org.apache.http.client.HttpResponseException;
 import org.json.JSONArray;
@@ -14,6 +16,7 @@ import android.os.SystemClock;
 import android.util.Log;
 
 import com.j256.ormlite.dao.RuntimeExceptionDao;
+import com.j256.ormlite.misc.TransactionManager;
 
 public class AsyncGetEvents extends Thread {
     HumbugActivity activity;
@@ -137,7 +140,7 @@ public class AsyncGetEvents extends Thread {
         }
     }
 
-    protected void processRegister(JSONObject response) {
+    protected void processRegister(final JSONObject response) {
         // In task thread
         try {
             app.setPointer(response.getInt("pointer"));
@@ -145,28 +148,35 @@ public class AsyncGetEvents extends Thread {
 
             Message.trim(5000, this.app);
 
-            // Get subscriptions
-            JSONArray subscriptions = response.getJSONArray("subscriptions");
-            RuntimeExceptionDao<Stream, Object> streamDao = this.app
-                    .getDao(Stream.class);
-            Log.i("stream", "" + subscriptions.length() + " streams");
+            TransactionManager.callInTransaction(app.getDatabaseHelper()
+                    .getConnectionSource(), new Callable<Void>() {
+                public Void call() throws Exception {
+                    // Get subscriptions
+                    JSONArray subscriptions = response
+                            .getJSONArray("subscriptions");
+                    RuntimeExceptionDao<Stream, Object> streamDao = app
+                            .getDao(Stream.class);
+                    Log.i("stream", "" + subscriptions.length() + " streams");
 
-            for (int i = 0; i < subscriptions.length(); i++) {
-                Stream stream = Stream.getFromJSON(app,
-                        subscriptions.getJSONObject(i));
+                    for (int i = 0; i < subscriptions.length(); i++) {
+                        Stream stream = Stream.getFromJSON(app,
+                                subscriptions.getJSONObject(i));
 
-                streamDao.createOrUpdate(stream);
-            }
+                        streamDao.createOrUpdate(stream);
+                    }
 
-            // Get people
-            JSONArray people = response.getJSONArray("realm_users");
-            RuntimeExceptionDao<Person, Object> personDao = this.app
-                    .getDao(Person.class);
-            for (int i = 0; i < people.length(); i++) {
-                Person person = Person
-                        .getFromJSON(app, people.getJSONObject(i));
-                personDao.createOrUpdate(person);
-            }
+                    // Get people
+                    JSONArray people = response.getJSONArray("realm_users");
+                    RuntimeExceptionDao<Person, Object> personDao = app
+                            .getDao(Person.class);
+                    for (int i = 0; i < people.length(); i++) {
+                        Person person = Person.getFromJSON(app,
+                                people.getJSONObject(i));
+                        personDao.createOrUpdate(person);
+                    }
+                    return null;
+                }
+            });
 
             activity.runOnUiThread(new Runnable() {
                 @Override
@@ -177,6 +187,8 @@ public class AsyncGetEvents extends Thread {
                 }
             });
         } catch (JSONException e) {
+            ZLog.logException(e);
+        } catch (SQLException e) {
             ZLog.logException(e);
         }
     }
