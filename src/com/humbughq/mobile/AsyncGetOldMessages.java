@@ -2,7 +2,6 @@ package com.humbughq.mobile;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -13,7 +12,6 @@ import org.json.JSONObject;
 import android.util.Log;
 
 import com.humbughq.mobile.MessageListener.LoadPosition;
-import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.stmt.Where;
 
@@ -215,23 +213,21 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
             try {
                 JSONObject response = new JSONObject(result);
                 JSONArray objects = response.getJSONArray("messages");
-
-                Dao<Message, Integer> messages = this.app.getDatabaseHelper()
-                        .getDao(Message.class);
-
-                Message[] fetchedMessages = new Message[objects.length()];
+                ArrayList<Message> fetchedMessages = new ArrayList<Message>(
+                        objects.length());
 
                 for (int i = 0; i < objects.length(); i++) {
                     Message message = new Message(this.app,
                             objects.getJSONObject(i));
-
-                    fetchedMessages[i] = message;
-                    messages.createOrUpdate(message);
+                    fetchedMessages.add(message);
                 }
+
+                Message.createMessages(app, fetchedMessages);
+
                 if (num_after == 0) {
-                    receivedMessages.addAll(0, Arrays.asList(fetchedMessages));
+                    receivedMessages.addAll(0, fetchedMessages);
                 } else {
-                    receivedMessages.addAll(Arrays.asList(fetchedMessages));
+                    receivedMessages.addAll(fetchedMessages);
                 }
 
                 if ((position == LoadPosition.ABOVE || position == LoadPosition.BELOW)
@@ -246,9 +242,6 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
             } catch (NullPointerException e) {
                 Log.e("poll", "No data returned?");
                 ZLog.logException(e);
-            } catch (SQLException e) {
-                // Awkward. (TODO)
-                throw new RuntimeException(e);
             }
         } else {
             Log.i("poll", "got nothing from the server");

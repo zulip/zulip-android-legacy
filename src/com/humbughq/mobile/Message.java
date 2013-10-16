@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.Callable;
 
@@ -314,6 +315,26 @@ public class Message {
 
     public void setStream(Stream stream) {
         this.stream = stream;
+    }
+
+    public static void createMessages(final ZulipApp app,
+            final List<Message> messages) {
+        try {
+            TransactionManager.callInTransaction(app.getDatabaseHelper()
+                    .getConnectionSource(), new Callable<Void>() {
+                public Void call() throws Exception {
+                    RuntimeExceptionDao<Message, Object> messageDao = app
+                            .getDao(Message.class);
+
+                    for (Message m : messages) {
+                        messageDao.createOrUpdate(m);
+                    }
+                    return null;
+                }
+            });
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static void trim(final int olderThan, final ZulipApp app) {

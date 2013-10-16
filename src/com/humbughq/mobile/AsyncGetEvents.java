@@ -199,9 +199,6 @@ public class AsyncGetEvents extends Thread {
     protected void onEvents(JSONArray events) {
         try {
             ArrayList<Message> messages = new ArrayList<Message>();
-            RuntimeExceptionDao<Message, Object> messageDao = this.app
-                    .getDao(Message.class);
-
             for (int i = 0; i < events.length(); i++) {
                 JSONObject event = events.getJSONObject(i);
                 String type = event.getString("type");
@@ -210,7 +207,6 @@ public class AsyncGetEvents extends Thread {
                     Message message = new Message(this.app,
                             event.getJSONObject("message"));
                     messages.add(message);
-                    messageDao.createOrUpdate(message);
                 } else if (type.equals("pointer")) {
                     // Keep our pointer synced with global pointer
                     app.setPointer(event.getInt("pointer"));
@@ -220,6 +216,7 @@ public class AsyncGetEvents extends Thread {
             if (messages.size() > 0) {
                 Log.i("AsyncGetEvents", "Received " + messages.size()
                         + " messages");
+                Message.createMessages(app, messages);
                 onMessages(messages);
             }
 
