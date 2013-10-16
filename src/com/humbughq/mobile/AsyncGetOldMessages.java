@@ -190,13 +190,11 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
 
     protected boolean fetchMessages(int anchor, int num_before, int num_after,
             String[] params) {
-
         this.setProperty("anchor", Integer.toString(anchor));
         this.setProperty("num_before", Integer.toString(num_before));
         this.setProperty("num_after", Integer.toString(num_after));
         this.setProperty("apply_markdown", "false");
-        // We don't support narrowing at all, so always specify we're
-        // unnarrowed.
+
         if (filter != null) {
             try {
                 this.setProperty("narrow", filter.getJsonFilter());
