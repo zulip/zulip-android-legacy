@@ -114,36 +114,32 @@ public class MessageRange extends BaseDaoEnabled<MessageRange, Integer> {
                 TransactionManager.callInTransaction(app.getDatabaseHelper()
                         .getConnectionSource(), new Callable<Void>() {
                     public Void call() throws Exception {
-                        MessageRange rng = new MessageRange(low, high);
                         Where<MessageRange, Integer> where = messageRangeDao
                                 .queryBuilder().orderBy("low", true).where();
                         @SuppressWarnings("unchecked")
                         List<MessageRange> ranges = where.or(
-                                where.and(where.ge("high", rng.low - 1),
-                                        where.le("high", rng.high + 1)),
-                                where.and(where.ge("low", rng.low - 1),
-                                        where.le("low", rng.high + 1))).query();
+                                where.and(where.ge("high", low - 1),
+                                        where.le("high", high + 1)),
+                                where.and(where.ge("low", low - 1),
+                                        where.le("low", high + 1))).query();
 
-                        if (ranges.size() == 0) {
-                            // Nothing to consolidate
-                            messageRangeDao.createOrUpdate(rng);
-                            return null;
+                        MessageRange rng = new MessageRange(low, high);
+                        if (ranges.size() > 0) {
+                            Log.i("", "our low: " + rng.low + ", our high: "
+                                    + rng.high);
+                            int db_low = ranges.get(0).low;
+                            int db_high = ranges.get(ranges.size() - 1).high;
+                            Log.i("", "their low: " + db_low + ", their high: "
+                                    + db_high);
+                            if (db_low < rng.low) {
+                                rng.low = db_low;
+                            }
+                            if (db_high > rng.high) {
+                                rng.high = db_high;
+                            }
+                            messageRangeDao.delete(ranges);
                         }
-                        Log.i("", "our low: " + rng.low + ", our high: "
-                                + rng.high);
-                        int db_low = ranges.get(0).low;
-                        int db_high = ranges.get(ranges.size() - 1).high;
-                        Log.i("", "their low: " + db_low + ", their high: "
-                                + db_high);
-                        if (db_low < rng.low) {
-                            rng.low = db_low;
-                        }
-                        if (db_high > rng.high) {
-                            rng.high = db_high;
-                        }
-                        messageRangeDao.delete(ranges);
                         messageRangeDao.createOrUpdate(rng);
-
                         return null;
                     }
                 });
