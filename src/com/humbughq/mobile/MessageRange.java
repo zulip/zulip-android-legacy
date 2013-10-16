@@ -82,7 +82,7 @@ public class MessageRange extends BaseDaoEnabled<MessageRange, Integer> {
     }
 
     // / Update or create the final range for new messages from server events
-    static void updateNewMessagesRange(ZulipApp app, int maxId) {
+    public static void updateNewMessagesRange(ZulipApp app, int maxId) {
         synchronized (app.updateRangeLock) {
             RuntimeExceptionDao<MessageRange, Integer> rangeDao = app
                     .getDao(MessageRange.class);
@@ -106,7 +106,7 @@ public class MessageRange extends BaseDaoEnabled<MessageRange, Integer> {
     // Create a range for fetched messages, merging with other ranges if
     // necessary. Messages between low and high (both inclusive) must exist in
     // the DB.
-    static void markRange(ZulipApp app, final int low, final int high) {
+    public static void markRange(ZulipApp app, final int low, final int high) {
         final RuntimeExceptionDao<MessageRange, Integer> messageRangeDao = app
                 .getDao(MessageRange.class);
         try {
@@ -152,5 +152,4 @@ public class MessageRange extends BaseDaoEnabled<MessageRange, Integer> {
             throw new RuntimeException(e);
         }
     }
-
 }

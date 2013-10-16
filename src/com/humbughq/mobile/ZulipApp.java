@@ -173,9 +173,11 @@ public class ZulipApp extends Application {
 
     public void setMaxMessageId(int max_message_id) {
         this.max_message_id = max_message_id;
-        Editor ed = settings.edit();
-        ed.putInt("max_message_id", max_message_id);
-        ed.apply();
+        if (settings != null) {
+            Editor ed = settings.edit();
+            ed.putInt("max_message_id", max_message_id);
+            ed.apply();
+        }
     }
 
     public int getPointer() {

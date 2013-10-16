@@ -51,6 +51,55 @@ public class UnsortedTests extends ActivityUnitTestCase<HumbugActivity> {
                 "lfaraone@zulip.com"));
     }
 
+    public void checkRanges(String rangestr) throws SQLException {
+        List<MessageRange> ranges = app.getDao(MessageRange.class)
+                .queryBuilder().orderBy("low", true).query();
+        String s = "";
+        for (MessageRange rng : ranges) {
+            s += "(" + rng.low + "," + rng.high + ")";
+        }
+
+        assertEquals(rangestr, s);
+    }
+
+    public void testMessageRange() throws SQLException {
+        prepTests();
+
+        MessageRange.markRange(app, 100, 200);
+        checkRanges("(100,200)");
+
+        MessageRange.markRange(app, 50, 60);
+        checkRanges("(50,60)(100,200)");
+
+        MessageRange.markRange(app, 58, 70);
+        checkRanges("(50,70)(100,200)");
+
+        MessageRange.markRange(app, 70, 100);
+        checkRanges("(50,200)");
+
+        MessageRange.markRange(app, 40, 49);
+        checkRanges("(40,200)");
+
+        MessageRange.markRange(app, 201, 210);
+        checkRanges("(40,210)");
+    }
+
+    public void testUpdateMessageRange() throws SQLException {
+        prepTests();
+
+        app.setMaxMessageId(1000);
+        MessageRange.updateNewMessagesRange(app, 1010);
+        checkRanges("(1000,1010)");
+
+        MessageRange.updateNewMessagesRange(app, 1020);
+        checkRanges("(1000,1020)");
+
+        // Then, after we skip some messages...
+        app.setMaxMessageId(2000);
+        MessageRange.updateNewMessagesRange(app, 2010);
+        checkRanges("(1000,1020)(2000,2010)");
+    }
+
     public void testMessageTrim() throws SQLException {
         prepTests();
         TransactionManager.callInTransaction(app.getDatabaseHelper()
