@@ -2,6 +2,7 @@ package com.humbughq.mobile;
 
 import java.sql.SQLException;
 
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
@@ -48,6 +49,37 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
         }
     }
 
+    public void resetDatabase(SQLiteDatabase db) {
+        ZulipApp.get().onResetDatabase();
+        Log.i("resetDatabase", "Resetting database");
+
+        boolean inTransaction = db.inTransaction();
+
+        if (!inTransaction) {
+            db.beginTransaction();
+        }
+
+        Cursor c = db.rawQuery(
+                "SELECT name FROM sqlite_master WHERE type='table'"
+                        + "AND name NOT LIKE 'sqlite_%'"
+                        + "AND name NOT LIKE 'android_%';", null);
+        while (c.moveToNext()) {
+            String name = c.getString(0);
+            Log.i("resetDatabase", "Dropping " + name);
+            db.execSQL("DROP TABLE " + name);
+        }
+
+        db.setTransactionSuccessful();
+        db.endTransaction();
+        db.execSQL("VACUUM;");
+
+        if (inTransaction) {
+            db.beginTransaction();
+        }
+
+        onCreate(db);
+    }
+
     /**
      * This is called when your application is upgraded and it has a higher
      * version number. This allows you to adjust the various data to match the
@@ -56,15 +88,12 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, ConnectionSource connectionSource,
             int oldVersion, int newVersion) {
-        try {
-            Log.i(DatabaseHelper.class.getName(), "onUpgrade");
-            TableUtils.dropTable(connectionSource, Person.class, true);
-            // after we drop the old databases, we create the new ones
-            onCreate(db, connectionSource);
-        } catch (SQLException e) {
-            Log.e(DatabaseHelper.class.getName(), "Can't drop databases", e);
-            throw new RuntimeException(e);
-        }
+        resetDatabase(db);
+    }
+
+    @Override
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        resetDatabase(db);
     }
 
     /**

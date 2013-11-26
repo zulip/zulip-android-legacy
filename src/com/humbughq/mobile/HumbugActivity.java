@@ -256,7 +256,7 @@ public class HumbugActivity extends FragmentActivity implements
             switch (param) {
             case RESET_DATABASE:
                 Log.i("params", "Resetting the database...");
-                boolean result = app.resetDatabase();
+                app.resetDatabase();
                 Log.i("params", "Database deleted successfully.");
                 this.finish();
                 break;

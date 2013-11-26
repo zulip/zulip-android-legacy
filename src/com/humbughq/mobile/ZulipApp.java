@@ -191,12 +191,14 @@ public class ZulipApp extends Application {
         ed.apply();
     }
 
-    public boolean resetDatabase() {
+    public void resetDatabase() {
+        databaseHelper.resetDatabase(databaseHelper.getWritableDatabase());
+    }
+
+    public void onResetDatabase() {
         setPointer(-1);
         setMaxMessageId(-1);
         setLastEventId(-1);
         setEventQueueId(null);
-        return getApplicationContext().deleteDatabase(
-                getDatabaseHelper().getDatabaseName());
     }
 }
