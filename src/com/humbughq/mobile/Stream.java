@@ -28,6 +28,7 @@ public class Stream {
     public static final String COLOR_FIELD = "color";
     public static final String INHOMEVIEW_FIELD = "inHomeView";
     public static final String INVITEONLY_FIELD = "inviteOnly";
+    public static final String SUBSCRIBED_FIELD = "subscribed";
 
     @DatabaseField(columnName = ID_FIELD, generatedId = true)
     private int id;
@@ -41,12 +42,14 @@ public class Stream {
     private Boolean inHomeView;
     @DatabaseField(columnName = INVITEONLY_FIELD)
     private Boolean inviteOnly;
+    @DatabaseField(columnName = SUBSCRIBED_FIELD)
+    boolean subscribed;
 
     /**
      * Construct an empty Stream object.
      */
     public Stream() {
-
+        this.subscribed = false;
     }
 
     /**

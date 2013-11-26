@@ -21,6 +21,7 @@ public class Person {
     public static final String EMAIL_FIELD = "email";
     public static final String AVATARURL_FIELD = "avatarUrl";
     public static final String ISBOT_FIELD = "isBot";
+    public static final String ISACTIVE_FIELD = "isActive";
 
     @DatabaseField(columnName = ID_FIELD, generatedId = true)
     protected int id;
@@ -32,6 +33,8 @@ public class Person {
     private String avatarURL;
     @DatabaseField(columnName = ISBOT_FIELD)
     private boolean isBot;
+    @DatabaseField(columnName = ISACTIVE_FIELD)
+    boolean isActive;
 
     public Person(String name, String email) {
         this.setName(name);
@@ -41,6 +44,7 @@ public class Person {
     public Person(String name, String email, String avatarURL) {
         this(name, email);
         this.setAvatarURL(avatarURL);
+        this.isActive = false;
     }
 
     /**

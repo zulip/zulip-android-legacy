@@ -151,6 +151,7 @@ public class AsyncGetEvents extends Thread {
             TransactionManager.callInTransaction(app.getDatabaseHelper()
                     .getConnectionSource(), new Callable<Void>() {
                 public Void call() throws Exception {
+
                     // Get subscriptions
                     JSONArray subscriptions = response
                             .getJSONArray("subscriptions");
@@ -158,10 +159,14 @@ public class AsyncGetEvents extends Thread {
                             .getDao(Stream.class);
                     Log.i("stream", "" + subscriptions.length() + " streams");
 
+                    // Mark all existing subscriptions as not subscribed
+                    streamDao.updateBuilder().updateColumnValue(
+                            Stream.SUBSCRIBED_FIELD, false);
+
                     for (int i = 0; i < subscriptions.length(); i++) {
                         Stream stream = Stream.getFromJSON(app,
                                 subscriptions.getJSONObject(i));
-
+                        stream.subscribed = true;
                         streamDao.createOrUpdate(stream);
                     }
 
@@ -169,9 +174,15 @@ public class AsyncGetEvents extends Thread {
                     JSONArray people = response.getJSONArray("realm_users");
                     RuntimeExceptionDao<Person, Object> personDao = app
                             .getDao(Person.class);
+
+                    // Mark all existing people as inactive
+                    personDao.updateBuilder().updateColumnValue(
+                            Person.ISACTIVE_FIELD, false);
+
                     for (int i = 0; i < people.length(); i++) {
                         Person person = Person.getFromJSON(app,
                                 people.getJSONObject(i));
+                        person.isActive = true;
                         personDao.createOrUpdate(person);
                     }
                     return null;

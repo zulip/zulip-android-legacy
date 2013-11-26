@@ -144,8 +144,8 @@ public class HumbugActivity extends FragmentActivity implements
                 return ((AndroidDatabaseResults) app.getDao(Stream.class)
                         .queryBuilder().selectRaw("rowid _id", "*")
                         .orderByRaw(Stream.NAME_FIELD + " COLLATE NOCASE")
-                        .queryRaw().closeableIterator().getRawResults())
-                        .getRawCursor();
+                        .where().eq(Stream.SUBSCRIBED_FIELD, true).queryRaw()
+                        .closeableIterator().getRawResults()).getRawCursor();
             }
         };
 
@@ -157,7 +157,8 @@ public class HumbugActivity extends FragmentActivity implements
                 return ((AndroidDatabaseResults) app.getDao(Person.class)
                         .queryBuilder().selectRaw("rowid _id", "*")
                         .orderByRaw(Person.NAME_FIELD + " COLLATE NOCASE")
-                        .where().eq(Person.ISBOT_FIELD, false).queryRaw()
+                        .where().eq(Person.ISBOT_FIELD, false).and()
+                        .eq(Person.ISACTIVE_FIELD, true).queryRaw()
                         .closeableIterator().getRawResults()).getRawCursor();
             }
 
