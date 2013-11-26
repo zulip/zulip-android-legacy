@@ -187,7 +187,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
                     // messages to scroll.
                     int mID = ((Message) view.getItemAtPosition(view
                             .getFirstVisiblePosition())).getID();
-                    if (app.getPointer() < mID) {
+                    if (filter == null && app.getPointer() < mID) {
                         Log.i("scrolling", "Now at " + mID);
                         (new AsyncPointerUpdate(app)).execute(mID);
                         app.setPointer(mID);
