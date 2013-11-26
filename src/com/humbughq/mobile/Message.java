@@ -121,7 +121,6 @@ public class Message {
         }
 
         this.setTimestamp(new Date(message.getLong("timestamp") * 1000));
-        app.getDao(Message.class).createIfNotExists(this);
     }
 
     public int hashCode() {
