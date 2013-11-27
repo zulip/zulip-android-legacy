@@ -35,7 +35,13 @@
             android:name="com.humbughq.mobile.LegalActivity"
             android:label="@string/title_activity_legal" >
         </activity>
-        <meta-data android:name="com.crashlytics.ApiKey" android:value="7c523eb4efdbd264d6d4a7403ee7a683b733a9bd"/>
+
+        <meta-data
+            android:name="com.crashlytics.ApiKey"
+            android:value="7c523eb4efdbd264d6d4a7403ee7a683b733a9bd" />
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
     </application>
 
 </manifest>
