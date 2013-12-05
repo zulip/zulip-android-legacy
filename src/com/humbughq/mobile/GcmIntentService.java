@@ -9,8 +9,6 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.google.android.gms.gcm.GoogleCloudMessaging;
-
 /**
  * This {@code IntentService} does the actual handling of the GCM message.
  * {@code GcmBroadcastReceiver} (a {@code WakefulBroadcastReceiver}) holds a
@@ -27,38 +25,11 @@ public class GcmIntentService extends IntentService {
         super("GcmIntentService");
     }
 
-    public static final String TAG = "GCM";
-
     @Override
     protected void onHandleIntent(Intent intent) {
-        Bundle extras = intent.getExtras();
-        GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
-        // The getMessageType() intent parameter must be the intent you received
-        // in your BroadcastReceiver.
-        String messageType = gcm.getMessageType(intent);
-
-        if (!extras.isEmpty()) { // has effect of unparcelling Bundle
-            Log.i(TAG, "Received a message: " + messageType);
-            /*
-             * Filter messages based on message type. Since it is likely that
-             * GCM will be extended in the future with new message types, just
-             * ignore any message types you're not interested in, or that you
-             * don't recognize.
-             */
-            if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR
-                    .equals(messageType)) {
-            } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED
-                    .equals(messageType)) {
-            } else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE
-                    .equals(messageType)) {
-
-                // Post notification of received message.
-                sendNotification(extras);
-                Log.i(TAG, "Received: " + extras.toString());
-            }
-        }
+        sendNotification(intent.getExtras());
         // Release the wake lock provided by the WakefulBroadcastReceiver.
-        GcmBroadcastReceiver.completeWakefulIntent(intent);
+        GcmShowNotificationReceiver.completeWakefulIntent(intent);
     }
 
     // Put the message into a notification and post it.

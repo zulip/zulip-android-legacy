@@ -5,7 +5,10 @@ import java.util.HashMap;
 import java.util.concurrent.Callable;
 
 import android.annotation.TargetApi;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
@@ -443,6 +446,9 @@ public class HumbugActivity extends FragmentActivity implements
         super.onPause();
         Log.i("status", "suspend");
         this.suspended = true;
+
+        unregisterReceiver(onGcmMessage);
+
         if (event_poll != null) {
             event_poll.abort();
             event_poll = null;
@@ -453,6 +459,13 @@ public class HumbugActivity extends FragmentActivity implements
         super.onResume();
         Log.i("status", "resume");
         this.suspended = false;
+
+        // Set up the BroadcastReceiver to trap GCM messages so notifications
+        // don't show while in the app
+        IntentFilter filter = new IntentFilter(GcmBroadcastReceiver.BROADCAST);
+        filter.setPriority(2);
+        registerReceiver(onGcmMessage, filter);
+
         homeList.onActivityResume();
         if (narrowedList != null) {
             narrowedList.onActivityResume();
@@ -497,4 +510,14 @@ public class HumbugActivity extends FragmentActivity implements
             narrowedList.onNewMessages(messages);
         }
     }
+
+    private BroadcastReceiver onGcmMessage = new BroadcastReceiver() {
+        public void onReceive(Context contenxt, Intent intent) {
+            // Block the event before it propagates to show a notification.
+            // TODO: could be smarter and only block the event if the message is
+            // in the narrow.
+            Log.i("GCM", "Dropping a push because the activity is active");
+            abortBroadcast();
+        }
+    };
 }

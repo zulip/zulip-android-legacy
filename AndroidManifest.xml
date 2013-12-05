@@ -54,6 +54,13 @@
                 <category android:name="com.humbughq.mobile" />
             </intent-filter>
         </receiver>
+        <receiver
+            android:name=".GcmShowNotificationReceiver"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.humbughq.mobile.PushMessage.BROADCAST" />
+            </intent-filter>
+        </receiver>
 
         <service android:name=".GcmIntentService" />
 
