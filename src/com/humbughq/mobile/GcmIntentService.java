@@ -80,7 +80,7 @@ public class GcmIntentService extends IntentService {
             tag = "zulip-pm-" + msg.getString("sender_email");
         }
 
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(
                 this)
                 .setSmallIcon(R.drawable.notification_icon)
                 .setContentTitle(title)
@@ -88,7 +88,13 @@ public class GcmIntentService extends IntentService {
                         new NotificationCompat.BigTextStyle().bigText(msg
                                 .getString("content")));
 
-        mBuilder.setContentIntent(contentIntent);
-        mNotificationManager.notify(tag, NOTIFICATION_ID, mBuilder.build());
+        if (msg.containsKey("time")) {
+            long time = Long.parseLong(msg.getString("time")) * 1000;
+            Log.i("GCM", "time: " + time);
+            builder.setWhen(time);
+        }
+
+        builder.setContentIntent(contentIntent);
+        mNotificationManager.notify(tag, NOTIFICATION_ID, builder.build());
     }
 }
