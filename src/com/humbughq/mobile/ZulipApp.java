@@ -6,6 +6,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 
 import com.j256.ormlite.dao.Dao;
@@ -52,6 +53,16 @@ public class ZulipApp extends Application {
 
         if (api_key != null) {
             afterLogin();
+        }
+    }
+
+    int getAppVersion() {
+        try {
+            PackageInfo packageInfo = this.getPackageManager().getPackageInfo(
+                    this.getPackageName(), 0);
+            return packageInfo.versionCode;
+        } catch (NameNotFoundException e) {
+            throw new RuntimeException("Could not get package version: " + e);
         }
     }
 

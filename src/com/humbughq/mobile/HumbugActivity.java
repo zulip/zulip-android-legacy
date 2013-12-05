@@ -110,6 +110,8 @@ public class HumbugActivity extends FragmentActivity implements
             return;
         }
 
+        new Notifications(this);
+
         this.onPrepareOptionsMenu(menu);
 
         this.logged_in = true;
