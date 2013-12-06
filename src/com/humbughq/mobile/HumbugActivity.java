@@ -67,6 +67,8 @@ public class HumbugActivity extends FragmentActivity implements
     MessageListFragment narrowedList;
     MessageListFragment homeList;
 
+    Notifications notifications;
+
     private SimpleCursorAdapter.ViewBinder streamBinder = new SimpleCursorAdapter.ViewBinder() {
 
         @Override
@@ -113,7 +115,8 @@ public class HumbugActivity extends FragmentActivity implements
             return;
         }
 
-        new Notifications(this);
+        notifications = new Notifications(this);
+        notifications.register();
 
         this.onPrepareOptionsMenu(menu);
 
@@ -415,8 +418,12 @@ public class HumbugActivity extends FragmentActivity implements
     private void logout() {
         this.logged_in = false;
 
-        app.logOut();
-        this.openLogin();
+        notifications.logOut(new Runnable() {
+            public void run() {
+                app.logOut();
+                openLogin();
+            }
+        });
     }
 
     /**
