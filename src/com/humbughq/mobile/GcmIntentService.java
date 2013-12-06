@@ -1,10 +1,14 @@
 package com.humbughq.mobile;
 
+import java.io.IOException;
+import java.net.URL;
+
 import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -59,6 +63,14 @@ public class GcmIntentService extends IntentService {
                         new NotificationCompat.BigTextStyle().bigText(msg
                                 .getString("content")));
 
+        if (msg.containsKey("sender_avatar_url")) {
+            // IntentService is a background thread, so blocking is ok
+            Bitmap avatar = fetchAvatar(msg.getString("sender_avatar_url"));
+            if (avatar != null) {
+                builder.setLargeIcon(avatar);
+            }
+        }
+
         if (msg.containsKey("time")) {
             long time = Long.parseLong(msg.getString("time")) * 1000;
             Log.i("GCM", "time: " + time);
@@ -67,5 +79,15 @@ public class GcmIntentService extends IntentService {
 
         builder.setContentIntent(contentIntent);
         mNotificationManager.notify(tag, NOTIFICATION_ID, builder.build());
+    }
+
+    private Bitmap fetchAvatar(String url_str) {
+        try {
+            URL url = new URL(url_str);
+            return GravatarAsyncFetchTask.fetch(url);
+        } catch (IOException e) {
+            ZLog.logException(e);
+        }
+        return null;
     }
 }

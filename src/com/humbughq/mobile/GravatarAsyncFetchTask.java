@@ -34,18 +34,21 @@ class GravatarAsyncFetchTask extends AsyncTask<URL, Void, Bitmap> {
     // Fetch and decode image in background.
     @Override
     protected Bitmap doInBackground(URL... urls) {
-        url = urls[0];
-        Log.i("GAFT.fetch", "Getting gravatar from url: " + url);
-        URLConnection connection;
         try {
-            connection = url.openConnection();
-            connection.setUseCaches(true);
-            Object response = connection.getContent();
-            if (response instanceof InputStream) {
-                return BitmapFactory.decodeStream((InputStream) response);
-            }
+            return fetch(urls[0]);
         } catch (IOException e) {
             ZLog.logException(e);
+        }
+        return null;
+    }
+
+    static Bitmap fetch(URL url) throws IOException {
+        Log.i("GAFT.fetch", "Getting gravatar from url: " + url);
+        URLConnection connection = url.openConnection();
+        connection.setUseCaches(true);
+        Object response = connection.getContent();
+        if (response instanceof InputStream) {
+            return BitmapFactory.decodeStream((InputStream) response);
         }
         return null;
     }
