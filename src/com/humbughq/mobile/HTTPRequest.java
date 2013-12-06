@@ -59,6 +59,19 @@ public class HTTPRequest {
         }
     }
 
+    // Java doesn't support a request body on DELETE requests, but RFC2616 does
+    // not prohibit it.
+    class HttpDeleteWithReq extends HttpPost {
+        HttpDeleteWithReq(String url) {
+            super(url);
+        }
+
+        @Override
+        public String getMethod() {
+            return "DELETE";
+        }
+    }
+
     String execute(String method, String path) throws IOException {
         AndroidHttpClient httpclient = AndroidHttpClient.newInstance(app
                 .getUserAgent());
@@ -68,20 +81,21 @@ public class HTTPRequest {
             String url = app.getServerURI() + path;
             nameValuePairs.add(new BasicNameValuePair("client", "Android"));
 
-            // Only POST, PUT and GET are supported, for now.
             if (method.equals("POST")) {
                 request = new HttpPost(url);
-                ((HttpEntityEnclosingRequestBase) request)
-                        .setEntity(new UrlEncodedFormEntity(nameValuePairs,
-                                "UTF-8"));
             } else if (method.equals("PUT")) {
                 request = new HttpPut(url);
+            } else if (method.equals("DELETE")) {
+                request = new HttpDeleteWithReq(url);
+            } else if (method.equals("GET")) {
+                request = new HttpGet(url + "?"
+                        + URLEncodedUtils.format(nameValuePairs, "utf-8"));
+            }
+
+            if (!method.equals("GET")) {
                 ((HttpEntityEnclosingRequestBase) request)
                         .setEntity(new UrlEncodedFormEntity(nameValuePairs,
                                 "UTF-8"));
-            } else {
-                request = new HttpGet(url + "?"
-                        + URLEncodedUtils.format(nameValuePairs, "utf-8"));
             }
 
             Log.i("HTTP.request", request.getMethod() + " " + request.getURI());
