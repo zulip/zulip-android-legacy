@@ -44,24 +44,30 @@ public class GcmIntentService extends IntentService {
                 .getSystemService(Context.NOTIFICATION_SERVICE);
 
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, HumbugActivity.class), 0);
+                new Intent(this, HumbugActivity.class).addFlags(0), 0);
 
         String type = msg.getString("recipient_type");
         String title = msg.getString("alert");
         String tag = "zulip";
+        String content = msg.getString("content");
+
+        title = msg.getString("sender_full_name");
 
         if (type.equals("private")) {
-            title = msg.getString("sender_full_name");
             tag = "zulip-pm-" + msg.getString("sender_email");
+        } else if (type.equals("stream")) {
+            tag = "zulip-mention-" + msg.getString("stream", "");
+            content = "Mentioned you on " + msg.getString("stream") + ":\n"
+                    + content;
         }
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(
                 this)
                 .setSmallIcon(R.drawable.notification_icon)
                 .setContentTitle(title)
+                .setAutoCancel(true)
                 .setStyle(
-                        new NotificationCompat.BigTextStyle().bigText(msg
-                                .getString("content")));
+                        new NotificationCompat.BigTextStyle().bigText(content));
 
         if (msg.containsKey("sender_avatar_url")) {
             // IntentService is a background thread, so blocking is ok

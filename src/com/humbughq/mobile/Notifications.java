@@ -110,7 +110,7 @@ public class Notifications {
                     Log.i("GCM", "Device registered, registration ID=" + regid);
 
                     HTTPRequest request = new HTTPRequest(app);
-                    request.setProperty("reg_id", regid);
+                    request.setProperty("token", regid);
                     request.execute("POST", "v1/users/me/android_gcm_reg_id");
 
                     // Persist the regID - no need to register again.
@@ -138,7 +138,7 @@ public class Notifications {
                     // authenticated request.
 
                     HTTPRequest request = new HTTPRequest(app);
-                    request.setProperty("reg_id", regid);
+                    request.setProperty("token", regid);
                     request.execute("DELETE", "v1/users/me/android_gcm_reg_id");
 
                     storeRegistrationId(app, "");
