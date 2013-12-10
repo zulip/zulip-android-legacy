@@ -9,6 +9,16 @@ import android.util.Log;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
+// This class receives GCM messages from the cloud. It then passes them through a series of steps
+// to get a notification on the menu bar. See
+// http://commonsware.com/blog/2010/08/11/activity-notification-ordered-broadcast.html
+// for the inspiration for the dispatch strategy.
+
+// A com.humbughq.mobile.PushMessage.BROADCAST is broadcast to ordered receivers. If the
+// HumbugActivity is active, its receiver gets the message first and inhibits it. Otherwise,
+// it is received by GcmShowNotificationReceiver. That launches a GcmIntentService that
+// displays the notification.
+
 public class GcmBroadcastReceiver extends BroadcastReceiver {
 
     public static final String TAG = "GCM";

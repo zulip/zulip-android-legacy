@@ -13,8 +13,11 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
+// This class manages registering and unregistering for GCM notifications.
+// When a notification is received, it is processed by GcmBroadcastReceiver.
 public class Notifications {
 
+    // Project Number from the Google Cloud Services console
     private static final String SENDER_ID = "835904834568";
 
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
