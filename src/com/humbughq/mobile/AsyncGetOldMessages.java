@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang.time.StopWatch;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -77,6 +78,10 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
                         mainAnchor, messageRangeDao);
                 Log.i("AGOM", "rng retreived");
                 if (protoRng != null) {
+
+                    StopWatch watch = new StopWatch();
+                    watch.start();
+
                     // We found a range, lets get relevant messages from the
                     // cache
                     rng = protoRng;
@@ -119,6 +124,10 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
                     }
                     receivedMessages.addAll(lowerCachedMessages);
                     receivedMessages.addAll(upperCachedMessages);
+
+                    watch.stop();
+                    Log.i("perf",
+                            "Retrieving cached messages: " + watch.toString());
 
                     if (lowerCachedMessages.size() > 0
                             || upperCachedMessages.size() > 0) {
@@ -205,11 +214,23 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
             this.setProperty("narrow", "{}");
         }
 
+        StopWatch watch = new StopWatch();
+
+        watch.start();
         String result = super.doInBackground(params);
+        watch.stop();
+        Log.i("perf", "net: v1/messages: " + watch.toString());
 
         if (result != null) {
             try {
+                watch.reset();
+                watch.start();
                 JSONObject response = new JSONObject(result);
+                watch.stop();
+                Log.i("perf", "json: v1/messages: " + watch.toString());
+
+                watch.reset();
+                watch.start();
                 JSONArray objects = response.getJSONArray("messages");
                 ArrayList<Message> fetchedMessages = new ArrayList<Message>(
                         objects.length());
@@ -219,8 +240,14 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
                             objects.getJSONObject(i));
                     fetchedMessages.add(message);
                 }
+                watch.stop();
+                Log.i("perf", "creating messages " + watch.toString());
 
+                watch.reset();
+                watch.start();
                 Message.createMessages(app, fetchedMessages);
+                watch.stop();
+                Log.i("perf", "sqlite: messages " + watch.toString());
 
                 if (num_after == 0) {
                     receivedMessages.addAll(0, fetchedMessages);

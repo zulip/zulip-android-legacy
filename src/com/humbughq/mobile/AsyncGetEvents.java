@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
+import org.apache.commons.lang.time.StopWatch;
 import org.apache.http.client.HttpResponseException;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -62,8 +63,18 @@ public class AsyncGetEvents extends Thread {
 
     private void register() throws JSONException, IOException {
         request.setProperty("apply_markdown", "false");
-        JSONObject response = new JSONObject(request.execute("POST",
-                "v1/register"));
+
+        StopWatch watch = new StopWatch();
+        watch.start();
+        String responseData = request.execute("POST", "v1/register");
+        watch.stop();
+        Log.i("perf", "net: v1/register: " + watch.toString());
+
+        watch.reset();
+        watch.start();
+        JSONObject response = new JSONObject(responseData);
+        watch.stop();
+        Log.i("perf", "json: v1/register: " + watch.toString());
 
         registeredOrGotEventsThisRun = true;
         app.setEventQueueId(response.getString("queue_id"));
@@ -146,8 +157,14 @@ public class AsyncGetEvents extends Thread {
             app.setPointer(response.getInt("pointer"));
             app.setMaxMessageId(response.getInt("max_message_id"));
 
+            StopWatch watch = new StopWatch();
+            watch.start();
             Message.trim(5000, this.app);
+            watch.stop();
+            Log.i("perf", "trim: " + watch.toString());
 
+            watch.reset();
+            watch.start();
             TransactionManager.callInTransaction(app.getDatabaseHelper()
                     .getConnectionSource(), new Callable<Void>() {
                 public Void call() throws Exception {
@@ -188,6 +205,8 @@ public class AsyncGetEvents extends Thread {
                     return null;
                 }
             });
+            watch.stop();
+            Log.i("perf", "DB people and streams: " + watch.toString());
 
             activity.runOnUiThread(new Runnable() {
                 @Override
@@ -207,6 +226,9 @@ public class AsyncGetEvents extends Thread {
     protected void processEvents(JSONArray events) {
         // In task thread
         try {
+            StopWatch watch = new StopWatch();
+            watch.start();
+
             ArrayList<Message> messages = new ArrayList<Message>();
             for (int i = 0; i < events.length(); i++) {
                 JSONObject event = events.getJSONObject(i);
@@ -222,12 +244,21 @@ public class AsyncGetEvents extends Thread {
                 }
             }
 
+            watch.stop();
+            Log.i("perf", "Processing events: " + watch.toString());
+
+            watch.reset();
+            watch.start();
+
             if (messages.size() > 0) {
                 Log.i("AsyncGetEvents", "Received " + messages.size()
                         + " messages");
                 Message.createMessages(app, messages);
                 processMessages(messages);
             }
+
+            watch.stop();
+            Log.i("perf", "Inserting event messages: " + watch.toString());
 
         } catch (JSONException e) {
             ZLog.logException(e);
