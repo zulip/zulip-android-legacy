@@ -72,6 +72,7 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
                 .getDao(MessageRange.class);
         RuntimeExceptionDao<Message, Object> messageDao = app
                 .getDao(Message.class);
+        messageDao.setObjectCache(true);
         try {
             if (rng == null) {
                 // We haven't been passed a range, see if we have a range cached
