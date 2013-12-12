@@ -3,10 +3,12 @@ package com.humbughq.mobile;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -15,6 +17,7 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
+import android.util.TypedValue;
 import android.widget.ImageView;
 
 class GravatarAsyncFetchTask extends AsyncTask<URL, Void, Bitmap> {
@@ -40,6 +43,19 @@ class GravatarAsyncFetchTask extends AsyncTask<URL, Void, Bitmap> {
             ZLog.logException(e);
         }
         return null;
+    }
+
+    static URL sizedURL(Context context, String url, float dpSize) {
+        // From http://stackoverflow.com/questions/4605527/
+        Resources r = context.getResources();
+        float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                dpSize, r.getDisplayMetrics());
+        try {
+            return new URL(url + "&s=" + px);
+        } catch (MalformedURLException e) {
+            ZLog.logException(e);
+            return null;
+        }
     }
 
     static Bitmap fetch(URL url) throws IOException {

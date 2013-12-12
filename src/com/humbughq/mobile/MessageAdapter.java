@@ -1,15 +1,12 @@
 package com.humbughq.mobile;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -92,11 +89,6 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         TextView timestamp = (TextView) tile.findViewById(R.id.timestamp);
         timestamp.setText(message.getFormattedTimestamp());
 
-        // Convert 35dp to px for gravatar.
-        // From http://stackoverflow.com/questions/4605527/
-        Resources r = context.getResources();
-        float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 35,
-                r.getDisplayMetrics());
         ImageView gravatar = (ImageView) tile.findViewById(R.id.gravatar);
         Bitmap gravatar_img = context.gravatars.get(message.getSender()
                 .getEmail());
@@ -105,15 +97,11 @@ public class MessageAdapter extends ArrayAdapter<Message> {
             gravatar.setImageBitmap(gravatar_img);
         } else {
             // Go get the Bitmap
-            URL url = null;
-            try {
-                url = new URL(message.getSender().getAvatarURL() + "&s=" + px);
-                GravatarAsyncFetchTask task = new GravatarAsyncFetchTask(
-                        context, gravatar, message.getSender());
-                task.loadBitmap(context, url, gravatar, message.getSender());
-            } catch (MalformedURLException e) {
-                ZLog.logException(e);
-            }
+            URL url = GravatarAsyncFetchTask.sizedURL(context, message
+                    .getSender().getAvatarURL(), 35);
+            GravatarAsyncFetchTask task = new GravatarAsyncFetchTask(context,
+                    gravatar, message.getSender());
+            task.loadBitmap(context, url, gravatar, message.getSender());
         }
 
         int color;

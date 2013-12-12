@@ -71,7 +71,8 @@ public class GcmIntentService extends IntentService {
 
         if (msg.containsKey("sender_avatar_url")) {
             // IntentService is a background thread, so blocking is ok
-            Bitmap avatar = fetchAvatar(msg.getString("sender_avatar_url"));
+            Bitmap avatar = fetchAvatar(GravatarAsyncFetchTask.sizedURL(this,
+                    msg.getString("sender_avatar_url"), 64));
             if (avatar != null) {
                 builder.setLargeIcon(avatar);
             }
@@ -87,9 +88,8 @@ public class GcmIntentService extends IntentService {
         mNotificationManager.notify(tag, NOTIFICATION_ID, builder.build());
     }
 
-    private Bitmap fetchAvatar(String url_str) {
+    private Bitmap fetchAvatar(URL url) {
         try {
-            URL url = new URL(url_str);
             return GravatarAsyncFetchTask.fetch(url);
         } catch (IOException e) {
             ZLog.logException(e);
