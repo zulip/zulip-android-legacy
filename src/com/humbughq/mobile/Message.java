@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.Callable;
@@ -84,19 +85,33 @@ public class Message {
      *            the JSON object as returned by the server.
      * @throws JSONException
      */
-    public Message(ZulipApp app, JSONObject message) throws JSONException {
+    public Message(ZulipApp app, JSONObject message,
+            HashMap<String, Person> personCache,
+            HashMap<String, Stream> streamCache) throws JSONException {
         this.setID(message.getInt("id"));
         this.setSender(Person.getOrUpdate(app,
                 message.getString("sender_email"),
                 message.getString("sender_full_name"),
-                message.getString("avatar_url")));
+                message.getString("avatar_url"), personCache));
 
         if (message.getString("type").equals("stream")) {
             this.setType(MessageType.STREAM_MESSAGE);
 
-            setStream(Stream.getByName(app,
-                    message.getString("display_recipient")));
+            String streamName = message.getString("display_recipient");
 
+            Stream stream = null;
+            if (streamCache != null) {
+                stream = streamCache.get(streamName);
+            }
+
+            if (stream == null) {
+                stream = Stream.getByName(app, streamName);
+                if (streamCache != null) {
+                    streamCache.put(streamName, stream);
+                }
+            }
+
+            setStream(stream);
         } else if (message.getString("type").equals("private")) {
             this.setType(MessageType.PRIVATE_MESSAGE);
 
@@ -107,7 +122,7 @@ public class Message {
             for (int i = 0; i < jsonRecipients.length(); i++) {
                 JSONObject obj = jsonRecipients.getJSONObject(i);
                 Person person = Person.getOrUpdate(app, obj.getString("email"),
-                        obj.getString("full_name"), null);
+                        obj.getString("full_name"), null, personCache);
                 r[i] = person;
             }
             recipients = recipientList(r);
@@ -121,6 +136,10 @@ public class Message {
         }
 
         this.setTimestamp(new Date(message.getLong("timestamp") * 1000));
+    }
+
+    public Message(ZulipApp app, JSONObject message) throws JSONException {
+        this(app, message, null, null);
     }
 
     public int hashCode() {

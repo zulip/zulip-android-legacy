@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.lang.time.StopWatch;
@@ -230,13 +231,17 @@ public class AsyncGetEvents extends Thread {
             watch.start();
 
             ArrayList<Message> messages = new ArrayList<Message>();
+            HashMap<String, Person> personCache = new HashMap<String, Person>();
+            HashMap<String, Stream> streamCache = new HashMap<String, Stream>();
+
             for (int i = 0; i < events.length(); i++) {
                 JSONObject event = events.getJSONObject(i);
                 String type = event.getString("type");
 
                 if (type.equals("message")) {
                     Message message = new Message(this.app,
-                            event.getJSONObject("message"));
+                            event.getJSONObject("message"), personCache,
+                            streamCache);
                     messages.add(message);
                 } else if (type.equals("pointer")) {
                     // Keep our pointer synced with global pointer

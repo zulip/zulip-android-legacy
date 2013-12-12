@@ -3,6 +3,7 @@ package com.humbughq.mobile;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.lang.time.StopWatch;
@@ -235,9 +236,12 @@ public class AsyncGetOldMessages extends HumbugAsyncPushTask {
                 ArrayList<Message> fetchedMessages = new ArrayList<Message>(
                         objects.length());
 
+                HashMap<String, Person> personCache = new HashMap<String, Person>();
+                HashMap<String, Stream> streamCache = new HashMap<String, Stream>();
+
                 for (int i = 0; i < objects.length(); i++) {
                     Message message = new Message(this.app,
-                            objects.getJSONObject(i));
+                            objects.getJSONObject(i), personCache, streamCache);
                     fetchedMessages.add(message);
                 }
                 watch.stop();

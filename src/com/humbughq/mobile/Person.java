@@ -1,6 +1,7 @@
 package com.humbughq.mobile;
 
 import java.sql.SQLException;
+import java.util.HashMap;
 
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.json.JSONException;
@@ -130,8 +131,21 @@ public class Person {
     }
 
     public static Person getOrUpdate(ZulipApp app, String email, String name,
-            String avatarURL) {
-        Person person = getByEmail(app, email);
+            String avatarURL, HashMap<String, Person> personCache) {
+
+        Person person = null;
+
+        if (personCache != null) {
+            person = personCache.get(email);
+        }
+
+        if (person == null) {
+            person = getByEmail(app, email);
+            if (personCache != null) {
+                personCache.put(email, person);
+            }
+        }
+
         if (person == null) {
             person = new Person(name, email, avatarURL);
             app.getDao(Person.class).create(person);
@@ -150,6 +164,11 @@ public class Person {
             }
         }
         return person;
+    }
+
+    public static Person getOrUpdate(ZulipApp app, String email, String name,
+            String avatarURL) {
+        return getOrUpdate(app, email, name, avatarURL, null);
     }
 
     void updateFromJSON(JSONObject jPerson) throws JSONException {
