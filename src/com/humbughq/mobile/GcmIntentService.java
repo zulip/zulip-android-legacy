@@ -53,21 +53,25 @@ public class GcmIntentService extends IntentService {
 
         title = msg.getString("sender_full_name");
 
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(
+                this).setSmallIcon(R.drawable.zulip_notification)
+                .setContentTitle(title).setAutoCancel(true);
+
+        builder.setContentText(content);
+
         if (type.equals("private")) {
             tag = "zulip-pm-" + msg.getString("sender_email");
+            if (android.os.Build.VERSION.SDK_INT >= 16) {
+                builder.setSubText("New private message");
+            }
         } else if (type.equals("stream")) {
             tag = "zulip-mention-" + msg.getString("stream", "");
-            content = "Mentioned you on " + msg.getString("stream") + ":\n"
-                    + content;
+            if (android.os.Build.VERSION.SDK_INT >= 16) {
+                String displayTopic = msg.getString("stream") + " > "
+                        + msg.getString("topic");
+                builder.setSubText("Mention on " + displayTopic);
+            }
         }
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(
-                this)
-                .setSmallIcon(R.drawable.zulip_notification)
-                .setContentTitle(title)
-                .setAutoCancel(true)
-                .setStyle(
-                        new NotificationCompat.BigTextStyle().bigText(content));
 
         if (msg.containsKey("sender_avatar_url")) {
             // IntentService is a background thread, so blocking is ok
