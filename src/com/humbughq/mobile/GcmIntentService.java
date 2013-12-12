@@ -63,7 +63,7 @@ public class GcmIntentService extends IntentService {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(
                 this)
-                .setSmallIcon(R.drawable.notification_icon)
+                .setSmallIcon(R.drawable.zulip_notification)
                 .setContentTitle(title)
                 .setAutoCancel(true)
                 .setStyle(
