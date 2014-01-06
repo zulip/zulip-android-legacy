@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -94,6 +95,7 @@ public class ZulipActivity extends FragmentActivity implements
     protected RefreshableCursorAdapter peopleAdapter;
 
     /** Called when the activity is first created. */
+    @SuppressLint("NewApi")
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
