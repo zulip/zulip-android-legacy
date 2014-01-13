@@ -136,6 +136,7 @@ public class LoginActivity extends Activity implements View.OnClickListener,
             this.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    connectionProgressDialog.dismiss();
                     Toast.makeText(that,
                             "Unable to connect with Google. Try again later.",
                             Toast.LENGTH_LONG).show();
