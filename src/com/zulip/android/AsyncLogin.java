@@ -62,18 +62,21 @@ class AsyncLogin extends ZulipAsyncPushTask {
         final TextView errorText = (TextView) this.context
                 .findViewById(R.id.error_text);
         if (e.getStatusCode() == HttpStatus.SC_FORBIDDEN) {
+            String message = "Unknown authentication error.";
             try {
                 JSONObject obj = new JSONObject(e.getMessage());
                 String reason = obj.getString("reason");
+                message = obj.getString("msg");
                 userDefinitelyInvalid = reason.equals(AsyncLogin.DISABLED)
                         || reason.equals(AsyncLogin.UNREGISTERED);
             } catch (JSONException e1) {
                 ZLog.logException(e1);
             }
+            final String finalMessage = message;
             errorText.post(new Runnable() {
                 @Override
                 public void run() {
-                    errorText.setText("Incorrect username or password");
+                    errorText.setText(finalMessage);
                 }
             });
             this.cancel(true);
