@@ -63,10 +63,18 @@
         android:id="@+id/legalTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/login"
+        android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="35dp"
         android:text="@string/legal"
         android:textColor="#ff0099cc" />
+
+    <com.google.android.gms.common.SignInButton
+        android:id="@+id/sign_in_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@+id/legalTextView"
+        android:layout_below="@+id/login"
+        android:layout_marginTop="28dp" >
+    </com.google.android.gms.common.SignInButton>
 
 </RelativeLayout>

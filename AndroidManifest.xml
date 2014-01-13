@@ -18,6 +18,7 @@
         android:protectionLevel="signature" />
 
     <uses-permission android:name="com.humbughq.mobile.permission.C2D_MESSAGE" />
+    <uses-permission android:name="android.permission.USE_CREDENTIALS"/>
 
     <application
         android:name="com.zulip.android.ZulipApp"

@@ -9,16 +9,21 @@ import android.util.Log;
 import android.widget.TextView;
 
 class AsyncLogin extends ZulipAsyncPushTask {
+    public static final String UNREGISTERED = "unregistered";
+    public static final String DISABLED = "disabled";
+
     LoginActivity context;
+    boolean userDefinitelyInvalid = false;
 
     public AsyncLogin(LoginActivity loginActivity, String username,
             String password) {
         super(loginActivity.app);
         context = loginActivity;
-        // Knowing your name would be nice, but we don't use it anywhere and
-        // it's not returned by the API, so having it be null here is fine for
-        // now.
-        this.app.setEmail(username);
+        if (username.contains("@") == true) {
+            // @-less usernames are used as indicating special cases, for
+            // example in OAuth2 authentication
+            this.app.setEmail(username);
+        }
         this.setProperty("username", username);
         this.setProperty("password", password);
     }
@@ -57,6 +62,14 @@ class AsyncLogin extends ZulipAsyncPushTask {
         final TextView errorText = (TextView) this.context
                 .findViewById(R.id.error_text);
         if (e.getStatusCode() == HttpStatus.SC_FORBIDDEN) {
+            try {
+                JSONObject obj = new JSONObject(e.getMessage());
+                String reason = obj.getString("reason");
+                userDefinitelyInvalid = reason.equals(AsyncLogin.DISABLED)
+                        || reason.equals(AsyncLogin.UNREGISTERED);
+            } catch (JSONException e1) {
+                ZLog.logException(e1);
+            }
             errorText.post(new Runnable() {
                 @Override
                 public void run() {
