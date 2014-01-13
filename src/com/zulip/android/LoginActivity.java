@@ -174,7 +174,7 @@ public class LoginActivity extends Activity implements View.OnClickListener,
                             }
                         }).start();
                     } else {
-                        connectionProgressDialog.hide();
+                        connectionProgressDialog.dismiss();
                     }
 
                 }
@@ -187,7 +187,7 @@ public class LoginActivity extends Activity implements View.OnClickListener,
             this.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    connectionProgressDialog.hide();
+                    connectionProgressDialog.dismiss();
                     dia.show();
                 }
             });
@@ -201,7 +201,7 @@ public class LoginActivity extends Activity implements View.OnClickListener,
             this.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    connectionProgressDialog.hide();
+                    connectionProgressDialog.dismiss();
                     Toast.makeText(
                             that,
                             "Google Apps login not supported at this time, please contact support@zulip.com.",
