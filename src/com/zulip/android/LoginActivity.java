@@ -49,8 +49,7 @@ public class LoginActivity extends Activity implements View.OnClickListener,
                 .setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        TextView errorText = (TextView) findViewById(R.id.error_text);
-                        errorText.setText("Logging in...");
+                        connectionProgressDialog.show();
                         (new AsyncLogin(that,
                                 ((EditText) findViewById(R.id.username))
                                         .getText().toString(),
@@ -216,8 +215,6 @@ public class LoginActivity extends Activity implements View.OnClickListener,
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.sign_in_button) {
-            TextView errorText = (TextView) findViewById(R.id.error_text);
-            errorText.setText("");
             connectionProgressDialog.show();
             startActivityForResult(AccountPicker.newChooseAccountIntent(null,
                     null, new String[] { "com.google" }, false, null, null,

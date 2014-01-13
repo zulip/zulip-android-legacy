@@ -6,7 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.util.Log;
-import android.widget.TextView;
+import android.widget.Toast;
 
 class AsyncLogin extends ZulipAsyncPushTask {
     public static final String UNREGISTERED = "unregistered";
@@ -51,16 +51,12 @@ class AsyncLogin extends ZulipAsyncPushTask {
                 ZLog.logException(e);
             }
         }
-        TextView errorText = (TextView) this.context
-                .findViewById(R.id.error_text);
-        errorText.setText("Unknown error");
+        Toast.makeText(context, "Unknown error", Toast.LENGTH_LONG).show();
         Log.wtf("login", "We shouldn't have gotten this far.");
     }
 
     @Override
     protected void handleHTTPError(final HttpResponseException e) {
-        final TextView errorText = (TextView) this.context
-                .findViewById(R.id.error_text);
         if (e.getStatusCode() == HttpStatus.SC_FORBIDDEN) {
             String message = "Unknown authentication error.";
             try {
@@ -73,18 +69,20 @@ class AsyncLogin extends ZulipAsyncPushTask {
                 ZLog.logException(e1);
             }
             final String finalMessage = message;
-            errorText.post(new Runnable() {
+            context.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    errorText.setText(finalMessage);
+                    Toast.makeText(context, finalMessage, Toast.LENGTH_LONG)
+                            .show();
                 }
             });
             this.cancel(true);
         } else {
-            errorText.post(new Runnable() {
+            context.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    errorText.setText("Network error");
+                    Toast.makeText(context, "Network error", Toast.LENGTH_LONG)
+                            .show();
                 }
             });
             // supermethod invokes cancel for us

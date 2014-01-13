@@ -15,23 +15,12 @@
         android:text="@string/login_welcome_blurb"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
-    <TextView
-        android:id="@+id/error_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/textView1"
-        android:gravity="center|center_horizontal"
-        android:padding="10dp"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textStyle="bold" />
-
     <EditText
         android:id="@+id/username"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/error_text"
+        android:layout_below="@+id/textView1"
         android:ems="10"
         android:hint="@string/username"
         android:inputType="textEmailAddress" >
