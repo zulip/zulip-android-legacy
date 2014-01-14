@@ -310,7 +310,7 @@ public class ZulipActivity extends FragmentActivity implements
         this.drawerLayout.closeDrawers();
     }
 
-    protected void doNarrow(NarrowFilter filter) {
+    public void doNarrow(NarrowFilter filter) {
         narrowedList = MessageListFragment.newInstance(filter);
         // Push to the back stack if we are not already narrowed
         pushListFragment(narrowedList, "narrow");
