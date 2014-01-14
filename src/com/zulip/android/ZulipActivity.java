@@ -1,6 +1,7 @@
 package com.zulip.android;
 
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
 
@@ -280,7 +281,7 @@ public class ZulipActivity extends FragmentActivity implements
     }
 
     protected void narrow_pm_with(final Person person) {
-        doNarrow(new NarrowFilterPM(person));
+        doNarrow(new NarrowFilterPM(Arrays.asList(person)));
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)

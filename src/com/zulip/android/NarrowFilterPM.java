@@ -1,25 +1,37 @@
 package com.zulip.android;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 import com.j256.ormlite.stmt.SelectArg;
 import com.j256.ormlite.stmt.Where;
 
 public class NarrowFilterPM implements NarrowFilter {
-    Person person;
+    List<Person> people;
     String recipientString;
 
-    NarrowFilterPM(Person person) {
-        this.person = person;
-        this.recipientString = Message.recipientList(new Person[] { person,
-                ZulipApp.get().you });
+    NarrowFilterPM(List<Person> people) {
+        this.people = people;
+        this.recipientString = Message.recipientList(people
+                .toArray(new Person[0]));
+    }
+
+    private NarrowFilterPM(String recipientString) {
+        this.recipientString = recipientString;
+        this.people = new ArrayList<Person>();
+        for (String id : this.recipientString.split(",")) {
+            this.people
+                    .add(Person.getById(ZulipApp.get(), Integer.valueOf(id)));
+        }
     }
 
     public int describeContents() {
@@ -27,13 +39,12 @@ public class NarrowFilterPM implements NarrowFilter {
     }
 
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(person.getEmail());
+        dest.writeString(this.recipientString);
     }
 
     public static final Parcelable.Creator<NarrowFilterPM> CREATOR = new Parcelable.Creator<NarrowFilterPM>() {
         public NarrowFilterPM createFromParcel(Parcel in) {
-            return new NarrowFilterPM(Person.getByEmail(ZulipApp.get(),
-                    in.readString()));
+            return new NarrowFilterPM(in.readString());
         }
 
         public NarrowFilterPM[] newArray(int size) {
@@ -59,7 +70,13 @@ public class NarrowFilterPM implements NarrowFilter {
 
     @Override
     public String getTitle() {
-        return person.getName();
+        ArrayList<String> names = new ArrayList<String>();
+        for (Person person : people) {
+            if (!person.equals(ZulipApp.get().you)) {
+                names.add(person.getName());
+            }
+        }
+        return TextUtils.join(", ", names);
     }
 
     @Override
@@ -74,13 +91,17 @@ public class NarrowFilterPM implements NarrowFilter {
 
     @Override
     public String getComposePMRecipient() {
-        return person.getEmail();
+        return this.recipientString;
     }
 
     @Override
     public String getJsonFilter() throws JSONException {
-        return (new JSONArray())
-                .put(new JSONArray(Arrays.asList("pm-with",
-                        this.person.getEmail()))).toString();
+        ArrayList<String> emails = new ArrayList<String>();
+        for (Person person : this.people) {
+            emails.add(person.getEmail());
+        }
+        return (new JSONArray()).put(
+                new JSONArray(Arrays.asList("pm-with",
+                        TextUtils.join(",", emails)))).toString();
     }
 }
