@@ -2,6 +2,7 @@ package com.zulip.android;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -316,6 +317,16 @@ public class MessageListFragment extends Fragment implements MessageListener {
             return true;
         case R.id.reply_to_sender:
             mListener.openCompose(message.getSender().getEmail());
+            return true;
+        case R.id.narrow_to_private:
+            ((ZulipActivity) getActivity()).doNarrow(new NarrowFilterPM(Arrays
+                    .asList(message.getRecipients(app))));
+            return true;
+        case R.id.narrow_to_stream:
+            // TODO This should probably use an interface defining a custom
+            // listener.
+            ((ZulipActivity) getActivity()).doNarrow(new NarrowFilterStream(
+                    message.getStream()));
             return true;
         case R.id.copy_message:
             copyMessage(message);
