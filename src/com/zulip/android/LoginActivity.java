@@ -100,6 +100,8 @@ public class LoginActivity extends Activity implements View.OnClickListener,
     }
 
     protected void openHome() {
+        // Cancel before leaving activity to avoid leaking windows
+        connectionProgressDialog.dismiss();
         Intent i = new Intent(this, ZulipActivity.class);
         startActivity(i);
         finish();
