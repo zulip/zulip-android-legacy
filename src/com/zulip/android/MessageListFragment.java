@@ -328,6 +328,10 @@ public class MessageListFragment extends Fragment implements MessageListener {
             ((ZulipActivity) getActivity()).doNarrow(new NarrowFilterStream(
                     message.getStream(), null));
             return true;
+        case R.id.narrow_to_subject:
+            ((ZulipActivity) getActivity()).doNarrow(new NarrowFilterStream(
+                    message.getStream(), message.getSubject()));
+            return true;
         case R.id.copy_message:
             copyMessage(message);
             return true;
