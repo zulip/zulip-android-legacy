@@ -326,7 +326,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
             // TODO This should probably use an interface defining a custom
             // listener.
             ((ZulipActivity) getActivity()).doNarrow(new NarrowFilterStream(
-                    message.getStream()));
+                    message.getStream(), null));
             return true;
         case R.id.copy_message:
             copyMessage(message);

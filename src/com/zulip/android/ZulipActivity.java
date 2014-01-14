@@ -277,7 +277,7 @@ public class ZulipActivity extends FragmentActivity implements
     }
 
     protected void narrow(final Stream stream) {
-        doNarrow(new NarrowFilterStream(stream));
+        doNarrow(new NarrowFilterStream(stream, null));
     }
 
     protected void narrow_pm_with(final Person person) {

@@ -14,9 +14,11 @@ import com.j256.ormlite.stmt.Where;
 
 public class NarrowFilterStream implements NarrowFilter {
     Stream stream;
+    String subject;
 
-    public NarrowFilterStream(Stream stream) {
+    public NarrowFilterStream(Stream stream, String subject) {
         this.stream = stream;
+        this.subject = subject;
     }
 
     public int describeContents() {
@@ -24,13 +26,15 @@ public class NarrowFilterStream implements NarrowFilter {
     }
 
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(stream.getName());
+        String[] pair = { stream.getName(), subject };
+        dest.writeStringArray(pair);
     }
 
     public static final Parcelable.Creator<NarrowFilterStream> CREATOR = new Parcelable.Creator<NarrowFilterStream>() {
         public NarrowFilterStream createFromParcel(Parcel in) {
+            String[] pair = in.createStringArray();
             return new NarrowFilterStream(Stream.getByName(ZulipApp.get(),
-                    in.readString()));
+                    pair[0]), pair[1]);
         }
 
         public NarrowFilterStream[] newArray(int size) {
@@ -42,6 +46,9 @@ public class NarrowFilterStream implements NarrowFilter {
     public Where<Message, Object> modWhere(Where<Message, Object> where)
             throws SQLException {
         where.eq(Message.STREAM_FIELD, new SelectArg(stream));
+        if (subject != null) {
+            where.and().eq(Message.SUBJECT_FIELD, new SelectArg(subject));
+        }
         return where;
     }
 
@@ -58,7 +65,7 @@ public class NarrowFilterStream implements NarrowFilter {
 
     @Override
     public String getSubtitle() {
-        return null;
+        return subject;
     }
 
     @Override
@@ -73,8 +80,11 @@ public class NarrowFilterStream implements NarrowFilter {
 
     @Override
     public String getJsonFilter() throws JSONException {
-        return (new JSONArray()).put(
-                new JSONArray(Arrays.asList("stream", this.stream.getName())))
-                .toString();
+        JSONArray filter = new JSONArray();
+        filter.put(new JSONArray(Arrays.asList("stream", this.stream.getName())));
+        if (subject != null) {
+            filter.put(new JSONArray(Arrays.asList("topic", this.subject)));
+        }
+        return filter.toString();
     }
 }
