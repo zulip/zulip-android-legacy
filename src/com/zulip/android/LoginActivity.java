@@ -50,11 +50,25 @@ public class LoginActivity extends Activity implements View.OnClickListener,
                     @Override
                     public void onClick(View v) {
                         connectionProgressDialog.show();
-                        (new AsyncLogin(that,
+                        AsyncLogin alog = new AsyncLogin(that,
                                 ((EditText) findViewById(R.id.username))
                                         .getText().toString(),
                                 ((EditText) findViewById(R.id.password))
-                                        .getText().toString())).execute();
+                                        .getText().toString());
+                        // Remove the CPD when done
+                        alog.setCallback(new AsyncTaskCompleteListener() {
+                            @Override
+                            public void onTaskComplete(String result) {
+                                connectionProgressDialog.dismiss();
+                            }
+
+                            @Override
+                            public void onTaskFailure(String result) {
+                                connectionProgressDialog.dismiss();
+                            }
+
+                        });
+                        alog.execute();
                     }
                 });
         ((TextView) findViewById(R.id.legalTextView))
