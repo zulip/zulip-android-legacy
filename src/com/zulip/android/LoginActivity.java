@@ -35,7 +35,6 @@ public class LoginActivity extends Activity implements View.OnClickListener,
     ZulipApp app;
 
     private ProgressDialog connectionProgressDialog;
-    private ConnectionResult connectionResult;
     private int googleFailureCount = 0;
 
     @Override
@@ -132,14 +131,10 @@ public class LoginActivity extends Activity implements View.OnClickListener,
                     result.startResolutionForResult(this,
                             REQUEST_CODE_RESOLVE_ERR);
                 } catch (SendIntentException e) {
-                    // plusClient.connect();
+                    // Yeah, no idea what to do here.
                 }
             }
         }
-
-        // Save the intent so that we can start an activity when the user clicks
-        // the sign-in button.
-        connectionResult = result;
     }
 
     public void quickRetry() {
