@@ -59,7 +59,6 @@ public class ZulipActivity extends FragmentActivity implements
     private ActionBarDrawerToggle drawerToggle;
 
     private Menu menu;
-    public Person you;
 
     protected HashMap<String, Bitmap> gravatars = new HashMap<String, Bitmap>();
 
