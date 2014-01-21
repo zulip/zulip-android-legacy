@@ -281,7 +281,7 @@ public class ZulipActivity extends FragmentActivity implements
     }
 
     protected void narrow_pm_with(final Person person) {
-        doNarrow(new NarrowFilterPM(Arrays.asList(person)));
+        doNarrow(new NarrowFilterPM(Arrays.asList(app.you, person)));
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
