@@ -251,15 +251,19 @@ public class Message {
             return this.getSender().getEmail();
         } else {
             Person[] people = this.getRecipients(app);
-            ArrayList<String> names = new ArrayList<String>();
-
-            for (Person person : people) {
-                if (person.id != app.you.id) {
-                    names.add(person.getEmail());
-                }
-            }
-            return TextUtils.join(", ", names);
+            return emailsMinusYou(Arrays.asList(people), app.you);
         }
+    }
+
+    public static String emailsMinusYou(List<Person> people, Person you) {
+        ArrayList<String> names = new ArrayList<String>();
+
+        for (Person person : people) {
+            if (person.id != you.id) {
+                names.add(person.getEmail());
+            }
+        }
+        return TextUtils.join(", ", names);
     }
 
     /**
