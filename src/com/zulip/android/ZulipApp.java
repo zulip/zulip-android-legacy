@@ -142,6 +142,7 @@ public class ZulipApp extends Application {
         return databaseHelper;
     }
 
+    @SuppressWarnings("unchecked")
     public <C, T> RuntimeExceptionDao<C, T> getDao(Class<C> cls) {
         try {
             return new RuntimeExceptionDao<C, T>(
