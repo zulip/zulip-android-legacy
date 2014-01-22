@@ -25,7 +25,7 @@ import android.os.AsyncTask;
 import android.util.Base64;
 import android.util.Log;
 
-/// Simplified HTTP request API
+/** Simplified HTTP request API */
 public class HTTPRequest {
     ZulipApp app;
     List<NameValuePair> nameValuePairs;

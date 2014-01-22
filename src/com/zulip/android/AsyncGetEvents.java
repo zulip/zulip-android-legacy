@@ -62,6 +62,9 @@ public class AsyncGetEvents extends Thread {
         SystemClock.sleep(backoff);
     }
 
+    /**
+     * Registers for a new event queue with the Zulip API
+     */
     private void register() throws JSONException, IOException {
         request.setProperty("apply_markdown", "false");
 
@@ -224,6 +227,9 @@ public class AsyncGetEvents extends Thread {
         }
     }
 
+    /**
+     * Handles any event returned by the server that we care about.
+     */
     protected void processEvents(JSONArray events) {
         // In task thread
         try {

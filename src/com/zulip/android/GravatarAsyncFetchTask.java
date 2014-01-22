@@ -20,6 +20,9 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.widget.ImageView;
 
+/**
+ * Retrieves a user avatar (which may be a Gravatar) from the relevant server
+ */
 class GravatarAsyncFetchTask extends AsyncTask<URL, Void, Bitmap> {
     private final WeakReference<ImageView> imageViewReference;
     private URL url;
@@ -86,7 +89,7 @@ class GravatarAsyncFetchTask extends AsyncTask<URL, Void, Bitmap> {
         }
     }
 
-    /*
+    /**
      * This object is attached to the ImageView at the time of a gravatar
      * request to keep a reference back to the task that is fetching the image.
      * This is to prevent multiple tasks being initiated for the same ImageView.
@@ -109,8 +112,8 @@ class GravatarAsyncFetchTask extends AsyncTask<URL, Void, Bitmap> {
     // Called externally to initiate a new gravatar fetch task, only if there
     // already isn't one
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public void loadBitmap(ZulipActivity context, URL url,
-            ImageView imageView, Person person) {
+    public void loadBitmap(ZulipActivity context, URL url, ImageView imageView,
+            Person person) {
         if (cancelPotentialWork(person, imageView)) {
             Log.i("GAFT.init", "Starting new task for " + imageView);
             final GravatarAsyncFetchTask task = new GravatarAsyncFetchTask(

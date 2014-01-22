@@ -63,6 +63,15 @@ class AsyncLogin extends ZulipAsyncPushTask {
                 JSONObject obj = new JSONObject(e.getMessage());
                 String reason = obj.getString("reason");
                 message = obj.getString("msg");
+                /*
+                 * If you're disabled or unregistered, your credentials were
+                 * valid but you are not able to use the service.
+                 * 
+                 * This is useful in the context of Google Apps login where we
+                 * want to differentiate between "bad credentials" and
+                 * "not permitted by policy". So, an authentication vs.
+                 * authorization thing.
+                 */
                 userDefinitelyInvalid = reason.equals(AsyncLogin.DISABLED)
                         || reason.equals(AsyncLogin.UNREGISTERED);
             } catch (JSONException e1) {

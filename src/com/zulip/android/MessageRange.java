@@ -18,7 +18,6 @@ import com.j256.ormlite.table.DatabaseTable;
 
 /**
  * Ranges of messages we have received.
- * 
  */
 @DatabaseTable(tableName = "ranges")
 public class MessageRange extends BaseDaoEnabled<MessageRange, Integer> {
