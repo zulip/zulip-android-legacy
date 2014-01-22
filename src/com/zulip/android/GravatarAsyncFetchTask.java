@@ -25,7 +25,6 @@ import android.widget.ImageView;
  */
 class GravatarAsyncFetchTask extends AsyncTask<URL, Void, Bitmap> {
     private final WeakReference<ImageView> imageViewReference;
-    private URL url;
     private Person person;
     private ZulipActivity context;
 
