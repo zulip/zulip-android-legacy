@@ -91,7 +91,7 @@ public class NarrowFilterPM implements NarrowFilter {
 
     @Override
     public String getComposePMRecipient() {
-        return this.recipientString;
+        return Message.emailsMinusYou(people, ZulipApp.get().you);
     }
 
     @Override
