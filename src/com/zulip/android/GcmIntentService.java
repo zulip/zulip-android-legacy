@@ -94,7 +94,7 @@ public class GcmIntentService extends IntentService {
             builder.setWhen(time);
         }
 
-        long[] vPattern = { 0, 300, 100, 300 };
+        long[] vPattern = { 0, 100, 200, 100 };
         builder.setVibrate(vPattern);
 
         builder.setContentIntent(contentIntent);
