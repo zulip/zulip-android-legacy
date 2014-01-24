@@ -65,7 +65,13 @@ public class GcmIntentService extends IntentService {
                 builder.setSubText("New private message");
             }
         } else if (type.equals("stream")) {
-            tag = "zulip-mention-" + msg.getString("stream", "");
+            /*
+             * The getString call used here used to specify a default value of
+             * "", but that's not supported by API <12. If msg.getString returns
+             * null the concatenation will still not fail. That said, not
+             * entirely clear on when that would happen.
+             */
+            tag = "zulip-mention-" + msg.getString("stream");
             if (android.os.Build.VERSION.SDK_INT >= 16) {
                 String displayTopic = msg.getString("stream") + " > "
                         + msg.getString("topic");
