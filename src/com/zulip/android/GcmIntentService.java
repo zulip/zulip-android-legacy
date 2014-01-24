@@ -94,6 +94,9 @@ public class GcmIntentService extends IntentService {
             builder.setWhen(time);
         }
 
+        long[] vPattern = { 0, 300, 100, 300 };
+        builder.setVibrate(vPattern);
+
         builder.setContentIntent(contentIntent);
         mNotificationManager.notify(tag, NOTIFICATION_ID, builder.build());
     }
