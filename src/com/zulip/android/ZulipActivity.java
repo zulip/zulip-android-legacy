@@ -1,8 +1,10 @@
 package com.zulip.android;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 import android.annotation.SuppressLint;
@@ -14,6 +16,8 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.database.MatrixCursor;
+import android.database.MergeCursor;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff.Mode;
 import android.os.Build;
@@ -159,17 +163,38 @@ public class ZulipActivity extends FragmentActivity implements
             }
         };
 
+        // row number which is used to differentiate the 'All private messages'
+        // row from the people
+        final int allPeopleId = -1;
         Callable<Cursor> peopleGenerator = new Callable<Cursor>() {
 
             @Override
             public Cursor call() throws Exception {
                 // TODO Auto-generated method stub
-                return ((AndroidDatabaseResults) app.getDao(Person.class)
-                        .queryBuilder().selectRaw("rowid _id", "*")
+                Cursor peopleCursor = ((AndroidDatabaseResults) app
+                        .getDao(Person.class).queryBuilder()
+                        .selectRaw("rowid _id", "*")
                         .orderByRaw(Person.NAME_FIELD + " COLLATE NOCASE")
                         .where().eq(Person.ISBOT_FIELD, false).and()
                         .eq(Person.ISACTIVE_FIELD, true).queryRaw()
                         .closeableIterator().getRawResults()).getRawCursor();
+                MatrixCursor allPrivateMessages = new MatrixCursor(
+                        peopleCursor.getColumnNames());
+                String[] row = new String[peopleCursor.getColumnCount()];
+                row[0] = String.valueOf(allPeopleId);
+                for (int i = 0; i < peopleCursor.getColumnCount(); i++) {
+                    String columnName = peopleCursor.getColumnName(i);
+                    if (columnName.equals(Person.NAME_FIELD)) {
+                        row[i] = "All private messages";
+                    }
+                }
+
+                allPrivateMessages.addRow(row);
+
+                MergeCursor mergeCursor = new MergeCursor(new Cursor[] {
+                        allPrivateMessages, peopleCursor });
+                return mergeCursor;
+
             }
 
         };
@@ -210,7 +235,11 @@ public class ZulipActivity extends FragmentActivity implements
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
                     int position, long id) {
-                narrow_pm_with(Person.getById(app, (int) id));
+                if (id == allPeopleId) {
+                    doNarrow(new NarrowFilterAllPMs(app.you));
+                } else {
+                    narrow_pm_with(Person.getById(app, (int) id));
+                }
             }
         });
 

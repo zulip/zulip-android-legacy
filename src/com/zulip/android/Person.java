@@ -15,7 +15,6 @@ import com.j256.ormlite.table.DatabaseTable;
 
 @DatabaseTable(tableName = "people")
 public class Person {
-
     public static final String ID_FIELD = "id";
     public static final String NAME_FIELD = "name";
     public static final String MESSAGESPARTICIPATEDIN_FIELD = "messagesParticipatedIn";
