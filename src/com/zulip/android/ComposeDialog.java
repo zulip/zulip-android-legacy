@@ -21,6 +21,7 @@ import android.widget.EditText;
 import android.widget.FilterQueryProvider;
 
 import com.j256.ormlite.android.AndroidDatabaseResults;
+import com.j256.ormlite.stmt.Where;
 import com.zulip.android.ZulipAsyncPushTask.AsyncTaskCompleteListener;
 
 import java.sql.SQLException;
@@ -153,7 +154,8 @@ public class ComposeDialog extends DialogFragment {
                 ZLog.logException(e);
             }
             try {
-                Cursor subjectCursor = makeSubjectCursor("");
+                Cursor subjectCursor = makeSubjectCursor(recipient.getText(),
+                        "");
                 SimpleCursorAdapter subjectAdapter = new SimpleCursorAdapter(
                         getActivity(), R.layout.stream_tile, subjectCursor,
                         new String[] { Message.SUBJECT_FIELD },
@@ -172,7 +174,8 @@ public class ComposeDialog extends DialogFragment {
                             @Override
                             public Cursor runQuery(CharSequence charSequence) {
                                 try {
-                                    return makeSubjectCursor(charSequence);
+                                    return makeSubjectCursor(
+                                            recipient.getText(), charSequence);
                                 } catch (SQLException e) {
                                     ZLog.logException(e);
                                     // TODO: is there something like
@@ -267,19 +270,31 @@ public class ComposeDialog extends DialogFragment {
                 .closeableIterator().getRawResults()).getRawCursor();
     }
 
-    private Cursor makeSubjectCursor(CharSequence match) throws SQLException {
-        if (match == null) {
-            match = "";
+    private Cursor makeSubjectCursor(CharSequence stream, CharSequence subject)
+            throws SQLException {
+        if (subject == null) {
+            subject = "";
         }
+        if (stream == null) {
+            stream = "";
+        }
+
         // _id must exist to use SimpleCursorAdapter but we can't use rowid
         // because
         // it would interfere with DISTINCT
         AndroidDatabaseResults results = (AndroidDatabaseResults) app
-                .getDao(Message.class).queryBuilder().distinct()
-                .selectRaw("1 _id", Message.SUBJECT_FIELD)
-                .orderByRaw(Message.SUBJECT_FIELD + " COLLATE NOCASE").where()
-                .like(Message.SUBJECT_FIELD, match + "%").queryRaw()
-                .closeableIterator().getRawResults();
+                .getDao(Message.class)
+                .queryRaw(
+                        "SELECT DISTINCT "
+                                + Message.SUBJECT_FIELD
+                                + ", 1 AS _id FROM messages JOIN streams ON streams."
+                                + Stream.ID_FIELD + " = messages."
+                                + Message.STREAM_FIELD + " WHERE "
+                                + Message.SUBJECT_FIELD + " LIKE ? AND "
+                                + Stream.NAME_FIELD + " = ? ORDER BY "
+                                + Message.SUBJECT_FIELD + " COLLATE NOCASE",
+                        subject + "%", stream.toString()).closeableIterator()
+                .getRawResults();
         return results.getRawCursor();
     }
 
