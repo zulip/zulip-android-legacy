@@ -258,18 +258,53 @@ public class ComposeDialog extends DialogFragment {
         return dialog;
     }
 
-    private Cursor makeStreamCursor(CharSequence match) throws SQLException {
-        if (match == null) {
-            match = "";
+    /**
+     * Provide streams for autocompletion
+     * 
+     * @param streamName
+     *            Stream prefix to use for autocompletion
+     * @return Cursor with autocompletion results
+     * @throws SQLException
+     */
+    private Cursor makeStreamCursor(CharSequence streamName)
+            throws SQLException {
+        if (streamName == null) {
+            streamName = "";
         }
-        return ((AndroidDatabaseResults) app.getDao(Stream.class)
-                .queryBuilder().selectRaw("rowid _id", "*")
-                .orderByRaw(Stream.NAME_FIELD + " COLLATE NOCASE").where()
-                .eq(Stream.SUBSCRIBED_FIELD, true).and()
-                .like(Stream.NAME_FIELD, match + "%").queryRaw()
+
+        return ((AndroidDatabaseResults) app
+                .getDao(Stream.class)
+                .queryRaw(
+                        "SELECT rowid _id, * FROM streams WHERE "
+                                + Stream.SUBSCRIBED_FIELD + " = 1 AND "
+                                + Stream.NAME_FIELD
+                                + " LIKE ? ESCAPE '\\' ORDER BY "
+                                + Stream.NAME_FIELD + " COLLATE NOCASE",
+                        likeEscape(streamName.toString()) + "%")
                 .closeableIterator().getRawResults()).getRawCursor();
     }
 
+    /**
+     * Escape LIKE wildcards with a backslash. Must also use ESCAPE clause
+     * 
+     * @param likeClause
+     *            string to escape
+     * @return Escaped string
+     */
+    private static String likeEscape(String likeClause) {
+        return likeClause.replace("%", "\\%").replace("_", "\\_");
+    }
+
+    /**
+     * Provide message subjects for autocompletion
+     * 
+     * @param stream
+     *            Only consider messages in this stream. Must be exact match
+     * @param subject
+     *            Subject prefix to use for autocompletion
+     * @return Cursor with autocompletion results
+     * @throws SQLException
+     */
     private Cursor makeSubjectCursor(CharSequence stream, CharSequence subject)
             throws SQLException {
         if (subject == null) {
@@ -290,19 +325,28 @@ public class ComposeDialog extends DialogFragment {
                                 + ", 1 AS _id FROM messages JOIN streams ON streams."
                                 + Stream.ID_FIELD + " = messages."
                                 + Message.STREAM_FIELD + " WHERE "
-                                + Message.SUBJECT_FIELD + " LIKE ? AND "
+                                + Message.SUBJECT_FIELD
+                                + " LIKE ? ESCAPE '\\' AND "
                                 + Stream.NAME_FIELD + " = ? ORDER BY "
                                 + Message.SUBJECT_FIELD + " COLLATE NOCASE",
-                        subject + "%", stream.toString()).closeableIterator()
-                .getRawResults();
+                        likeEscape(subject.toString()) + "%", stream.toString())
+                .closeableIterator().getRawResults();
         return results.getRawCursor();
     }
 
-    private Cursor makePeopleCursor(CharSequence match) throws SQLException {
-        if (match == null) {
-            match = "";
+    /**
+     * Provide people for autocompletion
+     * 
+     * @param email
+     *            Prefix to use for matching email addresses
+     * @return Cursor with autocompletion results
+     * @throws SQLException
+     */
+    private Cursor makePeopleCursor(CharSequence email) throws SQLException {
+        if (email == null) {
+            email = "";
         }
-        String[] pieces = TextUtils.split(match.toString(), ",");
+        String[] pieces = TextUtils.split(email.toString(), ",");
         String piece;
         if (pieces.length == 0) {
             piece = "";
@@ -310,13 +354,16 @@ public class ComposeDialog extends DialogFragment {
             piece = pieces[pieces.length - 1].trim();
         }
         Cursor peopleCursor = ((AndroidDatabaseResults) app
-                .getDao(Person.class).queryBuilder()
-                .selectRaw("rowid _id", "*")
-                .orderByRaw(Person.NAME_FIELD + " COLLATE NOCASE").where()
-                .eq(Person.ISBOT_FIELD, false).and()
-                .eq(Person.ISACTIVE_FIELD, true).and()
-                .like(Person.EMAIL_FIELD, piece + "%").queryRaw()
-                .closeableIterator().getRawResults()).getRawCursor();
+                .getDao(Person.class)
+                .queryRaw(
+                        "SELECT rowid _id, * FROM people WHERE "
+                                + Person.ISBOT_FIELD + " = 0 AND "
+                                + Person.ISACTIVE_FIELD + " = 1 AND "
+                                + Person.EMAIL_FIELD
+                                + " LIKE ? ESCAPE '\\' ORDER BY "
+                                + Person.NAME_FIELD + " COLLATE NOCASE",
+                        likeEscape(piece) + "%").closeableIterator()
+                .getRawResults()).getRawCursor();
         return peopleCursor;
     }
 
