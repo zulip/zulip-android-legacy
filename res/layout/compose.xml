@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
 
-        <EditText
+        <AutoCompleteTextView
             android:id="@+id/composeRecipient"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -17,12 +17,14 @@
             android:ems="10"
             android:hint="@string/stream"
             android:inputType="textNoSuggestions"
-            android:maxLines="1" >
+            android:maxLines="1"
+            android:dropDownWidth="fill_parent"
+            android:completionThreshold="1">
 
             <requestFocus />
-        </EditText>
+        </AutoCompleteTextView>
 
-        <EditText
+        <AutoCompleteTextView
             android:id="@+id/composeSubject"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -30,7 +32,9 @@
             android:ems="10"
             android:hint="@string/subject"
             android:inputType="textNoSuggestions"
-            android:maxLines="1" />
+            android:maxLines="1"
+            android:completionThreshold="1"
+            android:dropDownWidth="fill_parent"/>
     </LinearLayout>
 
     <EditText
