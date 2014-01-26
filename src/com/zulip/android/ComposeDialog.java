@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -211,9 +212,17 @@ public class ComposeDialog extends DialogFragment {
                         .setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter() {
                             @Override
                             public CharSequence convertToString(Cursor cursor) {
+                                String text = recipient.getText().toString();
+                                String prefix;
+                                int lastIndex = text.lastIndexOf(",");
+                                if (lastIndex != -1) {
+                                    prefix = text.substring(0, lastIndex + 1);
+                                } else {
+                                    prefix = "";
+                                }
                                 int index = cursor
                                         .getColumnIndex(Person.EMAIL_FIELD);
-                                return cursor.getString(index);
+                                return prefix + cursor.getString(index);
                             }
                         });
                 emailAdapter.setFilterQueryProvider(new FilterQueryProvider() {
@@ -278,14 +287,20 @@ public class ComposeDialog extends DialogFragment {
         if (match == null) {
             match = "";
         }
-        // TODO: refactor this with the instance in ZulipActivity
+        String[] pieces = TextUtils.split(match.toString(), ",");
+        String piece;
+        if (pieces.length == 0) {
+            piece = "";
+        } else {
+            piece = pieces[pieces.length - 1].trim();
+        }
         Cursor peopleCursor = ((AndroidDatabaseResults) app
                 .getDao(Person.class).queryBuilder()
                 .selectRaw("rowid _id", "*")
                 .orderByRaw(Person.NAME_FIELD + " COLLATE NOCASE").where()
                 .eq(Person.ISBOT_FIELD, false).and()
                 .eq(Person.ISACTIVE_FIELD, true).and()
-                .like(Person.EMAIL_FIELD, match + "%").queryRaw()
+                .like(Person.EMAIL_FIELD, piece + "%").queryRaw()
                 .closeableIterator().getRawResults()).getRawCursor();
         return peopleCursor;
     }
