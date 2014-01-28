@@ -37,8 +37,8 @@ public class AsyncStatusUpdate extends ZulipAsyncPushTask {
     }
 
     /**
-     * Choose latest presence object under two minutes in age, or null if none
-     * are available
+     * Choose presence object. This will return the latest active presence, then
+     * the latest away presence available.
      */
     private JSONObject chooseLatestPresence(JSONObject person)
             throws JSONException {
@@ -48,10 +48,37 @@ public class AsyncStatusUpdate extends ZulipAsyncPushTask {
             String key = (String) keys.next();
             JSONObject presence = person.getJSONObject(key);
             long timestamp = presence.getLong("timestamp");
+            String status = presence.getString("status");
             if (latestPresence == null) {
+                // first presence
                 latestPresence = presence;
-            } else if (latestPresence.getLong("timestamp") < timestamp) {
-                latestPresence = presence;
+            } else {
+                String latestStatus = latestPresence.getString("status");
+                if (latestStatus == null) {
+                    Log.wtf("statusUpdate",
+                            "Received presence information with no status");
+                } else if (status == null) {
+                    Log.wtf("statusUpdate",
+                            "Received presence information with no status");
+                } else {
+                    if (status.equals(PresenceType.ACTIVE.toString())) {
+                        if (latestStatus.equals(PresenceType.ACTIVE.toString())) {
+                            if (latestPresence.getLong("timestamp") < timestamp) {
+                                latestPresence = presence;
+                            }
+                        } else {
+                            // found an active status which overrides the idle
+                            // status
+                            latestPresence = presence;
+                        }
+                    } else if (status.equals(PresenceType.IDLE.toString())) {
+                        if (latestStatus.equals(PresenceType.IDLE.toString())) {
+                            if (latestPresence.getLong("timestamp") < timestamp) {
+                                latestPresence = presence;
+                            }
+                        }
+                    }
+                }
             }
         }
         return latestPresence;
@@ -94,9 +121,11 @@ public class AsyncStatusUpdate extends ZulipAsyncPushTask {
                                 PresenceType statusEnum;
                                 if (status == null) {
                                     statusEnum = null;
-                                } else if (status.equals("active")) {
+                                } else if (status.equals(PresenceType.ACTIVE
+                                        .toString())) {
                                     statusEnum = PresenceType.ACTIVE;
-                                } else if (status.equals("idle")) {
+                                } else if (status.equals(PresenceType.IDLE
+                                        .toString())) {
                                     statusEnum = PresenceType.IDLE;
                                 } else {
                                     statusEnum = null;
@@ -117,6 +146,7 @@ public class AsyncStatusUpdate extends ZulipAsyncPushTask {
             }
         }
         Toast.makeText(context, "Unknown error", Toast.LENGTH_LONG).show();
-        Log.wtf("login", "We shouldn't have gotten this far.");
+        Log.wtf("statusUpdate",
+                "An exception was thrown or we got a failed response from the server for status updates.");
     }
 }
