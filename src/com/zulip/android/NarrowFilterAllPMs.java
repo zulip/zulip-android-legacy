@@ -55,14 +55,7 @@ public class NarrowFilterAllPMs implements NarrowFilter {
             throws SQLException {
 
         // see if recipient matches any items in comma delimited string
-        where.like(Message.RECIPIENTS_FIELD, new SelectArg(recipient))
-                .or()
-                .like(Message.RECIPIENTS_FIELD, new SelectArg(recipient + ",%"))
-                .or()
-                .like(Message.RECIPIENTS_FIELD,
-                        new SelectArg("%," + recipient + ",%"))
-                .or()
-                .like(Message.RECIPIENTS_FIELD, new SelectArg("%," + recipient));
+        where.eq(Message.TYPE_FIELD, MessageType.PRIVATE_MESSAGE);
 
         return where;
     }
