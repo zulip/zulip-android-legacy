@@ -1,10 +1,8 @@
 package com.zulip.android;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.Callable;
 
 import android.annotation.SuppressLint;
@@ -22,6 +20,7 @@ import android.graphics.Bitmap;
 import android.graphics.PorterDuff.Mode;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -68,6 +67,8 @@ public class ZulipActivity extends FragmentActivity implements
 
     private AsyncGetEvents event_poll;
 
+    private Handler statusUpdateHandler;
+
     MessageListFragment currentList;
     MessageListFragment narrowedList;
     MessageListFragment homeList;
@@ -93,6 +94,45 @@ public class ZulipActivity extends FragmentActivity implements
             return false;
         }
 
+    };
+
+    private SimpleCursorAdapter.ViewBinder peopleBinder = new SimpleCursorAdapter.ViewBinder() {
+        @Override
+        public boolean setViewValue(View view, Cursor cursor, int i) {
+            switch (view.getId()) {
+            case R.id.name:
+                TextView name = (TextView) view;
+                name.setText(cursor.getString(i));
+                return true;
+            case R.id.stream_dot:
+                String email = cursor.getString(i);
+                if (app == null || email == null) {
+                    view.setVisibility(View.INVISIBLE);
+                } else {
+                    Presence presence = app.presences.get(email);
+                    if (presence == null) {
+                        view.setVisibility(View.INVISIBLE);
+                    } else {
+                        String status = presence.getStatus();
+                        long age = presence.getAge();
+                        if (age > 2 * 60) {
+                            view.setVisibility(View.VISIBLE);
+                            view.setBackgroundResource(R.drawable.presence_inactive);
+                        } else if ("active".equals(status)) {
+                            view.setVisibility(View.VISIBLE);
+                            view.setBackgroundResource(R.drawable.presence_active);
+                        } else if ("idle".equals(status)) {
+                            view.setVisibility(View.VISIBLE);
+                            view.setBackgroundResource(R.drawable.presence_away);
+                        } else {
+                            view.setVisibility(View.INVISIBLE);
+                        }
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
     };
 
     protected RefreshableCursorAdapter streamsAdapter;
@@ -209,9 +249,10 @@ public class ZulipActivity extends FragmentActivity implements
 
             this.peopleAdapter = new RefreshableCursorAdapter(
                     this.getApplicationContext(), R.layout.stream_tile,
-                    peopleGenerator.call(), peopleGenerator,
-                    new String[] { Person.NAME_FIELD },
-                    new int[] { R.id.name }, 0);
+                    peopleGenerator.call(), peopleGenerator, new String[] {
+                            Person.NAME_FIELD, Person.EMAIL_FIELD }, new int[] {
+                            R.id.name, R.id.stream_dot }, 0);
+            peopleAdapter.setViewBinder(peopleBinder);
 
             peopleDrawer.setAdapter(peopleAdapter);
         } catch (SQLException e) {
@@ -242,6 +283,30 @@ public class ZulipActivity extends FragmentActivity implements
                 }
             }
         });
+
+        // send status update and check again every couple minutes
+        statusUpdateHandler = new Handler();
+        Runnable statusUpdateRunnable = new Runnable() {
+            @Override
+            public void run() {
+                AsyncStatusUpdate task = new AsyncStatusUpdate(
+                        ZulipActivity.this);
+                task.setCallback(new ZulipAsyncPushTask.AsyncTaskCompleteListener() {
+                    @Override
+                    public void onTaskComplete(String result) {
+                        peopleAdapter.refresh();
+                    }
+
+                    @Override
+                    public void onTaskFailure(String result) {
+
+                    }
+                });
+                task.execute();
+                statusUpdateHandler.postDelayed(this, 2 * 60 * 1000);
+            }
+        };
+        statusUpdateHandler.post(statusUpdateRunnable);
 
         if (android.os.Build.VERSION.SDK_INT >= 11 && getActionBar() != null) {
             // the AB is unavailable when invoked from JUnit
@@ -491,6 +556,10 @@ public class ZulipActivity extends FragmentActivity implements
             event_poll.abort();
             event_poll = null;
         }
+
+        if (statusUpdateHandler != null) {
+            statusUpdateHandler.removeMessages(0);
+        }
     }
 
     protected void onResume() {
@@ -509,6 +578,14 @@ public class ZulipActivity extends FragmentActivity implements
             narrowedList.onActivityResume();
         }
         startRequests();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (statusUpdateHandler != null) {
+            statusUpdateHandler.removeMessages(0);
+        }
     }
 
     protected void onRefresh() {
@@ -533,6 +610,7 @@ public class ZulipActivity extends FragmentActivity implements
 
         event_poll = new AsyncGetEvents(this);
         event_poll.start();
+
     }
 
     public void onReadyToDisplay(boolean registered) {

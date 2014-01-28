@@ -120,74 +120,58 @@ public class ComposeDialog extends DialogFragment {
 
         if (type == MessageType.STREAM_MESSAGE) {
             this.switchToStream();
-            try {
-                Cursor streamCursor = makeStreamCursor("");
-                SimpleCursorAdapter recipientAdapter = new SimpleCursorAdapter(
-                        getActivity(), R.layout.stream_tile, streamCursor,
-                        new String[] { Stream.NAME_FIELD },
-                        new int[] { R.id.name }, 0);
-                recipientAdapter
-                        .setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter() {
-                            @Override
-                            public CharSequence convertToString(Cursor cursor) {
-                                int index = cursor
-                                        .getColumnIndex(Stream.NAME_FIELD);
-                                return cursor.getString(index);
-                            }
-                        });
-                recipient.setAdapter(recipientAdapter);
-                recipientAdapter
-                        .setFilterQueryProvider(new FilterQueryProvider() {
-                            @Override
-                            public Cursor runQuery(CharSequence charSequence) {
-                                try {
-                                    return makeStreamCursor(charSequence);
-                                } catch (SQLException e) {
-                                    ZLog.logException(e);
-                                    // TODO: is there something like
-                                    // Cursor.empty()?
-                                    return null;
-                                }
-                            }
-                        });
-            } catch (SQLException e) {
-                ZLog.logException(e);
-            }
-            try {
-                Cursor subjectCursor = makeSubjectCursor(recipient.getText(),
-                        "");
-                SimpleCursorAdapter subjectAdapter = new SimpleCursorAdapter(
-                        getActivity(), R.layout.stream_tile, subjectCursor,
-                        new String[] { Message.SUBJECT_FIELD },
-                        new int[] { R.id.name }, 0);
-                subjectAdapter
-                        .setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter() {
-                            @Override
-                            public CharSequence convertToString(Cursor cursor) {
-                                int index = cursor
-                                        .getColumnIndex(Message.SUBJECT_FIELD);
-                                return cursor.getString(index);
-                            }
-                        });
-                subjectAdapter
-                        .setFilterQueryProvider(new FilterQueryProvider() {
-                            @Override
-                            public Cursor runQuery(CharSequence charSequence) {
-                                try {
-                                    return makeSubjectCursor(
-                                            recipient.getText(), charSequence);
-                                } catch (SQLException e) {
-                                    ZLog.logException(e);
-                                    // TODO: is there something like
-                                    // Cursor.empty()?
-                                    return null;
-                                }
-                            }
-                        });
-                subject.setAdapter(subjectAdapter);
-            } catch (SQLException e) {
-                ZLog.logException(e);
-            }
+
+            SimpleCursorAdapter recipientAdapter = new SimpleCursorAdapter(
+                    getActivity(), R.layout.stream_tile, null,
+                    new String[] { Stream.NAME_FIELD },
+                    new int[] { R.id.name }, 0);
+            recipientAdapter
+                    .setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter() {
+                        @Override
+                        public CharSequence convertToString(Cursor cursor) {
+                            int index = cursor
+                                    .getColumnIndex(Stream.NAME_FIELD);
+                            return cursor.getString(index);
+                        }
+                    });
+            recipient.setAdapter(recipientAdapter);
+            recipientAdapter.setFilterQueryProvider(new FilterQueryProvider() {
+                @Override
+                public Cursor runQuery(CharSequence charSequence) {
+                    try {
+                        return makeStreamCursor(charSequence);
+                    } catch (SQLException e) {
+                        ZLog.logException(e);
+                        return null;
+                    }
+                }
+            });
+            SimpleCursorAdapter subjectAdapter = new SimpleCursorAdapter(
+                    getActivity(), R.layout.stream_tile, null,
+                    new String[] { Message.SUBJECT_FIELD },
+                    new int[] { R.id.name }, 0);
+            subjectAdapter
+                    .setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter() {
+                        @Override
+                        public CharSequence convertToString(Cursor cursor) {
+                            int index = cursor
+                                    .getColumnIndex(Message.SUBJECT_FIELD);
+                            return cursor.getString(index);
+                        }
+                    });
+            subjectAdapter.setFilterQueryProvider(new FilterQueryProvider() {
+                @Override
+                public Cursor runQuery(CharSequence charSequence) {
+                    try {
+                        return makeSubjectCursor(recipient.getText(),
+                                charSequence);
+                    } catch (SQLException e) {
+                        ZLog.logException(e);
+                        return null;
+                    }
+                }
+            });
+            subject.setAdapter(subjectAdapter);
             if (stream != null) {
                 recipient.setText(stream);
 
@@ -204,45 +188,39 @@ public class ComposeDialog extends DialogFragment {
             }
         } else {
             this.switchToPersonal();
-            try {
-                Cursor streamCursor = makePeopleCursor("");
-                SimpleCursorAdapter emailAdapter = new SimpleCursorAdapter(
-                        getActivity(), R.layout.stream_tile, streamCursor,
-                        new String[] { Person.EMAIL_FIELD },
-                        new int[] { R.id.name }, 0);
-                recipient.setAdapter(emailAdapter);
-                emailAdapter
-                        .setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter() {
-                            @Override
-                            public CharSequence convertToString(Cursor cursor) {
-                                String text = recipient.getText().toString();
-                                String prefix;
-                                int lastIndex = text.lastIndexOf(",");
-                                if (lastIndex != -1) {
-                                    prefix = text.substring(0, lastIndex + 1);
-                                } else {
-                                    prefix = "";
-                                }
-                                int index = cursor
-                                        .getColumnIndex(Person.EMAIL_FIELD);
-                                return prefix + cursor.getString(index);
+            SimpleCursorAdapter emailAdapter = new SimpleCursorAdapter(
+                    getActivity(), R.layout.stream_tile, null,
+                    new String[] { Person.EMAIL_FIELD },
+                    new int[] { R.id.name }, 0);
+            recipient.setAdapter(emailAdapter);
+            emailAdapter
+                    .setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter() {
+                        @Override
+                        public CharSequence convertToString(Cursor cursor) {
+                            String text = recipient.getText().toString();
+                            String prefix;
+                            int lastIndex = text.lastIndexOf(",");
+                            if (lastIndex != -1) {
+                                prefix = text.substring(0, lastIndex + 1);
+                            } else {
+                                prefix = "";
                             }
-                        });
-                emailAdapter.setFilterQueryProvider(new FilterQueryProvider() {
-                    @Override
-                    public Cursor runQuery(CharSequence charSequence) {
-                        try {
-                            return makePeopleCursor(charSequence);
-                        } catch (SQLException e) {
-                            ZLog.logException(e);
-                            // TODO: is there something like Cursor.empty()?
-                            return null;
+                            int index = cursor
+                                    .getColumnIndex(Person.EMAIL_FIELD);
+                            return prefix + cursor.getString(index);
                         }
+                    });
+            emailAdapter.setFilterQueryProvider(new FilterQueryProvider() {
+                @Override
+                public Cursor runQuery(CharSequence charSequence) {
+                    try {
+                        return makePeopleCursor(charSequence);
+                    } catch (SQLException e) {
+                        ZLog.logException(e);
+                        return null;
                     }
-                });
-            } catch (SQLException e) {
-                ZLog.logException(e);
-            }
+                }
+            });
             if (pmRecipients != null) {
                 recipient.setText(pmRecipients);
                 body.requestFocus();
@@ -272,6 +250,7 @@ public class ComposeDialog extends DialogFragment {
             streamName = "";
         }
 
+        // queryRaw is used because of ESCAPE clause
         return ((AndroidDatabaseResults) app
                 .getDao(Stream.class)
                 .queryRaw(
@@ -317,6 +296,8 @@ public class ComposeDialog extends DialogFragment {
         // _id must exist to use SimpleCursorAdapter but we can't use rowid
         // because
         // it would interfere with DISTINCT
+
+        // queryRaw is used because of ESCAPE clause
         AndroidDatabaseResults results = (AndroidDatabaseResults) app
                 .getDao(Message.class)
                 .queryRaw(
@@ -353,6 +334,7 @@ public class ComposeDialog extends DialogFragment {
         } else {
             piece = pieces[pieces.length - 1].trim();
         }
+        // queryRaw is used because of ESCAPE clause
         Cursor peopleCursor = ((AndroidDatabaseResults) app
                 .getDao(Person.class)
                 .queryRaw(

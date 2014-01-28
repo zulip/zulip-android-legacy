@@ -54,6 +54,7 @@ public class NarrowFilterAllPMs implements NarrowFilter {
     public Where<Message, Object> modWhere(Where<Message, Object> where)
             throws SQLException {
 
+        // see if recipient matches any items in comma delimited string
         where.like(Message.RECIPIENTS_FIELD, new SelectArg(recipient))
                 .or()
                 .like(Message.RECIPIENTS_FIELD, new SelectArg(recipient + ",%"))

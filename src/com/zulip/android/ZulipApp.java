@@ -1,6 +1,7 @@
 package com.zulip.android;
 
 import java.sql.SQLException;
+import java.util.concurrent.ConcurrentHashMap;
 
 import android.app.Application;
 import android.content.Context;
@@ -29,6 +30,12 @@ public class ZulipApp extends Application {
     // This object's intrinsic lock is used to prevent multiple threads from
     // making conflicting updates to ranges
     public Object updateRangeLock = new Object();
+
+    /**
+     * Mapping of email address to presence information for that user. This is
+     * updated every 2 minutes by a background thread (see AsyncStatusUpdate)
+     */
+    public final ConcurrentHashMap<String, Presence> presences = new ConcurrentHashMap<String, Presence>();
 
     public static ZulipApp get() {
         return instance;
