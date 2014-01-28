@@ -90,8 +90,19 @@ public class AsyncStatusUpdate extends ZulipAsyncPushTask {
                                         .getString("status");
                                 String client = latestPresenceObj
                                         .getString("client");
+
+                                PresenceType statusEnum;
+                                if (status == null) {
+                                    statusEnum = null;
+                                } else if (status.equals("active")) {
+                                    statusEnum = PresenceType.ACTIVE;
+                                } else if (status.equals("idle")) {
+                                    statusEnum = PresenceType.IDLE;
+                                } else {
+                                    statusEnum = null;
+                                }
                                 Presence presence = new Presence(age, client,
-                                        status);
+                                        statusEnum);
                                 presenceLookup.put(email, presence);
                             }
                         }

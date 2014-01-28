@@ -6,9 +6,9 @@ package com.zulip.android;
 public class Presence {
     private final long age;
     private final String client;
-    private final String status;
+    private final PresenceType status;
 
-    public Presence(long age, String client, String status) {
+    public Presence(long age, String client, PresenceType status) {
         this.age = age;
         this.client = client;
         this.status = status;
@@ -22,7 +22,7 @@ public class Presence {
         return client;
     }
 
-    public String getStatus() {
+    public PresenceType getStatus() {
         return status;
     }
 }

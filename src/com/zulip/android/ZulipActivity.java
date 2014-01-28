@@ -113,15 +113,15 @@ public class ZulipActivity extends FragmentActivity implements
                     if (presence == null) {
                         view.setVisibility(View.INVISIBLE);
                     } else {
-                        String status = presence.getStatus();
+                        PresenceType status = presence.getStatus();
                         long age = presence.getAge();
                         if (age > 2 * 60) {
                             view.setVisibility(View.VISIBLE);
                             view.setBackgroundResource(R.drawable.presence_inactive);
-                        } else if ("active".equals(status)) {
+                        } else if (PresenceType.ACTIVE == status) {
                             view.setVisibility(View.VISIBLE);
                             view.setBackgroundResource(R.drawable.presence_active);
-                        } else if ("idle".equals(status)) {
+                        } else if (PresenceType.IDLE == status) {
                             view.setVisibility(View.VISIBLE);
                             view.setBackgroundResource(R.drawable.presence_away);
                         } else {
