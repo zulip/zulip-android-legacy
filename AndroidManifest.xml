@@ -19,6 +19,7 @@
 
     <uses-permission android:name="com.humbughq.mobile.permission.C2D_MESSAGE" />
     <uses-permission android:name="android.permission.USE_CREDENTIALS"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
 
     <application
         android:name="com.zulip.android.ZulipApp"
