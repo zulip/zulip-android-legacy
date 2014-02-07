@@ -1,12 +1,19 @@
 package com.zulip.android;
 
+import android.database.Cursor;
+
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.j256.ormlite.android.AndroidDatabaseResults;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.field.DatabaseField;
@@ -190,5 +197,44 @@ public class Person {
     public static Person getById(ZulipApp app, int id) {
         RuntimeExceptionDao<Person, Object> dao = app.getDao(Person.class);
         return dao.queryForId(id);
+    }
+
+    public static void sortByPresence(ZulipApp app, List<Person> people) {
+        final Map<String, Presence> presenceCopy = new HashMap<String, Presence>(
+                app.presences);
+
+        Collections.sort(people, new Comparator<Person>() {
+            @Override
+            public int compare(Person a, Person b) {
+                Presence aPresence = presenceCopy.get(a.getEmail());
+                Presence bPresence = presenceCopy.get(b.getEmail());
+
+                final int inactiveTimeout = 2 * 60;
+
+                if (aPresence == null && bPresence == null) {
+                    return a.getName().toLowerCase()
+                            .compareTo(b.getName().toLowerCase());
+                } else if (aPresence == null) {
+                    return 1;
+                } else if (bPresence == null) {
+                    return -1;
+                } else if (aPresence.getAge() > inactiveTimeout
+                        && bPresence.getAge() > inactiveTimeout) {
+                    return a.getName().toLowerCase()
+                            .compareTo(b.getName().toLowerCase());
+                } else if (aPresence.getAge() > inactiveTimeout) {
+                    return 1;
+                } else if (bPresence.getAge() > inactiveTimeout) {
+                    return -1;
+                } else if (aPresence.getStatus() == bPresence.getStatus()) {
+                    return a.getName().toLowerCase()
+                            .compareTo(b.getName().toLowerCase());
+                } else if (aPresence.getStatus() == PresenceType.ACTIVE) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            }
+        });
     }
 }

@@ -1,8 +1,12 @@
 package com.zulip.android;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 import android.annotation.SuppressLint;
@@ -216,28 +220,33 @@ public class ZulipActivity extends FragmentActivity implements
             @Override
             public Cursor call() throws Exception {
                 // TODO Auto-generated method stub
-                Cursor peopleCursor = ((AndroidDatabaseResults) app
-                        .getDao(Person.class).queryBuilder()
-                        .selectRaw("rowid _id", "*")
-                        .orderByRaw(Person.NAME_FIELD + " COLLATE NOCASE")
+                List<Person> people = app.getDao(Person.class).queryBuilder()
                         .where().eq(Person.ISBOT_FIELD, false).and()
-                        .eq(Person.ISACTIVE_FIELD, true).queryRaw()
-                        .closeableIterator().getRawResults()).getRawCursor();
-                MatrixCursor allPrivateMessages = new MatrixCursor(
-                        peopleCursor.getColumnNames());
-                String[] row = new String[peopleCursor.getColumnCount()];
-                row[0] = String.valueOf(allPeopleId);
-                for (int i = 0; i < peopleCursor.getColumnCount(); i++) {
-                    String columnName = peopleCursor.getColumnName(i);
-                    if (columnName.equals(Person.NAME_FIELD)) {
-                        row[i] = "All private messages";
-                    }
+                        .eq(Person.ISACTIVE_FIELD, true).query();
+
+                Person.sortByPresence(app, people);
+
+                String[] columnsWithPresence = new String[] { "_id",
+                        Person.EMAIL_FIELD, Person.NAME_FIELD };
+
+                MatrixCursor sortedPeopleCursor = new MatrixCursor(
+                        columnsWithPresence);
+                for (Person person : people) {
+                    Object[] row = new Object[] { person.id, person.getEmail(),
+                            person.getName() };
+                    sortedPeopleCursor.addRow(row);
                 }
+
+                // add private messages row
+                MatrixCursor allPrivateMessages = new MatrixCursor(
+                        sortedPeopleCursor.getColumnNames());
+                Object[] row = new Object[] { allPeopleId, "",
+                        "All private messages" };
 
                 allPrivateMessages.addRow(row);
 
                 MergeCursor mergeCursor = new MergeCursor(new Cursor[] {
-                        allPrivateMessages, peopleCursor });
+                        allPrivateMessages, sortedPeopleCursor });
                 return mergeCursor;
 
             }
