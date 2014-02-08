@@ -186,13 +186,17 @@ public class MessageListFragment extends Fragment implements MessageListener {
                 try {
                     // Scrolling messages isn't meaningful unless we have
                     // messages to scroll.
-                    int mID = ((Message) view.getItemAtPosition(view
-                            .getFirstVisiblePosition())).getID();
+                    Message message = ((Message) view.getItemAtPosition(view
+                            .getFirstVisiblePosition()));
+                    int mID = message.getID();
                     if (filter == null && app.getPointer() < mID) {
                         Log.i("scrolling", "Now at " + mID);
                         (new AsyncPointerUpdate(app)).execute(mID);
                         app.setPointer(mID);
                     }
+
+                    app.markMessageAsRead(message);
+
                 } catch (NullPointerException e) {
                     Log.w("scrolling",
                             "Could not find a location to scroll to!");

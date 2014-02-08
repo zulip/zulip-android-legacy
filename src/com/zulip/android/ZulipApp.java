@@ -2,6 +2,7 @@ package com.zulip.android;
 
 import java.sql.SQLException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import android.app.Application;
 import android.content.Context;
@@ -9,6 +10,8 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Handler;
+import android.util.Log;
 
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
@@ -21,6 +24,11 @@ public class ZulipApp extends Application {
     String api_key;
     private int max_message_id;
     DatabaseHelper databaseHelper;
+
+    /**
+     * Handler to manage batching of unread messages
+     */
+    private Handler unreadMessageHandler;
 
     private String eventQueueId;
     private int lastEventId;
@@ -36,6 +44,12 @@ public class ZulipApp extends Application {
      * updated every 2 minutes by a background thread (see AsyncStatusUpdate)
      */
     public final ConcurrentHashMap<String, Presence> presences = new ConcurrentHashMap<String, Presence>();
+
+    /**
+     * Queue of message ids to be marked as read. This queue should be emptied
+     * every couple of seconds
+     */
+    public final ConcurrentLinkedQueue<Integer> unreadMessageQueue = new ConcurrentLinkedQueue<Integer>();
 
     public static ZulipApp get() {
         return instance;
@@ -61,6 +75,24 @@ public class ZulipApp extends Application {
         if (api_key != null) {
             afterLogin();
         }
+
+        // create unread message queue
+        unreadMessageHandler = new Handler(new Handler.Callback() {
+            @Override
+            public boolean handleMessage(android.os.Message message) {
+                if (message.what == 0) {
+                    AsyncUnreadMessagesUpdate task = new AsyncUnreadMessagesUpdate(
+                            ZulipApp.this);
+                    task.execute();
+                }
+
+                // documentation doesn't say what this value does for
+                // Handler.Callback,
+                // and Handler.handleMessage returns void
+                // so this just returns true.
+                return true;
+            }
+        });
     }
 
     int getAppVersion() {
@@ -219,5 +251,18 @@ public class ZulipApp extends Application {
         setMaxMessageId(-1);
         setLastEventId(-1);
         setEventQueueId(null);
+    }
+
+    public void markMessageAsRead(Message message) {
+        if (unreadMessageHandler == null) {
+            Log.e("zulipApp",
+                    "markMessageAsRead called before unreadMessageHandler was instantiated");
+            return;
+        }
+
+        unreadMessageQueue.offer(message.getID());
+        if (!unreadMessageHandler.hasMessages(0)) {
+            unreadMessageHandler.sendEmptyMessageDelayed(0, 2000);
+        }
     }
 }
