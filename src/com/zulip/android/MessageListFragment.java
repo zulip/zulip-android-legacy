@@ -200,29 +200,6 @@ public class MessageListFragment extends Fragment implements MessageListener {
             }
         });
 
-        listView.setOnItemClickListener(new OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view,
-                    int position, long id) {
-                try {
-                    Message m = (Message) parent.getItemAtPosition(position);
-                    if (m.getType() == MessageType.STREAM_MESSAGE) {
-                        mListener.openCompose(m.getType(), m.getStream()
-                                .getName(), m.getSubject(), null);
-                    } else {
-                        mListener.openCompose(m.getType(), null, null,
-                                m.getReplyTo(app));
-                    }
-                } catch (IndexOutOfBoundsException e) {
-                    // We can ignore this because its probably before the data
-                    // has been fetched.
-                }
-
-            }
-
-        });
-
         listView.setOnItemSelectedListener(new OnItemSelectedListener() {
 
             @Override

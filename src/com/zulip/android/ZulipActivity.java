@@ -7,8 +7,11 @@ import java.util.concurrent.Callable;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.app.AlertDialog;
+import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -35,7 +38,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
@@ -435,6 +440,33 @@ public class ZulipActivity extends FragmentActivity implements
             MenuInflater inflater = getMenuInflater();
             inflater.inflate(R.menu.options, menu);
         }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            // Get the SearchView and set the searchable configuration
+            SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+            final MenuItem searchMenuItem = menu.findItem(R.id.search);
+            SearchView searchView = (SearchView) searchMenuItem.getActionView();
+            // Assumes current activity is the searchable activity
+            searchView.setSearchableInfo(searchManager
+                    .getSearchableInfo(getComponentName()));
+
+            searchView
+                    .setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                        @Override
+                        public boolean onQueryTextSubmit(String s) {
+                            doNarrow(new NarrowFilterSearch(s));
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+                                searchMenuItem.collapseActionView();
+                            }
+                            return true;
+                        }
+
+                        @Override
+                        public boolean onQueryTextChange(String s) {
+                            return false;
+                        }
+                    });
+        }
         return true;
     }
 
@@ -454,6 +486,26 @@ public class ZulipActivity extends FragmentActivity implements
             getSupportFragmentManager().popBackStack("narrow",
                     FragmentManager.POP_BACK_STACK_INCLUSIVE);
             break;
+        case R.id.search:
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Search Zulip");
+                final EditText editText = new EditText(this);
+                builder.setView(editText);
+
+                builder.setPositiveButton("Ok",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(
+                                    DialogInterface dialogInterface, int i) {
+                                String query = editText.getText().toString();
+                                doNarrow(new NarrowFilterSearch(query));
+                            }
+                        });
+                builder.show();
+            }
+            break;
+
         case R.id.compose_stream:
             String stream = null;
             if (currentList.filter != null
