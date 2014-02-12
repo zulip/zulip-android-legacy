@@ -287,7 +287,13 @@ public class Message {
     }
 
     public void setSubject(String subject) {
-        this.subject = subject;
+        if (subject.equals("")) {
+            // The empty string should be interpreted as "no topic"
+            // i18n here will be sad
+            this.subject = "(no topic)";
+        } else {
+            this.subject = subject;
+        }
     }
 
     public String getContent() {

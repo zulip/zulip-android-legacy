@@ -372,7 +372,6 @@ public class ComposeDialog extends DialogFragment {
                         boolean valid = true;
 
                         if (type == MessageType.STREAM_MESSAGE) {
-                            valid &= requireFilled(subject, "subject");
                             valid &= requireFilled(recipient, "recipient"); // stream
                         } else if (type == MessageType.PRIVATE_MESSAGE) {
                             valid &= requireFilled(recipient, "recipient");
