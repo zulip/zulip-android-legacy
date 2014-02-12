@@ -1,8 +1,9 @@
 package com.zulip.android;
 
+import java.sql.SQLException;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -15,16 +16,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.FilterQueryProvider;
 
 import com.j256.ormlite.android.AndroidDatabaseResults;
-import com.j256.ormlite.stmt.Where;
 import com.zulip.android.ZulipAsyncPushTask.AsyncTaskCompleteListener;
-
-import java.sql.SQLException;
 
 public class ComposeDialog extends DialogFragment {
     ZulipActivity activity;
@@ -108,7 +105,7 @@ public class ComposeDialog extends DialogFragment {
 
         recipient = (AutoCompleteTextView) view
                 .findViewById(R.id.composeRecipient);
-        subject = (AutoCompleteTextView) view.findViewById(R.id.composeSubject);
+        subject = (AutoCompleteTextView) view.findViewById(R.id.composeTopic);
         body = (EditText) view.findViewById(R.id.composeText);
 
         activity = ((ZulipActivity) getActivity());

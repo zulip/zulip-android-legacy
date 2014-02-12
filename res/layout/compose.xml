@@ -25,12 +25,12 @@
         </AutoCompleteTextView>
 
         <AutoCompleteTextView
-            android:id="@+id/composeSubject"
+            android:id="@+id/composeTopic"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.70"
             android:ems="10"
-            android:hint="@string/subject"
+            android:hint="@string/topic"
             android:inputType="textNoSuggestions"
             android:maxLines="1"
             android:completionThreshold="1"

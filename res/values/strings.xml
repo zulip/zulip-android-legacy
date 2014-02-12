@@ -16,7 +16,7 @@
     <string name="stream">Stream</string>
     <string name="pm_prompt">One or more email addresses</string>
     <string name="people">People</string>
-    <string name="subject">Subject</string>
+    <string name="topic">Topic</string>
     <string name="close">Close</string>
     <string name="legalUrl">https://zulip.com/terms?mobile=true</string>
     <string name="refresh">Refresh</string>
