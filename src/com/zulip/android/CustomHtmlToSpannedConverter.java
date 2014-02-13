@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package android.text;
+package com.zulip.android;
 
-import com.android.internal.util.ArrayUtils;
 import org.ccil.cowan.tagsoup.HTMLSchema;
 import org.ccil.cowan.tagsoup.Parser;
 import org.xml.sax.Attributes;
@@ -28,8 +27,16 @@ import org.xml.sax.XMLReader;
 
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.text.Html;
+import android.text.Layout;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.TextUtils;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.AlignmentSpan;
 import android.text.style.CharacterStyle;
@@ -47,361 +54,11 @@ import android.text.style.TypefaceSpan;
 import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
 
-import com.android.internal.util.XmlUtils;
-
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.HashMap;
 
-/**
- * This class processes HTML strings into displayable styled text. Not all HTML
- * tags are supported.
- */
-public class Html {
-    /**
-     * Retrieves images for HTML &lt;img&gt; tags.
-     */
-    public static interface ImageGetter {
-        /**
-         * This methos is called when the HTML parser encounters an &lt;img&gt;
-         * tag. The <code>source</code> argument is the string from the "src"
-         * attribute; the return value should be a Drawable representation of
-         * the image or <code>null</code> for a generic replacement image. Make
-         * sure you call setBounds() on your Drawable if it doesn't already have
-         * its bounds set.
-         */
-        public Drawable getDrawable(String source);
-    }
-
-    /**
-     * Is notified when HTML tags are encountered that the parser does not know
-     * how to interpret.
-     */
-    public static interface TagHandler {
-        /**
-         * This method will be called whenn the HTML parser encounters a tag
-         * that it does not know how to interpret.
-         */
-        public void handleTag(boolean opening, String tag, Editable output,
-                XMLReader xmlReader);
-    }
-
-    private Html() {
-    }
-
-    /**
-     * Returns displayable styled text from the provided HTML string. Any
-     * &lt;img&gt; tags in the HTML will display as a generic replacement image
-     * which your program can then go through and replace with real images.
-     * 
-     * <p>
-     * This uses TagSoup to handle real HTML, including all of the brokenness
-     * found in the wild.
-     */
-    public static Spanned fromHtml(String source) {
-        return fromHtml(source, null, null);
-    }
-
-    /**
-     * Lazy initialization holder for HTML parser. This class will a) be
-     * preloaded by the zygote, or b) not loaded until absolutely necessary.
-     */
-    private static class HtmlParser {
-        private static final HTMLSchema schema = new HTMLSchema();
-    }
-
-    /**
-     * Returns displayable styled text from the provided HTML string. Any
-     * &lt;img&gt; tags in the HTML will use the specified ImageGetter to
-     * request a representation of the image (use null if you don't want this)
-     * and the specified TagHandler to handle unknown tags (specify null if you
-     * don't want this).
-     * 
-     * <p>
-     * This uses TagSoup to handle real HTML, including all of the brokenness
-     * found in the wild.
-     */
-    public static Spanned fromHtml(String source, ImageGetter imageGetter,
-            TagHandler tagHandler) {
-        Parser parser = new Parser();
-        try {
-            parser.setProperty(Parser.schemaProperty, HtmlParser.schema);
-        } catch (org.xml.sax.SAXNotRecognizedException e) {
-            // Should not happen.
-            throw new RuntimeException(e);
-        } catch (org.xml.sax.SAXNotSupportedException e) {
-            // Should not happen.
-            throw new RuntimeException(e);
-        }
-
-        HtmlToSpannedConverter converter = new HtmlToSpannedConverter(source,
-                imageGetter, tagHandler, parser);
-        return converter.convert();
-    }
-
-    /**
-     * Returns an HTML representation of the provided Spanned text.
-     */
-    public static String toHtml(Spanned text) {
-        StringBuilder out = new StringBuilder();
-        withinHtml(out, text);
-        return out.toString();
-    }
-
-    private static void withinHtml(StringBuilder out, Spanned text) {
-        int len = text.length();
-
-        int next;
-        for (int i = 0; i < text.length(); i = next) {
-            next = text.nextSpanTransition(i, len, ParagraphStyle.class);
-            ParagraphStyle[] style = text.getSpans(i, next,
-                    ParagraphStyle.class);
-            String elements = " ";
-            boolean needDiv = false;
-
-            for (int j = 0; j < style.length; j++) {
-                if (style[j] instanceof AlignmentSpan) {
-                    Layout.Alignment align = ((AlignmentSpan) style[j])
-                            .getAlignment();
-                    needDiv = true;
-                    if (align == Layout.Alignment.ALIGN_CENTER) {
-                        elements = "align=\"center\" " + elements;
-                    } else if (align == Layout.Alignment.ALIGN_OPPOSITE) {
-                        elements = "align=\"right\" " + elements;
-                    } else {
-                        elements = "align=\"left\" " + elements;
-                    }
-                }
-            }
-            if (needDiv) {
-                out.append("<div " + elements + ">");
-            }
-
-            withinDiv(out, text, i, next);
-
-            if (needDiv) {
-                out.append("</div>");
-            }
-        }
-    }
-
-    private static void withinDiv(StringBuilder out, Spanned text, int start,
-            int end) {
-        int next;
-        for (int i = start; i < end; i = next) {
-            next = text.nextSpanTransition(i, end, QuoteSpan.class);
-            QuoteSpan[] quotes = text.getSpans(i, next, QuoteSpan.class);
-
-            for (QuoteSpan quote : quotes) {
-                out.append("<blockquote>");
-            }
-
-            withinBlockquote(out, text, i, next);
-
-            for (QuoteSpan quote : quotes) {
-                out.append("</blockquote>\n");
-            }
-        }
-    }
-
-    private static String getOpenParaTagWithDirection(Spanned text, int start,
-            int end) {
-        final int len = end - start;
-        final byte[] levels = new byte[ArrayUtils.idealByteArraySize(len)];
-        final char[] buffer = TextUtils.obtain(len);
-        TextUtils.getChars(text, start, end, buffer, 0);
-
-        int paraDir = AndroidBidi.bidi(Layout.DIR_REQUEST_DEFAULT_LTR, buffer,
-                levels, len, false /* no info */);
-        switch (paraDir) {
-        case Layout.DIR_RIGHT_TO_LEFT:
-            return "<p dir=rtl>";
-        case Layout.DIR_LEFT_TO_RIGHT:
-        default:
-            return "<p dir=ltr>";
-        }
-    }
-
-    private static void withinBlockquote(StringBuilder out, Spanned text,
-            int start, int end) {
-        out.append(getOpenParaTagWithDirection(text, start, end));
-
-        int next;
-        for (int i = start; i < end; i = next) {
-            next = TextUtils.indexOf(text, '\n', i, end);
-            if (next < 0) {
-                next = end;
-            }
-
-            int nl = 0;
-
-            while (next < end && text.charAt(next) == '\n') {
-                nl++;
-                next++;
-            }
-
-            withinParagraph(out, text, i, next - nl, nl, next == end);
-        }
-
-        out.append("</p>\n");
-    }
-
-    private static void withinParagraph(StringBuilder out, Spanned text,
-            int start, int end, int nl, boolean last) {
-        int next;
-        for (int i = start; i < end; i = next) {
-            next = text.nextSpanTransition(i, end, CharacterStyle.class);
-            CharacterStyle[] style = text.getSpans(i, next,
-                    CharacterStyle.class);
-
-            for (int j = 0; j < style.length; j++) {
-                if (style[j] instanceof StyleSpan) {
-                    int s = ((StyleSpan) style[j]).getStyle();
-
-                    if ((s & Typeface.BOLD) != 0) {
-                        out.append("<b>");
-                    }
-                    if ((s & Typeface.ITALIC) != 0) {
-                        out.append("<i>");
-                    }
-                }
-                if (style[j] instanceof TypefaceSpan) {
-                    String s = ((TypefaceSpan) style[j]).getFamily();
-
-                    if (s.equals("monospace")) {
-                        out.append("<tt>");
-                    }
-                }
-                if (style[j] instanceof SuperscriptSpan) {
-                    out.append("<sup>");
-                }
-                if (style[j] instanceof SubscriptSpan) {
-                    out.append("<sub>");
-                }
-                if (style[j] instanceof UnderlineSpan) {
-                    out.append("<u>");
-                }
-                if (style[j] instanceof StrikethroughSpan) {
-                    out.append("<strike>");
-                }
-                if (style[j] instanceof URLSpan) {
-                    out.append("<a href=\"");
-                    out.append(((URLSpan) style[j]).getURL());
-                    out.append("\">");
-                }
-                if (style[j] instanceof ImageSpan) {
-                    out.append("<img src=\"");
-                    out.append(((ImageSpan) style[j]).getSource());
-                    out.append("\">");
-
-                    // Don't output the dummy character underlying the image.
-                    i = next;
-                }
-                if (style[j] instanceof AbsoluteSizeSpan) {
-                    out.append("<font size =\"");
-                    out.append(((AbsoluteSizeSpan) style[j]).getSize() / 6);
-                    out.append("\">");
-                }
-                if (style[j] instanceof ForegroundColorSpan) {
-                    out.append("<font color =\"#");
-                    String color = Integer
-                            .toHexString(((ForegroundColorSpan) style[j])
-                                    .getForegroundColor() + 0x01000000);
-                    while (color.length() < 6) {
-                        color = "0" + color;
-                    }
-                    out.append(color);
-                    out.append("\">");
-                }
-            }
-
-            withinStyle(out, text, i, next);
-
-            for (int j = style.length - 1; j >= 0; j--) {
-                if (style[j] instanceof ForegroundColorSpan) {
-                    out.append("</font>");
-                }
-                if (style[j] instanceof AbsoluteSizeSpan) {
-                    out.append("</font>");
-                }
-                if (style[j] instanceof URLSpan) {
-                    out.append("</a>");
-                }
-                if (style[j] instanceof StrikethroughSpan) {
-                    out.append("</strike>");
-                }
-                if (style[j] instanceof UnderlineSpan) {
-                    out.append("</u>");
-                }
-                if (style[j] instanceof SubscriptSpan) {
-                    out.append("</sub>");
-                }
-                if (style[j] instanceof SuperscriptSpan) {
-                    out.append("</sup>");
-                }
-                if (style[j] instanceof TypefaceSpan) {
-                    String s = ((TypefaceSpan) style[j]).getFamily();
-
-                    if (s.equals("monospace")) {
-                        out.append("</tt>");
-                    }
-                }
-                if (style[j] instanceof StyleSpan) {
-                    int s = ((StyleSpan) style[j]).getStyle();
-
-                    if ((s & Typeface.BOLD) != 0) {
-                        out.append("</b>");
-                    }
-                    if ((s & Typeface.ITALIC) != 0) {
-                        out.append("</i>");
-                    }
-                }
-            }
-        }
-
-        String p = last ? "" : "</p>\n"
-                + getOpenParaTagWithDirection(text, start, end);
-
-        if (nl == 1) {
-            out.append("<br>\n");
-        } else if (nl == 2) {
-            out.append(p);
-        } else {
-            for (int i = 2; i < nl; i++) {
-                out.append("<br>");
-            }
-            out.append(p);
-        }
-    }
-
-    private static void withinStyle(StringBuilder out, Spanned text, int start,
-            int end) {
-        for (int i = start; i < end; i++) {
-            char c = text.charAt(i);
-
-            if (c == '<') {
-                out.append("&lt;");
-            } else if (c == '>') {
-                out.append("&gt;");
-            } else if (c == '&') {
-                out.append("&amp;");
-            } else if (c > 0x7E || c < ' ') {
-                out.append("&#" + ((int) c) + ";");
-            } else if (c == ' ') {
-                while (i + 1 < end && text.charAt(i + 1) == ' ') {
-                    out.append("&nbsp;");
-                    i++;
-                }
-
-                out.append(' ');
-            } else {
-                out.append(c);
-            }
-        }
-    }
-}
-
-class HtmlToSpannedConverter implements ContentHandler {
+class CustomHtmlToSpannedConverter implements ContentHandler {
 
     private static final float[] HEADER_SIZES = { 1.5f, 1.4f, 1.3f, 1.2f, 1.1f,
             1f, };
@@ -411,14 +68,19 @@ class HtmlToSpannedConverter implements ContentHandler {
     private SpannableStringBuilder mSpannableStringBuilder;
     private Html.ImageGetter mImageGetter;
     private Html.TagHandler mTagHandler;
+    private Html.ImageGetter mEmojiGetter;
+    private String mBaseUri;
 
-    public HtmlToSpannedConverter(String source, Html.ImageGetter imageGetter,
-            Html.TagHandler tagHandler, Parser parser) {
+    public CustomHtmlToSpannedConverter(String source,
+            Html.ImageGetter imageGetter, Html.TagHandler tagHandler,
+            Parser parser, Html.ImageGetter emojiGetter, String baseUri) {
         mSource = source;
         mSpannableStringBuilder = new SpannableStringBuilder();
         mImageGetter = imageGetter;
         mTagHandler = tagHandler;
         mReader = parser;
+        mEmojiGetter = emojiGetter;
+        mBaseUri = baseUri;
     }
 
     public Spanned convert() {
@@ -494,22 +156,60 @@ class HtmlToSpannedConverter implements ContentHandler {
         } else if (tag.equalsIgnoreCase("tt")) {
             start(mSpannableStringBuilder, new Monospace());
         } else if (tag.equalsIgnoreCase("a")) {
-            startA(mSpannableStringBuilder, attributes);
+            startA(mSpannableStringBuilder, attributes, mBaseUri);
         } else if (tag.equalsIgnoreCase("u")) {
             start(mSpannableStringBuilder, new Underline());
         } else if (tag.equalsIgnoreCase("sup")) {
             start(mSpannableStringBuilder, new Super());
         } else if (tag.equalsIgnoreCase("sub")) {
             start(mSpannableStringBuilder, new Sub());
+        } else if (tag.equalsIgnoreCase("code")) {
+            start(mSpannableStringBuilder, new InlineCode());
+        } else if (tag.equalsIgnoreCase("pre")) {
+            start(mSpannableStringBuilder, new CodeBlock());
         } else if (tag.length() == 2
                 && Character.toLowerCase(tag.charAt(0)) == 'h'
                 && tag.charAt(1) >= '1' && tag.charAt(1) <= '6') {
             handleP(mSpannableStringBuilder);
             start(mSpannableStringBuilder, new Header(tag.charAt(1) - '1'));
         } else if (tag.equalsIgnoreCase("img")) {
-            startImg(mSpannableStringBuilder, attributes, mImageGetter);
+            String cssClass = attributes.getValue("", "class");
+            if (cssClass != null && cssClass.equals("emoji")) {
+                startImg(mSpannableStringBuilder, attributes, mEmojiGetter);
+            } else {
+                startImg(mSpannableStringBuilder, attributes, mImageGetter);
+            }
         } else if (mTagHandler != null) {
             mTagHandler.handleTag(true, tag, mSpannableStringBuilder, mReader);
+        }
+    }
+
+    private class CustomQuoteSpan extends QuoteSpan {
+        private static final int STRIPE_WIDTH = 10;
+        private static final int GAP_WIDTH = 20;
+
+        public CustomQuoteSpan() {
+            super(0xffdddddd); // grey color
+        }
+
+        @Override
+        public int getLeadingMargin(boolean first) {
+            return STRIPE_WIDTH + GAP_WIDTH;
+        }
+
+        public void drawLeadingMargin(Canvas c, Paint p, int x, int dir,
+                int top, int baseline, int bottom, CharSequence text,
+                int start, int end, boolean first, Layout layout) {
+            Paint.Style style = p.getStyle();
+            int color = p.getColor();
+
+            p.setStyle(Paint.Style.FILL);
+            p.setColor(getColor());
+
+            c.drawRect(x, top, x + dir * STRIPE_WIDTH, bottom, p);
+
+            p.setStyle(style);
+            p.setColor(color);
         }
     }
 
@@ -547,7 +247,8 @@ class HtmlToSpannedConverter implements ContentHandler {
             endFont(mSpannableStringBuilder);
         } else if (tag.equalsIgnoreCase("blockquote")) {
             handleP(mSpannableStringBuilder);
-            end(mSpannableStringBuilder, Blockquote.class, new QuoteSpan());
+            end(mSpannableStringBuilder, Blockquote.class,
+                    new CustomQuoteSpan());
         } else if (tag.equalsIgnoreCase("tt")) {
             end(mSpannableStringBuilder, Monospace.class, new TypefaceSpan(
                     "monospace"));
@@ -559,6 +260,14 @@ class HtmlToSpannedConverter implements ContentHandler {
             end(mSpannableStringBuilder, Super.class, new SuperscriptSpan());
         } else if (tag.equalsIgnoreCase("sub")) {
             end(mSpannableStringBuilder, Sub.class, new SubscriptSpan());
+        } else if (tag.equalsIgnoreCase("code")) {
+            endMultiple(mSpannableStringBuilder, InlineCode.class,
+                    new Object[] { new TypefaceSpan("monospace"),
+                            new ForegroundColorSpan(0xffdd1144) // pink
+                    });
+        } else if (tag.equalsIgnoreCase("pre")) {
+            end(mSpannableStringBuilder, CodeBlock.class, new TypefaceSpan(
+                    "monospace"));
         } else if (tag.length() == 2
                 && Character.toLowerCase(tag.charAt(0)) == 'h'
                 && tag.charAt(1) >= '1' && tag.charAt(1) <= '6') {
@@ -609,6 +318,24 @@ class HtmlToSpannedConverter implements ContentHandler {
         text.setSpan(mark, len, len, Spannable.SPAN_MARK_MARK);
     }
 
+    private static void endMultiple(SpannableStringBuilder text, Class kind,
+            Object[] replArray) {
+        int len = text.length();
+        Object obj = getLast(text, kind);
+        int where = text.getSpanStart(obj);
+
+        text.removeSpan(obj);
+
+        if (where != len) {
+            for (Object repl : replArray) {
+                text.setSpan(repl, where, len,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+        }
+
+        return;
+    }
+
     private static void end(SpannableStringBuilder text, Class kind, Object repl) {
         int len = text.length();
         Object obj = getLast(text, kind);
@@ -633,9 +360,8 @@ class HtmlToSpannedConverter implements ContentHandler {
         }
 
         if (d == null) {
-            d = Resources.getSystem().getDrawable(
-                    com.android.internal.R.drawable.unknown_image);
-            d.setBounds(0, 0, d.getIntrinsicWidth(), d.getIntrinsicHeight());
+            // don't draw anything
+            return;
         }
 
         int len = text.length();
@@ -692,8 +418,18 @@ class HtmlToSpannedConverter implements ContentHandler {
     }
 
     private static void startA(SpannableStringBuilder text,
-            Attributes attributes) {
+            Attributes attributes, String baseUri) {
         String href = attributes.getValue("", "href");
+
+        if (href != null && !href.startsWith("http")) {
+            String prefix;
+            if (!href.startsWith("/")) {
+                prefix = baseUri + "/";
+            } else {
+                prefix = baseUri;
+            }
+            href = prefix + href;
+        }
 
         int len = text.length();
         text.setSpan(new Href(href), len, len, Spannable.SPAN_MARK_MARK);
@@ -842,6 +578,12 @@ class HtmlToSpannedConverter implements ContentHandler {
     private static class Sub {
     }
 
+    private static class InlineCode {
+    }
+
+    private static class CodeBlock {
+    }
+
     private static class Font {
         public String mColor;
         public String mFace;
@@ -905,11 +647,56 @@ class HtmlToSpannedConverter implements ContentHandler {
             return i;
         } else {
             try {
-                return XmlUtils.convertValueToInt(color, -1);
+                return convertValueToInt(color, -1);
             } catch (NumberFormatException nfe) {
                 return -1;
             }
         }
     }
 
+    /**
+     * Copied from com.android.internal.util.XmlUtils from Android source
+     */
+    public static final int convertValueToInt(CharSequence charSeq,
+            int defaultValue) {
+        if (null == charSeq)
+            return defaultValue;
+
+        String nm = charSeq.toString();
+
+        // XXX This code is copied from Integer.decode() so we don't
+        // have to instantiate an Integer!
+
+        int value;
+        int sign = 1;
+        int index = 0;
+        int len = nm.length();
+        int base = 10;
+
+        if ('-' == nm.charAt(0)) {
+            sign = -1;
+            index++;
+        }
+
+        if ('0' == nm.charAt(index)) {
+            // Quick check for a zero by itself
+            if (index == (len - 1))
+                return 0;
+
+            char c = nm.charAt(index + 1);
+
+            if ('x' == c || 'X' == c) {
+                index += 2;
+                base = 16;
+            } else {
+                index++;
+                base = 8;
+            }
+        } else if ('#' == nm.charAt(index)) {
+            index++;
+            base = 16;
+        }
+
+        return Integer.parseInt(nm.substring(index), base) * sign;
+    }
 }

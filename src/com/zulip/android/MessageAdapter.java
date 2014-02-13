@@ -1,5 +1,6 @@
 package com.zulip.android;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
@@ -7,7 +8,13 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.support.v4.app.FragmentManager;
+import android.text.Html;
+import android.text.Spanned;
 import android.text.format.DateUtils;
+import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,11 +23,16 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.ccil.cowan.tagsoup.HTMLSchema;
+import org.ccil.cowan.tagsoup.Parser;
+
 /**
  * Adapter which stores Messages in a view, and generates LinearLayouts for
  * consumption by the ListView which displays the view.
  */
 public class MessageAdapter extends ArrayAdapter<Message> {
+
+    private static final HTMLSchema schema = new HTMLSchema();
 
     public MessageAdapter(Context context, List<Message> objects) {
         super(context, 0, objects);
@@ -28,8 +40,8 @@ public class MessageAdapter extends ArrayAdapter<Message> {
 
     public View getView(int position, View convertView, ViewGroup group) {
 
-        ZulipActivity context = (ZulipActivity) this.getContext();
-        Message message = getItem(position);
+        final ZulipActivity context = (ZulipActivity) this.getContext();
+        final Message message = getItem(position);
         LinearLayout tile;
 
         if (convertView == null
@@ -85,7 +97,28 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         senderName.setText(message.getSender().getName());
 
         TextView contentView = (TextView) tile.findViewById(R.id.contentView);
-        contentView.setText(message.getContent());
+
+        Spanned formattedMessage = formatContent(message.getFormattedContent(),
+                context.app);
+        contentView.setText(formattedMessage);
+
+        contentView.setMovementMethod(LinkMovementMethod.getInstance());
+        contentView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                FragmentManager fm = context.getSupportFragmentManager();
+                ComposeDialog dialog;
+                if (message.getType() == MessageType.STREAM_MESSAGE) {
+                    dialog = ComposeDialog.newInstance(message.getType(),
+                            message.getStream().getName(),
+                            message.getSubject(), null);
+                } else {
+                    dialog = ComposeDialog.newInstance(message.getType(), null,
+                            null, message.getReplyTo(context.app));
+                }
+                dialog.show(fm, "fragment_compose");
+            }
+        });
 
         TextView timestamp = (TextView) tile.findViewById(R.id.timestamp);
 
@@ -130,6 +163,62 @@ public class MessageAdapter extends ArrayAdapter<Message> {
 
         return tile;
 
+    }
+
+    /**
+     * Copied from Html.fromHtml
+     * 
+     * @param source
+     *            HTML to be formatted
+     * @param app
+     * @return Span
+     */
+    public static Spanned formatContent(String source, ZulipApp app) {
+        final Context context = app.getApplicationContext();
+        final float density = context.getResources().getDisplayMetrics().density;
+        Parser parser = new Parser();
+        try {
+            parser.setProperty(Parser.schemaProperty, schema);
+        } catch (org.xml.sax.SAXNotRecognizedException e) {
+            // Should not happen.
+            throw new RuntimeException(e);
+        } catch (org.xml.sax.SAXNotSupportedException e) {
+            // Should not happen.
+            throw new RuntimeException(e);
+        }
+
+        Html.ImageGetter emojiGetter = new Html.ImageGetter() {
+            @Override
+            public Drawable getDrawable(String source) {
+                int lastIndex = -1;
+                if (source != null) {
+                    lastIndex = source.lastIndexOf('/');
+                }
+                if (lastIndex != -1) {
+                    String filename = source.substring(lastIndex + 1);
+                    try {
+                        Drawable drawable = Drawable.createFromStream(context
+                                .getAssets().open("emoji/" + filename),
+                                "emoji/" + filename);
+                        // scaling down by half to fit well in message
+                        double scaleFactor = 0.5;
+                        drawable.setBounds(0, 0,
+                                (int) (drawable.getIntrinsicWidth()
+                                        * scaleFactor * density),
+                                (int) (drawable.getIntrinsicHeight()
+                                        * scaleFactor * density));
+                        return drawable;
+                    } catch (IOException e) {
+                        Log.e("MessageAdapter", e.getMessage());
+                    }
+                }
+                return null;
+            }
+        };
+
+        CustomHtmlToSpannedConverter converter = new CustomHtmlToSpannedConverter(
+                source, null, null, parser, emojiGetter, app.getServerURI());
+        return converter.convert();
     }
 
     public long getItemId(int position) {

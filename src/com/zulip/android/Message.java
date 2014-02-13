@@ -14,6 +14,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.text.Spanned;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -30,6 +31,7 @@ public class Message {
     public static final String SENDER_FIELD = "sender";
     public static final String TYPE_FIELD = "type";
     public static final String CONTENT_FIELD = "content";
+    public static final String FORMATTED_CONTENT_FIELD = "formattedContent";
     public static final String SUBJECT_FIELD = "subject";
     public static final String TIMESTAMP_FIELD = "timestamp";
     public static final String RECIPIENTS_FIELD = "recipients";
@@ -41,6 +43,8 @@ public class Message {
     private MessageType type;
     @DatabaseField(columnName = CONTENT_FIELD)
     private String content;
+    @DatabaseField(columnName = FORMATTED_CONTENT_FIELD)
+    private String formattedContent;
     @DatabaseField(columnName = SUBJECT_FIELD)
     private String subject;
     @DatabaseField(columnName = TIMESTAMP_FIELD)
@@ -125,7 +129,13 @@ public class Message {
             recipients = recipientList(r);
         }
 
-        this.setContent(message.getString("content"));
+        String html = message.getString("content");
+        this.setFormattedContent(html);
+
+        // Use HTML to create formatted Spanned, then strip formatting
+        Spanned formattedContent = MessageAdapter.formatContent(html, app);
+        this.setContent(formattedContent.toString());
+
         if (this.getType() == MessageType.STREAM_MESSAGE) {
             this.setSubject(message.getString("subject"));
         } else {
@@ -302,6 +312,14 @@ public class Message {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String getFormattedContent() {
+        return formattedContent;
+    }
+
+    public void setFormattedContent(String formattedContent) {
+        this.formattedContent = formattedContent;
     }
 
     public Person getSender() {

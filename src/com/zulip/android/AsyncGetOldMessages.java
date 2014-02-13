@@ -204,7 +204,7 @@ public class AsyncGetOldMessages extends ZulipAsyncPushTask {
         this.setProperty("anchor", Integer.toString(anchor));
         this.setProperty("num_before", Integer.toString(num_before));
         this.setProperty("num_after", Integer.toString(num_after));
-        this.setProperty("apply_markdown", "false");
+        this.setProperty("apply_markdown", "true");
 
         if (filter != null) {
             try {

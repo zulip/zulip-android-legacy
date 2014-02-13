@@ -66,7 +66,7 @@ public class AsyncGetEvents extends Thread {
      * Registers for a new event queue with the Zulip API
      */
     private void register() throws JSONException, IOException {
-        request.setProperty("apply_markdown", "false");
+        request.setProperty("apply_markdown", "true");
 
         StopWatch watch = new StopWatch();
         watch.start();
