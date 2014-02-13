@@ -287,7 +287,7 @@ public class Message {
     }
 
     public void setSubject(String subject) {
-        if (subject.equals("")) {
+        if (subject != null && subject.equals("")) {
             // The empty string should be interpreted as "no topic"
             // i18n here will be sad
             this.subject = "(no topic)";
