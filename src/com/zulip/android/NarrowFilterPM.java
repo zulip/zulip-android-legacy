@@ -98,7 +98,9 @@ public class NarrowFilterPM implements NarrowFilter {
     public String getJsonFilter() throws JSONException {
         ArrayList<String> emails = new ArrayList<String>();
         for (Person person : this.people) {
-            emails.add(person.getEmail());
+            if (!person.equals(ZulipApp.get().you)) {
+                emails.add(person.getEmail());
+            }
         }
         return (new JSONArray()).put(
                 new JSONArray(Arrays.asList("pm-with",
