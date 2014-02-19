@@ -103,4 +103,15 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
     public void close() {
         super.close();
     }
+
+    /**
+     * Escape LIKE wildcards with a backslash. Must also use ESCAPE clause
+     * 
+     * @param likeClause
+     *            string to escape
+     * @return Escaped string
+     */
+    public static String likeEscape(String likeClause) {
+        return likeClause.replace("%", "\\%").replace("_", "\\_");
+    }
 }

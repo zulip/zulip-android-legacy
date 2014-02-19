@@ -256,19 +256,8 @@ public class ComposeDialog extends DialogFragment {
                                 + Stream.NAME_FIELD
                                 + " LIKE ? ESCAPE '\\' ORDER BY "
                                 + Stream.NAME_FIELD + " COLLATE NOCASE",
-                        likeEscape(streamName.toString()) + "%")
+                        DatabaseHelper.likeEscape(streamName.toString()) + "%")
                 .closeableIterator().getRawResults()).getRawCursor();
-    }
-
-    /**
-     * Escape LIKE wildcards with a backslash. Must also use ESCAPE clause
-     * 
-     * @param likeClause
-     *            string to escape
-     * @return Escaped string
-     */
-    private static String likeEscape(String likeClause) {
-        return likeClause.replace("%", "\\%").replace("_", "\\_");
     }
 
     /**
@@ -307,8 +296,8 @@ public class ComposeDialog extends DialogFragment {
                                 + " LIKE ? ESCAPE '\\' AND "
                                 + Stream.NAME_FIELD + " = ? ORDER BY "
                                 + Message.SUBJECT_FIELD + " COLLATE NOCASE",
-                        likeEscape(subject.toString()) + "%", stream.toString())
-                .closeableIterator().getRawResults();
+                        DatabaseHelper.likeEscape(subject.toString()) + "%",
+                        stream.toString()).closeableIterator().getRawResults();
         return results.getRawCursor();
     }
 
@@ -341,8 +330,8 @@ public class ComposeDialog extends DialogFragment {
                                 + Person.EMAIL_FIELD
                                 + " LIKE ? ESCAPE '\\' ORDER BY "
                                 + Person.NAME_FIELD + " COLLATE NOCASE",
-                        likeEscape(piece) + "%").closeableIterator()
-                .getRawResults()).getRawCursor();
+                        DatabaseHelper.likeEscape(piece) + "%")
+                .closeableIterator().getRawResults()).getRawCursor();
         return peopleCursor;
     }
 
