@@ -2,8 +2,6 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
-	<classpathentry kind="lib" path="libs/commons-codec-1.5.jar"/>
-	<classpathentry kind="lib" path="libs/commons-io-1.4.jar"/>
 	<classpathentry kind="lib" path="libs/commons-lang-2.6.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/ormlite-android-4.45.jar" sourcepath="libsrc/ormlite-android-4.45-sources.jar">
 		<attributes>
