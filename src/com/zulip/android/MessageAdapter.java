@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
+import org.ccil.cowan.tagsoup.HTMLSchema;
+import org.ccil.cowan.tagsoup.Parser;
+
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -22,9 +25,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import org.ccil.cowan.tagsoup.HTMLSchema;
-import org.ccil.cowan.tagsoup.Parser;
 
 /**
  * Adapter which stores Messages in a view, and generates LinearLayouts for
@@ -100,6 +100,10 @@ public class MessageAdapter extends ArrayAdapter<Message> {
 
         Spanned formattedMessage = formatContent(message.getFormattedContent(),
                 context.app);
+        while (formattedMessage.charAt(formattedMessage.length() - 1) == '\n') {
+            formattedMessage = (Spanned) formattedMessage.subSequence(0,
+                    formattedMessage.length() - 2);
+        }
         contentView.setText(formattedMessage);
 
         contentView.setMovementMethod(LinkMovementMethod.getInstance());
