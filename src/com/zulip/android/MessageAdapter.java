@@ -100,7 +100,8 @@ public class MessageAdapter extends ArrayAdapter<Message> {
 
         Spanned formattedMessage = formatContent(message.getFormattedContent(),
                 context.app);
-        while (formattedMessage.charAt(formattedMessage.length() - 1) == '\n') {
+        while (formattedMessage.length() != 0
+                && formattedMessage.charAt(formattedMessage.length() - 1) == '\n') {
             formattedMessage = (Spanned) formattedMessage.subSequence(0,
                     formattedMessage.length() - 2);
         }
