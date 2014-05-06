@@ -128,7 +128,8 @@ public class ZulipApp extends Application {
             return "http://10.0.2.2:9991/api/";
         }
         if (you.getRealm().equals("zulip.com")
-                || you.getRealm().equals("humbughq.com")) {
+                || you.getRealm().equals("humbughq.com")
+                || you.getRealm().equals("dropbox.com")) {
             return "https://staging.zulip.com/api/";
         }
         return "https://api.zulip.com/";
