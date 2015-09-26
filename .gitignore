@@ -1,10 +1,7 @@
-gen/
-bin/
-/res/raw/ormlite_config.txt
-.settings
-*-sources.jar
-*-sources
-*-javadoc.jar
-*.log
 /local.properties
-res/values/com_crashlytics_export_strings.xml
+
+/src/main/res/raw/ormlite_config.txt
+/src/main/res/values/com_crashlytics_export_strings.xml
+
+build/
+.gradle/
