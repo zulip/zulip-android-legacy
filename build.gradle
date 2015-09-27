@@ -8,10 +8,10 @@ buildscript {
     }
 }
 
-apply plugin: 'android'
+apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 17
+    compileSdkVersion 22
     buildToolsVersion "23.0.1"
 }
 
@@ -22,7 +22,9 @@ repositories {
 
 dependencies {
     compile 'com.google.android.gms:play-services:4.0.30'
-    compile 'com.android.support:support-v13:18.0.0'
+    compile 'com.android.support:support-v4:22.2.1'
+    compile 'com.android.support:appcompat-v7:22.2.1'
+    compile 'com.android.support:support-v13:22.2.1'
     compile 'commons-lang:commons-lang:2.6'
     compile 'com.j256.ormlite:ormlite-android:4.45'
     compile 'org.ccil.cowan.tagsoup:tagsoup:1.2.1'

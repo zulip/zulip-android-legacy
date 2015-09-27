@@ -157,7 +157,7 @@ public class ZulipActivity extends FragmentActivity implements
         if (Build.HARDWARE.contains("goldfish")) {
             Log.i("hardware", "running in emulator");
         } else {
-            Crashlytics.start(this);
+            //Crashlytics.start(this);
         }
 
         app = (ZulipApp) getApplicationContext();

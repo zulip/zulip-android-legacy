@@ -10,7 +10,7 @@ public class ZLog {
         if (Build.HARDWARE.contains("goldfish")) {
             e.printStackTrace();
         } else {
-            Crashlytics.logException(e);
+            //Crashlytics.logException(e);
         }
     }
 
