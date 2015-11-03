@@ -144,9 +144,14 @@ public class MessageAdapter extends ArrayAdapter<Message> {
             // Gravatar already exists for this image, set the ImageView to it
             gravatar.setImageBitmap(gravatar_img);
         } else {
+            // Check if the profile is an integration bot: if it is the case then its url will be
+            // only a path relative to the Zulip deploy root. So we must add the base url.
+            String avatarURL = message.getSender().getAvatarURL();
+            if (avatarURL.contains("/user_avatars")) {
+                avatarURL = context.app.getServerURI().replace("/api", "") + avatarURL;
+            }
             // Go get the Bitmap
-            URL url = GravatarAsyncFetchTask.sizedURL(context, message
-                    .getSender().getAvatarURL(), 35);
+            URL url = GravatarAsyncFetchTask.sizedURL(context, avatarURL, 35);
             GravatarAsyncFetchTask task = new GravatarAsyncFetchTask(context,
                     gravatar, message.getSender());
             task.loadBitmap(context, url, gravatar, message.getSender());

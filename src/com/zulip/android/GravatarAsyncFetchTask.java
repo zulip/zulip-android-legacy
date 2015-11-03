@@ -1,7 +1,10 @@
 package com.zulip.android;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -62,13 +65,10 @@ class GravatarAsyncFetchTask extends AsyncTask<URL, Void, Bitmap> {
 
     static Bitmap fetch(URL url) throws IOException {
         Log.i("GAFT.fetch", "Getting gravatar from url: " + url);
-        URLConnection connection = url.openConnection();
-        connection.setUseCaches(true);
-        Object response = connection.getContent();
-        if (response instanceof InputStream) {
-            return BitmapFactory.decodeStream((InputStream) response);
-        }
-        return null;
+        URLConnection conn = url.openConnection();
+        conn.setUseCaches(true);
+        conn.connect();
+        return BitmapFactory.decodeStream(new BufferedInputStream(conn.getInputStream()));
     }
 
     // Once complete, see if ImageView is still around and set bitmap.
