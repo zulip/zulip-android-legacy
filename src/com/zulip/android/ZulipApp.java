@@ -127,7 +127,10 @@ public class ZulipApp extends Application {
         if (getEmail().equals("iago@zulip.com")) {
             return "http://10.0.2.2:9991/api/";
         }
-        return "https://api.zulip.com/";
+        return settings.getString(
+            "server_url",
+            "https://api.zulip.com/"
+        );
     }
 
     public String getApiKey() {
@@ -151,6 +154,12 @@ public class ZulipApp extends Application {
         this.you = Person.getOrUpdate(this, email, null, null);
     }
 
+    public void setServerURL(String serverURL) {
+        Editor ed = this.settings.edit();
+        ed.putString("server_url", serverURL);
+        ed.commit();
+    }
+
     public void setLoggedInApiKey(String apiKey) {
         this.api_key = apiKey;
         Editor ed = this.settings.edit();
@@ -164,6 +173,7 @@ public class ZulipApp extends Application {
         Editor ed = this.settings.edit();
         ed.remove("email");
         ed.remove("api_key");
+        ed.remove("server_url");
         ed.commit();
         this.api_key = null;
         setEventQueueId(null);

@@ -37,6 +37,25 @@ public class LoginActivity extends Activity implements View.OnClickListener,
     private ProgressDialog connectionProgressDialog;
     private int googleFailureCount = 0;
 
+    private void saveServerURL() {
+        String serverURL = ((EditText) findViewById(R.id.server_url))
+                                .getText().toString();
+
+        if (!serverURL.startsWith("https://")) {
+            serverURL = "https://" + serverURL;
+        }
+
+        if (!serverURL.endsWith("/")) {
+            serverURL = serverURL + "/";
+        }
+
+        if (!serverURL.startsWith("https://api.zulip.com/")) {
+            serverURL = serverURL + "api/";
+        }
+
+        app.setServerURL(serverURL);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +68,7 @@ public class LoginActivity extends Activity implements View.OnClickListener,
                     @Override
                     public void onClick(View v) {
                         connectionProgressDialog.show();
+                        saveServerURL();
                         AsyncLogin alog = new AsyncLogin(that,
                                 ((EditText) findViewById(R.id.username))
                                         .getText().toString(),
