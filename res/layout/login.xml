@@ -38,13 +38,23 @@
         android:hint="@string/password"
         android:inputType="textPassword" />
 
+    <EditText
+        android:id="@+id/server_url"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/password"
+        android:ems="10"
+        android:hint="@string/server_url"
+        android:inputType="textUri" />
+
     <Button
         android:id="@+id/login"
         style="android:buttonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/password"
+        android:layout_below="@+id/server_url"
         android:layout_marginTop="20dp"
         android:text="@string/login_button" />
 
