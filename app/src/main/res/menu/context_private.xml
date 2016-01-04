@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item android:id="@+id/reply_to_private" android:title="Reply to Private Message"></item>
+    <item android:id="@+id/reply_to_sender" android:title="Reply to Sender"></item>
+    <item android:id="@+id/narrow_to_private" android:title="Narrow to this conversation"></item>
+    <item android:id="@+id/copy_message" android:title="Copy Message"></item>
+
+</menu>

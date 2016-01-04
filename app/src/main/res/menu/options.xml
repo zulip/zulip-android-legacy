@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item android:id="@+id/compose_pm" 
+        android:title="@string/compose_pm"
+        android:icon="@drawable/ic_action_person"
+        android:showAsAction="ifRoom">
+        
+    </item>
+    <item android:id="@+id/compose_stream" 
+        android:title="@string/compose_stream"
+        android:icon="@drawable/ic_action_bullhorn"
+        android:showAsAction="ifRoom">
+        
+    </item>
+
+    <item android:id="@+id/search"
+        android:title="@string/search"
+        android:icon="@android:drawable/ic_menu_search"
+        android:showAsAction="collapseActionView"
+        android:actionViewClass="android.widget.SearchView" >
+        </item>
+    
+     <item android:id="@+id/refresh"
+        android:title="@string/refresh">
+    </item>
+    
+    <item android:id="@+id/logout"
+        android:title="@string/logout">
+    </item>
+    <item android:id="@+id/legal" android:title="@string/legal"></item>
+    
+    
+
+</menu>

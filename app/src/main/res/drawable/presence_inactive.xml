@@ -1,0 +1,5 @@
+<!-- This drawable is unused, since it is overridden by a raster asset -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="ring" >
+    <solid android:color="#000000" />
+
+</shape>
