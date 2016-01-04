@@ -22,6 +22,7 @@ class AsyncLogin extends ZulipAsyncPushTask {
         if (username.contains("@") == true) {
             // @-less usernames are used as indicating special cases, for
             // example in OAuth2 authentication
+            Log.w(AsyncLogin.class.getName(), "@-less usernames are used as indicating special cases - NOT SAVING APP CONTEXT!");
             this.app.setEmail(username);
         }
         this.setProperty("username", username);
