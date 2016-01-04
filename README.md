@@ -1,7 +1,7 @@
 Zulip Android IM
 
 #### Android Studio fork of Zulip IM Android
-Download apk [here](https://github.com/kosiara/suggestions-searchview-material-example/raw/master/released_apk/app-release.apk)
+Download apk [here](https://github.com/kosiara/zulip-android/raw/feature/gradle.android.studio.2.x/apk-bin/zulip-im.apk)
 
 <br/>
 #### Changes: 
