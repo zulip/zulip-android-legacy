@@ -62,11 +62,13 @@ class GravatarAsyncFetchTask extends AsyncTask<URL, Void, Bitmap> {
 
     static Bitmap fetch(URL url) throws IOException {
         Log.i("GAFT.fetch", "Getting gravatar from url: " + url);
-        URLConnection connection = url.openConnection();
-        connection.setUseCaches(true);
-        Object response = connection.getContent();
-        if (response instanceof InputStream) {
-            return BitmapFactory.decodeStream((InputStream) response);
+        if (url != null) {
+            URLConnection connection = url.openConnection();
+            connection.setUseCaches(true);
+            Object response = connection.getContent();
+            if (response instanceof InputStream) {
+                return BitmapFactory.decodeStream((InputStream) response);
+            }
         }
         return null;
     }
