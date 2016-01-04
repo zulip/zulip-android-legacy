@@ -26,8 +26,9 @@ android {
 dependencies {
     compile 'com.google.android.gms:play-services:6.+'
     compile 'com.android.support:support-v4:23.0.0'
-    compile files('libs/commons-lang-2.6.jar')
-    compile files('libs/ormlite-android-4.45.jar')
-    compile files('libs/ormlite-core-4.45.jar')
-    compile files('libs/tagsoup-1.2.1.jar')
+
+    compile 'commons-lang:commons-lang:2.6'
+    compile 'com.j256.ormlite:ormlite-android:4.45'
+    compile 'com.j256.ormlite:ormlite-core:4.45'
+    compile 'org.ccil.cowan.tagsoup:tagsoup:1.2.1'
 }
