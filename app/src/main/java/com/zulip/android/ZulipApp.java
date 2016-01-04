@@ -127,7 +127,7 @@ public class ZulipApp extends Application {
         if (getEmail().equals("iago@zulip.com")) {
             return "http://10.0.2.2:9991/api/";
         }
-        return "https://im.stxnext.pl/";
+        return "https://api.zulip.com/";
     }
 
     public String getApiKey() {
