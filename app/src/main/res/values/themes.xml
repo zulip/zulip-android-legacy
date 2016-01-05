@@ -5,4 +5,15 @@
     <style name="floating_action_button">
         <item name="android:layout_marginRight">0dp</item>
     </style>
+
+    <style name="Button">
+        <item name="android:background">@drawable/selector_default_button</item>
+        <item name="android:gravity">center</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+    <style name="Button.Material" parent="Button" />
 </resources>

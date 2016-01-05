@@ -5,4 +5,9 @@
     <style name="floating_action_button">
         <item name="android:layout_marginRight">20dp</item>
     </style>
+
+    <style name="Button.Material" parent="Button">
+        <item name="android:elevation">1dp</item>
+        <item name="android:background">@drawable/selector_default_button</item>
+    </style>
 </resources>
