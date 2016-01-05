@@ -89,6 +89,7 @@ public class ZulipActivity extends AppCompatActivity implements
 
     Notifications notifications;
     FloatingActionButton mComposeFAB;
+    FloatingActionButton mComposeToPersonFAB;
 
     private SimpleCursorAdapter.ViewBinder streamBinder = new SimpleCursorAdapter.ViewBinder() {
 
@@ -335,6 +336,7 @@ public class ZulipActivity extends AppCompatActivity implements
         pushListFragment(homeList, null);
 
         mComposeFAB = (FloatingActionButton) findViewById(R.id.activity_main_compose_fab);
+        mComposeToPersonFAB = (FloatingActionButton) findViewById(R.id.activity_main_compose_to_person_fab);
         mComposeFAB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -344,6 +346,15 @@ public class ZulipActivity extends AppCompatActivity implements
                     stream = currentList.filter.getComposeStream().getName();
                 }
                 openCompose(MessageType.STREAM_MESSAGE, stream, null, null);
+            }
+        });
+        mComposeToPersonFAB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String recipient = null;
+                if (currentList.filter != null)
+                    recipient = currentList.filter.getComposePMRecipient();
+                openCompose(MessageType.PRIVATE_MESSAGE, null, null, recipient);
             }
         });
     }
@@ -545,13 +556,13 @@ public class ZulipActivity extends AppCompatActivity implements
 //            }
 //            openCompose(MessageType.STREAM_MESSAGE, stream, null, null);
 //            break;
-        case R.id.compose_pm:
-            String recipient = null;
-            if (currentList.filter != null) {
-                recipient = currentList.filter.getComposePMRecipient();
-            }
-            openCompose(MessageType.PRIVATE_MESSAGE, null, null, recipient);
-            break;
+//        case R.id.compose_pm:
+//            String recipient = null;
+//            if (currentList.filter != null) {
+//                recipient = currentList.filter.getComposePMRecipient();
+//            }
+//            openCompose(MessageType.PRIVATE_MESSAGE, null, null, recipient);
+//            break;
         case R.id.refresh:
             Log.w("menu", "Refreshed manually by user. We shouldn't need this.");
             onRefresh();
