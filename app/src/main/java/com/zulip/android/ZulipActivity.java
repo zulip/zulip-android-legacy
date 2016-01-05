@@ -530,7 +530,7 @@ public class ZulipActivity extends AppCompatActivity implements
             break;
         case R.id.search:
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
                 builder.setTitle("Search Zulip");
                 final EditText editText = new EditText(this);
                 builder.setView(editText);

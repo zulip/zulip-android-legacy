@@ -6,6 +6,12 @@
         <item name="android:layout_marginRight">0dp</item>
     </style>
 
+    <style name="AppCompatAlertDialogStyle" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="colorAccent">@color/color_primary_dark</item>
+        <item name="android:textColorPrimary">#000000</item>
+        <item name="android:background">#FFFFFF</item>
+    </style>
+
     <style name="Button">
         <item name="android:background">@drawable/selector_default_button</item>
         <item name="android:gravity">center</item>
