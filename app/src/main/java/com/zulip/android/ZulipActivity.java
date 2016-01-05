@@ -25,6 +25,9 @@ import android.database.MatrixCursor;
 import android.database.MergeCursor;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff.Mode;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -37,6 +40,7 @@ import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
@@ -318,7 +322,12 @@ public class ZulipActivity extends AppCompatActivity implements
             // the AB is unavailable when invoked from JUnit
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
-            getSupportActionBar().setIcon(R.drawable.ic_launcher);
+
+            LayerDrawable dr = (LayerDrawable)getResources().getDrawable(R.drawable.custom_home_toolbar_logo);
+            Bitmap bitmap = ((BitmapDrawable) dr.getDrawable(0)).getBitmap();
+            Drawable homeDrawable = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bitmap, dpToPx(30), dpToPx(30), true));
+
+            getSupportActionBar().setIcon(homeDrawable);
             getSupportActionBar().setHomeButtonEnabled(true);
         }
 
@@ -337,6 +346,12 @@ public class ZulipActivity extends AppCompatActivity implements
                 openCompose(MessageType.STREAM_MESSAGE, stream, null, null);
             }
         });
+    }
+
+    public int dpToPx(int dp) {
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        int px = Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
+        return px;
     }
 
     public void onBackPressed() {
