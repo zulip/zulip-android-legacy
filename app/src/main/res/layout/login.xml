@@ -40,7 +40,7 @@
 
     <Button
         android:id="@+id/login"
-        style="android:buttonStyle"
+        style="@style/Button.Material"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
