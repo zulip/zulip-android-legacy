@@ -478,25 +478,25 @@ public class ZulipActivity extends AppCompatActivity implements
             final MenuItem searchMenuItem = menu.findItem(R.id.search);
             SearchView searchView = (SearchView) searchMenuItem.getActionView();
             // Assumes current activity is the searchable activity
-//            searchView.setSearchableInfo(searchManager
-//                    .getSearchableInfo(getComponentName()));
-//
-//            searchView
-//                    .setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-//                        @Override
-//                        public boolean onQueryTextSubmit(String s) {
-//                            doNarrow(new NarrowFilterSearch(s));
-//                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-//                                searchMenuItem.collapseActionView();
-//                            }
-//                            return true;
-//                        }
-//
-//                        @Override
-//                        public boolean onQueryTextChange(String s) {
-//                            return false;
-//                        }
-//                    });
+            searchView.setSearchableInfo(searchManager
+                    .getSearchableInfo(getComponentName()));
+
+            searchView
+                    .setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                        @Override
+                        public boolean onQueryTextSubmit(String s) {
+                            doNarrow(new NarrowFilterSearch(s));
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+                                searchMenuItem.collapseActionView();
+                            }
+                            return true;
+                        }
+
+                        @Override
+                        public boolean onQueryTextChange(String s) {
+                            return false;
+                        }
+                    });
         }
         return true;
     }

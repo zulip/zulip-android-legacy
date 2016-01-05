@@ -5,7 +5,7 @@
     <item android:id="@+id/compose_pm" 
         android:title="@string/compose_pm"
         android:icon="@drawable/ic_action_person"
-        app:showAsAction="ifRoom">
+        app:showAsAction="ifRoom|collapseActionView">
         
     </item>
     <!--<item android:id="@+id/compose_stream" -->
@@ -18,8 +18,8 @@
     <item android:id="@+id/search"
         android:title="@string/search"
         android:icon="@android:drawable/ic_menu_search"
-        app:showAsAction="always"
-        android:actionViewClass="android.support.v7.widget.SearchView" >
+        app:showAsAction="ifRoom|collapseActionView"
+        app:actionViewClass="android.support.v7.widget.SearchView" >
     </item>
     
      <item android:id="@+id/refresh"
