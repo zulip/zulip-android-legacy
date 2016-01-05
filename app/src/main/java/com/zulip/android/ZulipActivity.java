@@ -29,12 +29,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
@@ -182,19 +182,9 @@ public class ZulipActivity extends AppCompatActivity implements
         setContentView(R.layout.main);
 
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
-                R.drawable.ic_drawer, R.string.streams_open,
-                R.string.streams_close) {
-
-            /** Called when a drawer has settled in a completely closed state. */
-            public void onDrawerClosed(View view) {
-                // pass
-            }
-
-            /** Called when a drawer has settled in a completely open state. */
-            public void onDrawerOpened(View drawerView) {
-                // pass
-            }
+        drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.streams_open, R.string.streams_close) {
+            public void onDrawerClosed(View view) {}
+            public void onDrawerOpened(View drawerView) {}
         };
 
         // Set the drawer toggle as the DrawerListener
