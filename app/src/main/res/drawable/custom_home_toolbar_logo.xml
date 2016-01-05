@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:drawable="@drawable/ic_launcher"
+        android:width="5dp"
+        android:height="5dp"
+        android:right="15dp"/>
+</layer-list>
