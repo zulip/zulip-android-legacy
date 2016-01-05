@@ -19,6 +19,7 @@
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/activity_main_compose_to_person_fab"
+            style="@style/floating_action_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_person_black_24dp"
@@ -28,12 +29,12 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentBottom="true"
             android:layout_marginBottom="90dp"
-            android:layout_marginRight="20dp"
             />
 
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/activity_main_compose_fab"
+            style="@style/floating_action_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_create_black_32dp"
@@ -43,7 +44,6 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentBottom="true"
             android:layout_marginBottom="20dp"
-            android:layout_marginRight="20dp"
             />
 
     </RelativeLayout>
