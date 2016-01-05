@@ -26,6 +26,7 @@ android {
 dependencies {
     compile 'com.google.android.gms:play-services:6.+'
     compile 'com.android.support:support-v4:23.0.0'
+    compile 'com.android.support:design:23.1.0'
 
     compile 'commons-lang:commons-lang:2.6'
     compile 'com.j256.ormlite:ormlite-android:4.45'

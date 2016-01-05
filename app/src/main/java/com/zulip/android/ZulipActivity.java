@@ -28,12 +28,15 @@ import android.graphics.PorterDuff.Mode;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
@@ -44,12 +47,11 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.j256.ormlite.android.AndroidDatabaseResults;
 
-public class ZulipActivity extends FragmentActivity implements
+public class ZulipActivity extends AppCompatActivity implements
         MessageListFragment.Listener {
 
     ZulipApp app;
@@ -82,6 +84,7 @@ public class ZulipActivity extends FragmentActivity implements
     MessageListFragment homeList;
 
     Notifications notifications;
+    FloatingActionButton mComposeFAB;
 
     private SimpleCursorAdapter.ViewBinder streamBinder = new SimpleCursorAdapter.ViewBinder() {
 
@@ -321,14 +324,29 @@ public class ZulipActivity extends FragmentActivity implements
         };
         statusUpdateHandler.post(statusUpdateRunnable);
 
-        if (android.os.Build.VERSION.SDK_INT >= 11 && getActionBar() != null) {
+        if (android.os.Build.VERSION.SDK_INT >= 11 && getSupportActionBar() != null) {
             // the AB is unavailable when invoked from JUnit
-            getActionBar().setDisplayHomeAsUpEnabled(true);
-            getActionBar().setHomeButtonEnabled(true);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+            getSupportActionBar().setIcon(R.drawable.ic_launcher);
+            getSupportActionBar().setHomeButtonEnabled(true);
         }
 
         homeList = MessageListFragment.newInstance(null);
         pushListFragment(homeList, null);
+
+        mComposeFAB = (FloatingActionButton) findViewById(R.id.activity_main_compose_fab);
+        mComposeFAB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String stream = null;
+                if (currentList.filter != null
+                        && currentList.filter.getComposeStream() != null) {
+                    stream = currentList.filter.getComposeStream().getName();
+                }
+                openCompose(MessageType.STREAM_MESSAGE, stream, null, null);
+            }
+        });
     }
 
     public void onBackPressed() {
@@ -398,17 +416,17 @@ public class ZulipActivity extends FragmentActivity implements
 
         if (filter == null) {
             if (android.os.Build.VERSION.SDK_INT >= 11) {
-                getActionBar().setTitle("Zulip");
-                getActionBar().setSubtitle(null);
+                getSupportActionBar().setTitle("Zulip");
+                getSupportActionBar().setSubtitle(null);
             }
             this.drawerToggle.setDrawerIndicatorEnabled(true);
         } else {
             String title = list.filter.getTitle();
             if (android.os.Build.VERSION.SDK_INT >= 11) {
                 if (title != null) {
-                    getActionBar().setTitle(title);
+                    getSupportActionBar().setTitle(title);
                 }
-                getActionBar().setSubtitle(list.filter.getSubtitle());
+                getSupportActionBar().setSubtitle(list.filter.getSubtitle());
             }
             this.drawerToggle.setDrawerIndicatorEnabled(false);
         }
@@ -455,25 +473,25 @@ public class ZulipActivity extends FragmentActivity implements
             final MenuItem searchMenuItem = menu.findItem(R.id.search);
             SearchView searchView = (SearchView) searchMenuItem.getActionView();
             // Assumes current activity is the searchable activity
-            searchView.setSearchableInfo(searchManager
-                    .getSearchableInfo(getComponentName()));
-
-            searchView
-                    .setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                        @Override
-                        public boolean onQueryTextSubmit(String s) {
-                            doNarrow(new NarrowFilterSearch(s));
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-                                searchMenuItem.collapseActionView();
-                            }
-                            return true;
-                        }
-
-                        @Override
-                        public boolean onQueryTextChange(String s) {
-                            return false;
-                        }
-                    });
+//            searchView.setSearchableInfo(searchManager
+//                    .getSearchableInfo(getComponentName()));
+//
+//            searchView
+//                    .setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+//                        @Override
+//                        public boolean onQueryTextSubmit(String s) {
+//                            doNarrow(new NarrowFilterSearch(s));
+//                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+//                                searchMenuItem.collapseActionView();
+//                            }
+//                            return true;
+//                        }
+//
+//                        @Override
+//                        public boolean onQueryTextChange(String s) {
+//                            return false;
+//                        }
+//                    });
         }
         return true;
     }
@@ -514,14 +532,14 @@ public class ZulipActivity extends FragmentActivity implements
             }
             break;
 
-        case R.id.compose_stream:
-            String stream = null;
-            if (currentList.filter != null
-                    && currentList.filter.getComposeStream() != null) {
-                stream = currentList.filter.getComposeStream().getName();
-            }
-            openCompose(MessageType.STREAM_MESSAGE, stream, null, null);
-            break;
+//        case R.id.compose_stream:
+//            String stream = null;
+//            if (currentList.filter != null
+//                    && currentList.filter.getComposeStream() != null) {
+//                stream = currentList.filter.getComposeStream().getName();
+//            }
+//            openCompose(MessageType.STREAM_MESSAGE, stream, null, null);
+//            break;
         case R.id.compose_pm:
             String recipient = null;
             if (currentList.filter != null) {

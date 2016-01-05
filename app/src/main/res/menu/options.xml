@@ -6,19 +6,19 @@
         android:showAsAction="ifRoom">
         
     </item>
-    <item android:id="@+id/compose_stream" 
-        android:title="@string/compose_stream"
-        android:icon="@drawable/ic_action_bullhorn"
-        android:showAsAction="ifRoom">
-        
-    </item>
+    <!--<item android:id="@+id/compose_stream" -->
+        <!--android:title="@string/compose_stream"-->
+        <!--android:icon="@drawable/ic_action_bullhorn"-->
+        <!--android:showAsAction="ifRoom">-->
+        <!---->
+    <!--</item>-->
 
     <item android:id="@+id/search"
         android:title="@string/search"
         android:icon="@android:drawable/ic_menu_search"
         android:showAsAction="collapseActionView"
-        android:actionViewClass="android.widget.SearchView" >
-        </item>
+        android:actionViewClass="android.support.v7.widget.SearchView" >
+    </item>
     
      <item android:id="@+id/refresh"
         android:title="@string/refresh">
