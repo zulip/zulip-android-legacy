@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 17
     buildToolsVersion "23.0.2"
-
+    useLibrary 'org.apache.http.legacy'
     defaultConfig {
         applicationId "com.zulip.android"
         minSdkVersion 10
@@ -22,11 +22,10 @@ android {
 }
 
 dependencies {
-    compile 'com.google.android.gms:play-services:+'
-    compile files('libs/android-support-v13.jar')
-    compile files('libs/commons-lang-2.6.jar')
-    compile files('libs/crashlytics.jar')
-    compile files('libs/ormlite-android-4.45.jar')
-    compile files('libs/ormlite-core-4.45.jar')
-    compile files('libs/tagsoup-1.2.1.jar')
+    compile 'com.google.android.gms:play-services:8.4.0'
+    compile 'commons-lang:commons-lang:2.6'
+    compile 'com.j256.ormlite:ormlite-android:4.45'
+    compile 'com.j256.ormlite:ormlite-core:4.45'
+    compile 'org.ccil.cowan.tagsoup:tagsoup:1.2.1'
+    compile 'commons-lang:commons-lang:2.6'
 }
