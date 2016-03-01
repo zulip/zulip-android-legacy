@@ -22,12 +22,12 @@ import com.google.android.gms.auth.GooglePlayServicesAvailabilityException;
 import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.android.gms.common.AccountPicker;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.zulip.android.ZulipAsyncPushTask.AsyncTaskCompleteListener;
 
 public class LoginActivity extends Activity implements View.OnClickListener,
-        OnConnectionFailedListener {
+            GoogleApiClient.OnConnectionFailedListener {
     private static final int REQUEST_ACCOUNT_PICKER = 2;
     private static final int REQUEST_CODE_RESOLVE_ERR = 9000;
 

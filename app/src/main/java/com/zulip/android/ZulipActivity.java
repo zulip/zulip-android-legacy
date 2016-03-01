@@ -14,6 +14,7 @@ import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -32,6 +33,7 @@ import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
@@ -49,6 +51,7 @@ import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
 import com.j256.ormlite.android.AndroidDatabaseResults;
+
 import io.fabric.sdk.android.Fabric;
 
 public class ZulipActivity extends FragmentActivity implements
@@ -90,16 +93,16 @@ public class ZulipActivity extends FragmentActivity implements
         @Override
         public boolean setViewValue(View arg0, Cursor arg1, int arg2) {
             switch (arg0.getId()) {
-            case R.id.name:
-                TextView name = (TextView) arg0;
-                name.setText(arg1.getString(arg2));
-                return true;
-            case R.id.stream_dot:
-                // Set the color of the (currently white) dot
-                arg0.setVisibility(View.VISIBLE);
-                arg0.getBackground().setColorFilter(arg1.getInt(arg2),
-                        Mode.MULTIPLY);
-                return true;
+                case R.id.name:
+                    TextView name = (TextView) arg0;
+                    name.setText(arg1.getString(arg2));
+                    return true;
+                case R.id.stream_dot:
+                    // Set the color of the (currently white) dot
+                    arg0.setVisibility(View.VISIBLE);
+                    arg0.getBackground().setColorFilter(arg1.getInt(arg2),
+                            Mode.MULTIPLY);
+                    return true;
             }
             return false;
         }
@@ -110,36 +113,36 @@ public class ZulipActivity extends FragmentActivity implements
         @Override
         public boolean setViewValue(View view, Cursor cursor, int i) {
             switch (view.getId()) {
-            case R.id.name:
-                TextView name = (TextView) view;
-                name.setText(cursor.getString(i));
-                return true;
-            case R.id.stream_dot:
-                String email = cursor.getString(i);
-                if (app == null || email == null) {
-                    view.setVisibility(View.INVISIBLE);
-                } else {
-                    Presence presence = app.presences.get(email);
-                    if (presence == null) {
+                case R.id.name:
+                    TextView name = (TextView) view;
+                    name.setText(cursor.getString(i));
+                    return true;
+                case R.id.stream_dot:
+                    String email = cursor.getString(i);
+                    if (app == null || email == null) {
                         view.setVisibility(View.INVISIBLE);
                     } else {
-                        PresenceType status = presence.getStatus();
-                        long age = presence.getAge();
-                        if (age > 2 * 60) {
-                            view.setVisibility(View.VISIBLE);
-                            view.setBackgroundResource(R.drawable.presence_inactive);
-                        } else if (PresenceType.ACTIVE == status) {
-                            view.setVisibility(View.VISIBLE);
-                            view.setBackgroundResource(R.drawable.presence_active);
-                        } else if (PresenceType.IDLE == status) {
-                            view.setVisibility(View.VISIBLE);
-                            view.setBackgroundResource(R.drawable.presence_away);
-                        } else {
+                        Presence presence = app.presences.get(email);
+                        if (presence == null) {
                             view.setVisibility(View.INVISIBLE);
+                        } else {
+                            PresenceType status = presence.getStatus();
+                            long age = presence.getAge();
+                            if (age > 2 * 60) {
+                                view.setVisibility(View.VISIBLE);
+                                view.setBackgroundResource(R.drawable.presence_inactive);
+                            } else if (PresenceType.ACTIVE == status) {
+                                view.setVisibility(View.VISIBLE);
+                                view.setBackgroundResource(R.drawable.presence_active);
+                            } else if (PresenceType.IDLE == status) {
+                                view.setVisibility(View.VISIBLE);
+                                view.setBackgroundResource(R.drawable.presence_away);
+                            } else {
+                                view.setVisibility(View.INVISIBLE);
+                            }
                         }
                     }
-                }
-                return true;
+                    return true;
             }
             return false;
         }
@@ -257,16 +260,16 @@ public class ZulipActivity extends FragmentActivity implements
             this.streamsAdapter = new RefreshableCursorAdapter(
                     this.getApplicationContext(), R.layout.stream_tile,
                     streamsGenerator.call(), streamsGenerator, new String[] {
-                            Stream.NAME_FIELD, Stream.COLOR_FIELD }, new int[] {
-                            R.id.name, R.id.stream_dot }, 0);
+                    Stream.NAME_FIELD, Stream.COLOR_FIELD }, new int[] {
+                    R.id.name, R.id.stream_dot }, 0);
             streamsAdapter.setViewBinder(streamBinder);
             streamsDrawer.setAdapter(streamsAdapter);
 
             this.peopleAdapter = new RefreshableCursorAdapter(
                     this.getApplicationContext(), R.layout.stream_tile,
                     peopleGenerator.call(), peopleGenerator, new String[] {
-                            Person.NAME_FIELD, Person.EMAIL_FIELD }, new int[] {
-                            R.id.name, R.id.stream_dot }, 0);
+                    Person.NAME_FIELD, Person.EMAIL_FIELD }, new int[] {
+                    R.id.name, R.id.stream_dot }, 0);
             peopleAdapter.setViewBinder(peopleBinder);
 
             peopleDrawer.setAdapter(peopleAdapter);
@@ -280,7 +283,7 @@ public class ZulipActivity extends FragmentActivity implements
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
-                    int position, long id) {
+                                    int position, long id) {
                 // TODO: is there a way to get the Stream from the adapter
                 // without re-querying it?
                 narrow(Stream.getById(app, (int) id));
@@ -290,7 +293,7 @@ public class ZulipActivity extends FragmentActivity implements
         peopleDrawer.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
-                    int position, long id) {
+                                    int position, long id) {
                 if (id == allPeopleId) {
                     doNarrow(new NarrowFilterAllPMs(app.you));
                 } else {
@@ -374,12 +377,12 @@ public class ZulipActivity extends FragmentActivity implements
                 continue;
             }
             switch (param) {
-            case RESET_DATABASE:
-                Log.i("params", "Resetting the database...");
-                app.resetDatabase();
-                Log.i("params", "Database deleted successfully.");
-                this.finish();
-                break;
+                case RESET_DATABASE:
+                    Log.i("params", "Resetting the database...");
+                    app.resetDatabase();
+                    Log.i("params", "Database deleted successfully.");
+                    this.finish();
+                    break;
             }
         }
     }
@@ -452,13 +455,24 @@ public class ZulipActivity extends FragmentActivity implements
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            // Get the SearchView and set the searchable configuration
-            SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-            final MenuItem searchMenuItem = menu.findItem(R.id.search);
-            SearchView searchView = (SearchView) searchMenuItem.getActionView();
-            // Assumes current activity is the searchable activity
-            searchView.setSearchableInfo(searchManager
-                    .getSearchableInfo(getComponentName()));
+
+            final SearchManager searchManager =
+                    (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+//        SearchView searchView =(SearchView) menu.findItem(R.id.search).getActionView();
+
+
+            final MenuItem mSearchMenuItem = menu.findItem(R.id.search);
+            final SearchView searchView =
+                    (SearchView) MenuItemCompat.getActionView(mSearchMenuItem);
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(
+                    new ComponentName(getApplicationContext(),
+                            ZulipActivity.class)));
+
+
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+
+
+            searchView.setIconifiedByDefault(false);
 
             searchView
                     .setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -466,7 +480,7 @@ public class ZulipActivity extends FragmentActivity implements
                         public boolean onQueryTextSubmit(String s) {
                             doNarrow(new NarrowFilterSearch(s));
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-                                searchMenuItem.collapseActionView();
+                                mSearchMenuItem.collapseActionView();
                             }
                             return true;
                         }
@@ -492,59 +506,59 @@ public class ZulipActivity extends FragmentActivity implements
 
         // Handle item selection
         switch (item.getItemId()) {
-        case android.R.id.home:
-            getSupportFragmentManager().popBackStack("narrow",
-                    FragmentManager.POP_BACK_STACK_INCLUSIVE);
-            break;
-        case R.id.search:
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle("Search Zulip");
-                final EditText editText = new EditText(this);
-                builder.setView(editText);
+            case android.R.id.home:
+                getSupportFragmentManager().popBackStack("narrow",
+                        FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                break;
+            case R.id.search:
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setTitle("Search Zulip");
+                    final EditText editText = new EditText(this);
+                    builder.setView(editText);
 
-                builder.setPositiveButton("Ok",
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(
-                                    DialogInterface dialogInterface, int i) {
-                                String query = editText.getText().toString();
-                                doNarrow(new NarrowFilterSearch(query));
-                            }
-                        });
-                builder.show();
-            }
-            break;
+                    builder.setPositiveButton("Ok",
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(
+                                        DialogInterface dialogInterface, int i) {
+                                    String query = editText.getText().toString();
+                                    doNarrow(new NarrowFilterSearch(query));
+                                }
+                            });
+                    builder.show();
+                }
+                break;
 
-        case R.id.compose_stream:
-            String stream = null;
-            if (currentList.filter != null
-                    && currentList.filter.getComposeStream() != null) {
-                stream = currentList.filter.getComposeStream().getName();
-            }
-            openCompose(MessageType.STREAM_MESSAGE, stream, null, null);
-            break;
-        case R.id.compose_pm:
-            String recipient = null;
-            if (currentList.filter != null) {
-                recipient = currentList.filter.getComposePMRecipient();
-            }
-            openCompose(MessageType.PRIVATE_MESSAGE, null, null, recipient);
-            break;
-        case R.id.refresh:
-            Log.w("menu", "Refreshed manually by user. We shouldn't need this.");
-            onRefresh();
-            ((RefreshableCursorAdapter) ((ListView) findViewById(R.id.streams_drawer))
-                    .getAdapter()).refresh();
-            break;
-        case R.id.logout:
-            logout();
-            break;
-        case R.id.legal:
-            openLegal();
-            break;
-        default:
-            return super.onOptionsItemSelected(item);
+            case R.id.compose_stream:
+                String stream = null;
+                if (currentList.filter != null
+                        && currentList.filter.getComposeStream() != null) {
+                    stream = currentList.filter.getComposeStream().getName();
+                }
+                openCompose(MessageType.STREAM_MESSAGE, stream, null, null);
+                break;
+            case R.id.compose_pm:
+                String recipient = null;
+                if (currentList.filter != null) {
+                    recipient = currentList.filter.getComposePMRecipient();
+                }
+                openCompose(MessageType.PRIVATE_MESSAGE, null, null, recipient);
+                break;
+            case R.id.refresh:
+                Log.w("menu", "Refreshed manually by user. We shouldn't need this.");
+                onRefresh();
+                ((RefreshableCursorAdapter) ((ListView) findViewById(R.id.streams_drawer))
+                        .getAdapter()).refresh();
+                break;
+            case R.id.logout:
+                logout();
+                break;
+            case R.id.legal:
+                openLegal();
+                break;
+            default:
+                return super.onOptionsItemSelected(item);
         }
         return true;
     }
@@ -562,7 +576,7 @@ public class ZulipActivity extends FragmentActivity implements
     }
 
     public void openCompose(final MessageType type, String stream,
-            String topic, String pmRecipients) {
+                            String topic, String pmRecipients) {
 
         FragmentManager fm = getSupportFragmentManager();
         ComposeDialog dialog = ComposeDialog.newInstance(type, stream, topic,
