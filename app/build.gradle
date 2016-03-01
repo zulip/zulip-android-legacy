@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 17
+    compileSdkVersion 23
     buildToolsVersion "23.0.2"
     useLibrary 'org.apache.http.legacy'
     defaultConfig {
         applicationId "com.zulip.android"
         minSdkVersion 10
-        targetSdkVersion 17
+        targetSdkVersion 23
 
         testApplicationId "com.zulip.android.test"
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
