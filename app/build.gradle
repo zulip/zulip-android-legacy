@@ -1,5 +1,14 @@
 apply plugin: 'com.android.application'
+apply plugin: 'io.fabric'
 
+repositories {
+    maven { url 'https://maven.fabric.io/public' }
+}
+dependencies {
+    compile('com.crashlytics.sdk.android:crashlytics:2.5.5@aar') {
+        transitive = true
+    }
+}
 android {
     compileSdkVersion 23
     buildToolsVersion "23.0.2"
