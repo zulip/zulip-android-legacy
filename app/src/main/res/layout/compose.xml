@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#ffffff"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <AutoCompleteTextView
+            android:id="@+id/composeRecipient"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.30"
+            android:ems="10"
+            android:hint="@string/stream"
+            android:inputType="textNoSuggestions"
+            android:maxLines="1"
+            android:dropDownWidth="fill_parent"
+            android:completionThreshold="1">
+
+            <requestFocus />
+        </AutoCompleteTextView>
+
+        <AutoCompleteTextView
+            android:id="@+id/composeTopic"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.70"
+            android:ems="10"
+            android:hint="@string/topic"
+            android:inputType="textNoSuggestions"
+            android:maxLines="1"
+            android:completionThreshold="1"
+            android:dropDownWidth="fill_parent"/>
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/composeText"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:hint="@string/compose_hint"
+        android:inputType="textCapSentences|textAutoCorrect|textMultiLine"
+        android:lines="3"
+        android:textColor="#000000" />
+
+    <LinearLayout
+        android:id="@+id/composeStatus"
+        android:layout_width="match_parent"
+        android:layout_height="24dp"
+        android:layout_gravity="center"
+        android:background="#eeeeee"
+        android:gravity="center|center_vertical"
+        android:visibility="gone" >
+
+        <ProgressBar
+            android:id="@+id/composeSpinner"
+            android:layout_width="15dp"
+            android:layout_height="15dp" />
+
+        <TextView
+            android:id="@+id/composeStatusText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="8dp"
+            android:text="@string/sending_message"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Zulip</string>
+    <string name="login_welcome_blurb">Welcome to Zulip!</string>
+    <string name="login_button">Log in</string>
+    <string name="username">Email</string>
+    <string name="password">Password</string>
+    <string name="legal">Legal information</string>
+    <string name="logout">Log out</string>
+    <string name="compose_stream">Compose message to Stream</string>
+    <string name="compose_pm">Compose private message</string>
+    <string name="huddle_text">You and</string>
+    <string name="send">Send</string>
+    <string name="compose_hint">Compose your message here…</string>
+    <string name="stream">Stream</string>
+    <string name="pm_prompt">One or more email addresses</string>
+    <string name="people">People</string>
+    <string name="topic">Topic</string>
+    <string name="close">Close</string>
+    <string name="legalUrl">https://zulip.com/terms?mobile=true</string>
+    <string name="refresh">Refresh</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_legal">Legal</string>
+    <string name="streams_open">Open stream sidebar</string>
+    <string name="streams_close">Close stream sidebar</string>
+
+    <!-- Used on the indicator when loading messages -->
+    <string name="loading_messages">Loading messages</string>
+    <string name="sending_message">Sending</string>
+    <string name="search">Search</string>
+
+</resources>

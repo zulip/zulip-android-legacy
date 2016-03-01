@@ -1,0 +1,32 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 17
+    buildToolsVersion "23.0.2"
+
+    defaultConfig {
+        applicationId "com.zulip.android"
+        minSdkVersion 10
+        targetSdkVersion 17
+
+        testApplicationId "com.zulip.android.test"
+        testInstrumentationRunner "android.test.InstrumentationTestRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+}
+
+dependencies {
+    compile 'com.google.android.gms:play-services:+'
+    compile files('libs/android-support-v13.jar')
+    compile files('libs/commons-lang-2.6.jar')
+    compile files('libs/crashlytics.jar')
+    compile files('libs/ormlite-android-4.45.jar')
+    compile files('libs/ormlite-core-4.45.jar')
+    compile files('libs/tagsoup-1.2.1.jar')
+}
