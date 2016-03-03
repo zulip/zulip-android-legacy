@@ -10,6 +10,8 @@ import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -26,8 +28,8 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.zulip.android.ZulipAsyncPushTask.AsyncTaskCompleteListener;
 
-public class LoginActivity extends Activity implements View.OnClickListener,
-            GoogleApiClient.OnConnectionFailedListener {
+public class LoginActivity extends AppCompatActivity implements View.OnClickListener,
+        GoogleApiClient.OnConnectionFailedListener {
     private static final int REQUEST_ACCOUNT_PICKER = 2;
     private static final int REQUEST_CODE_RESOLVE_ERR = 9000;
 
@@ -84,26 +86,30 @@ public class LoginActivity extends Activity implements View.OnClickListener,
         connectionProgressDialog.setMessage("Signing in...");
         findViewById(R.id.sign_in_button).setOnClickListener(this);
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle("Login");
+        setSupportActionBar(toolbar);
+
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
-        case REQUEST_ACCOUNT_PICKER:
-            if (data != null && data.getExtras() != null) {
-                String accountName = data.getExtras().getString(
-                        AccountManager.KEY_ACCOUNT_NAME);
-                if (accountName != null) {
-                    this.app.setEmail(accountName);
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            authWithGapps();
-                        }
-                    }).start();
+            case REQUEST_ACCOUNT_PICKER:
+                if (data != null && data.getExtras() != null) {
+                    String accountName = data.getExtras().getString(
+                            AccountManager.KEY_ACCOUNT_NAME);
+                    if (accountName != null) {
+                        this.app.setEmail(accountName);
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                authWithGapps();
+                            }
+                        }).start();
+                    }
                 }
-            }
         }
     }
 
@@ -229,7 +235,7 @@ public class LoginActivity extends Activity implements View.OnClickListener,
         if (v.getId() == R.id.sign_in_button) {
             connectionProgressDialog.show();
             startActivityForResult(AccountPicker.newChooseAccountIntent(null,
-                    null, new String[] { "com.google" }, false, null, null,
+                    null, new String[]{"com.google"}, false, null, null,
                     null, null), REQUEST_ACCOUNT_PICKER);
         }
 
