@@ -1,14 +1,5 @@
 package com.zulip.android;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.Callable;
-
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
@@ -30,12 +21,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
@@ -46,15 +39,20 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
 import com.j256.ormlite.android.AndroidDatabaseResults;
 
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.Callable;
+
 import io.fabric.sdk.android.Fabric;
 
-public class ZulipActivity extends FragmentActivity implements
+public class ZulipActivity extends AppCompatActivity implements
         MessageListFragment.Listener {
 
     ZulipApp app;
@@ -183,6 +181,9 @@ public class ZulipActivity extends FragmentActivity implements
 
         setContentView(R.layout.main);
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
                 R.drawable.ic_drawer, R.string.streams_open,
@@ -230,27 +231,27 @@ public class ZulipActivity extends FragmentActivity implements
 
                 Person.sortByPresence(app, people);
 
-                String[] columnsWithPresence = new String[] { "_id",
-                        Person.EMAIL_FIELD, Person.NAME_FIELD };
+                String[] columnsWithPresence = new String[]{"_id",
+                        Person.EMAIL_FIELD, Person.NAME_FIELD};
 
                 MatrixCursor sortedPeopleCursor = new MatrixCursor(
                         columnsWithPresence);
                 for (Person person : people) {
-                    Object[] row = new Object[] { person.id, person.getEmail(),
-                            person.getName() };
+                    Object[] row = new Object[]{person.id, person.getEmail(),
+                            person.getName()};
                     sortedPeopleCursor.addRow(row);
                 }
 
                 // add private messages row
                 MatrixCursor allPrivateMessages = new MatrixCursor(
                         sortedPeopleCursor.getColumnNames());
-                Object[] row = new Object[] { allPeopleId, "",
-                        "All private messages" };
+                Object[] row = new Object[]{allPeopleId, "",
+                        "All private messages"};
 
                 allPrivateMessages.addRow(row);
 
-                MergeCursor mergeCursor = new MergeCursor(new Cursor[] {
-                        allPrivateMessages, sortedPeopleCursor });
+                MergeCursor mergeCursor = new MergeCursor(new Cursor[]{
+                        allPrivateMessages, sortedPeopleCursor});
                 return mergeCursor;
 
             }
@@ -259,17 +260,17 @@ public class ZulipActivity extends FragmentActivity implements
         try {
             this.streamsAdapter = new RefreshableCursorAdapter(
                     this.getApplicationContext(), R.layout.stream_tile,
-                    streamsGenerator.call(), streamsGenerator, new String[] {
-                    Stream.NAME_FIELD, Stream.COLOR_FIELD }, new int[] {
-                    R.id.name, R.id.stream_dot }, 0);
+                    streamsGenerator.call(), streamsGenerator, new String[]{
+                    Stream.NAME_FIELD, Stream.COLOR_FIELD}, new int[]{
+                    R.id.name, R.id.stream_dot}, 0);
             streamsAdapter.setViewBinder(streamBinder);
             streamsDrawer.setAdapter(streamsAdapter);
 
             this.peopleAdapter = new RefreshableCursorAdapter(
                     this.getApplicationContext(), R.layout.stream_tile,
-                    peopleGenerator.call(), peopleGenerator, new String[] {
-                    Person.NAME_FIELD, Person.EMAIL_FIELD }, new int[] {
-                    R.id.name, R.id.stream_dot }, 0);
+                    peopleGenerator.call(), peopleGenerator, new String[]{
+                    Person.NAME_FIELD, Person.EMAIL_FIELD}, new int[]{
+                    R.id.name, R.id.stream_dot}, 0);
             peopleAdapter.setViewBinder(peopleBinder);
 
             peopleDrawer.setAdapter(peopleAdapter);
@@ -326,10 +327,10 @@ public class ZulipActivity extends FragmentActivity implements
         };
         statusUpdateHandler.post(statusUpdateRunnable);
 
-        if (android.os.Build.VERSION.SDK_INT >= 11 && getActionBar() != null) {
+        if (android.os.Build.VERSION.SDK_INT >= 11 && getSupportActionBar() != null) {
             // the AB is unavailable when invoked from JUnit
-            getActionBar().setDisplayHomeAsUpEnabled(true);
-            getActionBar().setHomeButtonEnabled(true);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
         }
 
         homeList = MessageListFragment.newInstance(null);
@@ -403,17 +404,17 @@ public class ZulipActivity extends FragmentActivity implements
 
         if (filter == null) {
             if (android.os.Build.VERSION.SDK_INT >= 11) {
-                getActionBar().setTitle("Zulip");
-                getActionBar().setSubtitle(null);
+                getSupportActionBar().setTitle("Zulip");
+                getSupportActionBar().setSubtitle(null);
             }
             this.drawerToggle.setDrawerIndicatorEnabled(true);
         } else {
             String title = list.filter.getTitle();
             if (android.os.Build.VERSION.SDK_INT >= 11) {
                 if (title != null) {
-                    getActionBar().setTitle(title);
+                    getSupportActionBar().setTitle(title);
                 }
-                getActionBar().setSubtitle(list.filter.getSubtitle());
+                getSupportActionBar().setSubtitle(list.filter.getSubtitle());
             }
             this.drawerToggle.setDrawerIndicatorEnabled(false);
         }
@@ -435,7 +436,10 @@ public class ZulipActivity extends FragmentActivity implements
         drawerToggle.syncState();
     }
 
-    public boolean onPrepareOptionsMenu(Menu menu) {
+
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.options, menu);
+
         /*
          * We want to show a menu only when we're logged in, so this function is
          * called by both Android and our own app when we encounter state
