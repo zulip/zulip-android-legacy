@@ -13,6 +13,7 @@ android {
     compileSdkVersion 23
     buildToolsVersion "23.0.2"
     useLibrary 'org.apache.http.legacy'
+
     defaultConfig {
         applicationId "com.zulip.android"
         minSdkVersion 10
@@ -31,10 +32,10 @@ android {
 }
 
 dependencies {
-    compile 'com.google.android.gms:play-services:8.4.0'
+    compile 'com.google.android.gms:play-services-auth:8.4.0'
+    compile 'com.google.android.gms:play-services-gcm:8.4.0'
     compile 'commons-lang:commons-lang:2.6'
     compile 'com.j256.ormlite:ormlite-android:4.45'
     compile 'com.j256.ormlite:ormlite-core:4.45'
     compile 'org.ccil.cowan.tagsoup:tagsoup:1.2.1'
-    compile 'commons-lang:commons-lang:2.6'
 }
