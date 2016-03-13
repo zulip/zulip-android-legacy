@@ -83,7 +83,7 @@ public class Notifications {
         Editor ed = app.settings.edit();
         ed.putString("gcm_reg_id", regId);
         ed.putLong("gcm_reg_last_version", app.getAppVersion());
-        ed.commit();
+        ed.apply();
     }
 
     private void registerInBackground() {
