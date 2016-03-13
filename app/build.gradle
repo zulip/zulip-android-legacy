@@ -27,7 +27,8 @@ android {
 
 dependencies {
     compile 'com.android.support:support-v13:23.2.1'
-    compile 'com.google.android.gms:play-services:4.4.52'
+    compile 'com.google.android.gms:play-services-gcm:8.4.0'
+    compile 'com.google.android.gms:play-services-auth:8.4.0'
     compile 'com.j256.ormlite:ormlite-core:4.48'
     compile 'com.j256.ormlite:ormlite-android:4.48'
     compile 'commons-lang:commons-lang:2.6'
