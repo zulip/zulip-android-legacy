@@ -1,12 +1,11 @@
 /**
- * 
+ *
  */
 package com.zulip.android;
 
 /**
  * Runtime error when an operation is performed on a Message object that is of
  * an incompatible message type
- * 
  */
 public class WrongMessageType extends RuntimeException {
 

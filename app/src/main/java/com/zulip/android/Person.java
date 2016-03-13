@@ -94,9 +94,9 @@ public class Person {
     /**
      * Calculate the Humbug realm for the person, currently by splitting the
      * email address.
-     * 
+     * <p/>
      * In the future, realms may be distinct from your email hostname.
-     * 
+     *
      * @return the Person's realm.
      */
     public String getRealm() {
@@ -137,7 +137,7 @@ public class Person {
     }
 
     public static Person getOrUpdate(ZulipApp app, String email, String name,
-            String avatarURL, HashMap<String, Person> personCache) {
+                                     String avatarURL, HashMap<String, Person> personCache) {
 
         Person person = null;
 
@@ -173,7 +173,7 @@ public class Person {
     }
 
     public static Person getOrUpdate(ZulipApp app, String email, String name,
-            String avatarURL) {
+                                     String avatarURL) {
         return getOrUpdate(app, email, name, avatarURL, null);
     }
 

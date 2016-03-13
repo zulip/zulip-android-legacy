@@ -60,8 +60,8 @@ import java.util.HashMap;
 
 class CustomHtmlToSpannedConverter implements ContentHandler {
 
-    private static final float[] HEADER_SIZES = { 1.5f, 1.4f, 1.3f, 1.2f, 1.1f,
-            1f, };
+    private static final float[] HEADER_SIZES = {1.5f, 1.4f, 1.3f, 1.2f, 1.1f,
+            1f,};
 
     private String mSource;
     private XMLReader mReader;
@@ -72,8 +72,8 @@ class CustomHtmlToSpannedConverter implements ContentHandler {
     private String mBaseUri;
 
     public CustomHtmlToSpannedConverter(String source,
-            Html.ImageGetter imageGetter, Html.TagHandler tagHandler,
-            Parser parser, Html.ImageGetter emojiGetter, String baseUri) {
+                                        Html.ImageGetter imageGetter, Html.TagHandler tagHandler,
+                                        Parser parser, Html.ImageGetter emojiGetter, String baseUri) {
         mSource = source;
         mSpannableStringBuilder = new SpannableStringBuilder();
         mImageGetter = imageGetter;
@@ -198,8 +198,8 @@ class CustomHtmlToSpannedConverter implements ContentHandler {
         }
 
         public void drawLeadingMargin(Canvas c, Paint p, int x, int dir,
-                int top, int baseline, int bottom, CharSequence text,
-                int start, int end, boolean first, Layout layout) {
+                                      int top, int baseline, int bottom, CharSequence text,
+                                      int start, int end, boolean first, Layout layout) {
             Paint.Style style = p.getStyle();
             int color = p.getColor();
 
@@ -262,7 +262,7 @@ class CustomHtmlToSpannedConverter implements ContentHandler {
             end(mSpannableStringBuilder, Sub.class, new SubscriptSpan());
         } else if (tag.equalsIgnoreCase("code")) {
             endMultiple(mSpannableStringBuilder, InlineCode.class,
-                    new Object[] { new TypefaceSpan("monospace"),
+                    new Object[]{new TypefaceSpan("monospace"),
                             new ForegroundColorSpan(0xffdd1144) // pink
                     });
         } else if (tag.equalsIgnoreCase("pre")) {
@@ -319,7 +319,7 @@ class CustomHtmlToSpannedConverter implements ContentHandler {
     }
 
     private static void endMultiple(SpannableStringBuilder text, Class kind,
-            Object[] replArray) {
+                                    Object[] replArray) {
         int len = text.length();
         Object obj = getLast(text, kind);
         int where = text.getSpanStart(obj);
@@ -351,7 +351,7 @@ class CustomHtmlToSpannedConverter implements ContentHandler {
     }
 
     private static void startImg(SpannableStringBuilder text,
-            Attributes attributes, Html.ImageGetter img) {
+                                 Attributes attributes, Html.ImageGetter img) {
         String src = attributes.getValue("", "src");
         Drawable d = null;
 
@@ -372,7 +372,7 @@ class CustomHtmlToSpannedConverter implements ContentHandler {
     }
 
     private static void startFont(SpannableStringBuilder text,
-            Attributes attributes) {
+                                  Attributes attributes) {
         String color = attributes.getValue("", "color");
         String face = attributes.getValue("", "face");
 
@@ -398,7 +398,7 @@ class CustomHtmlToSpannedConverter implements ContentHandler {
                     if (colorRes != 0) {
                         ColorStateList colors = res.getColorStateList(colorRes);
                         text.setSpan(new TextAppearanceSpan(null, 0, 0, colors,
-                                null), where, len,
+                                        null), where, len,
                                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                     }
                 } else {
@@ -418,7 +418,7 @@ class CustomHtmlToSpannedConverter implements ContentHandler {
     }
 
     private static void startA(SpannableStringBuilder text,
-            Attributes attributes, String baseUri) {
+                               Attributes attributes, String baseUri) {
         String href = attributes.getValue("", "href");
 
         if (href != null && !href.startsWith("http")) {
@@ -492,7 +492,7 @@ class CustomHtmlToSpannedConverter implements ContentHandler {
     }
 
     public void startElement(String uri, String localName, String qName,
-            Attributes attributes) throws SAXException {
+                             Attributes attributes) throws SAXException {
         handleStartTag(localName, attributes);
     }
 
@@ -635,11 +635,10 @@ class CustomHtmlToSpannedConverter implements ContentHandler {
 
     /**
      * Converts an HTML color (named or numeric) to an integer RGB value.
-     * 
-     * @param color
-     *            Non-null color string.
+     *
+     * @param color Non-null color string.
      * @return A color value, or {@code -1} if the color string could not be
-     *         interpreted.
+     * interpreted.
      */
     private static int getHtmlColor(String color) {
         Integer i = COLORS.get(color.toLowerCase());
@@ -658,7 +657,7 @@ class CustomHtmlToSpannedConverter implements ContentHandler {
      * Copied from com.android.internal.util.XmlUtils from Android source
      */
     public static final int convertValueToInt(CharSequence charSeq,
-            int defaultValue) {
+                                              int defaultValue) {
         if (null == charSeq)
             return defaultValue;
 

@@ -22,7 +22,7 @@ public class AsyncStatusUpdate extends ZulipAsyncPushTask {
 
     /**
      * Declares a new HumbugAsyncPushTask, passing the activity as context.
-     * 
+     *
      * @param activity
      */
     public AsyncStatusUpdate(ZulipActivity activity) {
@@ -112,7 +112,7 @@ public class AsyncStatusUpdate extends ZulipAsyncPushTask {
                             if (latestPresenceObj != null) {
                                 long age = serverTimestamp
                                         - latestPresenceObj
-                                                .getLong("timestamp");
+                                        .getLong("timestamp");
                                 String status = latestPresenceObj
                                         .getString("status");
                                 String client = latestPresenceObj

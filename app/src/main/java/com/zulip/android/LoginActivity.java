@@ -90,20 +90,20 @@ public class LoginActivity extends Activity implements View.OnClickListener,
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
-        case REQUEST_ACCOUNT_PICKER:
-            if (data != null && data.getExtras() != null) {
-                String accountName = data.getExtras().getString(
-                        AccountManager.KEY_ACCOUNT_NAME);
-                if (accountName != null) {
-                    this.app.setEmail(accountName);
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            authWithGapps();
-                        }
-                    }).start();
+            case REQUEST_ACCOUNT_PICKER:
+                if (data != null && data.getExtras() != null) {
+                    String accountName = data.getExtras().getString(
+                            AccountManager.KEY_ACCOUNT_NAME);
+                    if (accountName != null) {
+                        this.app.setEmail(accountName);
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                authWithGapps();
+                            }
+                        }).start();
+                    }
                 }
-            }
         }
     }
 
@@ -229,7 +229,7 @@ public class LoginActivity extends Activity implements View.OnClickListener,
         if (v.getId() == R.id.sign_in_button) {
             connectionProgressDialog.show();
             startActivityForResult(AccountPicker.newChooseAccountIntent(null,
-                    null, new String[] { "com.google" }, false, null, null,
+                    null, new String[]{"com.google"}, false, null, null,
                     null, null), REQUEST_ACCOUNT_PICKER);
         }
 

@@ -13,7 +13,7 @@ public class AsyncCursorAdapterUpdater extends
     private Callable<Cursor> cursorGenerator;
 
     public void execute(Callable<Cursor> cursorGenerator,
-            SimpleCursorAdapter adapter) {
+                        SimpleCursorAdapter adapter) {
         this.adapter = adapter;
         this.cursorGenerator = cursorGenerator;
         this.execute();

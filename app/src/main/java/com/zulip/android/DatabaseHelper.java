@@ -87,7 +87,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
      */
     @Override
     public void onUpgrade(SQLiteDatabase db, ConnectionSource connectionSource,
-            int oldVersion, int newVersion) {
+                          int oldVersion, int newVersion) {
         resetDatabase(db);
     }
 
@@ -106,9 +106,8 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
 
     /**
      * Escape LIKE wildcards with a backslash. Must also use ESCAPE clause
-     * 
-     * @param likeClause
-     *            string to escape
+     *
+     * @param likeClause string to escape
      * @return Escaped string
      */
     public static String likeEscape(String likeClause) {

@@ -25,7 +25,9 @@ import android.os.AsyncTask;
 import android.util.Base64;
 import android.util.Log;
 
-/** Simplified HTTP request API */
+/**
+ * Simplified HTTP request API
+ */
 public class HTTPRequest {
     ZulipApp app;
     List<NameValuePair> nameValuePairs;
@@ -105,7 +107,7 @@ public class HTTPRequest {
                     "Authorization",
                     "Basic "
                             + Base64.encodeToString(authstr.getBytes(),
-                                    Base64.NO_WRAP));
+                            Base64.NO_WRAP));
             // timeout after 60 seconds in ms
             HttpConnectionParams.setSoTimeout(request.getParams(), 60 * 1000);
 

@@ -172,9 +172,8 @@ public class MessageAdapter extends ArrayAdapter<Message> {
 
     /**
      * Copied from Html.fromHtml
-     * 
-     * @param source
-     *            HTML to be formatted
+     *
+     * @param source HTML to be formatted
      * @param app
      * @return Span
      */
@@ -203,7 +202,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
                     String filename = source.substring(lastIndex + 1);
                     try {
                         Drawable drawable = Drawable.createFromStream(context
-                                .getAssets().open("emoji/" + filename),
+                                        .getAssets().open("emoji/" + filename),
                                 "emoji/" + filename);
                         // scaling down by half to fit well in message
                         double scaleFactor = 0.5;

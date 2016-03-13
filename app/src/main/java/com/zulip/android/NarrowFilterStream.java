@@ -26,7 +26,7 @@ public class NarrowFilterStream implements NarrowFilter {
     }
 
     public void writeToParcel(Parcel dest, int flags) {
-        String[] pair = { stream.getName(), subject };
+        String[] pair = {stream.getName(), subject};
         dest.writeStringArray(pair);
     }
 

@@ -25,11 +25,11 @@ class ZulipAsyncPushTask extends AsyncTask<String, String, String> {
 
     /**
      * Interface implemented by callbacks which are run at the end of a task.
-     * 
+     * <p/>
      * Clients overriding onPostExecute will need to finish with
-     * 
+     * <p/>
      * callback.onTaskComplete(result);
-     * 
+     * <p/>
      * if they want to honor declared callback.
      */
     interface AsyncTaskCompleteListener {
@@ -40,9 +40,8 @@ class ZulipAsyncPushTask extends AsyncTask<String, String, String> {
 
     /**
      * Declares a new HumbugAsyncPushTask, passing the activity as context.
-     * 
-     * @param humbugActivity
-     *            The Activity that created the PushTask
+     *
+     * @param humbugActivity The Activity that created the PushTask
      */
     public ZulipAsyncPushTask(ZulipApp app) {
         this.app = app;
@@ -76,9 +75,8 @@ class ZulipAsyncPushTask extends AsyncTask<String, String, String> {
 
     /**
      * Sets the callback to run when the task is complete.
-     * 
-     * @param listener
-     *            AsyncTaskCompleteListener to run
+     *
+     * @param listener AsyncTaskCompleteListener to run
      */
     public void setCallback(AsyncTaskCompleteListener listener) {
         callback = listener;
@@ -104,14 +102,13 @@ class ZulipAsyncPushTask extends AsyncTask<String, String, String> {
 
     /**
      * Prints a stacktrace and cancels the task.
-     * 
+     * <p/>
      * This function is called whenever the backend ends up in an error
      * condition.
-     * 
+     * <p/>
      * Override this to specify custom error behavior in your Task.
-     * 
-     * @param e
-     *            the Exception that triggered this handler
+     *
+     * @param e the Exception that triggered this handler
      */
     protected void handleError(Exception e) {
         // Ignore things that are obviously not our fault
@@ -123,16 +120,14 @@ class ZulipAsyncPushTask extends AsyncTask<String, String, String> {
     }
 
     /**
-     * 
      * Prints the error reason and response and cancels the task.
-     * 
+     * <p/>
      * This function is called if the server does not return a 200 OK as a
      * response to a request.
-     * 
+     * <p/>
      * Override this to specify custom behavior in your task.
-     * 
-     * @param e
-     *            the Exception that triggered this handler
+     *
+     * @param e the Exception that triggered this handler
      */
     protected void handleHTTPError(HttpResponseException e) {
         if (e.getStatusCode() < 500 && e.getStatusCode() >= 400) {

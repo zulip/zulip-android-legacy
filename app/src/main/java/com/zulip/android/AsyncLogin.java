@@ -16,7 +16,7 @@ class AsyncLogin extends ZulipAsyncPushTask {
     boolean userDefinitelyInvalid = false;
 
     public AsyncLogin(LoginActivity loginActivity, String username,
-            String password) {
+                      String password) {
         super(loginActivity.app);
         context = loginActivity;
         if (username.contains("@") == true) {

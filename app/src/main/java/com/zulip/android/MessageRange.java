@@ -38,7 +38,7 @@ public class MessageRange extends BaseDaoEnabled<MessageRange, Integer> {
     }
 
     public static MessageRange getRangeContaining(int value,
-            RuntimeExceptionDao<MessageRange, Integer> messageRangeDao) {
+                                                  RuntimeExceptionDao<MessageRange, Integer> messageRangeDao) {
         List<MessageRange> ranges;
         try {
             ranges = messageRangeDao.queryBuilder().where().le("low", value)

@@ -54,11 +54,10 @@ public class Stream {
 
     /**
      * Construct a new Stream object when all that's known is the name.
-     * 
+     * <p/>
      * These should be sensible defaults.
-     * 
-     * @param name
-     *            The stream name
+     *
+     * @param name The stream name
      */
     public Stream(String name) {
         this.name = name;

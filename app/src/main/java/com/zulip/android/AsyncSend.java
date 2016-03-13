@@ -6,11 +6,9 @@ public class AsyncSend extends ZulipAsyncPushTask {
 
     /**
      * Initialise an AsyncSend task to send a specific message.
-     * 
-     * @param humbugActivity
-     *            The calling Activity
-     * @param msg
-     *            The message to send.
+     *
+     * @param humbugActivity The calling Activity
+     * @param msg            The message to send.
      */
     public AsyncSend(ZulipActivity humbugActivity, Message msg) {
         super(humbugActivity.app);

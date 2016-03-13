@@ -39,7 +39,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated to
      * the activity and potentially other fragments contained in that activity.
-     * <p>
+     * <p/>
      * See the Android Training lesson <a href=
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
@@ -52,7 +52,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
         void openCompose(String pmRecipients);
 
         void openCompose(final MessageType type, String stream, String topic,
-                String pmRecipients);
+                         String pmRecipients);
     }
 
     private static final String PARAM_FILTER = "filter";
@@ -126,7 +126,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
+                             Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_message_list, container,
                 false);
 
@@ -156,7 +156,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem,
-                    int visibleItemCount, int totalItemCount) {
+                                 int visibleItemCount, int totalItemCount) {
 
                 final int near = 6;
 
@@ -208,7 +208,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
             @Override
             public void onItemSelected(AdapterView<?> parent, View view,
-                    int position, long id) {
+                                       int position, long id) {
                 try {
                     int mID = (Integer) view.getTag(R.id.messageID);
                     if (app.getPointer() < mID) {
@@ -266,7 +266,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v,
-            ContextMenuInfo menuInfo) {
+                                    ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
 
         Message msg = itemFromMenuInfo(menuInfo);
@@ -290,34 +290,34 @@ public class MessageListFragment extends Fragment implements MessageListener {
         Message message = itemFromMenuInfo((AdapterContextMenuInfo) item
                 .getMenuInfo());
         switch (item.getItemId()) {
-        case R.id.reply_to_stream:
-            mListener.openCompose(message.getStream(), message.getSubject());
-            return true;
-        case R.id.reply_to_private:
-            mListener.openCompose(message.getReplyTo(app));
-            return true;
-        case R.id.reply_to_sender:
-            mListener.openCompose(message.getSender().getEmail());
-            return true;
-        case R.id.narrow_to_private:
-            ((ZulipActivity) getActivity()).doNarrow(new NarrowFilterPM(Arrays
-                    .asList(message.getRecipients(app))));
-            return true;
-        case R.id.narrow_to_stream:
-            // TODO This should probably use an interface defining a custom
-            // listener.
-            ((ZulipActivity) getActivity()).doNarrow(new NarrowFilterStream(
-                    message.getStream(), null));
-            return true;
-        case R.id.narrow_to_subject:
-            ((ZulipActivity) getActivity()).doNarrow(new NarrowFilterStream(
-                    message.getStream(), message.getSubject()));
-            return true;
-        case R.id.copy_message:
-            copyMessage(message);
-            return true;
-        default:
-            return super.onContextItemSelected(item);
+            case R.id.reply_to_stream:
+                mListener.openCompose(message.getStream(), message.getSubject());
+                return true;
+            case R.id.reply_to_private:
+                mListener.openCompose(message.getReplyTo(app));
+                return true;
+            case R.id.reply_to_sender:
+                mListener.openCompose(message.getSender().getEmail());
+                return true;
+            case R.id.narrow_to_private:
+                ((ZulipActivity) getActivity()).doNarrow(new NarrowFilterPM(Arrays
+                        .asList(message.getRecipients(app))));
+                return true;
+            case R.id.narrow_to_stream:
+                // TODO This should probably use an interface defining a custom
+                // listener.
+                ((ZulipActivity) getActivity()).doNarrow(new NarrowFilterStream(
+                        message.getStream(), null));
+                return true;
+            case R.id.narrow_to_subject:
+                ((ZulipActivity) getActivity()).doNarrow(new NarrowFilterStream(
+                        message.getStream(), message.getSubject()));
+                return true;
+            case R.id.copy_message:
+                copyMessage(message);
+                return true;
+            default:
+                return super.onContextItemSelected(item);
         }
     }
 
@@ -379,7 +379,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
     private void size_bottom_spacer() {
         @SuppressWarnings("deprecation")
         // needed for compat with API <13
-        int windowHeight = ((WindowManager) app
+                int windowHeight = ((WindowManager) app
                 .getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay()
                 .getHeight();
 
@@ -408,7 +408,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
     }
 
     public void onMessages(Message[] messages, LoadPosition pos,
-            boolean moreAbove, boolean moreBelow, boolean noFurtherMessages) {
+                           boolean moreAbove, boolean moreBelow, boolean noFurtherMessages) {
 
         if (!initialized) {
             return;

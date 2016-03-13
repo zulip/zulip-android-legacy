@@ -29,7 +29,7 @@ class GravatarAsyncFetchTask extends AsyncTask<URL, Void, Bitmap> {
     private ZulipActivity context;
 
     public GravatarAsyncFetchTask(ZulipActivity context, ImageView imageView,
-            Person person) {
+                                  Person person) {
         // Use a WeakReference to ensure the ImageView can be garbage collected
         imageViewReference = new WeakReference<ImageView>(imageView);
         this.person = person;
@@ -97,7 +97,7 @@ class GravatarAsyncFetchTask extends AsyncTask<URL, Void, Bitmap> {
         private final WeakReference<GravatarAsyncFetchTask> taskReference;
 
         public AsyncDrawable(Resources res, Bitmap bitmap,
-                GravatarAsyncFetchTask bitmapWorkerTask) {
+                             GravatarAsyncFetchTask bitmapWorkerTask) {
             super(res, bitmap);
             taskReference = new WeakReference<GravatarAsyncFetchTask>(
                     bitmapWorkerTask);
@@ -112,15 +112,15 @@ class GravatarAsyncFetchTask extends AsyncTask<URL, Void, Bitmap> {
     // already isn't one
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public void loadBitmap(ZulipActivity context, URL url, ImageView imageView,
-            Person person) {
+                           Person person) {
         if (cancelPotentialWork(person, imageView)) {
             Log.i("GAFT.init", "Starting new task for " + imageView);
             final GravatarAsyncFetchTask task = new GravatarAsyncFetchTask(
                     context, imageView, person);
             final AsyncDrawable asyncDrawable = new AsyncDrawable(
                     context.getResources(), BitmapFactory.decodeResource(
-                            context.getResources(),
-                            android.R.drawable.presence_online), task);
+                    context.getResources(),
+                    android.R.drawable.presence_online), task);
             imageView.setImageDrawable(asyncDrawable);
             try {
                 task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, url);

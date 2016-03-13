@@ -34,7 +34,7 @@ public class ComposeDialog extends DialogFragment {
     private EditText body;
 
     public static ComposeDialog newInstance(MessageType type, String stream,
-            String topic, String pmRecipients) {
+                                            String topic, String pmRecipients) {
         ComposeDialog d = new ComposeDialog();
         Bundle args = d.getArguments();
         if (args == null) {
@@ -71,11 +71,9 @@ public class ComposeDialog extends DialogFragment {
 
     /**
      * Check if a field is nonempty and mark fields as invalid if they are.
-     * 
-     * @param field
-     *            The field to check
-     * @param fieldName
-     *            The human-readable name of the field
+     *
+     * @param field     The field to check
+     * @param fieldName The human-readable name of the field
      * @return Whether the field correctly validated.
      */
     protected boolean requireFilled(EditText field, String fieldName) {
@@ -120,8 +118,8 @@ public class ComposeDialog extends DialogFragment {
 
             SimpleCursorAdapter recipientAdapter = new SimpleCursorAdapter(
                     getActivity(), R.layout.stream_tile, null,
-                    new String[] { Stream.NAME_FIELD },
-                    new int[] { R.id.name }, 0);
+                    new String[]{Stream.NAME_FIELD},
+                    new int[]{R.id.name}, 0);
             recipientAdapter
                     .setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter() {
                         @Override
@@ -145,8 +143,8 @@ public class ComposeDialog extends DialogFragment {
             });
             SimpleCursorAdapter subjectAdapter = new SimpleCursorAdapter(
                     getActivity(), R.layout.stream_tile, null,
-                    new String[] { Message.SUBJECT_FIELD },
-                    new int[] { R.id.name }, 0);
+                    new String[]{Message.SUBJECT_FIELD},
+                    new int[]{R.id.name}, 0);
             subjectAdapter
                     .setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter() {
                         @Override
@@ -187,8 +185,8 @@ public class ComposeDialog extends DialogFragment {
             this.switchToPersonal();
             SimpleCursorAdapter emailAdapter = new SimpleCursorAdapter(
                     getActivity(), R.layout.stream_tile, null,
-                    new String[] { Person.EMAIL_FIELD },
-                    new int[] { R.id.name }, 0);
+                    new String[]{Person.EMAIL_FIELD},
+                    new int[]{R.id.name}, 0);
             recipient.setAdapter(emailAdapter);
             emailAdapter
                     .setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter() {
@@ -235,9 +233,8 @@ public class ComposeDialog extends DialogFragment {
 
     /**
      * Provide streams for autocompletion
-     * 
-     * @param streamName
-     *            Stream prefix to use for autocompletion
+     *
+     * @param streamName Stream prefix to use for autocompletion
      * @return Cursor with autocompletion results
      * @throws SQLException
      */
@@ -262,11 +259,9 @@ public class ComposeDialog extends DialogFragment {
 
     /**
      * Provide message subjects for autocompletion
-     * 
-     * @param stream
-     *            Only consider messages in this stream. Must be exact match
-     * @param subject
-     *            Subject prefix to use for autocompletion
+     *
+     * @param stream  Only consider messages in this stream. Must be exact match
+     * @param subject Subject prefix to use for autocompletion
      * @return Cursor with autocompletion results
      * @throws SQLException
      */
@@ -303,9 +298,8 @@ public class ComposeDialog extends DialogFragment {
 
     /**
      * Provide people for autocompletion
-     * 
-     * @param email
-     *            Prefix to use for matching email addresses
+     *
+     * @param email Prefix to use for matching email addresses
      * @return Cursor with autocompletion results
      * @throws SQLException
      */

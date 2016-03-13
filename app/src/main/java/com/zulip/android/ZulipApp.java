@@ -120,7 +120,7 @@ public class ZulipApp extends Application {
 
     /**
      * Determines the server URI applicable for the user.
-     * 
+     *
      * @return either the production or staging server's URI
      */
     public String getServerURI() {

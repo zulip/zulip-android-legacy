@@ -78,17 +78,14 @@ public class Message {
 
     /**
      * Populate a Message object based off a parsed JSON hash.
-     * 
-     * @param app
-     *            The global ZulipApp.
-     * 
-     * @param message
-     *            the JSON object as returned by the server.
+     *
+     * @param app     The global ZulipApp.
+     * @param message the JSON object as returned by the server.
      * @throws JSONException
      */
     public Message(ZulipApp app, JSONObject message,
-            HashMap<String, Person> personCache,
-            HashMap<String, Stream> streamCache) throws JSONException {
+                   HashMap<String, Person> personCache,
+                   HashMap<String, Stream> streamCache) throws JSONException {
         this.setID(message.getInt("id"));
         this.setSender(Person.getOrUpdate(app,
                 message.getString("sender_email"),
@@ -205,13 +202,12 @@ public class Message {
     /**
      * Convenience function to set the recipients without requiring the caller
      * to construct a full Person[] array.
-     * 
+     * <p/>
      * Do not call this method if you want to be able to get the recipient's
      * names for this message later; construct a Person[] array and use
      * setRecipient(Person[] recipients) instead.
-     * 
-     * @param emails
-     *            The emails of the recipients.
+     *
+     * @param emails The emails of the recipients.
      */
     public void setRecipient(String[] emails) {
         Person[] r = new Person[emails.length];
@@ -224,11 +220,11 @@ public class Message {
     /**
      * Constructs a pretty-printable-to-the-user string consisting of the names
      * of all of the participants in the message, minus you.
-     * 
+     * <p/>
      * For MessageType.STREAM_MESSAGE, return the stream name instead.
-     * 
+     *
      * @return A String of the names of each Person in recipients[],
-     *         comma-separated, or the stream name.
+     * comma-separated, or the stream name.
      */
     public String getDisplayRecipient(ZulipApp app) {
         if (this.getType() == MessageType.STREAM_MESSAGE) {
@@ -250,7 +246,7 @@ public class Message {
      * Creates a comma-separated String of the email addressed of all the
      * recipients of the message, as would be suitable to place in the compose
      * box.
-     * 
+     *
      * @return the aforementioned String.
      */
     public String getReplyTo(ZulipApp app) {
@@ -276,7 +272,7 @@ public class Message {
     /**
      * Returns a Person array of the email addresses of the parties of the
      * message, the user excluded.
-     * 
+     *
      * @return said Person[].
      */
     public Person[] getPersonalReplyTo(ZulipApp app) {
@@ -355,7 +351,7 @@ public class Message {
     }
 
     public static void createMessages(final ZulipApp app,
-            final List<Message> messages) {
+                                      final List<Message> messages) {
         try {
             TransactionManager.callInTransaction(app.getDatabaseHelper()
                     .getConnectionSource(), new Callable<Void>() {
@@ -376,7 +372,7 @@ public class Message {
 
     public static void trim(final int olderThan, final ZulipApp app) {
         final RuntimeExceptionDao<Message, Integer> messageDao = app
-                .<Message, Integer> getDao(Message.class);
+                .<Message, Integer>getDao(Message.class);
 
         if (messageDao.countOf() <= olderThan) {
             return;
@@ -400,7 +396,7 @@ public class Message {
 
                         MessageRange rng = MessageRange.getRangeContaining(
                                 topID,
-                                app.<MessageRange, Integer> getDao(MessageRange.class));
+                                app.<MessageRange, Integer>getDao(MessageRange.class));
                         if (rng == null) {
                             Log.wtf("trim",
                                     "Message in database but not in range!");
@@ -413,7 +409,7 @@ public class Message {
                             rng.update();
                         }
                         DeleteBuilder<MessageRange, Integer> dB2 = app
-                                .<MessageRange, Integer> getDao(
+                                .<MessageRange, Integer>getDao(
                                         MessageRange.class).deleteBuilder();
 
                         dB2.where().le("high", topID);
