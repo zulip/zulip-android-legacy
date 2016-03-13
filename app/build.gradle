@@ -30,7 +30,7 @@ dependencies {
     compile 'com.google.android.gms:play-services:4.+'
     compile 'com.j256.ormlite:ormlite-core:4.+'
     compile 'com.j256.ormlite:ormlite-android:4.+'
-    compile files('libs/commons-lang-2.6.jar')
+    compile 'commons-lang:commons-lang:2.6'
     compile files('libs/crashlytics.jar')
     compile files('libs/tagsoup-1.2.1.jar')
 }
