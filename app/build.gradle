@@ -26,10 +26,10 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:support-v13:+'
-    compile 'com.google.android.gms:play-services:4.+'
-    compile 'com.j256.ormlite:ormlite-core:4.+'
-    compile 'com.j256.ormlite:ormlite-android:4.+'
+    compile 'com.android.support:support-v13:23.2.1'
+    compile 'com.google.android.gms:play-services:4.4.52'
+    compile 'com.j256.ormlite:ormlite-core:4.48'
+    compile 'com.j256.ormlite:ormlite-android:4.48'
     compile 'commons-lang:commons-lang:2.6'
     compile 'org.ccil.cowan.tagsoup:tagsoup:1.2.1'
     compile files('libs/crashlytics.jar')
