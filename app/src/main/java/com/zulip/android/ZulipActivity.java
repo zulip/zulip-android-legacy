@@ -498,7 +498,7 @@ public class ZulipActivity extends FragmentActivity implements
                         FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 break;
             case R.id.search:
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(this);
                     builder.setTitle("Search Zulip");
                     final EditText editText = new EditText(this);
