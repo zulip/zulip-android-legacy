@@ -69,6 +69,8 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
             db.execSQL("DROP TABLE " + name);
         }
 
+        c.close();
+
         db.setTransactionSuccessful();
         db.endTransaction();
         db.execSQL("VACUUM;");
