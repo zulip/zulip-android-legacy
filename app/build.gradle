@@ -28,9 +28,9 @@ android {
 dependencies {
     compile 'com.android.support:support-v13:+'
     compile 'com.google.android.gms:play-services:4.+'
+    compile 'com.j256.ormlite:ormlite-core:4.+'
+    compile 'com.j256.ormlite:ormlite-android:4.+'
     compile files('libs/commons-lang-2.6.jar')
     compile files('libs/crashlytics.jar')
-    compile files('libs/ormlite-android-4.45.jar')
-    compile files('libs/ormlite-core-4.45.jar')
     compile files('libs/tagsoup-1.2.1.jar')
 }
