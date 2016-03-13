@@ -8,3 +8,9 @@ bin/
 *.log
 /local.properties
 res/values/com_crashlytics_export_strings.xml
+/app/build/
+/build/
+.gradle/
+*.iml
+.idea/workspace.xml
+.idea/libraries
