@@ -156,7 +156,7 @@ public class ZulipApp extends Application {
         Editor ed = this.settings.edit();
         ed.putString("email", this.getEmail());
         ed.putString("api_key", api_key);
-        ed.commit();
+        ed.apply();
         afterLogin();
     }
 
@@ -164,7 +164,7 @@ public class ZulipApp extends Application {
         Editor ed = this.settings.edit();
         ed.remove("email");
         ed.remove("api_key");
-        ed.commit();
+        ed.apply();
         this.api_key = null;
         setEventQueueId(null);
     }

@@ -60,7 +60,6 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
     private Listener mListener;
 
-    private View view;
     private ListView listView;
     private View loadIndicatorTop;
     private View loadIndicatorBottom;
@@ -127,7 +126,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_message_list, container,
+        View view = inflater.inflate(R.layout.fragment_message_list, container,
                 false);
 
         listView = (ListView) view.findViewById(R.id.listview);

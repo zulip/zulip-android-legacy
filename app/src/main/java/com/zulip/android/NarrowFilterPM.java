@@ -22,7 +22,7 @@ public class NarrowFilterPM implements NarrowFilter {
     NarrowFilterPM(List<Person> people) {
         this.people = people;
         this.recipientString = Message.recipientList(people
-                .toArray(new Person[0]));
+                .toArray(new Person[people.size()]));
     }
 
     private NarrowFilterPM(String recipientString) {

@@ -62,11 +62,7 @@ public class NarrowFilterAllPMs implements NarrowFilter {
 
     @Override
     public boolean matches(Message msg) {
-        if (msg.getType() == MessageType.PRIVATE_MESSAGE) {
-            return true;
-        } else {
-            return false;
-        }
+        return msg.getType() == MessageType.PRIVATE_MESSAGE;
     }
 
     @Override

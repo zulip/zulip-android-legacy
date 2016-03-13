@@ -9,7 +9,9 @@ import java.util.concurrent.ExecutionException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.annotation.TargetApi;
 import android.content.Intent;
+import android.os.Build;
 import android.test.ActivityUnitTestCase;
 
 import com.j256.ormlite.dao.RuntimeExceptionDao;
@@ -227,6 +229,7 @@ public class UnsortedTests extends ActivityUnitTestCase<ZulipActivity> {
     /**
      * Run this before each test to set up the activity.
      */
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     protected void prepTests() {
         setApplication(app);
         this.startActivity(new Intent(getInstrumentation().getTargetContext(),

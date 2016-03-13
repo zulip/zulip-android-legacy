@@ -24,8 +24,6 @@ public class AsyncGetEvents extends Thread {
     ZulipActivity activity;
     ZulipApp app;
 
-    Handler onRegisterHandler;
-    Handler onEventsHandler;
     HTTPRequest request;
 
     AsyncGetEvents that = this;
@@ -98,7 +96,7 @@ public class AsyncGetEvents extends Thread {
                     request.setProperty("queue_id", app.getEventQueueId());
                     request.setProperty("last_event_id",
                             "" + app.getLastEventId());
-                    if (registeredOrGotEventsThisRun == false) {
+                    if (!registeredOrGotEventsThisRun) {
                         request.setProperty("dont_block", "true");
                     }
                     JSONObject response = new JSONObject(request.execute("GET",
@@ -115,7 +113,7 @@ public class AsyncGetEvents extends Thread {
                         failures = 0;
                     }
 
-                    if (registeredOrGotEventsThisRun == false) {
+                    if (!registeredOrGotEventsThisRun) {
                         registeredOrGotEventsThisRun = true;
                         activity.runOnUiThread(new Runnable() {
                             @Override
@@ -284,7 +282,7 @@ public class AsyncGetEvents extends Thread {
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                activity.onNewMessages(messages.toArray(new Message[0]));
+                activity.onNewMessages(messages.toArray(new Message[messages.size()]));
             }
         });
     }

@@ -247,9 +247,8 @@ public class ZulipActivity extends FragmentActivity implements
 
                 allPrivateMessages.addRow(row);
 
-                MergeCursor mergeCursor = new MergeCursor(new Cursor[]{
+                return new MergeCursor(new Cursor[]{
                         allPrivateMessages, sortedPeopleCursor});
-                return mergeCursor;
 
             }
 

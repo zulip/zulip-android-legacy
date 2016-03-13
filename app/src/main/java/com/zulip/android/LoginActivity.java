@@ -177,7 +177,7 @@ public class LoginActivity extends Activity implements View.OnClickListener,
                 public void onTaskFailure(String result) {
                     // Invalidate the token and try again, unless the user we
                     // are authenticating as is not registered or is disabled.
-                    if (loginTask.userDefinitelyInvalid == false) {
+                    if (!loginTask.userDefinitelyInvalid) {
                         GoogleAuthUtil.invalidateToken(that, token);
                         new Thread(new Runnable() {
                             @Override

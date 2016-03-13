@@ -315,7 +315,7 @@ public class ComposeDialog extends DialogFragment {
             piece = pieces[pieces.length - 1].trim();
         }
         // queryRaw is used because of ESCAPE clause
-        Cursor peopleCursor = ((AndroidDatabaseResults) app
+        return ((AndroidDatabaseResults) app
                 .getDao(Person.class)
                 .queryRaw(
                         "SELECT rowid _id, * FROM people WHERE "
@@ -326,7 +326,6 @@ public class ComposeDialog extends DialogFragment {
                                 + Person.NAME_FIELD + " COLLATE NOCASE",
                         DatabaseHelper.likeEscape(piece) + "%")
                 .closeableIterator().getRawResults()).getRawCursor();
-        return peopleCursor;
     }
 
     private void sending(boolean isSending) {

@@ -333,7 +333,6 @@ class CustomHtmlToSpannedConverter implements ContentHandler {
             }
         }
 
-        return;
     }
 
     private static void end(SpannableStringBuilder text, Class kind, Object repl) {
@@ -347,7 +346,6 @@ class CustomHtmlToSpannedConverter implements ContentHandler {
             text.setSpan(repl, where, len, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
 
-        return;
     }
 
     private static void startImg(SpannableStringBuilder text,
@@ -656,7 +654,7 @@ class CustomHtmlToSpannedConverter implements ContentHandler {
     /**
      * Copied from com.android.internal.util.XmlUtils from Android source
      */
-    public static final int convertValueToInt(CharSequence charSeq,
+    public static int convertValueToInt(CharSequence charSeq,
                                               int defaultValue) {
         if (null == charSeq)
             return defaultValue;

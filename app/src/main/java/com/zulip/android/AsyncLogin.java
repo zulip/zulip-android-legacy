@@ -19,7 +19,7 @@ class AsyncLogin extends ZulipAsyncPushTask {
                       String password) {
         super(loginActivity.app);
         context = loginActivity;
-        if (username.contains("@") == true) {
+        if (username.contains("@")) {
             // @-less usernames are used as indicating special cases, for
             // example in OAuth2 authentication
             this.app.setEmail(username);

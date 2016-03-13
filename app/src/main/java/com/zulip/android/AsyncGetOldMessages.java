@@ -27,7 +27,6 @@ public class AsyncGetOldMessages extends ZulipAsyncPushTask {
     private int before;
     private int afterAnchor;
     private int after;
-    AsyncGetOldMessages that = this;
 
     boolean recursedAbove = false;
     boolean recursedBelow = false;
@@ -286,7 +285,7 @@ public class AsyncGetOldMessages extends ZulipAsyncPushTask {
                 noFurtherMessages = true;
             }
 
-            listener.onMessages(receivedMessages.toArray(new Message[0]),
+            listener.onMessages(receivedMessages.toArray(new Message[receivedMessages.size()]),
                     position, recursedAbove, recursedBelow, noFurtherMessages);
         } else {
             listener.onMessageError(position);

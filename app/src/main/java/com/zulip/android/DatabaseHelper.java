@@ -97,14 +97,6 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
     }
 
     /**
-     * Close the database connections and clear any cached DAOs.
-     */
-    @Override
-    public void close() {
-        super.close();
-    }
-
-    /**
      * Escape LIKE wildcards with a backslash. Must also use ESCAPE clause
      *
      * @param likeClause string to escape
