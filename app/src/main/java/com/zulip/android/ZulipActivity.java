@@ -452,7 +452,7 @@ public class ZulipActivity extends FragmentActivity implements
             inflater.inflate(R.menu.options, menu);
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+        if (this.logged_in && Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             // Get the SearchView and set the searchable configuration
             SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
             final MenuItem searchMenuItem = menu.findItem(R.id.search);
