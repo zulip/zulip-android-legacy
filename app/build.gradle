@@ -31,6 +31,6 @@ dependencies {
     compile 'com.j256.ormlite:ormlite-core:4.+'
     compile 'com.j256.ormlite:ormlite-android:4.+'
     compile 'commons-lang:commons-lang:2.6'
+    compile 'org.ccil.cowan.tagsoup:tagsoup:1.2.1'
     compile files('libs/crashlytics.jar')
-    compile files('libs/tagsoup-1.2.1.jar')
 }
