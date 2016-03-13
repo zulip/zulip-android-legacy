@@ -215,7 +215,7 @@ public class LoginActivity extends Activity implements View.OnClickListener,
                     connectionProgressDialog.dismiss();
                     Toast.makeText(
                             that,
-                            "Google Apps login not supported at this time, please contact support@zulip.com.",
+                            "Google Apps login failed for unknown reasons, please contact your distributor.",
                             Toast.LENGTH_LONG).show();
                     findViewById(R.id.sign_in_button).setEnabled(false);
                 }
