@@ -5,7 +5,9 @@
     android:gravity="center_horizontal"
     android:orientation="vertical"
     android:paddingBottom="10dp" >
-
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/toolbar" />
     <TextView
         android:id="@+id/textView1"
         android:layout_width="wrap_content"
