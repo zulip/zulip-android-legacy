@@ -328,10 +328,10 @@ public class ZulipActivity extends AppCompatActivity implements
         };
         statusUpdateHandler.post(statusUpdateRunnable);
 
-        if (android.os.Build.VERSION.SDK_INT >= 11 && getActionBar() != null) {
+        if (android.os.Build.VERSION.SDK_INT >= 11 && getSupportActionBar() != null) {
             // the AB is unavailable when invoked from JUnit
-            getActionBar().setDisplayHomeAsUpEnabled(true);
-            getActionBar().setHomeButtonEnabled(true);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
         }
 
         homeList = MessageListFragment.newInstance(null);
@@ -405,17 +405,17 @@ public class ZulipActivity extends AppCompatActivity implements
 
         if (filter == null) {
             if (android.os.Build.VERSION.SDK_INT >= 11) {
-                getActionBar().setTitle("Zulip");
-                getActionBar().setSubtitle(null);
+                getSupportActionBar().setTitle("Zulip");
+                getSupportActionBar().setSubtitle(null);
             }
             this.drawerToggle.setDrawerIndicatorEnabled(true);
         } else {
             String title = list.filter.getTitle();
             if (android.os.Build.VERSION.SDK_INT >= 11) {
                 if (title != null) {
-                    getActionBar().setTitle(title);
+                    getSupportActionBar().setTitle(title);
                 }
-                getActionBar().setSubtitle(list.filter.getSubtitle());
+                getSupportActionBar().setSubtitle(list.filter.getSubtitle());
             }
             this.drawerToggle.setDrawerIndicatorEnabled(false);
         }
