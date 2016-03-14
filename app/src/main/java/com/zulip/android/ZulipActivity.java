@@ -34,6 +34,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
@@ -50,7 +51,7 @@ import android.widget.TextView;
 import com.crashlytics.android.Crashlytics;
 import com.j256.ormlite.android.AndroidDatabaseResults;
 
-public class ZulipActivity extends FragmentActivity implements
+public class ZulipActivity extends AppCompatActivity implements
         MessageListFragment.Listener {
 
     ZulipApp app;

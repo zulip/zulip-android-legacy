@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -26,7 +27,7 @@ import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListe
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.zulip.android.ZulipAsyncPushTask.AsyncTaskCompleteListener;
 
-public class LoginActivity extends Activity implements View.OnClickListener,
+public class LoginActivity extends AppCompatActivity implements View.OnClickListener,
         OnConnectionFailedListener {
     private static final int REQUEST_ACCOUNT_PICKER = 2;
     private static final int REQUEST_CODE_RESOLVE_ERR = 9000;
