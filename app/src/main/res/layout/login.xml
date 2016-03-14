@@ -4,14 +4,17 @@
     android:layout_height="match_parent"
     android:gravity="center_horizontal"
     android:orientation="vertical"
-    android:paddingBottom="10dp" >
+    android:paddingBottom="10dp">
+
     <include
         android:id="@+id/toolbar"
         layout="@layout/toolbar" />
+
     <TextView
         android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/toolbar"
         android:gravity="center|center_horizontal"
         android:padding="10dp"
         android:text="@string/login_welcome_blurb"
@@ -54,7 +57,6 @@
     </android.support.design.widget.TextInputLayout>
 
 
-
     <Button
         android:id="@+id/login"
         style="android:buttonStyle"
@@ -83,7 +85,6 @@
         android:layout_height="wrap_content"
         android:layout_alignRight="@+id/legalTextView"
         android:layout_below="@+id/login"
-        android:layout_marginTop="28dp" >
-    </com.google.android.gms.common.SignInButton>
+        android:layout_marginTop="28dp"></com.google.android.gms.common.SignInButton>
 
 </RelativeLayout>
