@@ -35,6 +35,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
@@ -70,7 +71,7 @@ public class ZulipActivity extends AppCompatActivity implements
 
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
-
+    Toolbar toolbar;
     private Menu menu;
 
     protected HashMap<String, Bitmap> gravatars = new HashMap<String, Bitmap>();
@@ -182,6 +183,9 @@ public class ZulipActivity extends AppCompatActivity implements
 
         setContentView(R.layout.main);
 
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle("Login");
+        setSupportActionBar(toolbar);
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
                 R.drawable.ic_drawer, R.string.streams_open,
