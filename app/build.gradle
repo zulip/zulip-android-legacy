@@ -15,9 +15,14 @@ android {
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
     }
     buildTypes {
+        debug {
+            applicationIdSuffix '.dev'
+            manifestPlaceholders = [ permissionPackage : "com.humbughq.mobile.dev"]
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            manifestPlaceholders = [ permissionPackage : "com.humbughq.mobile"]
         }
     }
     useLibrary  'org.apache.http.legacy'
