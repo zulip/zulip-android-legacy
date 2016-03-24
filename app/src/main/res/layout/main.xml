@@ -18,7 +18,7 @@
         android:id="@+id/streams_drawer"
         android:layout_width="340dp"
         android:layout_height="match_parent"
-        android:layout_gravity="left"
+        android:layout_gravity="start"
         android:background="#FFF"
         android:choiceMode="singleChoice" />
 
@@ -26,7 +26,7 @@
         android:id="@+id/people_drawer"
         android:layout_width="240dp"
         android:layout_height="match_parent"
-        android:layout_gravity="right"
+        android:layout_gravity="end"
         android:background="#FFF"
         android:choiceMode="singleChoice" />
 

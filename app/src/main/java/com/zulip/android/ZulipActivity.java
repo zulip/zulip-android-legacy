@@ -29,6 +29,7 @@ import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
@@ -476,7 +477,7 @@ public class ZulipActivity extends FragmentActivity implements
         // true, then it has handled the app icon touch event
         if (drawerToggle.onOptionsItemSelected(item)) {
             // Close the right drawer if we opened the left one
-            drawerLayout.closeDrawer(Gravity.RIGHT);
+            drawerLayout.closeDrawer(GravityCompat.END);
             return true;
         }
 
