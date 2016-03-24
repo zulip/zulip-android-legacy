@@ -1,13 +1,11 @@
 package com.zulip.android;
 
-import android.os.Build;
-
 import com.crashlytics.android.Crashlytics;
 
 public class ZLog {
 
     public static void logException(Throwable e) {
-        if (Build.HARDWARE.contains("goldfish")) {
+        if (BuildHelper.shouldLogToCrashlytics()) {
             e.printStackTrace();
         } else {
             Crashlytics.logException(e);

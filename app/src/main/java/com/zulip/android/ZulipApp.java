@@ -10,7 +10,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
 
@@ -72,10 +71,7 @@ public class ZulipApp extends Application {
         lastEventId = settings.getInt("lastEventId", -1);
         pointer = settings.getInt("pointer", -1);
 
-
-        if (Build.HARDWARE.contains("goldfish") || BuildConfig.DEBUG) { // dont load crashlytics for debug builds
-            Log.i("hardware", "running in emulator");
-        } else {
+        if (BuildHelper.shouldLogToCrashlytics()) {
             Crashlytics.start(this);
         }
 
