@@ -16,7 +16,7 @@
 
     <ListView
         android:id="@+id/streams_drawer"
-        android:layout_width="240dp"
+        android:layout_width="340dp"
         android:layout_height="match_parent"
         android:layout_gravity="left"
         android:background="#FFF"
