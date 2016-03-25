@@ -1,10 +1,7 @@
 package com.zulip.android;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -47,7 +44,6 @@ import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
 
-import com.crashlytics.android.Crashlytics;
 import com.j256.ormlite.android.AndroidDatabaseResults;
 
 public class ZulipActivity extends FragmentActivity implements
@@ -155,12 +151,6 @@ public class ZulipActivity extends FragmentActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        if (Build.HARDWARE.contains("goldfish")) {
-            Log.i("hardware", "running in emulator");
-        } else {
-            Crashlytics.start(this);
-        }
 
         app = (ZulipApp) getApplicationContext();
         settings = app.settings;
