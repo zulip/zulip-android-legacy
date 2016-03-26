@@ -86,8 +86,9 @@ public class MessageAdapter extends ArrayAdapter<Message> {
             display_recipient.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    // TODO: narrow to stream.
-                    Toast.makeText(v.getContext(), "Narrow to stream", Toast.LENGTH_LONG).show();
+                    if (getContext() instanceof NarrowListener) {
+                        ((NarrowListener) getContext()).onNarrow(new NarrowFilterStream(message.getStream(), null));
+                    }
                 }
             });
         }
@@ -106,8 +107,9 @@ public class MessageAdapter extends ArrayAdapter<Message> {
             instance.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    // TODO: narrow to thread
-                    Toast.makeText(v.getContext(), "Narrow to thread", Toast.LENGTH_LONG).show();
+                    if (getContext() instanceof NarrowListener) {
+                        ((NarrowListener) getContext()).onNarrow(new NarrowFilterStream(message.getStream(), message.getSubject()));
+                    }
                 }
             });
         }

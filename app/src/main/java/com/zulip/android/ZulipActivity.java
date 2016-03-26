@@ -48,7 +48,7 @@ import android.widget.TextView;
 import com.j256.ormlite.android.AndroidDatabaseResults;
 
 public class ZulipActivity extends FragmentActivity implements
-        MessageListFragment.Listener {
+        MessageListFragment.Listener, NarrowListener {
 
     ZulipApp app;
 
@@ -414,6 +414,11 @@ public class ZulipActivity extends FragmentActivity implements
         // Push to the back stack if we are not already narrowed
         pushListFragment(narrowedList, "narrow");
         narrowedList.onReadyToDisplay(true);
+    }
+
+    @Override
+    public void onNarrow(NarrowFilter narrowFilter) {
+        doNarrow(narrowFilter);
     }
 
     @Override
