@@ -2,6 +2,7 @@ package com.zulip.android;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 
 import org.ccil.cowan.tagsoup.HTMLSchema;
@@ -79,7 +80,15 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         if (message.getType() != MessageType.STREAM_MESSAGE) {
             display_recipient.setText(context.getString(R.string.huddle_text, message.getDisplayRecipient(context.app)));
             display_recipient.setTextColor(Color.WHITE);
-            display_recipient.setOnClickListener(null);
+            display_recipient.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (getContext() instanceof NarrowListener) {
+                        ((NarrowListener) getContext()).onNarrow(new NarrowFilterPM(
+                                Arrays.asList(message.getRecipients((ZulipApp.get())))));
+                    }
+                }
+            });
         } else {
             display_recipient.setText(message.getDisplayRecipient(context.app));
             display_recipient.setTextColor(Color.BLACK);

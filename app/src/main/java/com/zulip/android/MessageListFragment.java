@@ -297,7 +297,9 @@ public class MessageListFragment extends Fragment implements MessageListener {
                 mListener.openCompose(message.getSender().getEmail());
                 return true;
             case R.id.narrow_to_private:
-                ((ZulipActivity) getActivity()).doNarrow(new NarrowFilterPM(Arrays.asList(message.getRecipients(app))));
+                if (getActivity() instanceof NarrowListener) {
+                    ((NarrowListener) getActivity()).onNarrow(new NarrowFilterPM(Arrays.asList(message.getRecipients(app))));
+                }
                 return true;
             case R.id.narrow_to_stream:
                 if (getActivity() instanceof NarrowListener) {
