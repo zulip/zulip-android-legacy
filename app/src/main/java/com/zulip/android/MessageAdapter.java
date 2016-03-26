@@ -164,17 +164,14 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         }
 
         ImageView gravatar = (ImageView) tile.findViewById(R.id.gravatar);
-        Bitmap gravatar_img = context.gravatars.get(message.getSender()
-                .getEmail());
+        Bitmap gravatar_img = context.gravatars.get(message.getSender().getEmail());
         if (gravatar_img != null) {
             // Gravatar already exists for this image, set the ImageView to it
             gravatar.setImageBitmap(gravatar_img);
         } else {
             // Go get the Bitmap
-            URL url = GravatarAsyncFetchTask.sizedURL(context, message
-                    .getSender().getAvatarURL(), 35);
-            GravatarAsyncFetchTask task = new GravatarAsyncFetchTask(context,
-                    gravatar, message.getSender());
+            URL url = GravatarAsyncFetchTask.sizedURL(context, message.getSender().getAvatarURL(), 35);
+            GravatarAsyncFetchTask task = new GravatarAsyncFetchTask(context, gravatar, message.getSender());
             task.loadBitmap(context, url, gravatar, message.getSender());
         }
 
