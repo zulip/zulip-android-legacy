@@ -29,5 +29,8 @@
     <string name="loading_messages">Loading messages</string>
     <string name="sending_message">Sending</string>
     <string name="search">Search</string>
+    <string name="reply_to_private_message">Reply to Private Message</string>
+    <string name="narrow_to_this_conversation">Narrow to this conversation</string>
+    <string name="copy_message">Copy Message</string>
 
 </resources>
