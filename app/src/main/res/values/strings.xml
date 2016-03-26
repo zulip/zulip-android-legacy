@@ -36,5 +36,6 @@
     <string name="arrow">❯</string>
     <string name="subject">Subject</string>
     <string name="timestamp">timestamp</string>
+    <string name="reply_to_sender">Reply to Sender</string>
 
 </resources>
