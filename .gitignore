@@ -13,3 +13,6 @@ res/values/com_crashlytics_export_strings.xml
 .gradle/
 *.iml
 .idea
+
+# mac files
+.DS_Store
