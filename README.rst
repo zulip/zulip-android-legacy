@@ -2,8 +2,8 @@
 Zulip for Android
 =================
 
-This is a Gradle project, and can be built via the provided `gradlew` or by
-using Android Studio.
+This is a Gradle project, and can be built via the provided ``gradlew``
+or by using Android Studio.
 
 License
 -------
@@ -25,39 +25,23 @@ limitations under the License.
 Build instructions (Android Studio)
 -----------------------------------
 
-Open the project in the IDE:
+1. Open the project in the IDE.
+    a) From the "Welcome to Android Studio" menu, select "Open an 
+       existing Android Studio project" option, or
+    b) If you already have an opened project, select "File > Open..." 
 
-- select "Open an existing Android Studio project" option
-if you are in "Welcome to Android Studio" menu;
-
-- select "File > Open..." if you already have an opened
-project.
-
-In both cases you will have to provide the path to the cloned
-project (to the "zulip-android/" directory).
-
-When the project is opened in Android Studio you will have to
-add some data needed by google services:
-
-1) A configuration file which you can generate here:
-
-https://developers.google.com/mobile/add?platform=android
-
-(Type in "Zulip" as "App name" and "com.zulip.android"
- as "Android package name".)
- Put the generated file in the "app/" directory of the project.
-
-2) Google app id. You will also get it from the above given link.
-This id should be written as the following string resource in
-app/src/main/res/values/strings.xml:
-
-<string name="google_app_id">GOOGLE_APP_ID</string>
-
-Now you are ready for running the app on a device or
-on an emulator.
+2. If you want to test Google sign in, add the required metadata:
+    1. Go to https://developers.google.com/mobile/add?platform=android
+    2. Type in "Zulip" as "App name" and "com.zulip.android" as 
+       "Android package name".)
+    3. Put the generated file in the "app/" directory of the project.
+    4. Google app id. You will also get it from the above given link.
+       This id should be written as the following string resource in
+       ``app/src/main/res/values/strings.xml``::
+            <string name="google_app_id">GOOGLE_APP_ID</string>
 
 If you have a device running Android go to the settings
-and  enable USB debugging in developer options. Then plug
+and enable USB debugging in developer options. Then plug
 your device in the computer and select "Run > Run...".
 You will be shown "Device chooser" window. Select your
 device in the given list and press "OK".
