@@ -25,7 +25,6 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -286,8 +285,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        Message message = itemFromMenuInfo((AdapterContextMenuInfo) item
-                .getMenuInfo());
+        Message message = itemFromMenuInfo(item.getMenuInfo());
         switch (item.getItemId()) {
             case R.id.reply_to_stream:
                 mListener.openCompose(message.getStream(), message.getSubject());
@@ -299,18 +297,17 @@ public class MessageListFragment extends Fragment implements MessageListener {
                 mListener.openCompose(message.getSender().getEmail());
                 return true;
             case R.id.narrow_to_private:
-                ((ZulipActivity) getActivity()).doNarrow(new NarrowFilterPM(Arrays
-                        .asList(message.getRecipients(app))));
+                ((ZulipActivity) getActivity()).doNarrow(new NarrowFilterPM(Arrays.asList(message.getRecipients(app))));
                 return true;
             case R.id.narrow_to_stream:
-                // TODO This should probably use an interface defining a custom
-                // listener.
-                ((ZulipActivity) getActivity()).doNarrow(new NarrowFilterStream(
-                        message.getStream(), null));
+                if (getActivity() instanceof NarrowListener) {
+                    ((NarrowListener) getActivity()).onNarrow(new NarrowFilterStream(message.getStream(), null));
+                }
                 return true;
             case R.id.narrow_to_subject:
-                ((ZulipActivity) getActivity()).doNarrow(new NarrowFilterStream(
-                        message.getStream(), message.getSubject()));
+                if (getActivity() instanceof NarrowListener) {
+                    ((NarrowListener) getActivity()).onNarrow(new NarrowFilterStream(message.getStream(), message.getSubject()));
+                }
                 return true;
             case R.id.copy_message:
                 copyMessage(message);
