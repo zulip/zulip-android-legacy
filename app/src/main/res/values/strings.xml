@@ -32,5 +32,9 @@
     <string name="reply_to_private_message">Reply to Private Message</string>
     <string name="narrow_to_this_conversation">Narrow to this conversation</string>
     <string name="copy_message">Copy Message</string>
+    <string name="stream_txt">Stream</string>
+    <string name="arrow">❯</string>
+    <string name="subject">Subject</string>
+    <string name="timestamp">timestamp</string>
 
 </resources>
