@@ -418,6 +418,7 @@ public class ZulipActivity extends FragmentActivity implements
 
     @Override
     public void onNarrow(NarrowFilter narrowFilter) {
+        // TODO: check if already narrowed to this particular stream/subject
         doNarrow(narrowFilter);
     }
 
