@@ -33,7 +33,6 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -457,8 +456,7 @@ public class ZulipActivity extends FragmentActivity implements
             searchView.setSearchableInfo(searchManager
                     .getSearchableInfo(getComponentName()));
 
-            searchView
-                    .setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                         @Override
                         public boolean onQueryTextSubmit(String s) {
                             doNarrow(new NarrowFilterSearch(s));
@@ -494,7 +492,8 @@ public class ZulipActivity extends FragmentActivity implements
                         FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 break;
             case R.id.search:
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                // show a pop up dialog only if gingerbread or under
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(this);
                     builder.setTitle("Search Zulip");
                     final EditText editText = new EditText(this);
