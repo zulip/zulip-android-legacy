@@ -7,6 +7,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.text.TextUtils;
@@ -15,6 +16,8 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
@@ -28,10 +31,11 @@ public class ComposeDialog extends DialogFragment {
     ZulipApp app;
     private MessageType type;
 
-    private View view;
     private AutoCompleteTextView recipient;
     private AutoCompleteTextView subject;
+    private View threadSeparator;
     private EditText body;
+    private View view;
 
     public static ComposeDialog newInstance(MessageType type, String stream,
                                             String topic, String pmRecipients) {
@@ -56,7 +60,7 @@ public class ComposeDialog extends DialogFragment {
      */
     protected void switchToPersonal() {
         subject.setVisibility(View.GONE);
-        recipient.setGravity(Gravity.FILL_HORIZONTAL);
+        threadSeparator.setVisibility(View.GONE);
         recipient.setHint(R.string.pm_prompt);
     }
 
@@ -64,8 +68,6 @@ public class ComposeDialog extends DialogFragment {
      * Switches the compose window's state to compose a stream message.
      */
     protected void switchToStream() {
-        subject.setVisibility(View.VISIBLE);
-        recipient.setGravity(Gravity.NO_GRAVITY);
         recipient.setHint(R.string.stream);
     }
 
@@ -88,9 +90,22 @@ public class ComposeDialog extends DialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        setupView(LayoutInflater.from(getActivity()), null);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        view = inflater.inflate(R.layout.compose, null);
+        AlertDialog dialog = builder
+                .setView(view)
+                .setPositiveButton(R.string.send, null)
+                .setNegativeButton(android.R.string.cancel, null)
+                .create();
+
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+
+        return dialog;
+    }
+
+    private void setupView(LayoutInflater inflater, ViewGroup container) {
+        view = inflater.inflate(R.layout.compose, container, false);
 
         Bundle bundle = getArguments();
         type = (MessageType) bundle.getSerializable("type");
@@ -98,20 +113,15 @@ public class ComposeDialog extends DialogFragment {
         final String topic = bundle.getString("topic");
         final String pmRecipients = bundle.getString("pmRecipients");
 
-        Log.i("onCreateDialog", "" + type + " " + stream + " " + topic + " "
-                + pmRecipients);
+        Log.i("onCreateDialog", "" + type + " " + stream + " " + topic + " " + pmRecipients);
 
-        recipient = (AutoCompleteTextView) view
-                .findViewById(R.id.composeRecipient);
+        recipient = (AutoCompleteTextView) view.findViewById(R.id.composeRecipient);
         subject = (AutoCompleteTextView) view.findViewById(R.id.composeTopic);
         body = (EditText) view.findViewById(R.id.composeText);
+        threadSeparator = view.findViewById(R.id.separator);
 
         activity = ((ZulipActivity) getActivity());
         app = activity.app;
-
-        AlertDialog dialog = builder.setView(view).setTitle("Compose")
-                .setPositiveButton(R.string.send, null)
-                .setNegativeButton(android.R.string.cancel, null).create();
 
         if (type == MessageType.STREAM_MESSAGE) {
             this.switchToStream();
@@ -145,15 +155,14 @@ public class ComposeDialog extends DialogFragment {
                     getActivity(), R.layout.stream_tile, null,
                     new String[]{Message.SUBJECT_FIELD},
                     new int[]{R.id.name}, 0);
-            subjectAdapter
-                    .setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter() {
-                        @Override
-                        public CharSequence convertToString(Cursor cursor) {
-                            int index = cursor
-                                    .getColumnIndex(Message.SUBJECT_FIELD);
-                            return cursor.getString(index);
-                        }
-                    });
+            subjectAdapter.setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter() {
+                @Override
+                public CharSequence convertToString(Cursor cursor) {
+                    int index = cursor
+                            .getColumnIndex(Message.SUBJECT_FIELD);
+                    return cursor.getString(index);
+                }
+            });
             subjectAdapter.setFilterQueryProvider(new FilterQueryProvider() {
                 @Override
                 public Cursor runQuery(CharSequence charSequence) {
@@ -188,23 +197,22 @@ public class ComposeDialog extends DialogFragment {
                     new String[]{Person.EMAIL_FIELD},
                     new int[]{R.id.name}, 0);
             recipient.setAdapter(emailAdapter);
-            emailAdapter
-                    .setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter() {
-                        @Override
-                        public CharSequence convertToString(Cursor cursor) {
-                            String text = recipient.getText().toString();
-                            String prefix;
-                            int lastIndex = text.lastIndexOf(",");
-                            if (lastIndex != -1) {
-                                prefix = text.substring(0, lastIndex + 1);
-                            } else {
-                                prefix = "";
-                            }
-                            int index = cursor
-                                    .getColumnIndex(Person.EMAIL_FIELD);
-                            return prefix + cursor.getString(index);
-                        }
-                    });
+            emailAdapter.setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter() {
+                @Override
+                public CharSequence convertToString(Cursor cursor) {
+                    String text = recipient.getText().toString();
+                    String prefix;
+                    int lastIndex = text.lastIndexOf(",");
+                    if (lastIndex != -1) {
+                        prefix = text.substring(0, lastIndex + 1);
+                    } else {
+                        prefix = "";
+                    }
+                    int index = cursor
+                            .getColumnIndex(Person.EMAIL_FIELD);
+                    return prefix + cursor.getString(index);
+                }
+            });
             emailAdapter.setFilterQueryProvider(new FilterQueryProvider() {
                 @Override
                 public Cursor runQuery(CharSequence charSequence) {
@@ -225,10 +233,6 @@ public class ComposeDialog extends DialogFragment {
             }
         }
 
-        dialog.getWindow().setSoftInputMode(
-                WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-
-        return dialog;
     }
 
     /**
