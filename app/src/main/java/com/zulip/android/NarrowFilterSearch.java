@@ -16,6 +16,18 @@ import java.util.Arrays;
  * Narrow based on search terms
  */
 public class NarrowFilterSearch implements NarrowFilter {
+    public static final Creator<NarrowFilterSearch> CREATOR = new Creator<NarrowFilterSearch>() {
+        @Override
+        public NarrowFilterSearch createFromParcel(Parcel parcel) {
+            return new NarrowFilterSearch(parcel.readString());
+        }
+
+        @Override
+        public NarrowFilterSearch[] newArray(int i) {
+            return new NarrowFilterSearch[i];
+        }
+    };
+
     private final String query;
 
     public NarrowFilterSearch(String query) {
@@ -63,18 +75,6 @@ public class NarrowFilterSearch implements NarrowFilter {
         filter.put(new JSONArray(Arrays.asList("search", query)));
         return filter.toString();
     }
-
-    public static final Creator<NarrowFilterSearch> CREATOR = new Creator<NarrowFilterSearch>() {
-        @Override
-        public NarrowFilterSearch createFromParcel(Parcel parcel) {
-            return new NarrowFilterSearch(parcel.readString());
-        }
-
-        @Override
-        public NarrowFilterSearch[] newArray(int i) {
-            return new NarrowFilterSearch[i];
-        }
-    };
 
     @Override
     public int describeContents() {

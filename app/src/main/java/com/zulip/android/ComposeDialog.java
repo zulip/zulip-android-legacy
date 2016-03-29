@@ -33,6 +33,8 @@ public class ComposeDialog extends DialogFragment {
     private AutoCompleteTextView subject;
     private EditText body;
 
+    public ComposeDialog() {}
+
     public static ComposeDialog newInstance(MessageType type, String stream,
                                             String topic, String pmRecipients) {
         ComposeDialog d = new ComposeDialog();
@@ -46,9 +48,6 @@ public class ComposeDialog extends DialogFragment {
         args.putString("pmRecipients", pmRecipients);
         d.setArguments(args);
         return d;
-    }
-
-    public ComposeDialog() {
     }
 
     /**

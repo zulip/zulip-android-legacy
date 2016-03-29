@@ -16,6 +16,16 @@ import com.j256.ormlite.stmt.SelectArg;
 import com.j256.ormlite.stmt.Where;
 
 public class NarrowFilterPM implements NarrowFilter {
+    public static final Parcelable.Creator<NarrowFilterPM> CREATOR = new Parcelable.Creator<NarrowFilterPM>() {
+        public NarrowFilterPM createFromParcel(Parcel in) {
+            return new NarrowFilterPM(in.readString());
+        }
+
+        public NarrowFilterPM[] newArray(int size) {
+            return new NarrowFilterPM[size];
+        }
+    };
+
     List<Person> people;
     String recipientString;
 
@@ -41,16 +51,6 @@ public class NarrowFilterPM implements NarrowFilter {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(this.recipientString);
     }
-
-    public static final Parcelable.Creator<NarrowFilterPM> CREATOR = new Parcelable.Creator<NarrowFilterPM>() {
-        public NarrowFilterPM createFromParcel(Parcel in) {
-            return new NarrowFilterPM(in.readString());
-        }
-
-        public NarrowFilterPM[] newArray(int size) {
-            return new NarrowFilterPM[size];
-        }
-    };
 
     @Override
     public Where<Message, Object> modWhere(Where<Message, Object> where)

@@ -81,17 +81,17 @@ public class MessageListFragment extends Fragment implements MessageListener {
     boolean paused = false;
     boolean initialized = false;
 
+    public MessageListFragment() {
+        app = ZulipApp.get();
+        // Required empty public constructor
+    }
+
     public static MessageListFragment newInstance(NarrowFilter filter) {
         MessageListFragment fragment = new MessageListFragment();
         Bundle args = new Bundle();
         args.putParcelable(PARAM_FILTER, filter);
         fragment.setArguments(args);
         return fragment;
-    }
-
-    public MessageListFragment() {
-        app = ZulipApp.get();
-        // Required empty public constructor
     }
 
     @Override
@@ -162,19 +162,15 @@ public class MessageListFragment extends Fragment implements MessageListener {
                 if (!paused && !loadingMessages && firstMessageId > 0
                         && lastMessageId > 0) {
                     if (firstVisibleItem + visibleItemCount > totalItemCount
-                            - near) {
+                            - near && !loadedToBottom) {
                         // At the bottom of the list
-                        if (!loadedToBottom) {
-                            Log.i("scroll", "Starting request below");
-                            loadMoreMessages(LoadPosition.BELOW);
-                        }
+                        Log.i("scroll", "Starting request below");
+                        loadMoreMessages(LoadPosition.BELOW);
                     }
-                    if (firstVisibleItem < near) {
+                    if (firstVisibleItem < near && !loadedToTop) {
                         // At the top of the list
-                        if (!loadedToTop) {
-                            Log.i("scroll", "Starting request above");
-                            loadMoreMessages(LoadPosition.ABOVE);
-                        }
+                        Log.i("scroll", "Starting request above");
+                        loadMoreMessages(LoadPosition.ABOVE);
                     }
                 }
 
@@ -426,15 +422,13 @@ public class MessageListFragment extends Fragment implements MessageListener {
         }
         int addedCount = 0;
 
-        if (pos == LoadPosition.NEW) {
-            if (!loadedToBottom) {
-                // If we don't have intermediate messages loaded, don't add new
-                // messages -- they'll be loaded when we scroll down.
-                Log.i("onMessage",
-                        "skipping new message " + messages[0].getID() + " "
-                                + app.getMaxMessageId());
-                return;
-            }
+        if (pos == LoadPosition.NEW && !loadedToBottom) {
+            // If we don't have intermediate messages loaded, don't add new
+            // messages -- they'll be loaded when we scroll down.
+            Log.i("onMessage",
+                    "skipping new message " + messages[0].getID() + " "
+                            + app.getMaxMessageId());
+            return;
         }
 
         for (int i = 0; i < messages.length; i++) {
