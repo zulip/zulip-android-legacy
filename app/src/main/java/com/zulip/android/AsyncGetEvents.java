@@ -21,6 +21,8 @@ import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.misc.TransactionManager;
 
 public class AsyncGetEvents extends Thread {
+    public static final String ASYNC_GET_EVENTS = "asyncGetEvents";
+    public static final String POINTER = "pointer";
     ZulipActivity activity;
     ZulipApp app;
 
@@ -45,7 +47,7 @@ public class AsyncGetEvents extends Thread {
     public void abort() {
         // TODO: does this have race conditions? (if the thread is not in a
         // request when called)
-        Log.i("asyncGetEvents", "Interrupting thread");
+        Log.i(ASYNC_GET_EVENTS, "Interrupting thread");
         request.abort();
     }
 
@@ -55,7 +57,7 @@ public class AsyncGetEvents extends Thread {
         }
         failures += 1;
         long backoff = (long) (Math.exp(failures / 2.0) * 1000);
-        Log.e("asyncGetEvents", "Failure " + failures + ", sleeping for "
+        Log.e(ASYNC_GET_EVENTS, "Failure " + failures + ", sleeping for "
                 + backoff);
         SystemClock.sleep(backoff);
     }
@@ -128,7 +130,7 @@ public class AsyncGetEvents extends Thread {
                         if (msg.contains("Bad event queue id")
                                 || msg.contains("too old")) {
                             // Queue dead. Register again.
-                            Log.w("asyncGetEvents", "Queue dead");
+                            Log.w(ASYNC_GET_EVENTS, "Queue dead");
                             app.setEventQueueId(null);
                             continue;
                         }
@@ -139,7 +141,7 @@ public class AsyncGetEvents extends Thread {
                     // Retry without backoff, since it's already been a while
                 } catch (IOException e) {
                     if (request.aborting) {
-                        Log.i("asyncGetEvents", "Thread aborted");
+                        Log.i(ASYNC_GET_EVENTS, "Thread aborted");
                         return;
                     } else {
                         backoff(e);
@@ -156,7 +158,7 @@ public class AsyncGetEvents extends Thread {
     protected void processRegister(final JSONObject response) {
         // In task thread
         try {
-            app.setPointer(response.getInt("pointer"));
+            app.setPointer(response.getInt(POINTER));
             app.setMaxMessageId(response.getInt("max_message_id"));
 
             StopWatch watch = new StopWatch();
@@ -247,9 +249,9 @@ public class AsyncGetEvents extends Thread {
                             event.getJSONObject("message"), personCache,
                             streamCache);
                     messages.add(message);
-                } else if (type.equals("pointer")) {
+                } else if (type.equals(POINTER)) {
                     // Keep our pointer synced with global pointer
-                    app.setPointer(event.getInt("pointer"));
+                    app.setPointer(event.getInt(POINTER));
                 }
             }
 
