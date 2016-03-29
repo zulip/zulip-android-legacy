@@ -1,7 +1,5 @@
 package com.zulip.android;
 
-import android.database.Cursor;
-
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Comparator;
@@ -13,7 +11,6 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.j256.ormlite.android.AndroidDatabaseResults;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.field.DatabaseField;
@@ -137,7 +134,7 @@ public class Person {
     }
 
     public static Person getOrUpdate(ZulipApp app, String email, String name,
-                                     String avatarURL, HashMap<String, Person> personCache) {
+                                     String avatarURL, Map<String, Person> personCache) {
 
         Person person = null;
 

@@ -1,6 +1,8 @@
 package com.zulip.android;
 
 import java.sql.SQLException;
+import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -43,13 +45,13 @@ public class ZulipApp extends Application {
      * Mapping of email address to presence information for that user. This is
      * updated every 2 minutes by a background thread (see AsyncStatusUpdate)
      */
-    public final ConcurrentHashMap<String, Presence> presences = new ConcurrentHashMap<String, Presence>();
+    public final Map<String, Presence> presences = new ConcurrentHashMap<String, Presence>();
 
     /**
      * Queue of message ids to be marked as read. This queue should be emptied
      * every couple of seconds
      */
-    public final ConcurrentLinkedQueue<Integer> unreadMessageQueue = new ConcurrentLinkedQueue<Integer>();
+    public final Queue<Integer> unreadMessageQueue = new ConcurrentLinkedQueue<Integer>();
 
     public static ZulipApp get() {
         return instance;
