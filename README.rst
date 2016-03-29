@@ -45,12 +45,12 @@ Build instructions (without Android Studio)
    All of these can be installed, together with their dependencies,
    using the Android SDK manager.
 
-2. Comment out or remove references to Craslytics. The following are
+2. Comment out or remove references to Crashlytics. The following are
    known references as at ``5de0b0e``. For future versions,
    ``grep -ir crashlytics .`` is your friend.
    
-   If you do not remove Craslytics then the app will crash on startup
-   unless Craslytics has been set up correctly as a member of the zulip
+   If you do not remove Crashlytics then the app will crash on startup
+   unless Crashlytics has been set up correctly as a member of the zulip
    team.
     
 * In ``app/src/main/java/com/zulip/android/ZLog.java``:
