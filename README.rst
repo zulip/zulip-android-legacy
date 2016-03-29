@@ -34,6 +34,63 @@ emulator. Here are instructions for creating an Android virtual device
 
 http://developer.android.com/tools/devices/managing-avds.html#createavd
 
+Build instructions (without Android Studio)
+-------------------------------------------
+
+1. Install the Android SDK including at least the API 23 (Android 6.0),
+   Build Tools, API Platform, Google APIs, Google Play Services,
+   Android Support Library, the Local Maven Repository for Support and
+   the Google Repository.
+   
+   All of these can be installed, together with their dependencies,
+   using the Android SDK manager.
+
+2. Comment out or remove references to Craslytics. The following are
+   known references as at ``5de0b0e``. For future versions,
+   ``grep -ir crashlytics .`` is your friend.
+   
+   If you do not remove Craslytics then the app will crash on startup
+   unless Craslytics has been set up correctly as a member of the zulip
+   team.
+    
+* In ``app/src/main/java/com/zulip/android/ZLog.java``:
+ 
+  * Line 5: ``import com.crashlytics.android.Crashlytics;``
+ 
+  * Line 13: ``Crashlytics.logException(e);``
+
+* In ``app/src/main/java/com/zulip/android/ZulipActivity.java``:
+
+  * Line 50: ``import com.crashlytics.android.Crashlytics;``
+
+  * Line 162: ``Crashlytics.start(this);``
+
+3. Run ``./gradlew`` (or ``gradlew.bat`` on Windows). This should
+   automatically build the application, downloading anything it
+   needs to do so.
+   
+   If you get a failed build with
+   ``A problem occurred configuring project ':app'.`` then you might
+   not have all the required SDK libraries. Make sure that you have
+   all the dependencies of the libraries listed above, and that all
+   versions match precisely.
+   
+   If the appropriate tools cannot be found by gradle, make sure that
+   ``ANDROID_HOME`` is properly set (this should point to the root
+   directory for the Android SDK i.e. the one which contains the add-ons,
+   build-tools, docs and other directories).
+
+4. To build the APK, run ``./gradlew assemble``. Your APKs will be
+   placed in ``app/build/outputs/apk``.
+   
+   The ``app-debug.apk`` can be installed directly on the device, or
+   loaded over USB using ``./gradlew installDebug`` or
+   ``adb install /path/to/app/build/outputs/apk/app-debug.apk``.
+   
+   Note that ``app-release-unsigned.apk`` will **not** install by
+   default because it is unsigned. You will be told the APK cannot be
+   parsed.
+
 Export
 ------
 This distribution includes cryptographic software. The country in
