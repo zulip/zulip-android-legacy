@@ -19,7 +19,7 @@ import com.zulip.android.MessageListener.LoadPosition;
 
 public class AsyncGetOldMessages extends ZulipAsyncPushTask {
     MessageListener listener;
-    public ArrayList<Message> receivedMessages;
+    public List<Message> receivedMessages;
     MessageListener.LoadPosition position;
     protected MessageRange rng;
     protected int mainAnchor;

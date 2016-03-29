@@ -4,8 +4,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -84,8 +84,8 @@ public class Message {
      * @throws JSONException
      */
     public Message(ZulipApp app, JSONObject message,
-                   HashMap<String, Person> personCache,
-                   HashMap<String, Stream> streamCache) throws JSONException {
+                   Map<String, Person> personCache,
+                   Map<String, Stream> streamCache) throws JSONException {
         this.setID(message.getInt("id"));
         this.setSender(Person.getOrUpdate(app,
                 message.getString("sender_email"),

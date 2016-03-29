@@ -1,17 +1,14 @@
 package com.zulip.android;
 
 import android.content.Context;
-import android.os.*;
-import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Iterator;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
 
 /**
  * Sends a status update and fetches updates for other users.
@@ -94,7 +91,7 @@ public class AsyncStatusUpdate extends ZulipAsyncPushTask {
 
                 if (obj.getString("result").equals("success")) {
 
-                    ConcurrentHashMap<String, Presence> presenceLookup = this.app.presences;
+                    Map<String, Presence> presenceLookup = this.app.presences;
                     presenceLookup.clear();
 
                     JSONObject presences = obj.getJSONObject("presences");
