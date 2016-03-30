@@ -34,6 +34,13 @@ emulator. Here are instructions for creating an Android virtual device
 
 http://developer.android.com/tools/devices/managing-avds.html#createavd
 
+Coding Style
+------------
+
+Please read the Zulip coding style conventions documented at
+https://zulip.readthedocs.org/en/latest/code-style.html#version-control
+carefully.
+
 Export
 ------
 This distribution includes cryptographic software. The country in
