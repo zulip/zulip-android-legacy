@@ -12,5 +12,4 @@ res/values/com_crashlytics_export_strings.xml
 /build/
 .gradle/
 *.iml
-.idea/workspace.xml
-.idea/libraries
+.idea
