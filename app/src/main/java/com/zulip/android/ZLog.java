@@ -6,6 +6,8 @@ import com.crashlytics.android.Crashlytics;
 
 public class ZLog {
 
+    private ZLog() {}
+
     public static void logException(Throwable e) {
         if (Build.HARDWARE.contains("goldfish")) {
             e.printStackTrace();

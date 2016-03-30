@@ -18,6 +18,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class AsyncStatusUpdate extends ZulipAsyncPushTask {
 
+    public static final String STATUS = "status";
+    public static final String TIMESTAMP = "timestamp";
+    public static final String STATUS_UPDATE = "statusUpdate";
     private final Context context;
 
     /**
@@ -29,7 +32,7 @@ public class AsyncStatusUpdate extends ZulipAsyncPushTask {
         super(activity.app);
         this.context = activity;
 
-        setProperty("status", "active");
+        setProperty(STATUS, "active");
     }
 
     public final void execute() {
@@ -47,23 +50,23 @@ public class AsyncStatusUpdate extends ZulipAsyncPushTask {
         while (keys.hasNext()) {
             String key = (String) keys.next();
             JSONObject presence = person.getJSONObject(key);
-            long timestamp = presence.getLong("timestamp");
-            String status = presence.getString("status");
+            long timestamp = presence.getLong(TIMESTAMP);
+            String status = presence.getString(STATUS);
             if (latestPresence == null) {
                 // first presence
                 latestPresence = presence;
             } else {
-                String latestStatus = latestPresence.getString("status");
+                String latestStatus = latestPresence.getString(STATUS);
                 if (latestStatus == null) {
-                    Log.wtf("statusUpdate",
+                    Log.wtf(STATUS_UPDATE,
                             "Received presence information with no status");
                 } else if (status == null) {
-                    Log.wtf("statusUpdate",
+                    Log.wtf(STATUS_UPDATE,
                             "Received presence information with no status");
                 } else {
                     if (status.equals(PresenceType.ACTIVE.toString())) {
                         if (latestStatus.equals(PresenceType.ACTIVE.toString())) {
-                            if (latestPresence.getLong("timestamp") < timestamp) {
+                            if (latestPresence.getLong(TIMESTAMP) < timestamp) {
                                 latestPresence = presence;
                             }
                         } else {
@@ -73,7 +76,7 @@ public class AsyncStatusUpdate extends ZulipAsyncPushTask {
                         }
                     } else if (status.equals(PresenceType.IDLE.toString())) {
                         if (latestStatus.equals(PresenceType.IDLE.toString())) {
-                            if (latestPresence.getLong("timestamp") < timestamp) {
+                            if (latestPresence.getLong(TIMESTAMP) < timestamp) {
                                 latestPresence = presence;
                             }
                         }
@@ -112,9 +115,9 @@ public class AsyncStatusUpdate extends ZulipAsyncPushTask {
                             if (latestPresenceObj != null) {
                                 long age = serverTimestamp
                                         - latestPresenceObj
-                                        .getLong("timestamp");
+                                        .getLong(TIMESTAMP);
                                 String status = latestPresenceObj
-                                        .getString("status");
+                                        .getString(STATUS);
                                 String client = latestPresenceObj
                                         .getString("client");
 
@@ -146,7 +149,7 @@ public class AsyncStatusUpdate extends ZulipAsyncPushTask {
             }
         }
         Toast.makeText(context, "Unknown error", Toast.LENGTH_LONG).show();
-        Log.wtf("statusUpdate",
+        Log.wtf(STATUS_UPDATE,
                 "An exception was thrown or we got a failed response from the server for status updates.");
     }
 }
