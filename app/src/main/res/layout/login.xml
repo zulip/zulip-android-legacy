@@ -14,11 +14,12 @@
         android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/toolbar"
         android:gravity="center|center_horizontal"
         android:padding="10dp"
         android:text="@string/login_welcome_blurb"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_below="@+id/toolbar"
+        android:layout_centerHorizontal="true" />
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/usernameTIL"
