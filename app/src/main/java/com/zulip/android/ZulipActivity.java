@@ -333,7 +333,8 @@ public class ZulipActivity extends AppCompatActivity implements
         if (android.os.Build.VERSION.SDK_INT >= 11 && getSupportActionBar() != null) {
             // the AB is unavailable when invoked from JUnit
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setHomeButtonEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(false);
+            getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
         }
 
         homeList = MessageListFragment.newInstance(null);
