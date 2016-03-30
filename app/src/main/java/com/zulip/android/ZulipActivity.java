@@ -440,6 +440,13 @@ public class ZulipActivity extends AppCompatActivity implements
         drawerToggle.syncState();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.options, menu);
+        return true;
+    }
+
     public boolean onPrepareOptionsMenu(Menu menu) {
         /*
          * We want to show a menu only when we're logged in, so this function is
