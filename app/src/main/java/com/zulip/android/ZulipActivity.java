@@ -3,7 +3,10 @@ package com.zulip.android;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.ArrayList;
 
@@ -51,6 +54,7 @@ public class ZulipActivity extends FragmentActivity implements
         MessageListFragment.Listener, NarrowListener {
 
     ZulipApp app;
+    List<Message> mutedTopics;
     @Override
     public void addToList(Message message) {
         mutedTopics.add(message);
@@ -190,6 +194,7 @@ public class ZulipActivity extends FragmentActivity implements
 
         setContentView(R.layout.main);
 
+        mutedTopics = new ArrayList<>();
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
                 R.drawable.ic_drawer, R.string.streams_open,
