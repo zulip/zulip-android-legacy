@@ -13,6 +13,18 @@ import com.j256.ormlite.stmt.SelectArg;
 import com.j256.ormlite.stmt.Where;
 
 public class NarrowFilterStream implements NarrowFilter {
+    public static final Parcelable.Creator<NarrowFilterStream> CREATOR = new Parcelable.Creator<NarrowFilterStream>() {
+        public NarrowFilterStream createFromParcel(Parcel in) {
+            String[] pair = in.createStringArray();
+            return new NarrowFilterStream(Stream.getByName(ZulipApp.get(),
+                    pair[0]), pair[1]);
+        }
+
+        public NarrowFilterStream[] newArray(int size) {
+            return new NarrowFilterStream[size];
+        }
+    };
+
     Stream stream;
     String subject;
 
@@ -29,18 +41,6 @@ public class NarrowFilterStream implements NarrowFilter {
         String[] pair = {stream.getName(), subject};
         dest.writeStringArray(pair);
     }
-
-    public static final Parcelable.Creator<NarrowFilterStream> CREATOR = new Parcelable.Creator<NarrowFilterStream>() {
-        public NarrowFilterStream createFromParcel(Parcel in) {
-            String[] pair = in.createStringArray();
-            return new NarrowFilterStream(Stream.getByName(ZulipApp.get(),
-                    pair[0]), pair[1]);
-        }
-
-        public NarrowFilterStream[] newArray(int size) {
-            return new NarrowFilterStream[size];
-        }
-    };
 
     @Override
     public Where<Message, Object> modWhere(Where<Message, Object> where)

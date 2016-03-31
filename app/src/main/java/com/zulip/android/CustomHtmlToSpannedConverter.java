@@ -63,6 +63,7 @@ class CustomHtmlToSpannedConverter implements ContentHandler {
     private static final float[] HEADER_SIZES = {1.5f, 1.4f, 1.3f, 1.2f, 1.1f,
             1f,};
 
+    private static HashMap<String, Integer> COLORS = buildColorMap();
     private String mSource;
     private XMLReader mReader;
     private SpannableStringBuilder mSpannableStringBuilder;
@@ -104,11 +105,10 @@ class CustomHtmlToSpannedConverter implements ContentHandler {
             int end = mSpannableStringBuilder.getSpanEnd(obj[i]);
 
             // If the last line of the range is blank, back off by one.
-            if (end - 2 >= 0) {
-                if (mSpannableStringBuilder.charAt(end - 1) == '\n'
-                        && mSpannableStringBuilder.charAt(end - 2) == '\n') {
-                    end--;
-                }
+            if (end - 2 >= 0
+                    && mSpannableStringBuilder.charAt(end - 1) == '\n'
+                    && mSpannableStringBuilder.charAt(end - 2) == '\n') {
+                end--;
             }
 
             if (end == start) {
@@ -607,8 +607,6 @@ class CustomHtmlToSpannedConverter implements ContentHandler {
             mLevel = level;
         }
     }
-
-    private static HashMap<String, Integer> COLORS = buildColorMap();
 
     private static HashMap<String, Integer> buildColorMap() {
         HashMap<String, Integer> map = new HashMap<String, Integer>();

@@ -74,6 +74,16 @@ public class ZulipActivity extends FragmentActivity implements
 
     private Handler statusUpdateHandler;
 
+    private BroadcastReceiver onGcmMessage = new BroadcastReceiver() {
+        public void onReceive(Context contenxt, Intent intent) {
+            // Block the event before it propagates to show a notification.
+            // TODO: could be smarter and only block the event if the message is
+            // in the narrow.
+            Log.i("GCM", "Dropping a push because the activity is active");
+            abortBroadcast();
+        }
+    };
+
     MessageListFragment currentList;
     MessageListFragment narrowedList;
     MessageListFragment homeList;
@@ -678,14 +688,4 @@ public class ZulipActivity extends FragmentActivity implements
             narrowedList.onNewMessages(messages);
         }
     }
-
-    private BroadcastReceiver onGcmMessage = new BroadcastReceiver() {
-        public void onReceive(Context contenxt, Intent intent) {
-            // Block the event before it propagates to show a notification.
-            // TODO: could be smarter and only block the event if the message is
-            // in the narrow.
-            Log.i("GCM", "Dropping a push because the activity is active");
-            abortBroadcast();
-        }
-    };
 }

@@ -17,6 +17,17 @@ import java.util.Arrays;
  * Filter all private messages involving this person
  */
 public class NarrowFilterAllPMs implements NarrowFilter {
+    public static final Parcelable.Creator<NarrowFilterAllPMs> CREATOR = new Parcelable.Creator<NarrowFilterAllPMs>() {
+        public NarrowFilterAllPMs createFromParcel(Parcel in) {
+
+            return new NarrowFilterAllPMs(in.readString());
+        }
+
+        public NarrowFilterAllPMs[] newArray(int size) {
+            return new NarrowFilterAllPMs[size];
+        }
+    };
+
     final Person person;
     final String recipient;
 
@@ -38,17 +49,6 @@ public class NarrowFilterAllPMs implements NarrowFilter {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(recipient);
     }
-
-    public static final Parcelable.Creator<NarrowFilterAllPMs> CREATOR = new Parcelable.Creator<NarrowFilterAllPMs>() {
-        public NarrowFilterAllPMs createFromParcel(Parcel in) {
-
-            return new NarrowFilterAllPMs(in.readString());
-        }
-
-        public NarrowFilterAllPMs[] newArray(int size) {
-            return new NarrowFilterAllPMs[size];
-        }
-    };
 
     @Override
     public Where<Message, Object> modWhere(Where<Message, Object> where)

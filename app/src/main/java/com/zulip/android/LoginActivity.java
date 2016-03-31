@@ -122,17 +122,15 @@ public class LoginActivity extends Activity implements View.OnClickListener,
 
     @Override
     public void onConnectionFailed(ConnectionResult result) {
-        if (connectionProgressDialog.isShowing()) {
+        if (connectionProgressDialog.isShowing() && result.hasResolution()) {
             // The user clicked the sign-in button already. Start to resolve
             // connection errors. Wait until onConnected() to dismiss the
             // connection dialog.
-            if (result.hasResolution()) {
-                try {
-                    result.startResolutionForResult(this,
-                            REQUEST_CODE_RESOLVE_ERR);
-                } catch (SendIntentException e) {
-                    // Yeah, no idea what to do here.
-                }
+            try {
+                result.startResolutionForResult(this,
+                        REQUEST_CODE_RESOLVE_ERR);
+            } catch (SendIntentException e) {
+                // Yeah, no idea what to do here.
             }
         }
     }
