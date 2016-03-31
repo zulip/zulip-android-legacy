@@ -51,6 +51,24 @@ public class ZulipActivity extends FragmentActivity implements
         MessageListFragment.Listener, NarrowListener {
 
     ZulipApp app;
+    @Override
+    public void addToList(Message message) {
+        mutedTopics.add(message);
+    }
+
+    @Override
+    public void muteTopic(Message message) {
+        app.muteTopic(message);
+        for (int i = homeList.adapter.getCount() - 1; i >= 0; i--) {
+            if (homeList.adapter.getItem(i).getStream() != null) {
+                if (homeList.adapter.getItem(i).getStream().getId() == message.getStream().getId() && homeList.adapter.getItem(i).getSubject().equals(message.getSubject())) {
+                    mutedTopics.add(homeList.adapter.getItem(i));
+                    homeList.adapter.remove(homeList.adapter.getItem(i));
+                }
+            }
+        }
+        homeList.adapter.notifyDataSetChanged();
+    }
 
     // Intent Extra constants
     public enum Flag {
