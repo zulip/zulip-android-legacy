@@ -159,4 +159,7 @@ public class Stream {
         app.getDao(Stream.class).update(stream);
         return stream;
     }
+    public int getId() {
+        return id;
+    }
 }
