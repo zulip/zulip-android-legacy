@@ -76,6 +76,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
     boolean loadedToTop = false;
     boolean loadedToBottom = false;
 
+    List<Message> mutedMessages;
     int firstMessageId = -1;
     int lastMessageId = -1;
 
@@ -94,16 +95,17 @@ public class MessageListFragment extends Fragment implements MessageListener {
         app = ZulipApp.get();
         // Required empty public constructor
     }
-
+    List<Message> messageList;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             filter = getArguments().getParcelable(PARAM_FILTER);
         }
-
+        mutedMessages = new ArrayList<>();
         messageIndex = new SparseArray<Message>();
-        adapter = new MessageAdapter(getActivity(), new ArrayList<Message>());
+        messageList = new ArrayList<>();
+        adapter = new MessageAdapter(getActivity(), messageList);
     }
 
     public void onPause() {
