@@ -32,6 +32,7 @@ import android.widget.ListView;
 
 import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.stmt.Where;
+import java.util.List;
 
 public class MessageListFragment extends Fragment implements MessageListener {
     /**
