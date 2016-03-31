@@ -268,4 +268,14 @@ public class ZulipApp extends Application {
             unreadMessageHandler.sendEmptyMessageDelayed(0, 2000);
         }
     }
+    public void muteTopic(Message message) {
+        mutedTopics.add(message.concatStreamAndTopic());
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putStringSet(MUTED_TOPIC_KEY, new HashSet<String>(mutedTopics));
+        editor.apply();
+    }
+
+    public boolean isTopicMute(Message message) {
+        return mutedTopics.contains(message.concatStreamAndTopic());
+    }
 }

@@ -424,4 +424,8 @@ public class Message {
         }
 
     }
+
+    public String concatStreamAndTopic() {
+        return getStream().getId() + getSubject();
+    }
 }
