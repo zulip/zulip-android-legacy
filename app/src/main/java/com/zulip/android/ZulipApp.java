@@ -3,6 +3,8 @@ package com.zulip.android;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.Queue;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -27,6 +29,8 @@ public class ZulipApp extends Application {
     String api_key;
     private int max_message_id;
     DatabaseHelper databaseHelper;
+    Set<String> mutedTopics;
+    private static final String MUTED_TOPIC_KEY = "mutedTopics";
 
     /**
      * Handler to manage batching of unread messages
@@ -83,6 +87,7 @@ public class ZulipApp extends Application {
             afterLogin();
         }
 
+         mutedTopics = new HashSet<String>(settings.getStringSet(MUTED_TOPIC_KEY, new HashSet<String>()));
         // create unread message queue
         unreadMessageHandler = new Handler(new Handler.Callback() {
             @Override
