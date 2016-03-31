@@ -52,6 +52,8 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
         void openCompose(final MessageType type, String stream, String topic,
                          String pmRecipients);
+        void addToList(Message message);
+        void muteTopic(Message message);
     }
 
     private static final String PARAM_FILTER = "filter";
