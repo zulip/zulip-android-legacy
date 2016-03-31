@@ -454,6 +454,12 @@ public class MessageListFragment extends Fragment implements MessageListener {
             this.messageIndex.append(message.getID(), message);
             Stream stream = message.getStream();
 
+            if (stream != null && filter == null) { //Filter muted messages only in homescreen.
+                if (app.isTopicMute(message)) {
+                    mListener.addToList(message);
+                    return;
+                }
+            }
             if (filter == null && stream != null && !stream.getInHomeView()) {
                 continue;
             }
