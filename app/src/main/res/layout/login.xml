@@ -4,7 +4,11 @@
     android:layout_height="match_parent"
     android:gravity="center_horizontal"
     android:orientation="vertical"
-    android:paddingBottom="10dp" >
+    android:paddingBottom="10dp">
+
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/toolbar" />
 
     <TextView
         android:id="@+id/textView1"
@@ -13,30 +17,46 @@
         android:gravity="center|center_horizontal"
         android:padding="10dp"
         android:text="@string/login_welcome_blurb"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_below="@+id/toolbar"
+        android:layout_centerHorizontal="true" />
 
-    <EditText
-        android:id="@+id/username"
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/usernameTIL"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
         android:layout_below="@+id/textView1"
-        android:ems="10"
         android:hint="@string/username"
-        android:inputType="textEmailAddress" >
 
-        <requestFocus />
-    </EditText>
+        android:padding="16dp">
 
-    <EditText
-        android:id="@+id/password"
+        <EditText
+            android:id="@+id/username"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="textEmailAddress">
+
+            <requestFocus />
+        </EditText>
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/passwordTIL"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/username"
-        android:ems="10"
+        android:layout_below="@+id/usernameTIL"
         android:hint="@string/password"
-        android:inputType="textPassword" />
+        android:padding="16dp">
+
+        <EditText
+            android:id="@+id/password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="textPassword" />
+    </android.support.design.widget.TextInputLayout>
+
 
     <Button
         android:id="@+id/login"
@@ -44,9 +64,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/password"
+        android:layout_below="@+id/passwordTIL"
+        android:layout_margin="16dp"
         android:layout_marginTop="20dp"
-        android:text="@string/login_button" />
+        android:background="@color/colorPrimary"
+        android:text="@string/login_button"
+        android:textColor="@android:color/white" />
 
     <TextView
         android:id="@+id/legalTextView"
@@ -63,7 +86,6 @@
         android:layout_height="wrap_content"
         android:layout_alignRight="@+id/legalTextView"
         android:layout_below="@+id/login"
-        android:layout_marginTop="28dp" >
-    </com.google.android.gms.common.SignInButton>
+        android:layout_marginTop="28dp"></com.google.android.gms.common.SignInButton>
 
 </RelativeLayout>
