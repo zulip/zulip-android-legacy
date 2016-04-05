@@ -174,6 +174,9 @@ public class AsyncGetEvents extends Thread {
                     // Get subscriptions
                     JSONArray subscriptions = response
                             .getJSONArray("subscriptions");
+                    JSONObject jsonObject = new JSONObject(response.toString());
+                    JSONArray mutedTopics = jsonObject.getJSONArray("muted_topics");
+                    app.addToMutedTopics(mutedTopics);
                     RuntimeExceptionDao<Stream, Object> streamDao = app
                             .getDao(Stream.class);
                     Log.i("stream", "" + subscriptions.length() + " streams");

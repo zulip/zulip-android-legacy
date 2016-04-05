@@ -21,6 +21,9 @@ import com.crashlytics.android.Crashlytics;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 public class ZulipApp extends Application {
     private static ZulipApp instance;
     private static final String USER_AGENT = "ZulipMobile";
@@ -141,7 +144,6 @@ public class ZulipApp extends Application {
         }
         return "https://api.zulip.com/";
     }
-
     public String getApiKey() {
         return api_key;
     }
@@ -156,6 +158,23 @@ public class ZulipApp extends Application {
             ZLog.logException(e);
             return ZulipApp.USER_AGENT + "/unknown";
         }
+    }
+
+    public void addToMutedTopics(JSONArray jsonArray) {
+        Stream stream;
+
+        for (int i = 0; i < jsonArray.length(); i++) {
+            try {
+                JSONArray mutedTopic = jsonArray.getJSONArray(i);
+                stream = Stream.getByName(this, mutedTopic.get(0).toString());
+                mutedTopics.add(stream.getId() + mutedTopic.get(1).toString());
+            } catch (JSONException e) {
+                Log.e("JSONException", "JSON Is not correct", e);
+            }
+        }
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putStringSet(MUTED_TOPIC_KEY, new HashSet<String>(mutedTopics));
+        editor.apply();
     }
 
     public void setEmail(String email) {
