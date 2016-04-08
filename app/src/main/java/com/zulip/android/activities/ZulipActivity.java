@@ -440,6 +440,41 @@ public class ZulipActivity extends FragmentActivity implements
 
     private void sendMessage() {
 
+        if (isCurrentModeStream()) {
+            if (TextUtils.isEmpty(streamActv.getText().toString())) {
+                streamActv.setError(getString(R.string.stream_error));
+                streamActv.requestFocus();
+                return;
+            } else {
+                try {
+                    Cursor streamCursor = makeStreamCursor(streamActv.getText().toString());
+                    if (streamCursor.getCount() == 0) {
+                        streamActv.setError(getString(R.string.stream_not_exists));
+                        streamActv.requestFocus();
+                        return;
+                    }
+                } catch (SQLException e) {
+                    Log.e("SQLException", "SQL not correct", e);
+                }
+            }
+            if (TextUtils.isEmpty(topicActv.getText().toString())) {
+                topicActv.setError(getString(R.string.subject_error));
+                topicActv.requestFocus();
+                return;
+            }
+        } else {
+            if (TextUtils.isEmpty(topicActv.getText().toString())) {
+                topicActv.setError(getString(R.string.person_error));
+                topicActv.requestFocus();
+                return;
+            }
+        }
+
+        if (TextUtils.isEmpty(messageEt.getText().toString())) {
+            messageEt.setError(getString(R.string.no_message_error));
+            messageEt.requestFocus();
+            return;
+        }
         MessageType messageType = (isCurrentModeStream()) ? MessageType.STREAM_MESSAGE : MessageType.PRIVATE_MESSAGE;
         Message msg = new Message(app);
         msg.setSender(app.getYou());
