@@ -793,6 +793,19 @@ public class ZulipActivity extends FragmentActivity implements
     }
 
     @Override
+    public void onNarrowFillSendBox(Message message) {
+        if(message.getType() == MessageType.PRIVATE_MESSAGE){
+            switchToPrivate();
+            topicActv.setText(message.getReplyTo(app));
+            messageEt.requestFocus();
+        } else {
+            switchToStream();
+            streamActv.setText(message.getStream().getName());
+            topicActv.setText(message.getSubject());
+            if ("".equals(message.getSubject())) topicActv.requestFocus();
+            else messageEt.requestFocus();
+        }
+    }
     public void onNarrow(NarrowFilter narrowFilter) {
         // TODO: check if already narrowed to this particular stream/subject
         doNarrow(narrowFilter);
