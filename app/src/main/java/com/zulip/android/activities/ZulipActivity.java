@@ -371,7 +371,10 @@ public class ZulipActivity extends FragmentActivity implements
                                     int position, long id) {
                 // TODO: is there a way to get the Stream from the adapter
                 // without re-querying it?
-                narrow(Stream.getById(app, (int) id));
+                Stream stream = Stream.getById(app, (int) id);
+                narrow(stream);
+                streamActv.setText(stream.getName());
+                topicActv.setText("");
             }
         });
 
