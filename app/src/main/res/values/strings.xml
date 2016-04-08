@@ -50,6 +50,9 @@
     <string name="username_required">Username required</string>
     <string name="server_domain_required">Server domain required</string>
     <string name="invalid_domain">Invalid domain</string>
+    <string name="hint_person">Person</string>
+    <string name="hint_subject">Subject</string>
+    <string name="hint_stream">Stream</string>
 
 
     <string name="tap_message">Tap on a message to send reply</string>
