@@ -51,4 +51,6 @@
     <string name="server_domain_required">Server domain required</string>
     <string name="invalid_domain">Invalid domain</string>
 
+
+    <string name="tap_message">Tap on a message to send reply</string>
 </resources>
