@@ -314,16 +314,19 @@ public class MessageListFragment extends Fragment implements MessageListener {
             case R.id.narrow_to_private:
                 if (getActivity() instanceof NarrowListener) {
                     ((NarrowListener) getActivity()).onNarrow(new NarrowFilterPM(Arrays.asList(message.getRecipients(app))));
+                    ((NarrowListener) getActivity()).onNarrowFillSendBox(message);
                 }
                 return true;
             case R.id.narrow_to_stream:
                 if (getActivity() instanceof NarrowListener) {
                     ((NarrowListener) getActivity()).onNarrow(new NarrowFilterStream(message.getStream(), null));
+                    ((NarrowListener) getActivity()).onNarrowFillSendBox(message);
                 }
                 return true;
             case R.id.narrow_to_subject:
                 if (getActivity() instanceof NarrowListener) {
                     ((NarrowListener) getActivity()).onNarrow(new NarrowFilterStream(message.getStream(), message.getSubject()));
+                    ((NarrowListener) getActivity()).onNarrowFillSendBox(message);
                 }
                 return true;
             case R.id.copy_message:
