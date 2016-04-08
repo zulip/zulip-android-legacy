@@ -653,6 +653,27 @@ public class ZulipActivity extends FragmentActivity implements
                         DatabaseHelper.likeEscape(piece) + "%")
                 .closeableIterator().getRawResults()).getRawCursor();
     }
+    public void switchToStream() {
+        removeEditTextErrors();
+        if (!isCurrentModeStream()) switchView();
+    }
+
+    public void switchToPrivate() {
+        removeEditTextErrors();
+        if (isCurrentModeStream()) switchView();
+    }
+
+    public boolean isCurrentModeStream() {
+        //The TextView is VISIBLE which means currently send to stream is on.
+        return (textView.getVisibility() == View.VISIBLE);
+    }
+
+    public void removeEditTextErrors() {
+        streamActv.setError(null);
+        topicActv.setError(null);
+        messageEt.setError(null);
+    }
+
     public void switchView() {
         if (isCurrentModeStream()) { //Person
             togglePrivateStreamBtn.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_action_bullhorn));
