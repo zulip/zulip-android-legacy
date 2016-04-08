@@ -41,7 +41,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
@@ -100,6 +102,12 @@ public class ZulipActivity extends FragmentActivity implements
     MessageListFragment narrowedList;
     MessageListFragment homeList;
 
+    AutoCompleteTextView streamActv;
+    AutoCompleteTextView topicActv;
+    EditText messageEt;
+    private TextView textView;
+    private ImageView sendBtn;
+    private ImageView togglePrivateStreamBtn;
     Notifications notifications;
 
     private BroadcastReceiver onGcmMessage = new BroadcastReceiver() {
@@ -242,7 +250,12 @@ public class ZulipActivity extends FragmentActivity implements
         this.logged_in = true;
 
         setContentView(R.layout.main);
-
+        streamActv = (AutoCompleteTextView) findViewById(R.id.stream_actv);
+        topicActv = (AutoCompleteTextView) findViewById(R.id.topic_actv);
+        messageEt = (EditText) findViewById(R.id.message_et);
+        textView = (TextView) findViewById(R.id.textView);
+        sendBtn = (ImageView) findViewById(R.id.send_btn);
+        togglePrivateStreamBtn = (ImageView) findViewById(R.id.togglePrivateStream_btn);
         mutedTopics = new ArrayList<>();
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
