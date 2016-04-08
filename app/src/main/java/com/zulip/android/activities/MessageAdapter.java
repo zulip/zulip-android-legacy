@@ -164,17 +164,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         contentView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                FragmentManager fm = context.getSupportFragmentManager();
-                ComposeDialog dialog;
-                if (message.getType() == MessageType.STREAM_MESSAGE) {
-                    dialog = ComposeDialog.newInstance(message.getType(),
-                            message.getStream().getName(),
-                            message.getSubject(), null);
-                } else {
-                    dialog = ComposeDialog.newInstance(message.getType(), null,
-                            null, message.getReplyTo(context.app));
-                }
-                dialog.show(fm, "fragment_compose");
+                ((NarrowListener) getContext()).onNarrowFillSendBox(message);
             }
         });
 
