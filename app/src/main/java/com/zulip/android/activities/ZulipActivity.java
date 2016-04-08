@@ -34,6 +34,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -43,12 +44,14 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.FilterQueryProvider;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.j256.ormlite.android.AndroidDatabaseResults;
+import com.zulip.android.database.DatabaseHelper;
 import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageType;
 import com.zulip.android.filters.NarrowFilter;
@@ -109,6 +112,9 @@ public class ZulipActivity extends FragmentActivity implements
     private ImageView sendBtn;
     private ImageView togglePrivateStreamBtn;
     Notifications notifications;
+    SimpleCursorAdapter streamActvAdapter;
+    SimpleCursorAdapter subjectActvAdapter;
+    SimpleCursorAdapter emailActvAdapter;
 
     private BroadcastReceiver onGcmMessage = new BroadcastReceiver() {
         public void onReceive(Context contenxt, Intent intent) {
@@ -419,6 +425,157 @@ public class ZulipActivity extends FragmentActivity implements
                 switchView();
             }
         });
+        setUpAdapter();
+        streamActv.setAdapter(streamActvAdapter);
+        topicActv.setAdapter(subjectActvAdapter);
+
+    public void setUpAdapter() {
+        streamActvAdapter = new SimpleCursorAdapter(
+                that, R.layout.stream_tile, null,
+                new String[]{Stream.NAME_FIELD},
+                new int[]{R.id.name}, 0);
+        streamActvAdapter.setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter() {
+            @Override
+            public CharSequence convertToString(Cursor cursor) {
+                int index = cursor.getColumnIndex(Stream.NAME_FIELD);
+                return cursor.getString(index);
+            }
+        });
+        streamActvAdapter.setFilterQueryProvider(new FilterQueryProvider() {
+            @Override
+            public Cursor runQuery(CharSequence charSequence) {
+                try {
+                    return makeStreamCursor(charSequence);
+                } catch (SQLException e) {
+                    Log.e("SQLException", "SQL not correct", e);
+                    return null;
+                }
+            }
+        });
+        subjectActvAdapter = new SimpleCursorAdapter(
+                that, R.layout.stream_tile, null,
+                new String[]{Message.SUBJECT_FIELD},
+                new int[]{R.id.name}, 0);
+        subjectActvAdapter.setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter() {
+            @Override
+            public CharSequence convertToString(Cursor cursor) {
+                int index = cursor.getColumnIndex(Message.SUBJECT_FIELD);
+                return cursor.getString(index);
+            }
+        });
+        subjectActvAdapter.setFilterQueryProvider(new FilterQueryProvider() {
+            @Override
+            public Cursor runQuery(CharSequence charSequence) {
+                try {
+                    return makeSubjectCursor(streamActv.getText().toString(), charSequence);
+                } catch (SQLException e) {
+                    Log.e("SQLException", "SQL not correct", e);
+                    return null;
+                }
+            }
+        });
+
+        emailActvAdapter = new SimpleCursorAdapter(
+                that, R.layout.stream_tile, null,
+                new String[]{Person.EMAIL_FIELD},
+                new int[]{R.id.name}, 0);
+        emailActvAdapter
+                .setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter() {
+                    @Override
+                    public CharSequence convertToString(Cursor cursor) {
+                        String text = topicActv.getText().toString();
+                        String prefix;
+                        int lastIndex = text.lastIndexOf(",");
+                        if (lastIndex != -1) {
+                            prefix = text.substring(0, lastIndex + 1);
+                        } else {
+                            prefix = "";
+                        }
+                        int index = cursor.getColumnIndex(Person.EMAIL_FIELD);
+                        return prefix + cursor.getString(index);
+                    }
+                });
+        emailActvAdapter.setFilterQueryProvider(new FilterQueryProvider() {
+            @Override
+            public Cursor runQuery(CharSequence charSequence) {
+                try {
+                    return makePeopleCursor(charSequence);
+                } catch (SQLException e) {
+                    Log.e("SQLException", "SQL not correct", e);
+                    return null;
+                }
+            }
+        });
+
+    }
+
+    private Cursor makeStreamCursor(CharSequence streamName)
+            throws SQLException {
+        if (streamName == null) {
+            streamName = "";
+        }
+
+        return ((AndroidDatabaseResults) app
+                .getDao(Stream.class)
+                .queryRaw(
+                        "SELECT rowid _id, * FROM streams WHERE "
+                                + Stream.SUBSCRIBED_FIELD + " = 1 AND "
+                                + Stream.NAME_FIELD
+                                + " LIKE ? ESCAPE '\\' ORDER BY "
+                                + Stream.NAME_FIELD + " COLLATE NOCASE",
+                        DatabaseHelper.likeEscape(streamName.toString()) + "%")
+                .closeableIterator().getRawResults()).getRawCursor();
+    }
+
+    private Cursor makeSubjectCursor(CharSequence stream, CharSequence subject)
+            throws SQLException {
+        if (subject == null) {
+            subject = "";
+        }
+        if (stream == null) {
+            stream = "";
+        }
+
+        AndroidDatabaseResults results = (AndroidDatabaseResults) app
+                .getDao(Message.class)
+                .queryRaw(
+                        "SELECT DISTINCT "
+                                + Message.SUBJECT_FIELD
+                                + ", 1 AS _id FROM messages JOIN streams ON streams."
+                                + Stream.ID_FIELD + " = messages."
+                                + Message.STREAM_FIELD + " WHERE "
+                                + Message.SUBJECT_FIELD
+                                + " LIKE ? ESCAPE '\\' AND "
+                                + Stream.NAME_FIELD + " = ? ORDER BY "
+                                + Message.SUBJECT_FIELD + " COLLATE NOCASE",
+                        DatabaseHelper.likeEscape(subject.toString()) + "%",
+                        stream.toString()).closeableIterator().getRawResults();
+        return results.getRawCursor();
+    }
+
+    private Cursor makePeopleCursor(CharSequence email) throws SQLException {
+        if (email == null) {
+            email = "";
+        }
+        String[] pieces = TextUtils.split(email.toString(), ",");
+        String piece;
+        if (pieces.length == 0) {
+            piece = "";
+        } else {
+            piece = pieces[pieces.length - 1].trim();
+        }
+        return ((AndroidDatabaseResults) app
+                .getDao(Person.class)
+                .queryRaw(
+                        "SELECT rowid _id, * FROM people WHERE "
+                                + Person.ISBOT_FIELD + " = 0 AND "
+                                + Person.ISACTIVE_FIELD + " = 1 AND "
+                                + Person.EMAIL_FIELD
+                                + " LIKE ? ESCAPE '\\' ORDER BY "
+                                + Person.NAME_FIELD + " COLLATE NOCASE",
+                        DatabaseHelper.likeEscape(piece) + "%")
+                .closeableIterator().getRawResults()).getRawCursor();
+    }
     public void switchView() {
         if (isCurrentModeStream()) { //Person
             togglePrivateStreamBtn.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_action_bullhorn));
