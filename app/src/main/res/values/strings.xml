@@ -53,6 +53,8 @@
     <string name="hint_person">Person</string>
     <string name="hint_subject">Subject</string>
     <string name="hint_stream">Stream</string>
+    <string name="message_sent">Message Sent!</string>
+    <string name="message_error">Error sending Message</string>
 
 
     <string name="tap_message">Tap on a message to send reply</string>

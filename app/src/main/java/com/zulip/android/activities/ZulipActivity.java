@@ -49,6 +49,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.j256.ormlite.android.AndroidDatabaseResults;
 import com.zulip.android.database.DatabaseHelper;
@@ -66,6 +67,7 @@ import com.zulip.android.models.Presence;
 import com.zulip.android.models.PresenceType;
 import com.zulip.android.R;
 import com.zulip.android.models.Stream;
+import com.zulip.android.networking.AsyncSend;
 import com.zulip.android.util.ZLog;
 import com.zulip.android.ZulipApp;
 import com.zulip.android.gcm.GcmBroadcastReceiver;
@@ -429,9 +431,45 @@ public class ZulipActivity extends FragmentActivity implements
                 switchView();
             }
         });
+        sendBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendMessage();
+            }
+        });
         setUpAdapter();
         streamActv.setAdapter(streamActvAdapter);
         topicActv.setAdapter(subjectActvAdapter);
+    }
+
+    private void sendMessage() {
+
+        MessageType messageType = (isCurrentModeStream()) ? MessageType.STREAM_MESSAGE : MessageType.PRIVATE_MESSAGE;
+        Message msg = new Message(app);
+        msg.setSender(app.getYou());
+
+        if (messageType == MessageType.STREAM_MESSAGE) {
+            msg.setType(messageType);
+            msg.setStream(new Stream(streamActv.getText().toString()));
+            msg.setSubject(topicActv.getText().toString());
+        } else if (messageType == MessageType.PRIVATE_MESSAGE) {
+            msg.setType(messageType);
+            msg.setRecipient(topicActv.getText().toString().split(","));
+        }
+        msg.setContent(messageEt.getText().toString());
+        AsyncSend sender = new AsyncSend(that, msg);
+        sender.setCallback(new ZulipAsyncPushTask.AsyncTaskCompleteListener() {
+            public void onTaskComplete(String result, JSONObject jsonObject) {
+                Toast.makeText(ZulipActivity.this, R.string.message_sent, Toast.LENGTH_SHORT).show();
+                messageEt.setText("");
+            }
+            public void onTaskFailure(String result) {
+                Log.d("onTaskFailure", "Result: " + result);
+                Toast.makeText(ZulipActivity.this, R.string.message_error, Toast.LENGTH_SHORT).show();
+            }
+        });
+        sender.execute();
+    }
 
     public void setUpAdapter() {
         streamActvAdapter = new SimpleCursorAdapter(
