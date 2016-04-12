@@ -6,7 +6,8 @@
     <string name="login_button">Log in</string>
     <string name="username">Email</string>
     <string name="password">Password</string>
-    <string name="server_url">api.zulip.com</string>
+    <string name="server_url">Server Url</string>
+    <string name="api_zulip_com">api.zulip.com</string>
     <string name="legal">Legal information</string>
     <string name="logout">Log out</string>
     <string name="compose_stream">Compose message to Stream</string>
