@@ -33,6 +33,7 @@ import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
@@ -111,6 +112,10 @@ public class ZulipActivity extends FragmentActivity implements
                 case R.id.name:
                     TextView name = (TextView) arg0;
                     name.setText(arg1.getString(arg2));
+                    //Change color in the drawer if this stream is inHomeView only.
+                    if (!Stream.getByName(app, arg1.getString(arg2)).getInHomeView())
+                        name.setTextColor(ContextCompat.getColor(ZulipActivity.this, android.R.color.tertiary_text_light));
+                    else name.setTextColor(ContextCompat.getColor(ZulipActivity.this, android.R.color.primary_text_light));
                     return true;
                 case R.id.stream_dot:
                     // Set the color of the (currently white) dot
