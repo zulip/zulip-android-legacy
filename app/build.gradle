@@ -14,6 +14,14 @@ android {
         testApplicationId "com.zulip.android.test"
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
     }
+    signingConfigs {
+        debug {
+            keyAlias "zulip"
+            keyPassword "zulip123#"
+            storeFile file("zulip_debug.keystore")
+            storePassword "zulip123#"
+        }
+    }
     buildTypes {
         debug {
             applicationIdSuffix '.dev'
