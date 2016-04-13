@@ -101,6 +101,10 @@ public class MessageAdapter extends ArrayAdapter<Message> {
                     }
                 }
             });
+            if (getContext() instanceof NarrowListener) {
+                if (context.app.isTopicMute(message)) muteImageView.setVisibility(View.VISIBLE);
+                else muteImageView.setVisibility(View.GONE);
+            }
         }
 
         TextView sep = (TextView) tile.findViewById(R.id.sep);
