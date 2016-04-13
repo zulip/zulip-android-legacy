@@ -68,6 +68,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
 
         LinearLayout envelopeTile = (LinearLayout) tile.findViewById(R.id.envelopeTile);
         TextView display_recipient = (TextView) tile.findViewById(R.id.displayRecipient);
+        ImageView muteImageView = (ImageView) tile.findViewById(R.id.muteMessageImage);
 
         if (message.getType() != MessageType.STREAM_MESSAGE) {
             envelopeTile.setBackgroundColor(mDefaultHuddleHeaderColor);
