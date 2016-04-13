@@ -36,10 +36,17 @@
 
         <TextView
             android:id="@+id/instance"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:text="@string/subject" />
 
+        <ImageView
+            android:id="@+id/muteMessageImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_volume_off_black_18dp"
+            android:visibility="gone" />
     </LinearLayout>
 
     <RelativeLayout
