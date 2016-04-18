@@ -201,7 +201,7 @@ public class ZulipApp extends Application {
     }
 
     public String getEmail() {
-        return this.you.getEmail();
+        return you == null ? "" : you.getEmail();
     }
 
     public DatabaseHelper getDatabaseHelper() {
