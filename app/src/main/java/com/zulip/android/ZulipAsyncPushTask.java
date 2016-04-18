@@ -33,15 +33,15 @@ class ZulipAsyncPushTask extends AsyncTask<String, String, String> {
      * if they want to honor declared callback.
      */
     interface AsyncTaskCompleteListener {
-        public void onTaskComplete(String result);
+        void onTaskComplete(String result);
 
-        public void onTaskFailure(String result);
+        void onTaskFailure(String result);
     }
 
     /**
      * Declares a new HumbugAsyncPushTask, passing the activity as context.
      *
-     * @param humbugActivity The Activity that created the PushTask
+     * @param app the zulip app god object
      */
     public ZulipAsyncPushTask(ZulipApp app) {
         this.app = app;
@@ -66,8 +66,7 @@ class ZulipAsyncPushTask extends AsyncTask<String, String, String> {
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public AsyncTask<String, String, String> execute(String method, String url) {
         try {
-            return this.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
-                    method, url);
+            return this.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, method, url);
         } catch (NoSuchFieldError e) {
             return super.execute(method, url);
         }
@@ -133,7 +132,7 @@ class ZulipAsyncPushTask extends AsyncTask<String, String, String> {
         if (e.getStatusCode() < 500 && e.getStatusCode() >= 400) {
             ZLog.logException(e);
         } else {
-            Log.i("hapt", "http error", e);
+            Log.e("hapt", "http error", e);
         }
         this.cancel(true);
     }
