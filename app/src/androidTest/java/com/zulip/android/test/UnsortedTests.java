@@ -16,14 +16,14 @@ import android.test.ActivityUnitTestCase;
 
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.misc.TransactionManager;
-import com.zulip.android.ZulipActivity;
-import com.zulip.android.Message;
-import com.zulip.android.MessageListFragment;
-import com.zulip.android.MessageRange;
-import com.zulip.android.MessageType;
-import com.zulip.android.Person;
+import com.zulip.android.activities.ZulipActivity;
+import com.zulip.android.models.Message;
+import com.zulip.android.activities.MessageListFragment;
+import com.zulip.android.models.MessageRange;
+import com.zulip.android.models.MessageType;
+import com.zulip.android.models.Person;
 import com.zulip.android.ZulipApp;
-import com.zulip.android.MessageListener.LoadPosition;
+import com.zulip.android.util.MessageListener.LoadPosition;
 import com.zulip.android.test.mutated.FakeAsyncGetOldMessages;
 
 public class UnsortedTests extends ActivityUnitTestCase<ZulipActivity> {

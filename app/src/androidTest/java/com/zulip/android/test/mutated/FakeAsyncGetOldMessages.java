@@ -3,13 +3,14 @@ package com.zulip.android.test.mutated;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.zulip.android.Message;
-import com.zulip.android.MessageListFragment;
-import com.zulip.android.MessageRange;
-import com.zulip.android.MessageListener.LoadPosition;
+import com.zulip.android.models.Message;
+import com.zulip.android.activities.MessageListFragment;
+import com.zulip.android.models.MessageRange;
+import com.zulip.android.util.MessageListener.LoadPosition;
+import com.zulip.android.networking.AsyncGetOldMessages;
 
 public class FakeAsyncGetOldMessages extends
-        com.zulip.android.AsyncGetOldMessages {
+        AsyncGetOldMessages {
     public String calculatedResult;
     public int fmAnchor;
     public int fmNumBefore;

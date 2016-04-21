@@ -20,6 +20,14 @@ import android.util.Log;
 import com.crashlytics.android.Crashlytics;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
+import com.zulip.android.database.DatabaseHelper;
+import com.zulip.android.models.Message;
+import com.zulip.android.models.Person;
+import com.zulip.android.models.Presence;
+import com.zulip.android.models.Stream;
+import com.zulip.android.networking.AsyncUnreadMessagesUpdate;
+import com.zulip.android.util.BuildHelper;
+import com.zulip.android.util.ZLog;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,9 +37,9 @@ public class ZulipApp extends Application {
     public static final String EMAIL = "email";
     private static ZulipApp instance;
     private static final String USER_AGENT = "ZulipMobile";
-    Person you;
-    SharedPreferences settings;
-    String api_key;
+    private Person you;
+    private SharedPreferences settings;
+    private String api_key;
     private int max_message_id;
     DatabaseHelper databaseHelper;
     Set<String> mutedTopics;
@@ -112,7 +120,7 @@ public class ZulipApp extends Application {
         });
     }
 
-    int getAppVersion() {
+    public int getAppVersion() {
         try {
             PackageInfo packageInfo = this.getPackageManager().getPackageInfo(
                     this.getPackageName(), 0);
@@ -310,5 +318,13 @@ public class ZulipApp extends Application {
 
     public boolean isTopicMute(Message message) {
         return mutedTopics.contains(message.concatStreamAndTopic());
+    }
+
+    public SharedPreferences getSettings() {
+        return settings;
+    }
+
+    public Person getYou() {
+        return you;
     }
 }
