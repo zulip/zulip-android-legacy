@@ -83,8 +83,6 @@ public class AsyncStatusUpdate extends ZulipAsyncPushTask {
 
     @Override
     protected void onPostExecute(String result) {
-        super.onPostExecute(result);
-
         if (result != null) {
             try {
                 JSONObject obj = new JSONObject(result);
