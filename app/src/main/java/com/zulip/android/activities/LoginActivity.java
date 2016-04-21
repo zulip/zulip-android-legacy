@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -27,28 +29,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class LoginActivity extends FragmentActivity implements View.OnClickListener,
-        GoogleApiClient.OnConnectionFailedListener {
+        GoogleApiClient.OnConnectionFailedListener, CompoundButton.OnCheckedChangeListener {
     private static final int REQUEST_CODE_RESOLVE_ERR = 9000;
     private static final int REQUEST_CODE_SIGN_IN = 9001;
 
     private ProgressDialog connectionProgressDialog;
     private GoogleApiClient mGoogleApiClient;
-
-    private void saveServerURL() {
-        String serverURL = ((EditText) findViewById(R.id.server_url)).getText().toString();
-
-        // todo: add protocol if no protocol exists, default to https
-
-        if (!serverURL.endsWith("/")) {
-            serverURL = serverURL + "/";
-        }
-
-        if (!serverURL.startsWith("https://api.zulip.com/")) {
-            serverURL = serverURL + "api/";
-        }
-
-        ((ZulipApp) getApplication()).setServerURL(serverURL);
-    }
+    private EditText mServerEditText;
+    private View mGoogleSignInButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +49,9 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
         connectionProgressDialog.setMessage(getString(R.string.signing_in));
         findViewById(R.id.google_sign_in_button).setOnClickListener(this);
         findViewById(R.id.zulip_login).setOnClickListener(this);
+        ((CheckBox) findViewById(R.id.checkbox_usezulip)).setOnCheckedChangeListener(this);
+        mServerEditText = (EditText) findViewById(R.id.server_url);
+        mGoogleSignInButton = findViewById(R.id.google_sign_in_button);
     }
 
     @Override
@@ -89,6 +80,23 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
         }
         super.onStop();
     }
+
+    private void saveServerURL() {
+        String serverURL = mServerEditText.getText().toString();
+
+        // todo: add protocol if no protocol exists, default to https
+
+        if (!serverURL.endsWith("/")) {
+            serverURL = serverURL + "/";
+        }
+
+        if (!serverURL.startsWith("https://api.zulip.com/")) {
+            serverURL = serverURL + "api/";
+        }
+
+        ((ZulipApp) getApplication()).setServerURL(serverURL);
+    }
+
 
     private void handleSignInResult(GoogleSignInResult result) {
         Log.d("Login", "handleSignInResult:" + result.isSuccess());
@@ -220,6 +228,18 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
             case R.id.legal_button:
                 openLegal();
                 break;
+        }
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        if (isChecked) {
+            mServerEditText.setVisibility(View.GONE);
+            mServerEditText.getText().clear();
+            mGoogleSignInButton.setVisibility(View.VISIBLE);
+        } else {
+            mServerEditText.setVisibility(View.VISIBLE);
+            mGoogleSignInButton.setVisibility(View.GONE);
         }
     }
 }
