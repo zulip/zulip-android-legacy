@@ -195,7 +195,7 @@ public class ZulipApp extends Application {
     public void setServerURL(String serverURL) {
         Editor ed = this.settings.edit();
         ed.putString("server_url", serverURL);
-        ed.commit();
+        ed.apply();
     }
 
     public void setLoggedInApiKey(String apiKey) {
