@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -39,6 +40,8 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
     private ProgressDialog connectionProgressDialog;
     private GoogleApiClient mGoogleApiClient;
     private EditText mServerEditText;
+    private EditText mUserName;
+    private EditText mPassword;
     private View mGoogleSignInButton;
     private CheckBox mUseZulipCheckbox;
 
@@ -58,6 +61,8 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
         findViewById(R.id.google_sign_in_button).setOnClickListener(this);
         findViewById(R.id.zulip_login).setOnClickListener(this);
         mUseZulipCheckbox.setOnCheckedChangeListener(this);
+        mUserName = (EditText) findViewById(R.id.username);
+        mPassword = (EditText) findViewById(R.id.password);
     }
 
     @Override
@@ -101,6 +106,10 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
         }
 
         // add https if scheme is not included
+        if (!serverURL.contains("://")) {
+            serverURL = "https://" + serverURL;
+        }
+
         Uri serverUri = Uri.parse(serverURL);
         if (serverUri.isRelative()) {
             serverUri = serverUri.buildUpon().scheme("https").build();
@@ -225,11 +234,12 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
                 setupGoogleSignIn();
                 break;
             case R.id.zulip_login:
+                if (!isInputValid()) return;
                 saveServerURL();
                 connectionProgressDialog.show();
-                if (!mUseZulipCheckbox.isChecked()) saveServerURL();
-                AsyncLogin alog = new AsyncLogin(LoginActivity.this, ((EditText) findViewById(R.id.username)).getText().toString(),
-                        ((EditText) findViewById(R.id.password)).getText().toString());
+
+                AsyncLogin alog = new AsyncLogin(LoginActivity.this,
+                        mUserName.getText().toString(), mPassword.getText().toString());
                 // Remove the CPD when done
                 alog.setCallback(new AsyncTaskCompleteListener() {
                     @Override
@@ -249,6 +259,37 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
                 openLegal();
                 break;
         }
+    }
+
+    private boolean isInputValid() {
+        boolean isValid = true;
+
+        if (mPassword.length() == 0) {
+            isValid = false;
+            mPassword.setError(getString(R.string.password_required));
+        }
+
+        if (mUserName.length() == 0) {
+            isValid = false;
+            mUserName.setError(getString(R.string.username_required));
+        }
+
+        if (!mUseZulipCheckbox.isChecked()) {
+            if (mServerEditText.length() == 0) {
+                isValid = false;
+                mServerEditText.setError(getString(R.string.server_domain_required));
+            } else {
+                String serverString = mServerEditText.getText().toString();
+                if (!serverString.contains("://")) serverString = "https://" + serverString;
+
+                if (!Patterns.WEB_URL.matcher(serverString).matches()) {
+                    mServerEditText.setError(getString(R.string.invalid_domain));
+                    isValid = false;
+                }
+            }
+        }
+
+        return isValid;
     }
 
     @Override
