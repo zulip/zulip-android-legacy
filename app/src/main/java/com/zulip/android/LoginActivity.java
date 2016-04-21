@@ -44,7 +44,7 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
             serverURL = serverURL + "api/";
         }
 
-        ((ZulipApp)getApplication()).setServerURL(serverURL);
+        ((ZulipApp) getApplication()).setServerURL(serverURL);
     }
 
     @Override
