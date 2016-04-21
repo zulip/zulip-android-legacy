@@ -102,12 +102,12 @@ public class HTTPRequest {
 
             Log.i("HTTP.request", request.getMethod() + " " + request.getURI());
 
-            String authstr = this.app.getEmail() + ":" + this.app.getApiKey();
-            request.setHeader(
-                    "Authorization",
-                    "Basic "
-                            + Base64.encodeToString(authstr.getBytes(),
-                            Base64.NO_WRAP));
+            if (this.app.getApiKey() != null) {
+                String authstr = this.app.getEmail() + ":" + this.app.getApiKey();
+                request.setHeader(
+                        "Authorization",
+                        "Basic "+ Base64.encodeToString(authstr.getBytes(), Base64.NO_WRAP));
+            }
             // timeout after 60 seconds in ms
             HttpConnectionParams.setSoTimeout(request.getParams(), 60 * 1000);
 
