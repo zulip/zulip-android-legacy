@@ -151,7 +151,12 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
                     result.startResolutionForResult(this, REQUEST_CODE_RESOLVE_ERR);
                 } catch (SendIntentException e) {
                     // Yeah, no idea what to do here.
+                    connectionProgressDialog.dismiss();
+                    Toast.makeText(LoginActivity.this, R.string.google_app_login_failed, Toast.LENGTH_SHORT).show();
                 }
+            } else {
+                connectionProgressDialog.dismiss();
+                Toast.makeText(LoginActivity.this, R.string.google_app_login_failed, Toast.LENGTH_SHORT).show();
             }
         }
     }
