@@ -186,6 +186,7 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
         switch (v.getId()) {
             case R.id.google_sign_in_button:
                 connectionProgressDialog.show();
+                saveServerURL();
                 setupGoogleSignIn();
                 break;
             case R.id.zulip_login:
