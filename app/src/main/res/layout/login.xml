@@ -52,7 +52,7 @@
 
         <CheckBox
             android:id="@+id/checkbox_usezulip"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/use_another_server"
             android:checked="true"
@@ -60,6 +60,7 @@
             android:drawableRight="?android:attr/listChoiceIndicatorMultiple"
             android:drawableEnd="?android:attr/listChoiceIndicatorMultiple"
             android:gravity="end|center_vertical"
+            android:layout_gravity="end"
             />
 
         <EditText
