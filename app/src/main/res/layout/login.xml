@@ -67,7 +67,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:hint="@string/api_zulip_com"
+            android:hint="@string/server_domain"
             android:inputType="textUri"
             android:selectAllOnFocus="true"
             android:visibility="gone"
