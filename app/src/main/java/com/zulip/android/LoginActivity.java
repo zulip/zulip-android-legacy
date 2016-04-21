@@ -165,7 +165,7 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
         if (mGoogleApiClient == null) {
             GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                     .requestEmail()
-                    .requestIdToken("659545034376-78hg5hmrvqr50nn53t0nme97ndhqjmvs.apps.googleusercontent.com")
+                    .requestIdToken(BuildConfig.GOOGLE_CLIENT_ID)
                     .build();
 
             mGoogleApiClient = new GoogleApiClient.Builder(LoginActivity.this)
