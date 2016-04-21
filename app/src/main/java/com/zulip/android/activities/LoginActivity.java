@@ -3,6 +3,7 @@ package com.zulip.android.activities;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -27,6 +28,8 @@ import com.zulip.android.networking.AsyncLogin;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.List;
 
 public class LoginActivity extends FragmentActivity implements View.OnClickListener,
         GoogleApiClient.OnConnectionFailedListener, CompoundButton.OnCheckedChangeListener {
@@ -83,18 +86,26 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
 
     private void saveServerURL() {
         String serverURL = mServerEditText.getText().toString();
+        int errorMessage = R.string.invalid_server_domain;
 
-        // todo: add protocol if no protocol exists, default to https
-
-        if (!serverURL.endsWith("/")) {
-            serverURL = serverURL + "/";
+        if (serverURL.isEmpty()) {
+            mServerEditText.setError(getString(errorMessage));
         }
 
-        if (!serverURL.startsWith("https://api.zulip.com/")) {
-            serverURL = serverURL + "api/";
+        // add https if scheme is not included
+        Uri serverUri = Uri.parse(serverURL);
+        if (serverUri.isRelative()) {
+            serverUri = serverUri.buildUpon().scheme("https").build();
         }
 
-        ((ZulipApp) getApplication()).setServerURL(serverURL);
+        // if does not begin with "api.zulip.com" and if the path is empty, use "/api" as first segment in the path
+        List<String> paths = serverUri.getPathSegments();
+        if (!serverUri.getHost().startsWith("api.") && paths.size() == 0) {
+            serverUri = serverUri.buildUpon().appendPath("api").build();
+        }
+
+        ((ZulipApp) getApplication()).setServerURL(serverUri.toString());
+        Toast.makeText(this, getString(R.string.logging_into_server, serverUri.toString()), Toast.LENGTH_SHORT).show();
     }
 
 

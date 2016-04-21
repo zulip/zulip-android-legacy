@@ -44,5 +44,7 @@
     <string name="signing_in">Signing in...</string>
     <string name="network_error">Network error</string>
     <string name="use_another_server">Use Zulip.com</string>
+    <string name="invalid_server_domain">Invalid server domain</string>
+    <string name="logging_into_server">Logging into server: %s</string>
 
 </resources>
