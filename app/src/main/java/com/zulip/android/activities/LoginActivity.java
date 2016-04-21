@@ -40,6 +40,7 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
     private GoogleApiClient mGoogleApiClient;
     private EditText mServerEditText;
     private View mGoogleSignInButton;
+    private CheckBox mUseZulipCheckbox;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,11 +51,13 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
         // Progress bar to be displayed if the connection failure is not resolved.
         connectionProgressDialog = new ProgressDialog(this);
         connectionProgressDialog.setMessage(getString(R.string.signing_in));
-        findViewById(R.id.google_sign_in_button).setOnClickListener(this);
-        findViewById(R.id.zulip_login).setOnClickListener(this);
-        ((CheckBox) findViewById(R.id.checkbox_usezulip)).setOnCheckedChangeListener(this);
+
+        mUseZulipCheckbox = ((CheckBox) findViewById(R.id.checkbox_usezulip));
         mServerEditText = (EditText) findViewById(R.id.server_url);
         mGoogleSignInButton = findViewById(R.id.google_sign_in_button);
+        findViewById(R.id.google_sign_in_button).setOnClickListener(this);
+        findViewById(R.id.zulip_login).setOnClickListener(this);
+        mUseZulipCheckbox.setOnCheckedChangeListener(this);
     }
 
     @Override
@@ -85,6 +88,11 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
     }
 
     private void saveServerURL() {
+        if (mUseZulipCheckbox.isChecked()) {
+            ((ZulipApp) getApplication()).useDefaultServerURL();
+            return;
+        }
+
         String serverURL = mServerEditText.getText().toString();
         int errorMessage = R.string.invalid_server_domain;
 
@@ -217,8 +225,9 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
                 setupGoogleSignIn();
                 break;
             case R.id.zulip_login:
-                connectionProgressDialog.show();
                 saveServerURL();
+                connectionProgressDialog.show();
+                if (!mUseZulipCheckbox.isChecked()) saveServerURL();
                 AsyncLogin alog = new AsyncLogin(LoginActivity.this, ((EditText) findViewById(R.id.username)).getText().toString(),
                         ((EditText) findViewById(R.id.password)).getText().toString());
                 // Remove the CPD when done

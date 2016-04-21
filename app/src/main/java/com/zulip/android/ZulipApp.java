@@ -37,6 +37,7 @@ public class ZulipApp extends Application {
     public static final String EMAIL = "email";
     private static ZulipApp instance;
     private static final String USER_AGENT = "ZulipMobile";
+    private static final String DEFAULT_SERVER_URL = "https://api.zulip.com/";
     private Person you;
     private SharedPreferences settings;
     private String api_key;
@@ -152,7 +153,7 @@ public class ZulipApp extends Application {
         if (getEmail().equals("iago@zulip.com")) {
             return "http://10.0.2.2:9991/api/";
         }
-        return settings.getString("server_url", "https://api.zulip.com/");
+        return settings.getString("server_url", DEFAULT_SERVER_URL);
     }
     public String getApiKey() {
         return api_key;
@@ -196,6 +197,10 @@ public class ZulipApp extends Application {
         Editor ed = this.settings.edit();
         ed.putString("server_url", serverURL);
         ed.apply();
+    }
+
+    public void useDefaultServerURL() {
+       setServerURL(DEFAULT_SERVER_URL);
     }
 
     public void setLoggedInApiKey(String apiKey) {
