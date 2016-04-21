@@ -7,7 +7,7 @@
     <string name="username">Email</string>
     <string name="password">Password</string>
     <string name="server_url">Server Url</string>
-    <string name="api_zulip_com">api.zulip.com</string>
+    <string name="api_zulip_com">https://api.zulip.com</string>
     <string name="legal">Legal information</string>
     <string name="logout">Log out</string>
     <string name="compose_stream">Compose message to Stream</string>
@@ -43,5 +43,6 @@
     <string name="google_sign_in_error_unable_to_connect">Unable to connect with Google. Try again later.</string>
     <string name="signing_in">Signing in...</string>
     <string name="network_error">Network error</string>
+    <string name="use_another_server">Use Zulip.com</string>
 
 </resources>

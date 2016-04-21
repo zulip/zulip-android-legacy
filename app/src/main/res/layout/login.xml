@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
@@ -23,7 +24,9 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:hint="@string/username"
-        android:inputType="textEmailAddress" >
+        android:inputType="textEmailAddress"
+        android:selectAllOnFocus="true"
+        >
 
         <requestFocus />
     </EditText>
@@ -34,16 +37,44 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:hint="@string/password"
+        android:selectAllOnFocus="true"
         android:inputType="textPassword" />
 
-    <EditText
-        android:id="@+id/server_url"
+    <LinearLayout
+        android:id="@+id/server"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="@string/server_url"
-        android:text="@string/api_zulip_com"
-        android:inputType="textUri" />
+        android:orientation="vertical"
+        android:visibility="visible"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        >
+
+        <CheckBox
+            android:id="@+id/checkbox_usezulip"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/use_another_server"
+            android:checked="true"
+            android:button="@null"
+            android:drawableRight="?android:attr/listChoiceIndicatorMultiple"
+            android:drawableEnd="?android:attr/listChoiceIndicatorMultiple"
+            android:gravity="end|center_vertical"
+            />
+
+        <EditText
+            android:id="@+id/server_url"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/api_zulip_com"
+            android:inputType="textUri"
+            android:selectAllOnFocus="true"
+            android:visibility="gone"
+            tools:visibility="visible"
+            />
+    </LinearLayout>
+
 
     <Button
         android:id="@+id/zulip_login"
