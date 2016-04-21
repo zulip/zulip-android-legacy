@@ -135,7 +135,7 @@ public class AsyncStatusUpdate extends ZulipAsyncPushTask {
                         }
                     }
 
-                    callback.onTaskComplete(result);
+                    callback.onTaskComplete(result, obj);
 
                     return;
                 }

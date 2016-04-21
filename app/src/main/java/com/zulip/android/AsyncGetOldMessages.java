@@ -291,7 +291,7 @@ public class AsyncGetOldMessages extends ZulipAsyncPushTask {
             listener.onMessageError(position);
             Log.v("poll", "No messages returned.");
         }
-        callback.onTaskComplete(result);
+        callback.onTaskComplete(result, null);
     }
 
     protected void onCancelled(String result) {

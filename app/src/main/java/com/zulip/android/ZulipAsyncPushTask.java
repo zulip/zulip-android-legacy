@@ -6,6 +6,8 @@ import java.net.UnknownHostException;
 
 import org.apache.http.NoHttpResponseException;
 import org.apache.http.client.HttpResponseException;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.annotation.TargetApi;
 import android.os.AsyncTask;
@@ -33,7 +35,7 @@ class ZulipAsyncPushTask extends AsyncTask<String, String, String> {
      * if they want to honor declared callback.
      */
     interface AsyncTaskCompleteListener {
-        void onTaskComplete(String result);
+        void onTaskComplete(String result, JSONObject jsonObject);
 
         void onTaskFailure(String result);
     }
@@ -47,9 +49,8 @@ class ZulipAsyncPushTask extends AsyncTask<String, String, String> {
         this.app = app;
         callback = new AsyncTaskCompleteListener() {
             @Override
-            public void onTaskComplete(String result) {
+            public void onTaskComplete(String result, JSONObject jsonObject) {
                 // Dummy method which does nothing
-
             }
 
             public void onTaskFailure(String result) {
@@ -139,7 +140,7 @@ class ZulipAsyncPushTask extends AsyncTask<String, String, String> {
 
     @Override
     protected void onPostExecute(String result) {
-        callback.onTaskComplete(result);
+        callback.onTaskComplete(result, null);
     }
 
     @Override

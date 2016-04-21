@@ -40,7 +40,7 @@ class AsyncLogin extends ZulipAsyncPushTask {
                 if (obj.getString("result").equals("success")) {
                     this.app.setLoggedInApiKey(obj.getString("api_key"));
                     this.context.openHome();
-                    callback.onTaskComplete(result);
+                    callback.onTaskComplete(result, obj);
 
                     return;
                 }

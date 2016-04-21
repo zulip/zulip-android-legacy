@@ -26,6 +26,8 @@ import android.widget.FilterQueryProvider;
 import com.j256.ormlite.android.AndroidDatabaseResults;
 import com.zulip.android.ZulipAsyncPushTask.AsyncTaskCompleteListener;
 
+import org.json.JSONObject;
+
 public class ComposeDialog extends DialogFragment {
     public static final String COLLATE_NOCASE = " COLLATE NOCASE";
     ZulipActivity activity;
@@ -384,7 +386,7 @@ public class ComposeDialog extends DialogFragment {
 
                             AsyncSend sender = new AsyncSend(activity, msg);
                             sender.setCallback(new AsyncTaskCompleteListener() {
-                                public void onTaskComplete(String result) {
+                                public void onTaskComplete(String result, JSONObject object) {
                                     dismiss();
                                 }
 

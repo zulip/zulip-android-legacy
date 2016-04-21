@@ -51,6 +51,8 @@ import android.widget.TextView;
 
 import com.j256.ormlite.android.AndroidDatabaseResults;
 
+import org.json.JSONObject;
+
 public class ZulipActivity extends FragmentActivity implements
         MessageListFragment.Listener, NarrowListener {
 
@@ -340,7 +342,7 @@ public class ZulipActivity extends FragmentActivity implements
                         ZulipActivity.this);
                 task.setCallback(new ZulipAsyncPushTask.AsyncTaskCompleteListener() {
                     @Override
-                    public void onTaskComplete(String result) {
+                    public void onTaskComplete(String result, JSONObject object) {
                         peopleAdapter.refresh();
                     }
 

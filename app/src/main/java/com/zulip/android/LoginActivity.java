@@ -18,6 +18,9 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.zulip.android.ZulipAsyncPushTask.AsyncTaskCompleteListener;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class LoginActivity extends FragmentActivity implements View.OnClickListener,
         GoogleApiClient.OnConnectionFailedListener {
     private static final int REQUEST_CODE_RESOLVE_ERR = 9000;
@@ -99,8 +102,13 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
             final AsyncLogin loginTask = new AsyncLogin(LoginActivity.this, "google-oauth2-token", account.getIdToken());
             loginTask.setCallback(new AsyncTaskCompleteListener() {
                 @Override
-                public void onTaskComplete(String result) {
-                    // No action needed
+                public void onTaskComplete(String result, JSONObject object) {
+                    try {
+                        String email = object.getString("email");
+                        ((ZulipApp) getApplication()).setEmail(email);
+                    } catch (JSONException e) {
+                        ZLog.logException(e);
+                    }
                 }
 
                 @Override
@@ -188,7 +196,7 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
                 // Remove the CPD when done
                 alog.setCallback(new AsyncTaskCompleteListener() {
                     @Override
-                    public void onTaskComplete(String result) {
+                    public void onTaskComplete(String result, JSONObject object) {
                         connectionProgressDialog.dismiss();
                     }
 
