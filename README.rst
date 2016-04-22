@@ -98,6 +98,13 @@ Please read the Zulip coding style conventions documented at
 https://zulip.readthedocs.org/en/latest/code-style.html#version-control
 carefully.
 
+Mailing List
+------------
+
+There's a mailing list for questions and development discussions
+related to the Zulip Android app:
+https://groups.google.com/forum/#!forum/zulip-android.
+
 Export
 ------
 This distribution includes cryptographic software. The country in
