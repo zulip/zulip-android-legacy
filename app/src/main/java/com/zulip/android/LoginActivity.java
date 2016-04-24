@@ -1,45 +1,33 @@
 package com.zulip.android;
 
-import java.io.IOException;
-
-import android.accounts.AccountManager;
-import android.app.Activity;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.os.Bundle;
-import android.os.SystemClock;
+import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.auth.GoogleAuthException;
-import com.google.android.gms.auth.GoogleAuthUtil;
-import com.google.android.gms.auth.GooglePlayServicesAvailabilityException;
-import com.google.android.gms.auth.UserRecoverableAuthException;
-import com.google.android.gms.common.AccountPicker;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
-import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.zulip.android.ZulipAsyncPushTask.AsyncTaskCompleteListener;
 
-public class LoginActivity extends Activity implements View.OnClickListener,
-        OnConnectionFailedListener {
-    private static final int REQUEST_ACCOUNT_PICKER = 2;
+public class LoginActivity extends FragmentActivity implements View.OnClickListener,
+        GoogleApiClient.OnConnectionFailedListener {
     private static final int REQUEST_CODE_RESOLVE_ERR = 9000;
-
-    LoginActivity that = this; // self-ref
-    ZulipApp app;
+    private static final int REQUEST_CODE_SIGN_IN = 9001;
 
     private ProgressDialog connectionProgressDialog;
-    private int googleFailureCount = 0;
+    private GoogleApiClient mGoogleApiClient;
 
     private void saveServerURL() {
-        String serverURL = ((EditText) findViewById(R.id.server_url))
-                                .getText().toString();
+        String serverURL = ((EditText) findViewById(R.id.server_url)).getText().toString();
 
         if (!serverURL.startsWith("https://")) {
             serverURL = "https://" + serverURL;
@@ -53,77 +41,81 @@ public class LoginActivity extends Activity implements View.OnClickListener,
             serverURL = serverURL + "api/";
         }
 
-        app.setServerURL(serverURL);
+        ((ZulipApp)getApplication()).setServerURL(serverURL);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        app = (ZulipApp) getApplicationContext();
 
         setContentView(R.layout.login);
 
-        ((Button) findViewById(R.id.login))
-                .setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        connectionProgressDialog.show();
-                        saveServerURL();
-                        AsyncLogin alog = new AsyncLogin(that,
-                                ((EditText) findViewById(R.id.username))
-                                        .getText().toString(),
-                                ((EditText) findViewById(R.id.password))
-                                        .getText().toString());
-                        // Remove the CPD when done
-                        alog.setCallback(new AsyncTaskCompleteListener() {
-                            @Override
-                            public void onTaskComplete(String result) {
-                                connectionProgressDialog.dismiss();
-                            }
-
-                            @Override
-                            public void onTaskFailure(String result) {
-                                connectionProgressDialog.dismiss();
-                            }
-
-                        });
-                        alog.execute();
-                    }
-                });
-        ((TextView) findViewById(R.id.legalTextView))
-                .setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        openLegal();
-                    }
-                });
-
-        // Progress bar to be displayed if the connection failure is not
-        // resolved.
+        // Progress bar to be displayed if the connection failure is not resolved.
         connectionProgressDialog = new ProgressDialog(this);
-        connectionProgressDialog.setMessage("Signing in...");
-        findViewById(R.id.sign_in_button).setOnClickListener(this);
-
+        connectionProgressDialog.setMessage(getString(R.string.signing_in));
+        findViewById(R.id.google_sign_in_button).setOnClickListener(this);
+        findViewById(R.id.zulip_login).setOnClickListener(this);
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
         switch (requestCode) {
-            case REQUEST_ACCOUNT_PICKER:
-                if (data != null && data.getExtras() != null) {
-                    String accountName = data.getExtras().getString(
-                            AccountManager.KEY_ACCOUNT_NAME);
-                    if (accountName != null) {
-                        this.app.setEmail(accountName);
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                authWithGapps();
-                            }
-                        }).start();
-                    }
+            case REQUEST_CODE_SIGN_IN:
+                GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(intent);
+                handleSignInResult(result);
+                break;
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (mGoogleApiClient != null) {
+            mGoogleApiClient.connect();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
+        }
+        super.onStop();
+    }
+
+    private void handleSignInResult(GoogleSignInResult result) {
+        Log.d("Login", "handleSignInResult:" + result.isSuccess());
+        if (result.isSuccess()) {
+            GoogleSignInAccount account = result.getSignInAccount();
+
+            // if there's a problem with fetching the account, bail
+            if (account == null) {
+                connectionProgressDialog.dismiss();
+                Toast.makeText(LoginActivity.this, R.string.google_app_login_failed, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            final AsyncLogin loginTask = new AsyncLogin(LoginActivity.this, "google-oauth2-token", account.getIdToken());
+            loginTask.setCallback(new AsyncTaskCompleteListener() {
+                @Override
+                public void onTaskComplete(String result) {
+                    // No action needed
                 }
+
+                @Override
+                public void onTaskFailure(String result) {
+                    // Invalidate the token and try again, unless the user we
+                    // are authenticating as is not registered or is disabled.
+                    connectionProgressDialog.dismiss();
+
+                }
+            });
+            loginTask.execute();
+        } else {
+            // something bad happened. whoops.
+            connectionProgressDialog.dismiss();
+            Toast.makeText(LoginActivity.this, R.string.google_app_login_failed, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -148,8 +140,7 @@ public class LoginActivity extends Activity implements View.OnClickListener,
             // connection dialog.
             if (result.hasResolution()) {
                 try {
-                    result.startResolutionForResult(this,
-                            REQUEST_CODE_RESOLVE_ERR);
+                    result.startResolutionForResult(this, REQUEST_CODE_RESOLVE_ERR);
                 } catch (SendIntentException e) {
                     // Yeah, no idea what to do here.
                 }
@@ -157,98 +148,61 @@ public class LoginActivity extends Activity implements View.OnClickListener,
         }
     }
 
-    public void quickRetry() {
-        // We retry once every 500ms up to 3 times, then abort.
-        googleFailureCount++;
-        if (googleFailureCount < 3) {
-            SystemClock.sleep(500);
-            this.authWithGapps();
+    public void setupGoogleSignIn() {
+        if (mGoogleApiClient == null) {
+            GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestEmail()
+                    .requestIdToken("659545034376-78hg5hmrvqr50nn53t0nme97ndhqjmvs.apps.googleusercontent.com")
+                    .build();
+
+            mGoogleApiClient = new GoogleApiClient.Builder(LoginActivity.this)
+                    .addApi(Auth.GOOGLE_SIGN_IN_API, googleSignInOptions)
+                    .addOnConnectionFailedListener(LoginActivity.this)
+                    .build();
+
+            mGoogleApiClient.connect();
+            allowUserToPickAccount();
         } else {
-            this.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    connectionProgressDialog.dismiss();
-                    Toast.makeText(that,
-                            "Unable to connect with Google. Try again later.",
-                            Toast.LENGTH_LONG).show();
-                }
-            });
+            allowUserToPickAccount();
         }
+
     }
 
-    public void authWithGapps() {
-        try {
-            // Retrieve a token for the given account and scope. It
-            // will always return either
-            // a non-empty String or throw an exception.
-            final String scope = "audience:server:client_id:835904834568-77mtr5mtmpgspj9b051del9i9r5t4g4n.apps.googleusercontent.com";
-            final String token = GoogleAuthUtil.getToken(that, this.app.getEmail(), scope);
-            // Send token to the server to exchange for an API key
-            final AsyncLogin loginTask = new AsyncLogin(that, "google-oauth2-token", token);
-            loginTask.setCallback(new AsyncTaskCompleteListener() {
-                @Override
-                public void onTaskComplete(String result) {
-                    // No action needed
-                }
-
-                @Override
-                public void onTaskFailure(String result) {
-                    // Invalidate the token and try again, unless the user we
-                    // are authenticating as is not registered or is disabled.
-                    if (!loginTask.userDefinitelyInvalid) {
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                quickRetry();
-                            }
-                        }).start();
-                    } else {
-                        connectionProgressDialog.dismiss();
-                    }
-
-                }
-            });
-            loginTask.execute();
-        } catch (GooglePlayServicesAvailabilityException playEx) {
-            final Dialog dia = GooglePlayServicesUtil.getErrorDialog(
-                    playEx.getConnectionStatusCode(), this,
-                    REQUEST_CODE_RESOLVE_ERR);
-            this.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    connectionProgressDialog.dismiss();
-                    dia.show();
-                }
-            });
-        } catch (UserRecoverableAuthException userAuthEx) {
-            that.startActivityForResult(userAuthEx.getIntent(),
-                    REQUEST_CODE_RESOLVE_ERR);
-        } catch (IOException transientEx) {
-            quickRetry();
-        } catch (GoogleAuthException authEx) {
-            ZLog.logException(authEx);
-            this.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    connectionProgressDialog.dismiss();
-                    Toast.makeText(
-                            that,
-                            "Google Apps login failed for unknown reasons, please contact your distributor.",
-                            Toast.LENGTH_LONG).show();
-                    findViewById(R.id.sign_in_button).setEnabled(false);
-                }
-            });
-        }
+    private void allowUserToPickAccount() {
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+        startActivityForResult(signInIntent, REQUEST_CODE_SIGN_IN);
     }
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.sign_in_button) {
-            connectionProgressDialog.show();
-            startActivityForResult(AccountPicker.newChooseAccountIntent(null,
-                    null, new String[]{"com.google"}, false, null, null,
-                    null, null), REQUEST_ACCOUNT_PICKER);
-        }
+        switch (v.getId()) {
+            case R.id.google_sign_in_button:
+                connectionProgressDialog.show();
+                setupGoogleSignIn();
+                break;
+            case R.id.zulip_login:
+                connectionProgressDialog.show();
+                saveServerURL();
+                AsyncLogin alog = new AsyncLogin(LoginActivity.this, ((EditText) findViewById(R.id.username)).getText().toString(),
+                        ((EditText) findViewById(R.id.password)).getText().toString());
+                // Remove the CPD when done
+                alog.setCallback(new AsyncTaskCompleteListener() {
+                    @Override
+                    public void onTaskComplete(String result) {
+                        connectionProgressDialog.dismiss();
+                    }
 
+                    @Override
+                    public void onTaskFailure(String result) {
+                        connectionProgressDialog.dismiss();
+                    }
+
+                });
+                alog.execute();
+                break;
+            case R.id.legal_button:
+                openLegal();
+                break;
+        }
     }
 }

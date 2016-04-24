@@ -39,5 +39,9 @@
     <string name="subject">Subject</string>
     <string name="timestamp">timestamp</string>
     <string name="reply_to_sender">Reply to Sender</string>
+    <string name="google_app_login_failed">Google Apps login failed for unknown reasons, please contact your distributor.</string>
+    <string name="google_sign_in_error_unable_to_connect">Unable to connect with Google. Try again later.</string>
+    <string name="signing_in">Signing in...</string>
+    <string name="network_error">Network error</string>
 
 </resources>

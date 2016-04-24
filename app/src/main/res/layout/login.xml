@@ -46,7 +46,7 @@
         android:inputType="textUri" />
 
     <Button
-        android:id="@+id/login"
+        android:id="@+id/zulip_login"
         style="android:buttonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -55,14 +55,14 @@
 
 
     <com.google.android.gms.common.SignInButton
-        android:id="@+id/sign_in_button"
+        android:id="@+id/google_sign_in_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="28dp" >
     </com.google.android.gms.common.SignInButton>
 
     <TextView
-        android:id="@+id/legalTextView"
+        android:id="@+id/legal_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/legal"
