@@ -162,11 +162,9 @@ public class LoginActivity extends Activity implements View.OnClickListener,
             // will always return either
             // a non-empty String or throw an exception.
             final String scope = "audience:server:client_id:835904834568-77mtr5mtmpgspj9b051del9i9r5t4g4n.apps.googleusercontent.com";
-            final String token = GoogleAuthUtil.getToken(that,
-                    this.app.getEmail(), scope);
+            final String token = GoogleAuthUtil.getToken(that, this.app.getEmail(), scope);
             // Send token to the server to exchange for an API key
-            final AsyncLogin loginTask = new AsyncLogin(that,
-                    "google-oauth2-token", token);
+            final AsyncLogin loginTask = new AsyncLogin(that, "google-oauth2-token", token);
             loginTask.setCallback(new AsyncTaskCompleteListener() {
                 @Override
                 public void onTaskComplete(String result) {
