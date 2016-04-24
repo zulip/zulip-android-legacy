@@ -144,10 +144,7 @@ public class ZulipApp extends Application {
         if (getEmail().equals("iago@zulip.com")) {
             return "http://10.0.2.2:9991/api/";
         }
-        return settings.getString(
-            "server_url",
-            "https://api.zulip.com/"
-        );
+        return settings.getString("server_url", "https://api.zulip.com/");
     }
     public String getApiKey() {
         return api_key;
