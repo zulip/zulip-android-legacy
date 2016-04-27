@@ -25,6 +25,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 public class ZulipApp extends Application {
+    public static final String API_KEY = "api_key";
+    public static final String EMAIL = "email";
     private static ZulipApp instance;
     private static final String USER_AGENT = "ZulipMobile";
     Person you;
@@ -84,7 +86,7 @@ public class ZulipApp extends Application {
             Crashlytics.start(this);
         }
 
-        this.api_key = settings.getString("api_key", null);
+        this.api_key = settings.getString(API_KEY, null);
 
         if (api_key != null) {
             afterLogin();
@@ -121,7 +123,7 @@ public class ZulipApp extends Application {
     }
 
     public void afterLogin() {
-        String email = settings.getString("email", null);
+        String email = settings.getString(EMAIL, null);
         setEmail(email);
     }
 
@@ -185,16 +187,16 @@ public class ZulipApp extends Application {
     public void setLoggedInApiKey(String apiKey) {
         this.api_key = apiKey;
         Editor ed = this.settings.edit();
-        ed.putString("email", this.getEmail());
-        ed.putString("api_key", api_key);
+        ed.putString(EMAIL, this.getEmail());
+        ed.putString(API_KEY, api_key);
         ed.apply();
         afterLogin();
     }
 
     public void logOut() {
         Editor ed = this.settings.edit();
-        ed.remove("email");
-        ed.remove("api_key");
+        ed.remove(EMAIL);
+        ed.remove(API_KEY);
         ed.apply();
         this.api_key = null;
         setEventQueueId(null);
