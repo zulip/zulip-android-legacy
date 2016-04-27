@@ -4,6 +4,8 @@ import android.os.Build;
 
 public class BuildHelper {
 
+    private BuildHelper() {}
+
     public static boolean shouldLogToCrashlytics() {
         return !isEmulator() && !BuildConfig.DEBUG;
     }
