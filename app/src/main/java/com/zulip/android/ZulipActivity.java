@@ -58,29 +58,6 @@ public class ZulipActivity extends FragmentActivity implements
     public static final String PARAMS = "params";
     ZulipApp app;
     List<Message> mutedTopics;
-    @Override
-    public void addToList(Message message) {
-        mutedTopics.add(message);
-    }
-
-    @Override
-    public void muteTopic(Message message) {
-        app.muteTopic(message);
-        for (int i = homeList.adapter.getCount() - 1; i >= 0; i--) {
-            if (homeList.adapter.getItem(i).getStream() != null) {
-                if (homeList.adapter.getItem(i).getStream().getId() == message.getStream().getId() && homeList.adapter.getItem(i).getSubject().equals(message.getSubject())) {
-                    mutedTopics.add(homeList.adapter.getItem(i));
-                    homeList.adapter.remove(homeList.adapter.getItem(i));
-                }
-            }
-        }
-        homeList.adapter.notifyDataSetChanged();
-    }
-
-    // Intent Extra constants
-    public enum Flag {
-        RESET_DATABASE,
-    }
 
     boolean suspended = false;
     boolean logged_in = false;
@@ -105,6 +82,21 @@ public class ZulipActivity extends FragmentActivity implements
     MessageListFragment homeList;
 
     Notifications notifications;
+
+    private BroadcastReceiver onGcmMessage = new BroadcastReceiver() {
+        public void onReceive(Context contenxt, Intent intent) {
+            // Block the event before it propagates to show a notification.
+            // TODO: could be smarter and only block the event if the message is
+            // in the narrow.
+            Log.i("GCM", "Dropping a push because the activity is active");
+            abortBroadcast();
+        }
+    };
+
+    // Intent Extra constants
+    public enum Flag {
+        RESET_DATABASE,
+    }
 
     private SimpleCursorAdapter.ViewBinder streamBinder = new SimpleCursorAdapter.ViewBinder() {
 
@@ -172,6 +164,25 @@ public class ZulipActivity extends FragmentActivity implements
 
     protected RefreshableCursorAdapter streamsAdapter;
     protected RefreshableCursorAdapter peopleAdapter;
+
+    @Override
+    public void addToList(Message message) {
+        mutedTopics.add(message);
+    }
+
+    @Override
+    public void muteTopic(Message message) {
+        app.muteTopic(message);
+        for (int i = homeList.adapter.getCount() - 1; i >= 0; i--) {
+            if (homeList.adapter.getItem(i).getStream() != null) {
+                if (homeList.adapter.getItem(i).getStream().getId() == message.getStream().getId() && homeList.adapter.getItem(i).getSubject().equals(message.getSubject())) {
+                    mutedTopics.add(homeList.adapter.getItem(i));
+                    homeList.adapter.remove(homeList.adapter.getItem(i));
+                }
+            }
+        }
+        homeList.adapter.notifyDataSetChanged();
+    }
 
     /**
      * Called when the activity is first created.
@@ -715,14 +726,4 @@ public class ZulipActivity extends FragmentActivity implements
             narrowedList.onNewMessages(messages);
         }
     }
-
-    private BroadcastReceiver onGcmMessage = new BroadcastReceiver() {
-        public void onReceive(Context contenxt, Intent intent) {
-            // Block the event before it propagates to show a notification.
-            // TODO: could be smarter and only block the event if the message is
-            // in the narrow.
-            Log.i("GCM", "Dropping a push because the activity is active");
-            abortBroadcast();
-        }
-    };
 }

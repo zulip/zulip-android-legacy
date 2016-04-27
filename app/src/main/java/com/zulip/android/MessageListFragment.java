@@ -83,6 +83,12 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
     boolean paused = false;
     boolean initialized = false;
+    List<Message> messageList;
+
+    public MessageListFragment() {
+        app = ZulipApp.get();
+        // Required empty public constructor
+    }
 
     public static MessageListFragment newInstance(NarrowFilter filter) {
         MessageListFragment fragment = new MessageListFragment();
@@ -92,11 +98,6 @@ public class MessageListFragment extends Fragment implements MessageListener {
         return fragment;
     }
 
-    public MessageListFragment() {
-        app = ZulipApp.get();
-        // Required empty public constructor
-    }
-    List<Message> messageList;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -64,6 +64,7 @@ class CustomHtmlToSpannedConverter implements ContentHandler {
             1f,};
     public static final String MONOSPACE = "monospace";
 
+    private static HashMap<String, Integer> COLORS = buildColorMap();
     private String mSource;
     private XMLReader mReader;
     private SpannableStringBuilder mSpannableStringBuilder;
@@ -608,8 +609,6 @@ class CustomHtmlToSpannedConverter implements ContentHandler {
             mLevel = level;
         }
     }
-
-    private static HashMap<String, Integer> COLORS = buildColorMap();
 
     private static HashMap<String, Integer> buildColorMap() {
         HashMap<String, Integer> map = new HashMap<String, Integer>();
