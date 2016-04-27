@@ -63,6 +63,7 @@ class CustomHtmlToSpannedConverter implements ContentHandler {
     private static final float[] HEADER_SIZES = {1.5f, 1.4f, 1.3f, 1.2f, 1.1f,
             1f,};
 
+    private static HashMap<String, Integer> COLORS = buildColorMap();
     private String mSource;
     private XMLReader mReader;
     private SpannableStringBuilder mSpannableStringBuilder;
@@ -607,8 +608,6 @@ class CustomHtmlToSpannedConverter implements ContentHandler {
             mLevel = level;
         }
     }
-
-    private static HashMap<String, Integer> COLORS = buildColorMap();
 
     private static HashMap<String, Integer> buildColorMap() {
         HashMap<String, Integer> map = new HashMap<String, Integer>();

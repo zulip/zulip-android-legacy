@@ -20,6 +20,17 @@ public class NarrowFilterAllPMs implements NarrowFilter {
     final Person person;
     final String recipient;
 
+    public static final Parcelable.Creator<NarrowFilterAllPMs> CREATOR = new Parcelable.Creator<NarrowFilterAllPMs>() {
+        public NarrowFilterAllPMs createFromParcel(Parcel in) {
+
+            return new NarrowFilterAllPMs(in.readString());
+        }
+
+        public NarrowFilterAllPMs[] newArray(int size) {
+            return new NarrowFilterAllPMs[size];
+        }
+    };
+
     NarrowFilterAllPMs(Person person) {
         this.person = person;
         this.recipient = Message.recipientList(new Person[]{person});
@@ -38,17 +49,6 @@ public class NarrowFilterAllPMs implements NarrowFilter {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(recipient);
     }
-
-    public static final Parcelable.Creator<NarrowFilterAllPMs> CREATOR = new Parcelable.Creator<NarrowFilterAllPMs>() {
-        public NarrowFilterAllPMs createFromParcel(Parcel in) {
-
-            return new NarrowFilterAllPMs(in.readString());
-        }
-
-        public NarrowFilterAllPMs[] newArray(int size) {
-            return new NarrowFilterAllPMs[size];
-        }
-    };
 
     @Override
     public Where<Message, Object> modWhere(Where<Message, Object> where)

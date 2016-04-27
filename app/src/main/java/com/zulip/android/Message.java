@@ -67,15 +67,6 @@ public class Message {
     public Message(ZulipApp app) {
     }
 
-    static String recipientList(Person[] recipients) {
-        Integer[] ids = new Integer[recipients.length];
-        for (int i = 0; i < recipients.length; i++) {
-            ids[i] = recipients[i].id;
-        }
-        Arrays.sort(ids);
-        return TextUtils.join(",", ids);
-    }
-
     /**
      * Populate a Message object based off a parsed JSON hash.
      *
@@ -144,6 +135,15 @@ public class Message {
 
     public Message(ZulipApp app, JSONObject message) throws JSONException {
         this(app, message, null, null);
+    }
+
+    static String recipientList(Person[] recipients) {
+        Integer[] ids = new Integer[recipients.length];
+        for (int i = 0; i < recipients.length; i++) {
+            ids[i] = recipients[i].id;
+        }
+        Arrays.sort(ids);
+        return TextUtils.join(",", ids);
     }
 
     public int hashCode() {
