@@ -7,6 +7,9 @@ import java.security.*;
  * Gravatar example from http://en.gravatar.com/site/implement/images/java/
  */
 public class MD5Util {
+
+    private MD5Util() {}
+
     public static String hex(byte[] array) {
         StringBuffer sb = new StringBuffer();
         for (int i = 0; i < array.length; ++i) {
