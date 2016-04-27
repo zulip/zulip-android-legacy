@@ -54,6 +54,8 @@ import com.j256.ormlite.android.AndroidDatabaseResults;
 public class ZulipActivity extends FragmentActivity implements
         MessageListFragment.Listener, NarrowListener {
 
+    public static final String NARROW = "narrow";
+    public static final String PARAMS = "params";
     ZulipApp app;
     List<Message> mutedTopics;
     @Override
@@ -355,7 +357,7 @@ public class ZulipActivity extends FragmentActivity implements
     public void onBackPressed() {
         if (narrowedList != null) {
             narrowedList = null;
-            getSupportFragmentManager().popBackStack("narrow",
+            getSupportFragmentManager().popBackStack(NARROW,
                     FragmentManager.POP_BACK_STACK_INCLUSIVE);
         } else {
             super.onBackPressed();
@@ -386,7 +388,7 @@ public class ZulipActivity extends FragmentActivity implements
                             .substring(getBaseContext().getPackageName()
                                     .length() + 1));
                 } catch (IllegalArgumentException e) {
-                    Log.e("params", "Invalid app-specific intent specified.", e);
+                    Log.e(PARAMS, "Invalid app-specific intent specified.", e);
                     continue;
                 }
             } else {
@@ -394,9 +396,9 @@ public class ZulipActivity extends FragmentActivity implements
             }
             switch (param) {
                 case RESET_DATABASE:
-                    Log.i("params", "Resetting the database...");
+                    Log.i(PARAMS, "Resetting the database...");
                     app.resetDatabase();
-                    Log.i("params", "Database deleted successfully.");
+                    Log.i(PARAMS, "Database deleted successfully.");
                     this.finish();
                     break;
             }
@@ -440,7 +442,7 @@ public class ZulipActivity extends FragmentActivity implements
     public void doNarrow(NarrowFilter filter) {
         narrowedList = MessageListFragment.newInstance(filter);
         // Push to the back stack if we are not already narrowed
-        pushListFragment(narrowedList, "narrow");
+        pushListFragment(narrowedList, NARROW);
         narrowedList.onReadyToDisplay(true);
     }
 
@@ -517,7 +519,7 @@ public class ZulipActivity extends FragmentActivity implements
         // Handle item selection
         switch (item.getItemId()) {
             case android.R.id.home:
-                getSupportFragmentManager().popBackStack("narrow",
+                getSupportFragmentManager().popBackStack(NARROW,
                         FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 break;
             case R.id.search:

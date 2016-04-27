@@ -27,6 +27,7 @@ import com.j256.ormlite.android.AndroidDatabaseResults;
 import com.zulip.android.ZulipAsyncPushTask.AsyncTaskCompleteListener;
 
 public class ComposeDialog extends DialogFragment {
+    public static final String COLLATE_NOCASE = " COLLATE NOCASE";
     ZulipActivity activity;
     ZulipApp app;
     private MessageType type;
@@ -256,7 +257,7 @@ public class ComposeDialog extends DialogFragment {
                                 + Stream.SUBSCRIBED_FIELD + " = 1 AND "
                                 + Stream.NAME_FIELD
                                 + " LIKE ? ESCAPE '\\' ORDER BY "
-                                + Stream.NAME_FIELD + " COLLATE NOCASE",
+                                + Stream.NAME_FIELD + COLLATE_NOCASE,
                         DatabaseHelper.likeEscape(streamName.toString()) + "%")
                 .closeableIterator().getRawResults()).getRawCursor();
     }
@@ -294,7 +295,7 @@ public class ComposeDialog extends DialogFragment {
                                 + Message.SUBJECT_FIELD
                                 + " LIKE ? ESCAPE '\\' AND "
                                 + Stream.NAME_FIELD + " = ? ORDER BY "
-                                + Message.SUBJECT_FIELD + " COLLATE NOCASE",
+                                + Message.SUBJECT_FIELD + COLLATE_NOCASE,
                         DatabaseHelper.likeEscape(subject.toString()) + "%",
                         stream.toString()).closeableIterator().getRawResults();
         return results.getRawCursor();
@@ -327,7 +328,7 @@ public class ComposeDialog extends DialogFragment {
                                 + Person.ISACTIVE_FIELD + " = 1 AND "
                                 + Person.EMAIL_FIELD
                                 + " LIKE ? ESCAPE '\\' ORDER BY "
-                                + Person.NAME_FIELD + " COLLATE NOCASE",
+                                + Person.NAME_FIELD + COLLATE_NOCASE,
                         DatabaseHelper.likeEscape(piece) + "%")
                 .closeableIterator().getRawResults()).getRawCursor();
     }

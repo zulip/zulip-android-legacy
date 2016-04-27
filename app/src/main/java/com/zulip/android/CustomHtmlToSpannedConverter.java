@@ -62,6 +62,7 @@ class CustomHtmlToSpannedConverter implements ContentHandler {
 
     private static final float[] HEADER_SIZES = {1.5f, 1.4f, 1.3f, 1.2f, 1.1f,
             1f,};
+    public static final String MONOSPACE = "monospace";
 
     private String mSource;
     private XMLReader mReader;
@@ -251,7 +252,7 @@ class CustomHtmlToSpannedConverter implements ContentHandler {
                     new CustomQuoteSpan());
         } else if (tag.equalsIgnoreCase("tt")) {
             end(mSpannableStringBuilder, Monospace.class, new TypefaceSpan(
-                    "monospace"));
+                    MONOSPACE));
         } else if (tag.equalsIgnoreCase("a")) {
             endA(mSpannableStringBuilder);
         } else if (tag.equalsIgnoreCase("u")) {
@@ -262,12 +263,12 @@ class CustomHtmlToSpannedConverter implements ContentHandler {
             end(mSpannableStringBuilder, Sub.class, new SubscriptSpan());
         } else if (tag.equalsIgnoreCase("code")) {
             endMultiple(mSpannableStringBuilder, InlineCode.class,
-                    new Object[]{new TypefaceSpan("monospace"),
+                    new Object[]{new TypefaceSpan(MONOSPACE),
                             new ForegroundColorSpan(0xffdd1144) // pink
                     });
         } else if (tag.equalsIgnoreCase("pre")) {
             end(mSpannableStringBuilder, CodeBlock.class, new TypefaceSpan(
-                    "monospace"));
+                    MONOSPACE));
         } else if (tag.length() == 2
                 && Character.toLowerCase(tag.charAt(0)) == 'h'
                 && tag.charAt(1) >= '1' && tag.charAt(1) <= '6') {

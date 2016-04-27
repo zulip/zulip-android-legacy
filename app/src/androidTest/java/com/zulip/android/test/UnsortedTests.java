@@ -28,6 +28,7 @@ import com.zulip.android.test.mutated.FakeAsyncGetOldMessages;
 
 public class UnsortedTests extends ActivityUnitTestCase<ZulipActivity> {
 
+    public static final String TEST_USER_EXAMPLE_COM = "testuser@example.com";
     private ZulipApp app;
     RuntimeExceptionDao<Message, Object> messageDao;
 
@@ -217,10 +218,10 @@ public class UnsortedTests extends ActivityUnitTestCase<ZulipActivity> {
     protected Message sampleMessage(ZulipApp app, int id) throws SQLException {
         Message rtr = new Message(app);
         rtr.setSender(Person.getOrUpdate(app, "Test User",
-                "testuser@example.com", ""));
+                TEST_USER_EXAMPLE_COM, ""));
         rtr.setContent("Test message");
         rtr.setType(MessageType.PRIVATE_MESSAGE);
-        rtr.setRecipient(new String[] { "testuser@example.com" });
+        rtr.setRecipient(new String[] {TEST_USER_EXAMPLE_COM});
         rtr.setID(id);
         messageDao.create(rtr);
         return rtr;
@@ -238,9 +239,9 @@ public class UnsortedTests extends ActivityUnitTestCase<ZulipActivity> {
         app.setContext(getInstrumentation().getTargetContext());
         // Need to setEmail twice to reinitialise the database after destroying
         // it.
-        app.setEmail("testuser@example.com");
+        app.setEmail(TEST_USER_EXAMPLE_COM);
         app.deleteDatabase(app.getDatabaseHelper().getDatabaseName());
-        app.setEmail("testuser@example.com");
+        app.setEmail(TEST_USER_EXAMPLE_COM);
         messageDao = app.getDao(Message.class);
 
     }
