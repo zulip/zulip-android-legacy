@@ -101,11 +101,10 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
             int end = mSpannableStringBuilder.getSpanEnd(obj[i]);
 
             // If the last line of the range is blank, back off by one.
-            if (end - 2 >= 0) {
-                if (mSpannableStringBuilder.charAt(end - 1) == '\n'
-                        && mSpannableStringBuilder.charAt(end - 2) == '\n') {
-                    end--;
-                }
+            if (end - 2 >= 0
+                    && mSpannableStringBuilder.charAt(end - 1) == '\n'
+                    && mSpannableStringBuilder.charAt(end - 2) == '\n') {
+                end--;
             }
 
             if (end == start) {

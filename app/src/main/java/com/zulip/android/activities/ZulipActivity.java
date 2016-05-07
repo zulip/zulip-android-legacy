@@ -197,11 +197,11 @@ public class ZulipActivity extends FragmentActivity implements
     public void muteTopic(Message message) {
         app.muteTopic(message);
         for (int i = homeList.adapter.getCount() - 1; i >= 0; i--) {
-            if (homeList.adapter.getItem(i).getStream() != null) {
-                if (homeList.adapter.getItem(i).getStream().getId() == message.getStream().getId() && homeList.adapter.getItem(i).getSubject().equals(message.getSubject())) {
-                    mutedTopics.add(homeList.adapter.getItem(i));
-                    homeList.adapter.remove(homeList.adapter.getItem(i));
-                }
+            if (homeList.adapter.getItem(i).getStream() != null
+                    && homeList.adapter.getItem(i).getStream().getId() == message.getStream().getId()
+                    && homeList.adapter.getItem(i).getSubject().equals(message.getSubject())) {
+                mutedTopics.add(homeList.adapter.getItem(i));
+                homeList.adapter.remove(homeList.adapter.getItem(i));
             }
         }
         homeList.adapter.notifyDataSetChanged();

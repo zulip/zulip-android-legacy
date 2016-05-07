@@ -159,21 +159,19 @@ public class AsyncGetOldMessages extends ZulipAsyncPushTask {
                     Log.w("db_gom", "No messages found in specified range!");
                 }
             }
-            if (fetchMessages(mainAnchor, before, after, params)) {
-                if (filter == null) {
-                    int lowest = receivedMessages.get(0).getID();
-                    int highest = receivedMessages.get(
-                            receivedMessages.size() - 1).getID();
+            if (fetchMessages(mainAnchor, before, after, params) && filter == null) {
+                int lowest = receivedMessages.get(0).getID();
+                int highest = receivedMessages.get(
+                        receivedMessages.size() - 1).getID();
 
-                    // We know there are no messages between the anchor and what
-                    // we received or we would have fetched them.
-                    if (lowest > mainAnchor)
-                        lowest = mainAnchor;
-                    if (highest < mainAnchor)
-                        highest = mainAnchor;
+                // We know there are no messages between the anchor and what
+                // we received or we would have fetched them.
+                if (lowest > mainAnchor)
+                    lowest = mainAnchor;
+                if (highest < mainAnchor)
+                    highest = mainAnchor;
 
-                    MessageRange.markRange(app, lowest, highest);
-                }
+                MessageRange.markRange(app, lowest, highest);
             }
         } catch (SQLException e) {
             // Still welp.
