@@ -128,8 +128,7 @@ public class UnsortedTests extends ActivityUnitTestCase<ZulipActivity> {
 
         assertEquals(600, messageDao.countOf());
         Message.trim(100, app);
-        @SuppressWarnings("unused")
-        List<Message> messages = this.messageDao.queryForAll();
+        this.messageDao.queryForAll();
         assertEquals(100, messageDao.countOf());
         assertEquals(1, messageRangeDao.countOf());
         MessageRange r = messageRangeDao.queryBuilder().queryForFirst();

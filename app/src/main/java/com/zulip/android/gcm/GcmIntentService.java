@@ -51,11 +51,10 @@ public class GcmIntentService extends IntentService {
                 new Intent(this, ZulipActivity.class).addFlags(0), 0);
 
         String type = msg.getString("recipient_type");
-        String title = msg.getString("alert");
         String tag = "zulip";
         String content = msg.getString("content");
 
-        title = msg.getString("sender_full_name");
+        String title = msg.getString("sender_full_name");
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(
                 this).setSmallIcon(R.drawable.zulip_notification)
