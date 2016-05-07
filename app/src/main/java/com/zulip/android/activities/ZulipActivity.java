@@ -136,6 +136,8 @@ public class ZulipActivity extends FragmentActivity implements
                     arg0.getBackground().setColorFilter(arg1.getInt(arg2),
                             Mode.MULTIPLY);
                     return true;
+                default:
+                    break;
             }
             return false;
         }
@@ -180,6 +182,8 @@ public class ZulipActivity extends FragmentActivity implements
                         }
                     }
                     return true;
+                default:
+                    break;
             }
             return false;
         }
@@ -442,6 +446,8 @@ public class ZulipActivity extends FragmentActivity implements
                     app.resetDatabase();
                     Log.i(PARAMS, "Database deleted successfully.");
                     this.finish();
+                    break;
+                default:
                     break;
             }
         }
