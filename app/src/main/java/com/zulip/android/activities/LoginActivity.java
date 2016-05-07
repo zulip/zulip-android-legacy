@@ -73,6 +73,8 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
                 GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(intent);
                 handleSignInResult(result);
                 break;
+            default:
+                break;
         }
     }
 
@@ -257,6 +259,8 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
                 break;
             case R.id.legal_button:
                 openLegal();
+                break;
+            default:
                 break;
         }
     }
