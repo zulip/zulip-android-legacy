@@ -121,10 +121,10 @@ public class AsyncGetOldMessages extends ZulipAsyncPushTask {
                     before -= lowerCachedMessages.size();
                     // One more than size to account for missing anchor
                     after -= upperCachedMessages.size() + 1;
-                    if (lowerCachedMessages.size() > 0) {
+                    if (!lowerCachedMessages.isEmpty()) {
                         mainAnchor = lowerCachedMessages.get(0).getID() - 1;
                     }
-                    if (upperCachedMessages.size() > 0) {
+                    if (!upperCachedMessages.isEmpty()) {
                         afterAnchor = upperCachedMessages.get(
                                 upperCachedMessages.size() - 1).getID() + 1;
                     }
@@ -135,8 +135,8 @@ public class AsyncGetOldMessages extends ZulipAsyncPushTask {
                     Log.i("perf",
                             "Retrieving cached messages: " + watch.toString());
 
-                    if (lowerCachedMessages.size() > 0
-                            || upperCachedMessages.size() > 0) {
+                    if (!lowerCachedMessages.isEmpty()
+                            || !upperCachedMessages.isEmpty()) {
                         if (before > 0) {
                             this.recurse(LoadPosition.ABOVE, before, rng,
                                     mainAnchor);
@@ -267,7 +267,7 @@ public class AsyncGetOldMessages extends ZulipAsyncPushTask {
                     noFurtherMessages = true;
                 }
 
-                return receivedMessages.size() > 0;
+                return !receivedMessages.isEmpty();
             } catch (JSONException e) {
                 Log.e("json", "parsing error");
                 ZLog.logException(e);
