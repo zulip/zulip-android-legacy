@@ -47,7 +47,7 @@ public class MessageRange extends BaseDaoEnabled<MessageRange, Integer> {
                     .and().ge("high", value).query();
             if (ranges.size() == 1) {
                 return ranges.get(0);
-            } else if (ranges.size() != 0) {
+            } else if (!ranges.isEmpty()) {
                 Log.wtf("rangecheck",
                         "Expected one range, got " + ranges.size()
                                 + " when looking for ID " + value);
@@ -125,7 +125,7 @@ public class MessageRange extends BaseDaoEnabled<MessageRange, Integer> {
                                         where.le("low", high + 1))).query();
 
                         MessageRange rng = new MessageRange(low, high);
-                        if (ranges.size() > 0) {
+                        if (!ranges.isEmpty()) {
                             Log.i("", "our low: " + rng.low + ", our high: "
                                     + rng.high);
                             int db_low = ranges.get(0).low;

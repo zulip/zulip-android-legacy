@@ -24,7 +24,7 @@ public class AsyncUnreadMessagesUpdate extends ZulipAsyncPushTask {
             }
         }
 
-        if (messageIds.size() > 0) {
+        if (!messageIds.isEmpty()) {
             setProperty("messages", "[" + TextUtils.join(",", messageIds) + "]");
             setProperty("flag", "read");
             setProperty("op", "add");

@@ -270,7 +270,7 @@ public class AsyncGetEvents extends Thread {
             watch.reset();
             watch.start();
 
-            if (messages.size() > 0) {
+            if (!messages.isEmpty()) {
                 Log.i("AsyncGetEvents", "Received " + messages.size()
                         + " messages");
                 Message.createMessages(app, messages);
