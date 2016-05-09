@@ -460,25 +460,22 @@ public class ZulipActivity extends FragmentActivity implements
         currentList = list;
 
         NarrowFilter filter = list.filter;
-
         if (filter == null) {
-            if (android.os.Build.VERSION.SDK_INT >= 11) {
-                getActionBar().setTitle("Zulip");
-                getActionBar().setSubtitle(null);
-            }
+            setupTitleBar(getString(R.string.app_name), null);
             this.drawerToggle.setDrawerIndicatorEnabled(true);
         } else {
-            String title = list.filter.getTitle();
-            if (android.os.Build.VERSION.SDK_INT >= 11) {
-                if (title != null) {
-                    getActionBar().setTitle(title);
-                }
-                getActionBar().setSubtitle(list.filter.getSubtitle());
-            }
+            setupTitleBar(filter.getTitle(), filter.getSubtitle());
             this.drawerToggle.setDrawerIndicatorEnabled(false);
         }
 
         this.drawerLayout.closeDrawers();
+    }
+
+    private void setupTitleBar(String title, String subtitle) {
+        if (android.os.Build.VERSION.SDK_INT >= 11 && getActionBar() != null) {
+            if (title != null) getActionBar().setTitle(title);
+            getActionBar().setSubtitle(subtitle);
+        }
     }
 
     public void doNarrow(NarrowFilter filter) {
