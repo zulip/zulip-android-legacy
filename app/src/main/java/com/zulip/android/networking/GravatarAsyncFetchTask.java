@@ -44,7 +44,7 @@ public class GravatarAsyncFetchTask extends AsyncTask<URL, Void, Bitmap> {
     @Override
     protected Bitmap doInBackground(URL... urls) {
         try {
-            return fetch(urls[0]);
+            if (urls[0] != null) return fetch(urls[0]);
         } catch (IOException e) {
             ZLog.logException(e);
         }
