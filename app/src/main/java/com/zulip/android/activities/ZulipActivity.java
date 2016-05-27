@@ -46,6 +46,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.FilterQueryProvider;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
@@ -436,6 +437,7 @@ public class ZulipActivity extends FragmentActivity implements
                 sendMessage();
             }
         });
+        composeStatus = (LinearLayout) findViewById(R.id.composeStatus);
         setUpAdapter();
         streamActv.setAdapter(streamActvAdapter);
         topicActv.setAdapter(subjectActvAdapter);
@@ -478,6 +480,7 @@ public class ZulipActivity extends FragmentActivity implements
             messageEt.requestFocus();
             return;
         }
+        sendingMessage(true);
         MessageType messageType = (isCurrentModeStream()) ? MessageType.STREAM_MESSAGE : MessageType.PRIVATE_MESSAGE;
         Message msg = new Message(app);
         msg.setSender(app.getYou());
@@ -496,14 +499,31 @@ public class ZulipActivity extends FragmentActivity implements
             public void onTaskComplete(String result, JSONObject jsonObject) {
                 Toast.makeText(ZulipActivity.this, R.string.message_sent, Toast.LENGTH_SHORT).show();
                 messageEt.setText("");
+                sendingMessage(false);
             }
             public void onTaskFailure(String result) {
                 Log.d("onTaskFailure", "Result: " + result);
                 Toast.makeText(ZulipActivity.this, R.string.message_error, Toast.LENGTH_SHORT).show();
+                sendingMessage(false);
             }
         });
         sender.execute();
     }
+
+    private void sendingMessage(boolean isSending) {
+        streamActv.setEnabled(!isSending);
+        textView.setEnabled(!isSending);
+        messageEt.setEnabled(!isSending);
+        topicActv.setEnabled(!isSending);
+        sendBtn.setEnabled(!isSending);
+        togglePrivateStreamBtn.setEnabled(!isSending);
+        if (isSending)
+            composeStatus.setVisibility(View.VISIBLE);
+        else
+            composeStatus.setVisibility(View.GONE);
+    }
+
+    LinearLayout composeStatus;
 
     public void setUpAdapter() {
         streamActvAdapter = new SimpleCursorAdapter(
@@ -583,6 +603,7 @@ public class ZulipActivity extends FragmentActivity implements
             }
         });
 
+        sendingMessage(false);
     }
 
     private Cursor makeStreamCursor(CharSequence streamName)
