@@ -68,6 +68,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
                          String pmRecipients);
         void addToList(Message message);
         void muteTopic(Message message);
+        void clearChatBox();
     }
 
     private static final String PARAM_FILTER = "filter";
@@ -260,6 +261,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
     @Override
     public void onDetach() {
         super.onDetach();
+        mListener.clearChatBox();
         mListener = null;
     }
 

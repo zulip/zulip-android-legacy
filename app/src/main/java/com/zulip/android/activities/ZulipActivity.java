@@ -722,6 +722,15 @@ public class ZulipActivity extends FragmentActivity implements
     }
     String tempStreamSave = null;
 
+    @Override
+    public void clearChatBox() {
+        if (messageEt != null) {
+            if (TextUtils.isEmpty(messageEt.getText())) {
+                topicActv.setText("");
+                streamActv.setText("");
+            }
+        }
+    }
     public void onBackPressed() {
         if (narrowedList != null) {
             narrowedList = null;
