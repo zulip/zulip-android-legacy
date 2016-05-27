@@ -40,6 +40,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AutoCompleteTextView;
@@ -832,6 +833,7 @@ public class ZulipActivity extends FragmentActivity implements
             if ("".equals(message.getSubject())) topicActv.requestFocus();
             else messageEt.requestFocus();
         }
+        ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE)).toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
     }
     public void onNarrow(NarrowFilter narrowFilter) {
         // TODO: check if already narrowed to this particular stream/subject
