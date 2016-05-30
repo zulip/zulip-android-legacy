@@ -1,32 +1,26 @@
 package com.zulip.android.networking;
 
-import java.io.IOException;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-
-import org.apache.http.NoHttpResponseException;
-import org.apache.http.client.HttpResponseException;
-import org.json.JSONObject;
-
 import android.annotation.TargetApi;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
 
-import com.zulip.android.util.ZLog;
 import com.zulip.android.ZulipApp;
+import com.zulip.android.util.ZLog;
+
+import org.json.JSONObject;
+
+import okhttp3.Response;
 
 /* General AsyncTask for use in making various web requests to Humbug.
- * 
+ *
  * This class should be extended by each asynchronous operation you
- * want to run. Most clients will need to override onPostExecute. 
+ * want to run. Most clients will need to override onPostExecute.
  */
-public class ZulipAsyncPushTask extends AsyncTask<String, String, String> {
-
-    private static final String TAG = "ZulipAsyncPushTask";
+public abstract class ZulipAsyncPushTask extends AsyncTask<String, String, String> {
 
     public ZulipApp app;
-    HTTPRequest request;
+    private HTTPRequest request;
     AsyncTaskCompleteListener callback;
 
     /**
@@ -71,9 +65,9 @@ public class ZulipAsyncPushTask extends AsyncTask<String, String, String> {
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public AsyncTask<String, String, String> execute(String method, String url) {
         try {
-            return this.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, method, url);
+            request.setMethodAndUrl(method, url);
+            return this.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         } catch (NoSuchFieldError e) {
-            Log.e(TAG, e.getMessage(), e);
             return super.execute(method, url);
         }
     }
@@ -94,53 +88,24 @@ public class ZulipAsyncPushTask extends AsyncTask<String, String, String> {
         this.request.setProperty(key, value);
     }
 
-    protected String doInBackground(String... apiPath) {
+    protected String doInBackground(String... api_path) {
         try {
-            return request.execute(apiPath[0], apiPath[1]);
-        } catch (HttpResponseException e) {
-            handleHTTPError(e);
-        } catch (IOException e) {
-            handleError(e);
+            Response response = request.execute();
+            String responseString = response.body().string();
+            if (response.isSuccessful()) {
+                Log.d("OkHTTP200", responseString);
+                return responseString;
+            } else {
+                Log.e("OkHTTPError", "Code:" + response.code());
+                Log.e("OkHTTPError", "Message:" + responseString);
+                this.cancel(true);
+                return responseString;
+            }
+        } catch (Exception e) {
+            ZLog.logException(e);
+            this.cancel(true);
         }
         return "";
-    }
-
-    /**
-     * Prints a stacktrace and cancels the task.
-     * <p/>
-     * This function is called whenever the backend ends up in an error
-     * condition.
-     * <p/>
-     * Override this to specify custom error behavior in your Task.
-     *
-     * @param e the Exception that triggered this handler
-     */
-    protected void handleError(Exception e) {
-        // Ignore things that are obviously not our fault
-        if (!(e instanceof UnknownHostException
-                || e instanceof NoHttpResponseException || e instanceof SocketException)) {
-            ZLog.logException(e);
-        }
-        this.cancel(true);
-    }
-
-    /**
-     * Prints the error reason and response and cancels the task.
-     * <p/>
-     * This function is called if the server does not return a 200 OK as a
-     * response to a request.
-     * <p/>
-     * Override this to specify custom behavior in your task.
-     *
-     * @param e the Exception that triggered this handler
-     */
-    protected void handleHTTPError(HttpResponseException e) {
-        if (e.getStatusCode() < 500 && e.getStatusCode() >= 400) {
-            ZLog.logException(e);
-        } else {
-            Log.e("hapt", "http error", e);
-        }
-        this.cancel(true);
     }
 
     @Override
@@ -148,6 +113,7 @@ public class ZulipAsyncPushTask extends AsyncTask<String, String, String> {
         callback.onTaskComplete(result, null);
     }
 
+    //Override this method for detecting errors!
     @Override
     protected void onCancelled(String result) {
         callback.onTaskFailure(result);
