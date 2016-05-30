@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.lang.time.StopWatch;
-import org.apache.http.client.HttpResponseException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,10 +25,12 @@ import com.zulip.android.util.ZLog;
 import com.zulip.android.activities.ZulipActivity;
 import com.zulip.android.ZulipApp;
 
+import okhttp3.Response;
+
 public class AsyncGetEvents extends Thread {
     private static final String TAG = "AsyncGetEvents";
-    public static final String ASYNC_GET_EVENTS = "asyncGetEvents";
-    public static final String POINTER = "pointer";
+    private static final String ASYNC_GET_EVENTS = "asyncGetEvents";
+    private static final String POINTER = "pointer";
     ZulipActivity activity;
     ZulipApp app;
 
@@ -77,7 +78,8 @@ public class AsyncGetEvents extends Thread {
 
         StopWatch watch = new StopWatch();
         watch.start();
-        String responseData = request.execute("POST", "v1/register");
+        request.setMethodAndUrl("POST", "v1/register");
+        String responseData = request.execute().body().string();
         watch.stop();
         Log.i("perf", "net: v1/register: " + watch.toString());
 
@@ -108,8 +110,24 @@ public class AsyncGetEvents extends Thread {
                     if (!registeredOrGotEventsThisRun) {
                         request.setProperty("dont_block", "true");
                     }
-                    JSONObject response = new JSONObject(request.execute("GET",
-                            "v1/events"));
+                    request.setMethodAndUrl("GET", "v1/events");
+                    Response httpResponse = request.execute();
+
+                    String json = httpResponse.body().string();
+                    if (!httpResponse.isSuccessful()) {
+                        String msg = httpResponse.message();
+                        if (msg.contains("Bad event queue id")
+                                || msg.contains("too old")) {
+                            // Queue dead. Register again.
+                            Log.w(ASYNC_GET_EVENTS, "Queue dead");
+                            app.setEventQueueId(null);
+                        }
+                        Log.i("WRONG", "run: " + json);
+                        continue;
+                    } else {
+                        Log.i("OkHttp200GE", json);
+                    }
+                    JSONObject response = new JSONObject(json);
 
                     JSONArray events = response.getJSONArray("events");
                     if (events.length() > 0) {
@@ -131,20 +149,9 @@ public class AsyncGetEvents extends Thread {
                             }
                         });
                     }
-                } catch (HttpResponseException e) {
-                    if (e.getStatusCode() == 400) {
-                        String msg = e.getMessage();
-                        if (msg.contains("Bad event queue id")
-                                || msg.contains("too old")) {
-                            // Queue dead. Register again.
-                            Log.w(ASYNC_GET_EVENTS, "Queue dead");
-                            app.setEventQueueId(null);
-                            continue;
-                        }
-                    }
-                    backoff(e);
                 } catch (SocketTimeoutException e) {
                     Log.e(TAG, e.getMessage(), e);
+                    ZLog.logException(e);
                     // Retry without backoff, since it's already been a while
                 } catch (IOException e) {
                     if (request.aborting) {
@@ -156,6 +163,7 @@ public class AsyncGetEvents extends Thread {
                 } catch (JSONException e) {
                     backoff(e);
                 }
+                Thread.sleep(1000);
             }
         } catch (Exception e) {
             ZLog.logException(e);
