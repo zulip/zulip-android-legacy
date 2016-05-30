@@ -36,7 +36,6 @@ android {
             buildConfigField "String", "GOOGLE_CLIENT_ID", "TODO: FILL THIS IN"
         }
     }
-    useLibrary  'org.apache.http.legacy'
     compileOptions {
         targetCompatibility JavaVersion.VERSION_1_7
     }
@@ -72,6 +71,7 @@ dependencies {
     }
 
     testCompile 'junit:junit:4.12'
+    compile 'com.squareup.okhttp3:okhttp:3.3.1'
 }
 
 apply plugin: 'com.google.gms.google-services'

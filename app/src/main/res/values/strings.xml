@@ -65,7 +65,7 @@
     <string name="admin_none">Administrators (None)</string>
     <string name="admin">Administrators</string>
     <string name="normal_user">Normal users</string>
-
-
+    <string name="method_null">Method should not be null</string>
+    <string name="method_error">Method not supported</string>
     <string name="tap_message">Tap on a message to send reply</string>
 </resources>
