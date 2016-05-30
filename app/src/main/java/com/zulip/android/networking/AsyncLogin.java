@@ -1,7 +1,5 @@
 package com.zulip.android.networking;
 
-import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpResponseException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -15,12 +13,13 @@ import com.zulip.android.util.ZLog;
 import com.zulip.android.ZulipApp;
 
 public class AsyncLogin extends ZulipAsyncPushTask {
-    public static final String UNREGISTERED = "unregistered";
-    public static final String DISABLED = "disabled";
+    private static final String UNREGISTERED = "unregistered";
+    private static final String DISABLED = "disabled";
 
     Activity activity;
-    boolean userDefinitelyInvalid = false;
     boolean devServer = true; //If this is a DevAuthBackend server!
+    private LoginActivity context;
+    private boolean userDefinitelyInvalid = false;
 
     public AsyncLogin(Activity activity, String username, String password, boolean devServer) {
         super(ZulipApp.get());
@@ -50,10 +49,9 @@ public class AsyncLogin extends ZulipAsyncPushTask {
 
                 if (obj.getString("result").equals("success")) {
                     this.app.setLoggedInApiKey(obj.getString("api_key"));
-                        if (devServer) ((DevAuthActivity) activity).openHome();
-                        else ((LoginActivity) activity).openHome();
+                    if (devServer) ((DevAuthActivity) activity).openHome();
+                    else ((LoginActivity) activity).openHome();
                     callback.onTaskComplete(result, obj);
-
                     return;
                 }
             } catch (JSONException e) {
@@ -65,46 +63,22 @@ public class AsyncLogin extends ZulipAsyncPushTask {
     }
 
     @Override
-    protected void handleHTTPError(final HttpResponseException e) {
-        if (e.getStatusCode() == HttpStatus.SC_FORBIDDEN) {
-            String message = "Unknown authentication error.";
-            try {
-                JSONObject obj = new JSONObject(e.getMessage());
-                String reason = obj.getString("reason");
-                message = obj.getString("msg");
-                /*
-                 * If you're disabled or unregistered, your credentials were
-                 * valid but you are not able to use the service.
-                 * 
-                 * This is useful in the context of Google Apps login where we
-                 * want to differentiate between "bad credentials" and
-                 * "not permitted by policy". So, an authentication vs.
-                 * authorization thing.
-                 */
-                userDefinitelyInvalid = reason.equals(AsyncLogin.DISABLED)
-                        || reason.equals(AsyncLogin.UNREGISTERED);
-            } catch (JSONException e1) {
-                ZLog.logException(e1);
-            }
-            final String finalMessage = message;
-            activity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(activity, finalMessage, Toast.LENGTH_LONG)
-                            .show();
-                }
-            });
-            this.cancel(true);
-        } else {
-            activity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(activity, "Network error", Toast.LENGTH_LONG)
-                            .show();
-                }
-            });
-            // supermethod invokes cancel for us
-            super.handleHTTPError(e);
+    protected void onCancelled(String result) {
+        super.onCancelled(result);
+        String message = "Unknown authentication error.";
+        try {
+            JSONObject obj = new JSONObject(result);
+            message = obj.getString("msg");
+        } catch (JSONException e1) {
+            ZLog.logException(e1);
         }
+        final String finalMessage = message;
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(activity, finalMessage, Toast.LENGTH_LONG)
+                        .show();
+            }
+        });
     }
 }
