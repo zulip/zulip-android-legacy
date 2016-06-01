@@ -59,13 +59,6 @@ public class MessageListFragment extends Fragment implements MessageListener {
      */
     public interface Listener {
         void onListResume(MessageListFragment f);
-
-        void openCompose(Stream stream, String topic);
-
-        void openCompose(String pmRecipients);
-
-        void openCompose(final MessageType type, String stream, String topic,
-                         String pmRecipients);
         void addToList(Message message);
         void muteTopic(Message message);
         void clearChatBox();
@@ -305,13 +298,13 @@ public class MessageListFragment extends Fragment implements MessageListener {
         Message message = itemFromMenuInfo(item.getMenuInfo());
         switch (item.getItemId()) {
             case R.id.reply_to_stream:
-                mListener.openCompose(message.getStream(), message.getSubject());
+                ((NarrowListener) getActivity()).onNarrowFillSendBox(message);
                 return true;
             case R.id.reply_to_private:
-                mListener.openCompose(message.getReplyTo(app));
+                ((NarrowListener) getActivity()).onNarrowFillSendBox(message);
                 return true;
             case R.id.reply_to_sender:
-                mListener.openCompose(message.getSender().getEmail());
+                ((NarrowListener) getActivity()).onNarrowFillSendBox(message);
                 return true;
             case R.id.narrow_to_private:
                 if (getActivity() instanceof NarrowListener) {

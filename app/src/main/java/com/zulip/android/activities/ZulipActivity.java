@@ -933,22 +933,6 @@ public class ZulipActivity extends FragmentActivity implements
                     builder.show();
                 }
                 break;
-
-            case R.id.compose_stream:
-                String stream = null;
-                if (currentList.filter != null
-                        && currentList.filter.getComposeStream() != null) {
-                    stream = currentList.filter.getComposeStream().getName();
-                }
-                openCompose(MessageType.STREAM_MESSAGE, stream, null, null);
-                break;
-            case R.id.compose_pm:
-                String recipient = null;
-                if (currentList.filter != null) {
-                    recipient = currentList.filter.getComposePMRecipient();
-                }
-                openCompose(MessageType.PRIVATE_MESSAGE, null, null, recipient);
-                break;
             case R.id.refresh:
                 Log.w("menu", "Refreshed manually by user. We shouldn't need this.");
                 onRefresh();
@@ -965,27 +949,6 @@ public class ZulipActivity extends FragmentActivity implements
                 return super.onOptionsItemSelected(item);
         }
         return true;
-    }
-
-    public void openCompose(MessageType type) {
-        openCompose(type, null, null, null);
-    }
-
-    public void openCompose(Stream stream, String topic) {
-        openCompose(MessageType.STREAM_MESSAGE, stream.getName(), topic, null);
-    }
-
-    public void openCompose(String pmRecipients) {
-        openCompose(MessageType.PRIVATE_MESSAGE, null, null, pmRecipients);
-    }
-
-    public void openCompose(final MessageType type, String stream,
-                            String topic, String pmRecipients) {
-
-        FragmentManager fm = getSupportFragmentManager();
-        ComposeDialog dialog = ComposeDialog.newInstance(type, stream, topic,
-                pmRecipients);
-        dialog.show(fm, "fragment_compose");
     }
 
     /**
