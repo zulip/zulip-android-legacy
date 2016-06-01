@@ -97,6 +97,7 @@
         android:id="@+id/local_server_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:onClick="onClick"
         android:paddingTop="16dp"
         android:text="@string/local_server"
         android:textColor="#ff0099cc" />
