@@ -94,10 +94,18 @@
     </com.google.android.gms.common.SignInButton>
 
     <TextView
+        android:id="@+id/local_server_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="16dp"
+        android:text="@string/local_server"
+        android:textColor="#ff0099cc" />
+
+    <TextView
         android:id="@+id/legal_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingTop="8dp"
         android:text="@string/legal"
-        android:paddingTop="16dp"
         android:textColor="#ff0099cc" />
 </LinearLayout>
