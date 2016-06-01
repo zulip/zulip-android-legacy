@@ -14,4 +14,11 @@
         android:layout_marginTop="8dp"
         android:text="@string/zulip_dev_login"
         android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/devAuthRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:layout_marginTop="16dp" />
 </LinearLayout>

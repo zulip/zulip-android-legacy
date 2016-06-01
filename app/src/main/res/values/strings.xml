@@ -62,6 +62,9 @@
     <string name="no_message_error">No Message Written.</string>
     <string name="local_server">Dev Backend testing server</string>
     <string name="zulip_dev_login">Zulip Dev Login</string>
+    <string name="admin_none">Administrators (None)</string>
+    <string name="admin">Administrators</string>
+    <string name="normal_user">Normal users</string>
 
 
     <string name="tap_message">Tap on a message to send reply</string>

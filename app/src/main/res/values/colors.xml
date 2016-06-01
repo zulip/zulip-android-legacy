@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="dev_auth_admin">#ff4136</color>
+    <color name="dev_auth_user">#428bca</color>
+</resources>
