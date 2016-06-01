@@ -60,6 +60,7 @@
     <string name="subject_error">No Subject specified.</string>
     <string name="person_error">No Person specified.</string>
     <string name="no_message_error">No Message Written.</string>
+    <string name="local_server">Dev Backend testing server</string>
 
 
     <string name="tap_message">Tap on a message to send reply</string>
