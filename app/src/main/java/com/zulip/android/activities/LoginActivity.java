@@ -64,6 +64,7 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
         mUseZulipCheckbox.setOnCheckedChangeListener(this);
         mUserName = (EditText) findViewById(R.id.username);
         mPassword = (EditText) findViewById(R.id.password);
+        if (!BuildConfig.DEBUG) findViewById(R.id.local_server_button).setVisibility(View.GONE);
     }
 
     @Override
