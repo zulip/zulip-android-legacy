@@ -11,15 +11,15 @@ import com.zulip.android.networking.AsyncGetOldMessages;
 
 public class FakeAsyncGetOldMessages extends
         AsyncGetOldMessages {
-    public String calculatedResult;
-    public int fmAnchor;
-    public int fmNumBefore;
-    public int fmNumAfter;
-    public boolean shouldFmSucceed;
-    public boolean fmCalled;
+    private String calculatedResult;
+    private int fmAnchor;
+    private int fmNumBefore;
+    private int fmNumAfter;
+    private boolean shouldFmSucceed;
+    private boolean fmCalled;
     public List<Message> appendTheseMessages;
     public List<FakeAsyncGetOldMessages> recurseRequestsReceived;
-    private MessageListFragment myfragment;
+    public MessageListFragment myfragment;
 
     public FakeAsyncGetOldMessages(MessageListFragment fragment) {
         super(fragment);
@@ -69,4 +69,51 @@ public class FakeAsyncGetOldMessages extends
         calculatedResult = result;
     }
 
+    public String getCalculatedResult() {
+        return calculatedResult;
+    }
+
+    public void setCalculatedResult(String calculatedResult) {
+        this.calculatedResult = calculatedResult;
+    }
+
+    public int getFmAnchor() {
+        return fmAnchor;
+    }
+
+    public void setFmAnchor(int fmAnchor) {
+        this.fmAnchor = fmAnchor;
+    }
+
+    public int getFmNumBefore() {
+        return fmNumBefore;
+    }
+
+    public void setFmNumBefore(int fmNumBefore) {
+        this.fmNumBefore = fmNumBefore;
+    }
+
+    public int getFmNumAfter() {
+        return fmNumAfter;
+    }
+
+    public void setFmNumAfter(int fmNumAfter) {
+        this.fmNumAfter = fmNumAfter;
+    }
+
+    public boolean shouldFmSucceed() {
+        return shouldFmSucceed;
+    }
+
+    public void setShouldFmSucceed(boolean shouldFmSucceed) {
+        this.shouldFmSucceed = shouldFmSucceed;
+    }
+
+    public boolean isFmCalled() {
+        return fmCalled;
+    }
+
+    public void setFmCalled(boolean fmCalled) {
+        this.fmCalled = fmCalled;
+    }
 }
