@@ -144,7 +144,7 @@ public class UnsortedTests extends ActivityUnitTestCase<ZulipActivity> {
         MessageListFragment fragment = MessageListFragment.newInstance(null);
         fragment.app = app;
         FakeAsyncGetOldMessages request = new FakeAsyncGetOldMessages(fragment);
-        request.shouldFmSucceed = true;
+        request.setShouldFmSucceed(true);
         request.appendTheseMessages = new ArrayList<Message>();
         Message m1 = sampleMessage(app, 40);
         Message m2 = sampleMessage(app, 45);
@@ -164,14 +164,14 @@ public class UnsortedTests extends ActivityUnitTestCase<ZulipActivity> {
         request = new FakeAsyncGetOldMessages(fragment);
         request.execute(45, LoadPosition.INITIAL, 1, 0, null);
         request.get();
-        assertFalse(request.fmCalled);
+        assertFalse(request.isFmCalled());
         assertEquals(2, request.receivedMessages.size());
 
         // Now let's test coalescing...
         // The fetch won't be in cache here, but one message will already be
         // retrieved.
         request = new FakeAsyncGetOldMessages(fragment);
-        request.shouldFmSucceed = true;
+        request.setShouldFmSucceed(true);
         request.appendTheseMessages = new ArrayList<Message>();
         Message m0 = sampleMessage(app, 35);
         request.appendTheseMessages.add(m0);
@@ -187,26 +187,26 @@ public class UnsortedTests extends ActivityUnitTestCase<ZulipActivity> {
         // And test partial hits for good measure!
 
         request = new FakeAsyncGetOldMessages(fragment);
-        request.shouldFmSucceed = true;
+        request.setShouldFmSucceed(true);
         request.execute(36, LoadPosition.INITIAL, 2, 0, null);
         request.get();
 
         // 35 should be in cache
         assertEquals(1, request.receivedMessages.size());
-        assertEquals(false, request.fmCalled);
+        assertEquals(false, request.isFmCalled());
         // Recursing in one direction
         assertEquals(1, request.recurseRequestsReceived.size());
 
         request = request.recurseRequestsReceived.get(0);
-        request.shouldFmSucceed = true;
-        assertEquals(1, request.fmNumBefore);
+        request.setShouldFmSucceed(true);
+        assertEquals(1, request.getFmNumBefore());
         request.appendTheseMessages = new ArrayList<Message>();
         Message mn1 = sampleMessage(app, 33);
         request.appendTheseMessages.add(mn1);
         request.executeBasedOnPresetValues();
         request.get();
 
-        assertEquals(true, request.fmCalled);
+        assertEquals(true, request.isFmCalled());
         assertEquals(1, request.receivedMessages.size());
         mrs = app.getDao(MessageRange.class).queryForAll();
         assertEquals(1, mrs.size());
