@@ -212,7 +212,7 @@ public class ComposeDialog extends DialogFragment {
                 public CharSequence convertToString(Cursor cursor) {
                     String text = recipient.getText().toString();
                     String prefix;
-                    int lastIndex = text.lastIndexOf(",");
+                    int lastIndex = text.lastIndexOf(',');
                     if (lastIndex != -1) {
                         prefix = text.substring(0, lastIndex + 1);
                     } else {

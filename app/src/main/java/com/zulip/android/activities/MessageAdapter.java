@@ -48,10 +48,14 @@ public class MessageAdapter extends ArrayAdapter<Message> {
 
     private static final HTMLSchema schema = new HTMLSchema();
 
-    private @ColorInt int mDefaultStreamHeaderColor;
-    private @ColorInt int mDefaultHuddleHeaderColor;
-    private @ColorInt int mDefaultStreamMessageColor;
-    private @ColorInt int mDefaultHuddleMessageColor;
+    @ColorInt
+    private int mDefaultStreamHeaderColor;
+    @ColorInt
+    private int mDefaultHuddleHeaderColor;
+    @ColorInt
+    private int mDefaultStreamMessageColor;
+    @ColorInt
+    private int mDefaultHuddleMessageColor;
 
     public MessageAdapter(Context context, List<Message> objects) {
         super(context, 0, objects);
@@ -77,7 +81,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         }
 
         LinearLayout envelopeTile = (LinearLayout) tile.findViewById(R.id.envelopeTile);
-        TextView display_recipient = (TextView) tile.findViewById(R.id.displayRecipient);
+        TextView displayRecipient = (TextView) tile.findViewById(R.id.displayRecipient);
         ImageView muteImageView = (ImageView) tile.findViewById(R.id.muteMessageImage);
 
         if (message.getType() != MessageType.STREAM_MESSAGE) {
@@ -89,21 +93,21 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         }
 
         if (message.getType() != MessageType.STREAM_MESSAGE) {
-            display_recipient.setText(context.getString(R.string.huddle_text, message.getDisplayRecipient(context.app)));
-            display_recipient.setTextColor(Color.WHITE);
-            display_recipient.setOnClickListener(new View.OnClickListener() {
+            displayRecipient.setText(context.getString(R.string.huddle_text, message.getDisplayRecipient(context.app)));
+            displayRecipient.setTextColor(Color.WHITE);
+            displayRecipient.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (getContext() instanceof NarrowListener) {
                         ((NarrowListener) getContext()).onNarrow(new NarrowFilterPM(
-                                Arrays.asList(message.getRecipients((ZulipApp.get())))));
+                                Arrays.asList(message.getRecipients(ZulipApp.get()))));
                     }
                 }
             });
         } else {
-            display_recipient.setText(message.getDisplayRecipient(context.app));
-            display_recipient.setTextColor(Color.BLACK);
-            display_recipient.setOnClickListener(new View.OnClickListener() {
+            displayRecipient.setText(message.getDisplayRecipient(context.app));
+            displayRecipient.setTextColor(Color.BLACK);
+            displayRecipient.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (getContext() instanceof NarrowListener) {
@@ -112,7 +116,9 @@ public class MessageAdapter extends ArrayAdapter<Message> {
                 }
             });
             if (getContext() instanceof NarrowListener) {
-                if (context.app.isTopicMute(message)) muteImageView.setVisibility(View.VISIBLE);
+                if (context.app.isTopicMute(message)) {
+                    muteImageView.setVisibility(View.VISIBLE);
+                }
                 else muteImageView.setVisibility(View.GONE);
             }
         }
@@ -190,10 +196,10 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         }
 
         ImageView gravatar = (ImageView) tile.findViewById(R.id.gravatar);
-        Bitmap gravatar_img = context.getGravatars().get(message.getSender().getEmail());
-        if (gravatar_img != null) {
+        Bitmap gravatarImg = context.getGravatars().get(message.getSender().getEmail());
+        if (gravatarImg != null) {
             // Gravatar already exists for this image, set the ImageView to it
-            gravatar.setImageBitmap(gravatar_img);
+            gravatar.setImageBitmap(gravatarImg);
         } else {
             // Go get the Bitmap
             URL url = GravatarAsyncFetchTask.sizedURL(context, message.getSender().getAvatarURL(), 35);
@@ -250,7 +256,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
                                         * scaleFactor * density));
                         return drawable;
                     } catch (IOException e) {
-                        Log.e("MessageAdapter", e.getMessage());
+                        Log.e("MessageAdapter", e.getMessage(), e);
                     }
                 }
                 return null;
