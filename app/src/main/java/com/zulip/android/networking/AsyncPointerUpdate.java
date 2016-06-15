@@ -9,6 +9,6 @@ public class AsyncPointerUpdate extends ZulipAsyncPushTask {
 
     public final void execute(int newPointer) {
         this.setProperty("pointer", Integer.toString(newPointer));
-        execute("PUT", "v1/users/me/pointer");
+        execute("PUT", "/v1/users/me/pointer");
     }
 }

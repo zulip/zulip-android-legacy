@@ -39,7 +39,7 @@ public class AsyncStatusUpdate extends ZulipAsyncPushTask {
     }
 
     public final void execute() {
-        execute("POST", "v1/users/me/presence");
+        execute("POST", "/v1/users/me/presence");
     }
 
     /**
