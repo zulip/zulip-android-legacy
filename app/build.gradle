@@ -13,6 +13,7 @@ android {
 
         testApplicationId "com.zulip.android.test"
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     signingConfigs {
         debug {
@@ -53,6 +54,23 @@ dependencies {
     compile 'commons-lang:commons-lang:2.6'
     compile 'org.ccil.cowan.tagsoup:tagsoup:1.2.1'
     compile files('libs/crashlytics.jar')
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2') {
+        exclude group: 'com.android.support'
+    }
+    androidTestCompile('com.android.support.test:runner:0.5') {
+        exclude group: 'com.android.support'
+    }
+    androidTestCompile('com.android.support.test:rules:0.5') {
+        exclude group: 'com.android.support'
+    }
+    androidTestCompile('com.android.support.test.espresso:espresso-contrib:2.2.2') {
+        exclude group: 'com.android.support'
+    }
+    androidTestCompile('com.android.support:support-annotations:23.3.0') {
+        exclude group: 'com.android.support'
+    }
+
+    testCompile 'junit:junit:4.12'
 }
 
 apply plugin: 'com.google.gms.google-services'
