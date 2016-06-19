@@ -16,12 +16,6 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.zulip.android.BuildConfig;
 import com.zulip.android.R;
 import com.zulip.android.networking.AsyncDevGetEmails;
@@ -35,14 +29,12 @@ import org.json.JSONObject;
 
 import java.util.List;
 
-public class LoginActivity extends AppCompatActivity implements View.OnClickListener,
-        GoogleApiClient.OnConnectionFailedListener, CompoundButton.OnCheckedChangeListener {
+public class LoginActivity extends AppCompatActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
     private static final String TAG = "LoginActivity";
     private static final int REQUEST_CODE_RESOLVE_ERR = 9000;
     private static final int REQUEST_CODE_SIGN_IN = 9001;
 
     private ProgressDialog connectionProgressDialog;
-    private GoogleApiClient mGoogleApiClient;
     private EditText mServerEditText;
     private EditText mUserName;
     private EditText mPassword;
@@ -75,31 +67,12 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        super.onActivityResult(requestCode, resultCode, intent);
-        switch (requestCode) {
-            case REQUEST_CODE_SIGN_IN:
-                GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(intent);
-                handleSignInResult(result);
-                break;
-            default:
-                break;
-        }
-    }
-
-    @Override
     protected void onStart() {
         super.onStart();
-        if (mGoogleApiClient != null) {
-            mGoogleApiClient.connect();
-        }
     }
 
     @Override
     protected void onStop() {
-        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
-            mGoogleApiClient.disconnect();
-        }
         super.onStop();
     }
 
@@ -136,46 +109,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
 
-    private void handleSignInResult(GoogleSignInResult result) {
-        Log.d("Login", "handleSignInResult:" + result.isSuccess());
-        if (result.isSuccess()) {
-            GoogleSignInAccount account = result.getSignInAccount();
-
-            // if there's a problem with fetching the account, bail
-            if (account == null) {
-                connectionProgressDialog.dismiss();
-                Toast.makeText(LoginActivity.this, R.string.google_app_login_failed, Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            final AsyncLogin loginTask = new AsyncLogin(LoginActivity.this, "google-oauth2-token", account.getIdToken(), false);
-            loginTask.setCallback(new AsyncTaskCompleteListener() {
-                @Override
-                public void onTaskComplete(String result, JSONObject object) {
-                    try {
-                        String email = object.getString("email");
-                        ((ZulipApp) getApplication()).setEmail(email);
-                    } catch (JSONException e) {
-                        ZLog.logException(e);
-                    }
-                }
-
-                @Override
-                public void onTaskFailure(String result) {
-                    // Invalidate the token and try again, unless the user we
-                    // are authenticating as is not registered or is disabled.
-                    connectionProgressDialog.dismiss();
-
-                }
-            });
-            loginTask.execute();
-        } else {
-            // something bad happened. whoops.
-            connectionProgressDialog.dismiss();
-            Toast.makeText(LoginActivity.this, R.string.google_app_login_failed, Toast.LENGTH_SHORT).show();
-        }
-    }
-
     protected void openLegal() {
         Intent i = new Intent(this, LegalActivity.class);
         startActivityForResult(i, 0);
@@ -190,60 +123,12 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     @Override
-    public void onConnectionFailed(ConnectionResult result) {
-        if (connectionProgressDialog.isShowing()) {
-            // The user clicked the sign-in button already. Start to resolve
-            // connection errors. Wait until onConnected() to dismiss the
-            // connection dialog.
-            if (result.hasResolution()) {
-                try {
-                    result.startResolutionForResult(this, REQUEST_CODE_RESOLVE_ERR);
-                } catch (SendIntentException e) {
-                    Log.e(TAG, e.getMessage(), e);
-                    // Yeah, no idea what to do here.
-                    connectionProgressDialog.dismiss();
-                    Toast.makeText(LoginActivity.this, R.string.google_app_login_failed, Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                connectionProgressDialog.dismiss();
-                Toast.makeText(LoginActivity.this, R.string.google_app_login_failed, Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    public void setupGoogleSignIn() {
-        if (mGoogleApiClient == null) {
-            GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                    .requestEmail()
-                    .requestIdToken(BuildConfig.GOOGLE_CLIENT_ID)
-                    .build();
-
-            mGoogleApiClient = new GoogleApiClient.Builder(LoginActivity.this)
-                    .addApi(Auth.GOOGLE_SIGN_IN_API, googleSignInOptions)
-                    .addOnConnectionFailedListener(LoginActivity.this)
-                    .build();
-
-            mGoogleApiClient.connect();
-            allowUserToPickAccount();
-        } else {
-            allowUserToPickAccount();
-        }
-
-    }
-
-    private void allowUserToPickAccount() {
-        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-        startActivityForResult(signInIntent, REQUEST_CODE_SIGN_IN);
-    }
-
-    @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.google_sign_in_button:
                 connectionProgressDialog.show();
                 saveServerURL();
                 Toast.makeText(this, getString(R.string.logging_into_server, ZulipApp.get().getServerURI()), Toast.LENGTH_SHORT).show();
-                setupGoogleSignIn();
                 break;
             case R.id.zulip_login:
                 if (!isInputValid()) {
