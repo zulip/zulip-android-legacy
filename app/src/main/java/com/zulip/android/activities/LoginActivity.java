@@ -20,6 +20,7 @@ import com.zulip.android.BuildConfig;
 import com.zulip.android.R;
 import com.zulip.android.networking.AsyncDevGetEmails;
 import com.zulip.android.util.ZLog;
+import com.zulip.android.networking.AsyncFetchGoogleID;
 import com.zulip.android.ZulipApp;
 import com.zulip.android.networking.ZulipAsyncPushTask.AsyncTaskCompleteListener;
 import com.zulip.android.networking.AsyncLogin;
@@ -129,6 +130,23 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 connectionProgressDialog.show();
                 saveServerURL();
                 Toast.makeText(this, getString(R.string.logging_into_server, ZulipApp.get().getServerURI()), Toast.LENGTH_SHORT).show();
+                AsyncFetchGoogleID asyncFetchGoogleID = new AsyncFetchGoogleID(ZulipApp.get());
+                asyncFetchGoogleID.setCallback(new AsyncTaskCompleteListener() {
+                    @Override
+                    public void onTaskComplete(String result, JSONObject jsonObject) {
+                        try {
+                            JSONObject jsonObject1 = new JSONObject(result);
+                        } catch (JSONException e) {
+                            ZLog.logException(e);
+                        }
+                    }
+
+                    @Override
+                    public void onTaskFailure(String result) {
+
+                    }
+                });
+                asyncFetchGoogleID.execute();
                 break;
             case R.id.zulip_login:
                 if (!isInputValid()) {
