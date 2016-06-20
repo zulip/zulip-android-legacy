@@ -1,14 +1,12 @@
 package com.zulip.android.activities;
 
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.IntentSender.SendIntentException;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.CheckBox;
@@ -25,6 +23,9 @@ import com.zulip.android.ZulipApp;
 import com.zulip.android.networking.ZulipAsyncPushTask.AsyncTaskCompleteListener;
 import com.zulip.android.networking.AsyncLogin;
 
+import net.openid.appauth.AuthorizationRequest;
+import net.openid.appauth.AuthorizationService;
+import net.openid.appauth.AuthorizationServiceConfiguration;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -34,6 +35,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private static final String TAG = "LoginActivity";
     private static final int REQUEST_CODE_RESOLVE_ERR = 9000;
     private static final int REQUEST_CODE_SIGN_IN = 9001;
+
+    private static final String AUTH_ENDPOINT_URL = "https://accounts.google.com/o/oauth2/v2/auth";
+    private static final String TOKEN_ENDPOINT_URL = "https://www.googleapis.com/oauth2/v4/token";
+    private static final String AUTH_CALLBACK = "com.zulip.android:/oauth2callback";
+    private static final String AUTH_INTENT_ACTION = "com.zulip.android.HANDLE_AUTHORIZATION_RESPONSE";
 
     private ProgressDialog connectionProgressDialog;
     private EditText mServerEditText;
@@ -136,6 +142,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     public void onTaskComplete(String result, JSONObject jsonObject) {
                         try {
                             JSONObject jsonObject1 = new JSONObject(result);
+                            setupSignIn(jsonObject1.getString("google_client_id"));
+                            connectionProgressDialog.dismiss();
                         } catch (JSONException e) {
                             ZLog.logException(e);
                         }
@@ -214,8 +222,29 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 }
             }
         }
-
         return isValid;
+    }
+
+    private void setupSignIn(String clientId) {
+        AuthorizationServiceConfiguration serviceConfiguration = new AuthorizationServiceConfiguration(
+                Uri.parse(AUTH_ENDPOINT_URL) /* auth endpoint */,
+                Uri.parse(TOKEN_ENDPOINT_URL) /* token endpoint */
+        );
+
+        Uri redirectUri = Uri.parse(AUTH_CALLBACK);
+        AuthorizationRequest.Builder builder = new AuthorizationRequest.Builder(
+                serviceConfiguration,
+                clientId,
+                AuthorizationRequest.RESPONSE_TYPE_CODE,
+                redirectUri
+        );
+        builder.setScopes("profile", "email");
+        AuthorizationRequest request = builder.build();
+        AuthorizationService authorizationService = new AuthorizationService(LoginActivity.this);
+        String action = AUTH_INTENT_ACTION;
+        Intent postAuthorizationIntent = new Intent(action);
+        PendingIntent pendingIntent = PendingIntent.getActivity(LoginActivity.this, request.hashCode(), postAuthorizationIntent, 0);
+        authorizationService.performAuthorizationRequest(request, pendingIntent);
     }
     private boolean isInputValid() {
         boolean isValid = true;
