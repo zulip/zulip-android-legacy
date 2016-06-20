@@ -50,5 +50,17 @@
     <string name="username_required">Username required</string>
     <string name="server_domain_required">Server domain required</string>
     <string name="invalid_domain">Invalid domain</string>
+    <string name="hint_person">Person</string>
+    <string name="hint_subject">Subject</string>
+    <string name="hint_stream">Stream</string>
+    <string name="message_sent">Message Sent!</string>
+    <string name="message_error">Error sending Message</string>
+    <string name="stream_error">No Stream specified.</string>
+    <string name="stream_not_exists">Stream Does not Exists.</string>
+    <string name="subject_error">No Subject specified.</string>
+    <string name="person_error">No Person specified.</string>
+    <string name="no_message_error">No Message Written.</string>
 
+
+    <string name="tap_message">Tap on a message to send reply</string>
 </resources>

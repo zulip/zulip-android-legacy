@@ -34,19 +34,27 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.FilterQueryProvider;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.j256.ormlite.android.AndroidDatabaseResults;
+import com.zulip.android.database.DatabaseHelper;
 import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageType;
 import com.zulip.android.filters.NarrowFilter;
@@ -61,6 +69,7 @@ import com.zulip.android.models.Presence;
 import com.zulip.android.models.PresenceType;
 import com.zulip.android.R;
 import com.zulip.android.models.Stream;
+import com.zulip.android.networking.AsyncSend;
 import com.zulip.android.util.ZLog;
 import com.zulip.android.ZulipApp;
 import com.zulip.android.gcm.GcmBroadcastReceiver;
@@ -100,7 +109,16 @@ public class ZulipActivity extends FragmentActivity implements
     MessageListFragment narrowedList;
     MessageListFragment homeList;
 
+    AutoCompleteTextView streamActv;
+    AutoCompleteTextView topicActv;
+    EditText messageEt;
+    private TextView textView;
+    private ImageView sendBtn;
+    private ImageView togglePrivateStreamBtn;
     Notifications notifications;
+    SimpleCursorAdapter streamActvAdapter;
+    SimpleCursorAdapter subjectActvAdapter;
+    SimpleCursorAdapter emailActvAdapter;
 
     private BroadcastReceiver onGcmMessage = new BroadcastReceiver() {
         public void onReceive(Context contenxt, Intent intent) {
@@ -246,7 +264,12 @@ public class ZulipActivity extends FragmentActivity implements
         this.logged_in = true;
 
         setContentView(R.layout.main);
-
+        streamActv = (AutoCompleteTextView) findViewById(R.id.stream_actv);
+        topicActv = (AutoCompleteTextView) findViewById(R.id.topic_actv);
+        messageEt = (EditText) findViewById(R.id.message_et);
+        textView = (TextView) findViewById(R.id.textView);
+        sendBtn = (ImageView) findViewById(R.id.send_btn);
+        togglePrivateStreamBtn = (ImageView) findViewById(R.id.togglePrivateStream_btn);
         mutedTopics = new ArrayList<>();
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
@@ -350,7 +373,10 @@ public class ZulipActivity extends FragmentActivity implements
                                     int position, long id) {
                 // TODO: is there a way to get the Stream from the adapter
                 // without re-querying it?
-                narrow(Stream.getById(app, (int) id));
+                Stream stream = Stream.getById(app, (int) id);
+                narrow(stream);
+                streamActv.setText(stream.getName());
+                topicActv.setText("");
             }
         });
 
@@ -398,8 +424,314 @@ public class ZulipActivity extends FragmentActivity implements
 
         homeList = MessageListFragment.newInstance(null);
         pushListFragment(homeList, null);
+        streamActv = (AutoCompleteTextView) findViewById(R.id.stream_actv);
+        topicActv = (AutoCompleteTextView) findViewById(R.id.topic_actv);
+        messageEt = (EditText) findViewById(R.id.message_et);
+        textView = (TextView) findViewById(R.id.textView);
+        sendBtn = (ImageView) findViewById(R.id.send_btn);
+        togglePrivateStreamBtn = (ImageView) findViewById(R.id.togglePrivateStream_btn);
+        togglePrivateStreamBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switchView();
+            }
+        });
+        sendBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendMessage();
+            }
+        });
+        composeStatus = (LinearLayout) findViewById(R.id.composeStatus);
+        setUpAdapter();
+        streamActv.setAdapter(streamActvAdapter);
+        topicActv.setAdapter(subjectActvAdapter);
     }
 
+    private void sendMessage() {
+
+        if (isCurrentModeStream()) {
+            if (TextUtils.isEmpty(streamActv.getText().toString())) {
+                streamActv.setError(getString(R.string.stream_error));
+                streamActv.requestFocus();
+                return;
+            } else {
+                try {
+                    Cursor streamCursor = makeStreamCursor(streamActv.getText().toString());
+                    if (streamCursor.getCount() == 0) {
+                        streamActv.setError(getString(R.string.stream_not_exists));
+                        streamActv.requestFocus();
+                        return;
+                    }
+                } catch (SQLException e) {
+                    Log.e("SQLException", "SQL not correct", e);
+                }
+            }
+            if (TextUtils.isEmpty(topicActv.getText().toString())) {
+                topicActv.setError(getString(R.string.subject_error));
+                topicActv.requestFocus();
+                return;
+            }
+        } else {
+            if (TextUtils.isEmpty(topicActv.getText().toString())) {
+                topicActv.setError(getString(R.string.person_error));
+                topicActv.requestFocus();
+                return;
+            }
+        }
+
+        if (TextUtils.isEmpty(messageEt.getText().toString())) {
+            messageEt.setError(getString(R.string.no_message_error));
+            messageEt.requestFocus();
+            return;
+        }
+        sendingMessage(true);
+        MessageType messageType = (isCurrentModeStream()) ? MessageType.STREAM_MESSAGE : MessageType.PRIVATE_MESSAGE;
+        Message msg = new Message(app);
+        msg.setSender(app.getYou());
+
+        if (messageType == MessageType.STREAM_MESSAGE) {
+            msg.setType(messageType);
+            msg.setStream(new Stream(streamActv.getText().toString()));
+            msg.setSubject(topicActv.getText().toString());
+        } else if (messageType == MessageType.PRIVATE_MESSAGE) {
+            msg.setType(messageType);
+            msg.setRecipient(topicActv.getText().toString().split(","));
+        }
+        msg.setContent(messageEt.getText().toString());
+        AsyncSend sender = new AsyncSend(that, msg);
+        sender.setCallback(new ZulipAsyncPushTask.AsyncTaskCompleteListener() {
+            public void onTaskComplete(String result, JSONObject jsonObject) {
+                Toast.makeText(ZulipActivity.this, R.string.message_sent, Toast.LENGTH_SHORT).show();
+                messageEt.setText("");
+                sendingMessage(false);
+            }
+            public void onTaskFailure(String result) {
+                Log.d("onTaskFailure", "Result: " + result);
+                Toast.makeText(ZulipActivity.this, R.string.message_error, Toast.LENGTH_SHORT).show();
+                sendingMessage(false);
+            }
+        });
+        sender.execute();
+    }
+
+    private void sendingMessage(boolean isSending) {
+        streamActv.setEnabled(!isSending);
+        textView.setEnabled(!isSending);
+        messageEt.setEnabled(!isSending);
+        topicActv.setEnabled(!isSending);
+        sendBtn.setEnabled(!isSending);
+        togglePrivateStreamBtn.setEnabled(!isSending);
+        if (isSending)
+            composeStatus.setVisibility(View.VISIBLE);
+        else
+            composeStatus.setVisibility(View.GONE);
+    }
+
+    LinearLayout composeStatus;
+
+    public void setUpAdapter() {
+        streamActvAdapter = new SimpleCursorAdapter(
+                that, R.layout.stream_tile, null,
+                new String[]{Stream.NAME_FIELD},
+                new int[]{R.id.name}, 0);
+        streamActvAdapter.setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter() {
+            @Override
+            public CharSequence convertToString(Cursor cursor) {
+                int index = cursor.getColumnIndex(Stream.NAME_FIELD);
+                return cursor.getString(index);
+            }
+        });
+        streamActvAdapter.setFilterQueryProvider(new FilterQueryProvider() {
+            @Override
+            public Cursor runQuery(CharSequence charSequence) {
+                try {
+                    return makeStreamCursor(charSequence);
+                } catch (SQLException e) {
+                    Log.e("SQLException", "SQL not correct", e);
+                    return null;
+                }
+            }
+        });
+        subjectActvAdapter = new SimpleCursorAdapter(
+                that, R.layout.stream_tile, null,
+                new String[]{Message.SUBJECT_FIELD},
+                new int[]{R.id.name}, 0);
+        subjectActvAdapter.setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter() {
+            @Override
+            public CharSequence convertToString(Cursor cursor) {
+                int index = cursor.getColumnIndex(Message.SUBJECT_FIELD);
+                return cursor.getString(index);
+            }
+        });
+        subjectActvAdapter.setFilterQueryProvider(new FilterQueryProvider() {
+            @Override
+            public Cursor runQuery(CharSequence charSequence) {
+                try {
+                    return makeSubjectCursor(streamActv.getText().toString(), charSequence);
+                } catch (SQLException e) {
+                    Log.e("SQLException", "SQL not correct", e);
+                    return null;
+                }
+            }
+        });
+
+        emailActvAdapter = new SimpleCursorAdapter(
+                that, R.layout.stream_tile, null,
+                new String[]{Person.EMAIL_FIELD},
+                new int[]{R.id.name}, 0);
+        emailActvAdapter
+                .setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter() {
+                    @Override
+                    public CharSequence convertToString(Cursor cursor) {
+                        String text = topicActv.getText().toString();
+                        String prefix;
+                        int lastIndex = text.lastIndexOf(",");
+                        if (lastIndex != -1) {
+                            prefix = text.substring(0, lastIndex + 1);
+                        } else {
+                            prefix = "";
+                        }
+                        int index = cursor.getColumnIndex(Person.EMAIL_FIELD);
+                        return prefix + cursor.getString(index);
+                    }
+                });
+        emailActvAdapter.setFilterQueryProvider(new FilterQueryProvider() {
+            @Override
+            public Cursor runQuery(CharSequence charSequence) {
+                try {
+                    return makePeopleCursor(charSequence);
+                } catch (SQLException e) {
+                    Log.e("SQLException", "SQL not correct", e);
+                    return null;
+                }
+            }
+        });
+
+        sendingMessage(false);
+    }
+
+    private Cursor makeStreamCursor(CharSequence streamName)
+            throws SQLException {
+        if (streamName == null) {
+            streamName = "";
+        }
+
+        return ((AndroidDatabaseResults) app
+                .getDao(Stream.class)
+                .queryRaw(
+                        "SELECT rowid _id, * FROM streams WHERE "
+                                + Stream.SUBSCRIBED_FIELD + " = 1 AND "
+                                + Stream.NAME_FIELD
+                                + " LIKE ? ESCAPE '\\' ORDER BY "
+                                + Stream.NAME_FIELD + " COLLATE NOCASE",
+                        DatabaseHelper.likeEscape(streamName.toString()) + "%")
+                .closeableIterator().getRawResults()).getRawCursor();
+    }
+
+    private Cursor makeSubjectCursor(CharSequence stream, CharSequence subject)
+            throws SQLException {
+        if (subject == null) {
+            subject = "";
+        }
+        if (stream == null) {
+            stream = "";
+        }
+
+        AndroidDatabaseResults results = (AndroidDatabaseResults) app
+                .getDao(Message.class)
+                .queryRaw(
+                        "SELECT DISTINCT "
+                                + Message.SUBJECT_FIELD
+                                + ", 1 AS _id FROM messages JOIN streams ON streams."
+                                + Stream.ID_FIELD + " = messages."
+                                + Message.STREAM_FIELD + " WHERE "
+                                + Message.SUBJECT_FIELD
+                                + " LIKE ? ESCAPE '\\' AND "
+                                + Stream.NAME_FIELD + " = ? ORDER BY "
+                                + Message.SUBJECT_FIELD + " COLLATE NOCASE",
+                        DatabaseHelper.likeEscape(subject.toString()) + "%",
+                        stream.toString()).closeableIterator().getRawResults();
+        return results.getRawCursor();
+    }
+
+    private Cursor makePeopleCursor(CharSequence email) throws SQLException {
+        if (email == null) {
+            email = "";
+        }
+        String[] pieces = TextUtils.split(email.toString(), ",");
+        String piece;
+        if (pieces.length == 0) {
+            piece = "";
+        } else {
+            piece = pieces[pieces.length - 1].trim();
+        }
+        return ((AndroidDatabaseResults) app
+                .getDao(Person.class)
+                .queryRaw(
+                        "SELECT rowid _id, * FROM people WHERE "
+                                + Person.ISBOT_FIELD + " = 0 AND "
+                                + Person.ISACTIVE_FIELD + " = 1 AND "
+                                + Person.EMAIL_FIELD
+                                + " LIKE ? ESCAPE '\\' ORDER BY "
+                                + Person.NAME_FIELD + " COLLATE NOCASE",
+                        DatabaseHelper.likeEscape(piece) + "%")
+                .closeableIterator().getRawResults()).getRawCursor();
+    }
+    public void switchToStream() {
+        removeEditTextErrors();
+        if (!isCurrentModeStream()) switchView();
+    }
+
+    public void switchToPrivate() {
+        removeEditTextErrors();
+        if (isCurrentModeStream()) switchView();
+    }
+
+    public boolean isCurrentModeStream() {
+        //The TextView is VISIBLE which means currently send to stream is on.
+        return (textView.getVisibility() == View.VISIBLE);
+    }
+
+    public void removeEditTextErrors() {
+        streamActv.setError(null);
+        topicActv.setError(null);
+        messageEt.setError(null);
+    }
+
+    public void switchView() {
+        if (isCurrentModeStream()) { //Person
+            togglePrivateStreamBtn.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_action_bullhorn));
+            tempStreamSave = topicActv.getText().toString();
+            topicActv.setText(null);
+            topicActv.setHint(R.string.hint_person);
+            topicActv.setAdapter(emailActvAdapter);
+            streamActv.setVisibility(View.GONE);
+            textView.setVisibility(View.GONE);
+        } else { //Stream
+            topicActv.setText(tempStreamSave);
+            togglePrivateStreamBtn.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_action_person));
+            streamActv.setEnabled(true);
+            topicActv.setHint(R.string.hint_subject);
+            streamActv.setHint(R.string.hint_stream);
+            streamActv.setVisibility(View.VISIBLE);
+            textView.setVisibility(View.VISIBLE);
+            topicActv.setVisibility(View.VISIBLE);
+            streamActv.setAdapter(streamActvAdapter);
+            topicActv.setAdapter(subjectActvAdapter);
+        }
+    }
+    String tempStreamSave = null;
+
+    @Override
+    public void clearChatBox() {
+        if (messageEt != null) {
+            if (TextUtils.isEmpty(messageEt.getText())) {
+                topicActv.setText("");
+                streamActv.setText("");
+            }
+        }
+    }
     public void onBackPressed() {
         if (narrowedList != null) {
             narrowedList = null;
@@ -492,6 +824,20 @@ public class ZulipActivity extends FragmentActivity implements
     }
 
     @Override
+    public void onNarrowFillSendBox(Message message) {
+        if(message.getType() == MessageType.PRIVATE_MESSAGE){
+            switchToPrivate();
+            topicActv.setText(message.getReplyTo(app));
+            messageEt.requestFocus();
+        } else {
+            switchToStream();
+            streamActv.setText(message.getStream().getName());
+            topicActv.setText(message.getSubject());
+            if ("".equals(message.getSubject())) topicActv.requestFocus();
+            else messageEt.requestFocus();
+        }
+        ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE)).toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+    }
     public void onNarrow(NarrowFilter narrowFilter) {
         // TODO: check if already narrowed to this particular stream/subject
         doNarrow(narrowFilter);
@@ -587,22 +933,6 @@ public class ZulipActivity extends FragmentActivity implements
                     builder.show();
                 }
                 break;
-
-            case R.id.compose_stream:
-                String stream = null;
-                if (currentList.filter != null
-                        && currentList.filter.getComposeStream() != null) {
-                    stream = currentList.filter.getComposeStream().getName();
-                }
-                openCompose(MessageType.STREAM_MESSAGE, stream, null, null);
-                break;
-            case R.id.compose_pm:
-                String recipient = null;
-                if (currentList.filter != null) {
-                    recipient = currentList.filter.getComposePMRecipient();
-                }
-                openCompose(MessageType.PRIVATE_MESSAGE, null, null, recipient);
-                break;
             case R.id.refresh:
                 Log.w("menu", "Refreshed manually by user. We shouldn't need this.");
                 onRefresh();
@@ -619,27 +949,6 @@ public class ZulipActivity extends FragmentActivity implements
                 return super.onOptionsItemSelected(item);
         }
         return true;
-    }
-
-    public void openCompose(MessageType type) {
-        openCompose(type, null, null, null);
-    }
-
-    public void openCompose(Stream stream, String topic) {
-        openCompose(MessageType.STREAM_MESSAGE, stream.getName(), topic, null);
-    }
-
-    public void openCompose(String pmRecipients) {
-        openCompose(MessageType.PRIVATE_MESSAGE, null, null, pmRecipients);
-    }
-
-    public void openCompose(final MessageType type, String stream,
-                            String topic, String pmRecipients) {
-
-        FragmentManager fm = getSupportFragmentManager();
-        ComposeDialog dialog = ComposeDialog.newInstance(type, stream, topic,
-                pmRecipients);
-        dialog.show(fm, "fragment_compose");
     }
 
     /**

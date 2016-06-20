@@ -59,15 +59,9 @@ public class MessageListFragment extends Fragment implements MessageListener {
      */
     public interface Listener {
         void onListResume(MessageListFragment f);
-
-        void openCompose(Stream stream, String topic);
-
-        void openCompose(String pmRecipients);
-
-        void openCompose(final MessageType type, String stream, String topic,
-                         String pmRecipients);
         void addToList(Message message);
         void muteTopic(Message message);
+        void clearChatBox();
     }
 
     private static final String PARAM_FILTER = "filter";
@@ -260,6 +254,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
     @Override
     public void onDetach() {
         super.onDetach();
+        mListener.clearChatBox();
         mListener = null;
     }
 
@@ -303,27 +298,30 @@ public class MessageListFragment extends Fragment implements MessageListener {
         Message message = itemFromMenuInfo(item.getMenuInfo());
         switch (item.getItemId()) {
             case R.id.reply_to_stream:
-                mListener.openCompose(message.getStream(), message.getSubject());
+                ((NarrowListener) getActivity()).onNarrowFillSendBox(message);
                 return true;
             case R.id.reply_to_private:
-                mListener.openCompose(message.getReplyTo(app));
+                ((NarrowListener) getActivity()).onNarrowFillSendBox(message);
                 return true;
             case R.id.reply_to_sender:
-                mListener.openCompose(message.getSender().getEmail());
+                ((NarrowListener) getActivity()).onNarrowFillSendBox(message);
                 return true;
             case R.id.narrow_to_private:
                 if (getActivity() instanceof NarrowListener) {
                     ((NarrowListener) getActivity()).onNarrow(new NarrowFilterPM(Arrays.asList(message.getRecipients(app))));
+                    ((NarrowListener) getActivity()).onNarrowFillSendBox(message);
                 }
                 return true;
             case R.id.narrow_to_stream:
                 if (getActivity() instanceof NarrowListener) {
                     ((NarrowListener) getActivity()).onNarrow(new NarrowFilterStream(message.getStream(), null));
+                    ((NarrowListener) getActivity()).onNarrowFillSendBox(message);
                 }
                 return true;
             case R.id.narrow_to_subject:
                 if (getActivity() instanceof NarrowListener) {
                     ((NarrowListener) getActivity()).onNarrow(new NarrowFilterStream(message.getStream(), message.getSubject()));
+                    ((NarrowListener) getActivity()).onNarrowFillSendBox(message);
                 }
                 return true;
             case R.id.copy_message:
