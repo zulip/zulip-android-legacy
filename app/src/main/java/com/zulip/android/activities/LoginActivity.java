@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.CheckBox;
@@ -24,9 +25,14 @@ import com.zulip.android.ZulipApp;
 import com.zulip.android.networking.ZulipAsyncPushTask.AsyncTaskCompleteListener;
 import com.zulip.android.networking.AsyncLogin;
 
+import net.openid.appauth.AuthState;
+import net.openid.appauth.AuthorizationException;
 import net.openid.appauth.AuthorizationRequest;
+import net.openid.appauth.AuthorizationResponse;
 import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.AuthorizationServiceConfiguration;
+import net.openid.appauth.TokenResponse;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -49,6 +55,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private EditText mPassword;
     private View mGoogleSignInButton;
     private CheckBox mUseZulipCheckbox;
+
+    private static final String GOOGLE_SIGN = "GOOGLE_SIGN";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -253,8 +261,38 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private void checkIntent(@Nullable Intent intent) {
         if (intent != null && intent.getAction() != null) {
                     if (intent.getAction().equals(AUTH_INTENT_ACTION) && !intent.hasExtra(USED_INTENT)) {
+                        handleAuthorizationResponse(intent);
                         intent.putExtra(USED_INTENT, true);
             }
+        }
+    }
+
+    private void handleAuthorizationResponse(Intent intent) {
+        AuthorizationResponse response = AuthorizationResponse.fromIntent(intent);
+        AuthorizationException error = AuthorizationException.fromIntent(intent);
+        final AuthState authState = new AuthState(response, error);
+        if (response != null) {
+            Log.i(GOOGLE_SIGN, String.format("Handled Authorization Response %s ", authState.toJsonString()));
+            AuthorizationService service = new AuthorizationService(this);
+            service.performTokenRequest(response.createTokenExchangeRequest(), new AuthorizationService.TokenResponseCallback() {
+                @Override
+                public void onTokenRequestCompleted(@Nullable TokenResponse tokenResponse, @Nullable AuthorizationException exception) {
+                    if (exception != null) {
+                        Log.w(GOOGLE_SIGN, "Token Exchange failed", exception);
+                    } else {
+                        if (tokenResponse != null) {
+                            authState.update(tokenResponse, exception);
+                            AuthorizationService mAuthorizationService = new AuthorizationService(LoginActivity.this);
+                            authState.performActionWithFreshTokens(mAuthorizationService, new AuthState.AuthStateAction() {
+                                @Override
+                                public void execute(@Nullable final String accessToken, @Nullable final String idToken, @Nullable AuthorizationException exception) {
+                                }
+                            });
+                            Log.i(GOOGLE_SIGN, String.format("Token Response [ Access Token: %s, ID Token: %s ]", tokenResponse.accessToken, tokenResponse.idToken));
+                        }
+                    }
+                }
+            });
         }
     }
     private boolean isInputValid() {
