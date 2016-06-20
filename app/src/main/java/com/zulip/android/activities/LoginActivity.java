@@ -240,7 +240,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             mGoogleSignInButton.setVisibility(View.VISIBLE);
         } else {
             mServerEditText.setVisibility(View.VISIBLE);
-            mGoogleSignInButton.setVisibility(View.GONE);
         }
     }
 }
