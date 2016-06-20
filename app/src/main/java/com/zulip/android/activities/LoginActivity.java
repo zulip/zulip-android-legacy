@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.support.annotation.Nullable;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.CheckBox;
@@ -41,6 +42,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private static final String AUTH_CALLBACK = "com.zulip.android:/oauth2callback";
     private static final String AUTH_INTENT_ACTION = "com.zulip.android.HANDLE_AUTHORIZATION_RESPONSE";
 
+    private static final String USED_INTENT = "USED_INTENT";
     private ProgressDialog connectionProgressDialog;
     private EditText mServerEditText;
     private EditText mUserName;
@@ -76,6 +78,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onStart() {
         super.onStart();
+        checkIntent(getIntent());
     }
 
     @Override
@@ -245,6 +248,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         Intent postAuthorizationIntent = new Intent(action);
         PendingIntent pendingIntent = PendingIntent.getActivity(LoginActivity.this, request.hashCode(), postAuthorizationIntent, 0);
         authorizationService.performAuthorizationRequest(request, pendingIntent);
+    }
+
+    private void checkIntent(@Nullable Intent intent) {
+        if (intent != null && intent.getAction() != null) {
+                    if (intent.getAction().equals(AUTH_INTENT_ACTION) && !intent.hasExtra(USED_INTENT)) {
+                        intent.putExtra(USED_INTENT, true);
+            }
+        }
     }
     private boolean isInputValid() {
         boolean isValid = true;
