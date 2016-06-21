@@ -66,7 +66,7 @@ public class AsyncGetOldMessages extends ZulipAsyncPushTask {
         position = pos;
         this.receivedMessages = new ArrayList<Message>();
         Log.i("AGOM", "executing " + anchor + " " + before + " " + after);
-        execute("GET", "v1/messages");
+        execute("GET", "/v1/messages");
     }
 
     @Override
@@ -223,7 +223,7 @@ public class AsyncGetOldMessages extends ZulipAsyncPushTask {
         watch.start();
         String result = super.doInBackground(params);
         watch.stop();
-        Log.i("perf", "net: v1/messages: " + watch.toString());
+        Log.i("perf", "net: /v1/messages: " + watch.toString());
 
         if (result != null) {
             try {
@@ -231,7 +231,7 @@ public class AsyncGetOldMessages extends ZulipAsyncPushTask {
                 watch.start();
                 JSONObject response = new JSONObject(result);
                 watch.stop();
-                Log.i("perf", "json: v1/messages: " + watch.toString());
+                Log.i("perf", "json: /v1/messages: " + watch.toString());
 
                 watch.reset();
                 watch.start();

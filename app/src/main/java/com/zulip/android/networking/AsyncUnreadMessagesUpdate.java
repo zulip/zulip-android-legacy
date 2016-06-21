@@ -29,7 +29,7 @@ public class AsyncUnreadMessagesUpdate extends ZulipAsyncPushTask {
             setProperty("flag", "read");
             setProperty("op", "add");
 
-            execute("POST", "v1/messages/flags");
+            execute("POST", "/v1/messages/flags");
         }
     }
 }

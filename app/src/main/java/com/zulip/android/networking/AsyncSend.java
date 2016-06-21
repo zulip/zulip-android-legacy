@@ -34,7 +34,7 @@ public class AsyncSend extends ZulipAsyncPushTask {
     }
 
     public final void execute() {
-        execute("POST", "v1/messages");
+        execute("POST", "/v1/messages");
     }
 
 }

@@ -32,7 +32,7 @@ public class AsyncLogin extends ZulipAsyncPushTask {
     }
 
     public final void execute() {
-        execute("POST", "v1/fetch_api_key");
+        execute("POST", "/v1/fetch_api_key");
     }
 
     @Override
