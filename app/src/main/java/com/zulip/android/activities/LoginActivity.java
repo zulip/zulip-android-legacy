@@ -286,6 +286,27 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                             authState.performActionWithFreshTokens(mAuthorizationService, new AuthState.AuthStateAction() {
                                 @Override
                                 public void execute(@Nullable final String accessToken, @Nullable final String idToken, @Nullable AuthorizationException exception) {
+                                    final AsyncLogin loginTask = new AsyncLogin(LoginActivity.this, "google-oauth2-token", idToken, false);
+                                    loginTask.setCallback(new AsyncTaskCompleteListener() {
+                                        @Override
+                                        public void onTaskComplete(String result, JSONObject object) {
+                                            Log.d("RECIEVED", "onTaskComplete: " + result);
+                                            try {
+                                                ((ZulipApp) getApplication()).setEmail(object.getString("email"));
+                                                connectionProgressDialog.dismiss();
+                                            } catch (JSONException e) {
+                                                ZLog.logException(e);
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onTaskFailure(String result) {
+                                            // Invalidate the token and try again, unless the user we
+                                            // are authenticating as is not registered or is disabled.
+                                            connectionProgressDialog.dismiss();
+                                        }
+                                    });
+                                    loginTask.execute();
                                 }
                             });
                             Log.i(GOOGLE_SIGN, String.format("Token Response [ Access Token: %s, ID Token: %s ]", tokenResponse.accessToken, tokenResponse.idToken));
