@@ -23,6 +23,8 @@ import com.zulip.android.ZulipApp;
  */
 public class ZulipAsyncPushTask extends AsyncTask<String, String, String> {
 
+    private static final String TAG = "ZulipAsyncPushTask";
+
     public ZulipApp app;
     HTTPRequest request;
     AsyncTaskCompleteListener callback;
@@ -71,6 +73,7 @@ public class ZulipAsyncPushTask extends AsyncTask<String, String, String> {
         try {
             return this.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, method, url);
         } catch (NoSuchFieldError e) {
+            Log.e(TAG, e.getMessage(), e);
             return super.execute(method, url);
         }
     }

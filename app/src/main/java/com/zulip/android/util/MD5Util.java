@@ -1,5 +1,7 @@
 package com.zulip.android.util;
 
+import android.util.Log;
+
 import java.io.*;
 import java.security.*;
 
@@ -7,6 +9,8 @@ import java.security.*;
  * Gravatar example from http://en.gravatar.com/site/implement/images/java/
  */
 public class MD5Util {
+
+    private static final String TAG = "MD5Util";
 
     private MD5Util() {}
 
@@ -24,7 +28,9 @@ public class MD5Util {
             MessageDigest md = MessageDigest.getInstance("MD5");
             return hex(md.digest(message.getBytes("CP1252")));
         } catch (NoSuchAlgorithmException e) {
+            Log.e(TAG, e.getMessage(), e);
         } catch (UnsupportedEncodingException e) {
+            Log.e(TAG, e.getMessage(), e);
         }
         return null;
     }

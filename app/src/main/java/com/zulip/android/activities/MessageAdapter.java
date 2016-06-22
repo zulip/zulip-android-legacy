@@ -46,6 +46,7 @@ import com.zulip.android.networking.GravatarAsyncFetchTask;
  */
 public class MessageAdapter extends ArrayAdapter<Message> {
 
+    private static final String TAG = "MessageAdapter";
     private static final HTMLSchema schema = new HTMLSchema();
 
     private @ColorInt int mDefaultStreamHeaderColor;
@@ -241,7 +242,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
                                         * scaleFactor * density));
                         return drawable;
                     } catch (IOException e) {
-                        Log.e("MessageAdapter", e.getMessage());
+                        Log.e(TAG, e.getMessage(), e);
                     }
                 }
                 return null;

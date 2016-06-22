@@ -64,6 +64,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
         void clearChatBox();
     }
 
+    private static final String TAG = "MessageListFragment";
     private static final String PARAM_FILTER = "filter";
     NarrowFilter filter;
 
@@ -206,7 +207,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
                 } catch (NullPointerException e) {
                     Log.w("scrolling",
-                            "Could not find a location to scroll to!");
+                            "Could not find a location to scroll to!", e);
                 }
             }
         });
@@ -224,7 +225,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
                         app.setPointer(mID);
                     }
                 } catch (NullPointerException e) {
-                    Log.e("selected", "None, because we couldn't find the tag.");
+                    Log.e("selected", "None, because we couldn't find the tag.", e);
                 }
 
             }
@@ -246,6 +247,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
         try {
             mListener = (Listener) activity;
         } catch (ClassCastException e) {
+            Log.e(TAG, e.getMessage(), e);
             throw new ClassCastException(activity.toString()
                     + " must implement Listener");
         }

@@ -28,6 +28,7 @@ import com.zulip.android.activities.ZulipActivity;
  * Retrieves a user avatar (which may be a Gravatar) from the relevant server
  */
 public class GravatarAsyncFetchTask extends AsyncTask<URL, Void, Bitmap> {
+    private static final String TAG = "GravatarAsyncFetchTask";
     private final WeakReference<ImageView> imageViewReference;
     private Person person;
     private ZulipActivity context;
@@ -129,6 +130,7 @@ public class GravatarAsyncFetchTask extends AsyncTask<URL, Void, Bitmap> {
             try {
                 task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, url);
             } catch (NoSuchFieldError e) {
+                Log.e(TAG, e.getMessage(), e);
                 task.execute(url);
             }
         }

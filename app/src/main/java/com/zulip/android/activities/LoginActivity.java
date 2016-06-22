@@ -35,6 +35,7 @@ import java.util.List;
 
 public class LoginActivity extends FragmentActivity implements View.OnClickListener,
         GoogleApiClient.OnConnectionFailedListener, CompoundButton.OnCheckedChangeListener {
+    private static final String TAG = "LoginActivity";
     private static final int REQUEST_CODE_RESOLVE_ERR = 9000;
     private static final int REQUEST_CODE_SIGN_IN = 9001;
 
@@ -192,6 +193,7 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
                 try {
                     result.startResolutionForResult(this, REQUEST_CODE_RESOLVE_ERR);
                 } catch (SendIntentException e) {
+                    Log.e(TAG, e.getMessage(), e);
                     // Yeah, no idea what to do here.
                     connectionProgressDialog.dismiss();
                     Toast.makeText(LoginActivity.this, R.string.google_app_login_failed, Toast.LENGTH_SHORT).show();
