@@ -48,10 +48,14 @@ public class MessageAdapter extends ArrayAdapter<Message> {
 
     private static final HTMLSchema schema = new HTMLSchema();
 
-    private @ColorInt int mDefaultStreamHeaderColor;
-    private @ColorInt int mDefaultHuddleHeaderColor;
-    private @ColorInt int mDefaultStreamMessageColor;
-    private @ColorInt int mDefaultHuddleMessageColor;
+    @ColorInt
+    private int mDefaultStreamHeaderColor;
+    @ColorInt
+    private int mDefaultHuddleHeaderColor;
+    @ColorInt
+    private int mDefaultStreamMessageColor;
+    @ColorInt
+    private int mDefaultHuddleMessageColor;
 
     public MessageAdapter(Context context, List<Message> objects) {
         super(context, 0, objects);
