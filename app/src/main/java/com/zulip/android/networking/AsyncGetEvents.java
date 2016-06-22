@@ -27,6 +27,7 @@ import com.zulip.android.activities.ZulipActivity;
 import com.zulip.android.ZulipApp;
 
 public class AsyncGetEvents extends Thread {
+    private static final String TAG = "AsyncGetEvents";
     public static final String ASYNC_GET_EVENTS = "asyncGetEvents";
     public static final String POINTER = "pointer";
     ZulipActivity activity;
@@ -143,7 +144,7 @@ public class AsyncGetEvents extends Thread {
                     }
                     backoff(e);
                 } catch (SocketTimeoutException e) {
-                    e.printStackTrace();
+                    Log.e(TAG, e.getMessage(), e);
                     // Retry without backoff, since it's already been a while
                 } catch (IOException e) {
                     if (request.aborting) {
