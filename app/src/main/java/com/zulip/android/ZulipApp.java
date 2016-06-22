@@ -79,7 +79,7 @@ public class ZulipApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        ZulipApp.instance = this;
+        ZulipApp.setInstance(this);
 
         // This used to be from HumbugActivity.getPreferences, so we keep that
         // file name.
@@ -328,5 +328,13 @@ public class ZulipApp extends Application {
 
     public Person getYou() {
         return you;
+    }
+
+    public static ZulipApp getInstance() {
+        return instance;
+    }
+
+    public static void setInstance(ZulipApp instance) {
+        ZulipApp.instance = instance;
     }
 }

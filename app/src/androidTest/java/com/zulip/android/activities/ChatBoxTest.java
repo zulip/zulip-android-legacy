@@ -41,8 +41,8 @@ public class ChatBoxTest extends BaseTest {
 
     @Before
     public void setUp() {
-        testMessageStream = (testMessageStream == null) ? RandomStringUtils.randomAlphanumeric(10) : testMessageStream;
-        testMessagePrivate = (testMessagePrivate == null) ? RandomStringUtils.randomAlphanumeric(15) : testMessagePrivate;
+        setTestMessageStream((testMessageStream == null) ? RandomStringUtils.randomAlphanumeric(10) : testMessageStream);
+        setTestMessagePrivate((testMessagePrivate == null) ? RandomStringUtils.randomAlphanumeric(15) : testMessagePrivate);
         if (ZulipApp.get().getApiKey() == null) {
             login();
         }
@@ -133,5 +133,21 @@ public class ChatBoxTest extends BaseTest {
                 return item.getType() == messageType && item.getContent().contains(text);
             }
         };
+    }
+
+    public static String getTestMessageStream() {
+        return testMessageStream;
+    }
+
+    public static void setTestMessageStream(String testMessageStream) {
+        ChatBoxTest.testMessageStream = testMessageStream;
+    }
+
+    public static String getTestMessagePrivate() {
+        return testMessagePrivate;
+    }
+
+    public static void setTestMessagePrivate(String testMessagePrivate) {
+        ChatBoxTest.testMessagePrivate = testMessagePrivate;
     }
 }
