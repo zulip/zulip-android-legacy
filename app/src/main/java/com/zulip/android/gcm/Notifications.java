@@ -118,7 +118,8 @@ public class Notifications {
 
                     HTTPRequest request = new HTTPRequest(app);
                     request.setProperty("token", regid);
-                    request.execute("POST", "v1/users/me/android_gcm_reg_id");
+                    request.setMethodAndUrl("POST", "v1/users/me/android_gcm_reg_id");
+                    request.execute();
 
                     // Persist the regID - no need to register again.
                     storeRegistrationId(app, regid);
@@ -146,7 +147,8 @@ public class Notifications {
 
                     HTTPRequest request = new HTTPRequest(app);
                     request.setProperty("token", regid);
-                    request.execute("DELETE", "v1/users/me/android_gcm_reg_id");
+                    request.setMethodAndUrl("DELETE", "v1/users/me/android_gcm_reg_id");
+                    request.execute();
 
                     storeRegistrationId(app, "");
                     regid = "";
