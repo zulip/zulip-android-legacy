@@ -24,7 +24,7 @@ public class Notifications {
     // Project Number from the Google Cloud Services console
     private static final String SENDER_ID = "835904834568";
 
-    private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
     static final String TAG = "GCM";
 
