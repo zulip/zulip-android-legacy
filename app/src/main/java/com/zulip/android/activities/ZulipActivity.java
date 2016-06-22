@@ -486,7 +486,7 @@ public class ZulipActivity extends FragmentActivity implements
             return;
         }
         sendingMessage(true);
-        MessageType messageType = (isCurrentModeStream()) ? MessageType.STREAM_MESSAGE : MessageType.PRIVATE_MESSAGE;
+        MessageType messageType = isCurrentModeStream() ? MessageType.STREAM_MESSAGE : MessageType.PRIVATE_MESSAGE;
         Message msg = new Message(app);
         msg.setSender(app.getYou());
 
@@ -690,7 +690,7 @@ public class ZulipActivity extends FragmentActivity implements
 
     public boolean isCurrentModeStream() {
         //The TextView is VISIBLE which means currently send to stream is on.
-        return (textView.getVisibility() == View.VISIBLE);
+        return textView.getVisibility() == View.VISIBLE;
     }
 
     public void removeEditTextErrors() {

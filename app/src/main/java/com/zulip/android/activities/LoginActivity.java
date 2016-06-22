@@ -55,7 +55,7 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
         connectionProgressDialog = new ProgressDialog(this);
         connectionProgressDialog.setMessage(getString(R.string.signing_in));
 
-        mUseZulipCheckbox = ((CheckBox) findViewById(R.id.checkbox_usezulip));
+        mUseZulipCheckbox = (CheckBox) findViewById(R.id.checkbox_usezulip);
         mServerEditText = (EditText) findViewById(R.id.server_url);
         mGoogleSignInButton = findViewById(R.id.google_sign_in_button);
         findViewById(R.id.google_sign_in_button).setOnClickListener(this);
