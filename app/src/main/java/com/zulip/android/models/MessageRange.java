@@ -128,15 +128,15 @@ public class MessageRange extends BaseDaoEnabled<MessageRange, Integer> {
                         if (!ranges.isEmpty()) {
                             Log.i("", "our low: " + rng.low + ", our high: "
                                     + rng.high);
-                            int db_low = ranges.get(0).low;
-                            int db_high = ranges.get(ranges.size() - 1).high;
-                            Log.i("", "their low: " + db_low + ", their high: "
-                                    + db_high);
-                            if (db_low < rng.low) {
-                                rng.low = db_low;
+                            int dbLow = ranges.get(0).low;
+                            int dbHigh = ranges.get(ranges.size() - 1).high;
+                            Log.i("", "their low: " + dbLow + ", their high: "
+                                    + dbHigh);
+                            if (dbLow < rng.low) {
+                                rng.low = dbLow;
                             }
-                            if (db_high > rng.high) {
-                                rng.high = db_high;
+                            if (dbHigh > rng.high) {
+                                rng.high = dbHigh;
                             }
                             messageRangeDao.delete(ranges);
                         }

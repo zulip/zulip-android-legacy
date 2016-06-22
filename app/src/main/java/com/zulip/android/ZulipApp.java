@@ -268,11 +268,11 @@ public class ZulipApp extends Application {
         return max_message_id;
     }
 
-    public void setMaxMessageId(int max_message_id) {
-        this.max_message_id = max_message_id;
+    public void setMaxMessageId(int maxMessageId) {
+        this.max_message_id = maxMessageId;
         if (settings != null) {
             Editor ed = settings.edit();
-            ed.putInt("max_message_id", max_message_id);
+            ed.putInt("max_message_id", maxMessageId);
             ed.apply();
         }
     }

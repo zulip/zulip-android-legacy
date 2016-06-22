@@ -94,9 +94,9 @@ public class ZulipAsyncPushTask extends AsyncTask<String, String, String> {
         this.request.setProperty(key, value);
     }
 
-    protected String doInBackground(String... api_path) {
+    protected String doInBackground(String... apiPath) {
         try {
-            return request.execute(api_path[0], api_path[1]);
+            return request.execute(apiPath[0], apiPath[1]);
         } catch (HttpResponseException e) {
             handleHTTPError(e);
         } catch (IOException e) {
