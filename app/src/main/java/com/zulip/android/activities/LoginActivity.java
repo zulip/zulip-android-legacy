@@ -236,7 +236,9 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
                 setupGoogleSignIn();
                 break;
             case R.id.zulip_login:
-                if (!isInputValid()) return;
+                if (!isInputValid()) {
+                    return;
+                }
                 saveServerURL();
                 connectionProgressDialog.show();
 
@@ -284,7 +286,9 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
                 mServerEditText.setError(getString(R.string.server_domain_required));
             } else {
                 String serverString = mServerEditText.getText().toString();
-                if (!serverString.contains("://")) serverString = "https://" + serverString;
+                if (!serverString.contains("://")) {
+                    serverString = "https://" + serverString;
+                }
 
                 if (!Patterns.WEB_URL.matcher(serverString).matches()) {
                     mServerEditText.setError(getString(R.string.invalid_domain));

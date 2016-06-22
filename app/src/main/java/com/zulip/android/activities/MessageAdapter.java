@@ -112,8 +112,11 @@ public class MessageAdapter extends ArrayAdapter<Message> {
                 }
             });
             if (getContext() instanceof NarrowListener) {
-                if (context.app.isTopicMute(message)) muteImageView.setVisibility(View.VISIBLE);
-                else muteImageView.setVisibility(View.GONE);
+                if (context.app.isTopicMute(message)) {
+                    muteImageView.setVisibility(View.VISIBLE);
+                } else {
+                    muteImageView.setVisibility(View.GONE);
+                }
             }
         }
 
