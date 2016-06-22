@@ -117,8 +117,8 @@ public class Person {
             return false;
         }
         Person per = (Person) obj;
-        return (this.name.equals(per.getName()) && this.email.equals(per
-                .getEmail()));
+        return this.name.equals(per.getName()) && this.email.equals(per
+                .getEmail());
     }
 
     public int hashCode() {

@@ -194,8 +194,8 @@ public class MessageListFragment extends Fragment implements MessageListener {
                 try {
                     // Scrolling messages isn't meaningful unless we have
                     // messages to scroll.
-                    Message message = ((Message) view.getItemAtPosition(view
-                            .getFirstVisiblePosition()));
+                    Message message = (Message) view.getItemAtPosition(view
+                            .getFirstVisiblePosition());
                     int mID = message.getID();
                     if (filter == null && app.getPointer() < mID) {
                         Log.i("scrolling", "Now at " + mID);

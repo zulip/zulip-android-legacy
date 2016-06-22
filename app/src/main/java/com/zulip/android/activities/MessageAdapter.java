@@ -101,7 +101,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
                 public void onClick(View v) {
                     if (getContext() instanceof NarrowListener) {
                         ((NarrowListener) getContext()).onNarrow(new NarrowFilterPM(
-                                Arrays.asList(message.getRecipients((ZulipApp.get())))));
+                                Arrays.asList(message.getRecipients(ZulipApp.get()))));
                     }
                 }
             });
