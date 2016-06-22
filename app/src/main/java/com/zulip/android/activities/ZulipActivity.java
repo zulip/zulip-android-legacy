@@ -680,12 +680,16 @@ public class ZulipActivity extends FragmentActivity implements
     }
     public void switchToStream() {
         removeEditTextErrors();
-        if (!isCurrentModeStream()) switchView();
+        if (!isCurrentModeStream()) {
+            switchView();
+        }
     }
 
     public void switchToPrivate() {
         removeEditTextErrors();
-        if (isCurrentModeStream()) switchView();
+        if (isCurrentModeStream()) {
+            switchView();
+        }
     }
 
     public boolean isCurrentModeStream() {
@@ -811,7 +815,9 @@ public class ZulipActivity extends FragmentActivity implements
 
     private void setupTitleBar(String title, String subtitle) {
         if (android.os.Build.VERSION.SDK_INT >= 11 && getActionBar() != null) {
-            if (title != null) getActionBar().setTitle(title);
+            if (title != null) {
+                getActionBar().setTitle(title);
+            }
             getActionBar().setSubtitle(subtitle);
         }
     }
@@ -833,7 +839,9 @@ public class ZulipActivity extends FragmentActivity implements
             switchToStream();
             streamActv.setText(message.getStream().getName());
             topicActv.setText(message.getSubject());
-            if ("".equals(message.getSubject())) topicActv.requestFocus();
+            if ("".equals(message.getSubject())) {
+                topicActv.requestFocus();
+            }
             else messageEt.requestFocus();
         }
         ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE)).toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
