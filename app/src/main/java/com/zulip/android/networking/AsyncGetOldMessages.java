@@ -201,11 +201,11 @@ public class AsyncGetOldMessages extends ZulipAsyncPushTask {
 
     }
 
-    protected boolean fetchMessages(int anchor, int num_before, int num_after,
+    protected boolean fetchMessages(int anchor, int numBefore, int numAfter,
                                     String[] params) {
         this.setProperty("anchor", Integer.toString(anchor));
-        this.setProperty("num_before", Integer.toString(num_before));
-        this.setProperty("num_after", Integer.toString(num_after));
+        this.setProperty("num_before", Integer.toString(numBefore));
+        this.setProperty("num_after", Integer.toString(numAfter));
         this.setProperty("apply_markdown", "true");
 
         if (filter != null) {
@@ -256,14 +256,14 @@ public class AsyncGetOldMessages extends ZulipAsyncPushTask {
                 watch.stop();
                 Log.i("perf", "sqlite: messages " + watch.toString());
 
-                if (num_after == 0) {
+                if (numAfter == 0) {
                     receivedMessages.addAll(0, fetchedMessages);
                 } else {
                     receivedMessages.addAll(fetchedMessages);
                 }
 
                 if ((position == LoadPosition.ABOVE || position == LoadPosition.BELOW)
-                        && receivedMessages.size() < num_before + num_after) {
+                        && receivedMessages.size() < numBefore + numAfter) {
                     noFurtherMessages = true;
                 }
 

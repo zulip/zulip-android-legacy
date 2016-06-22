@@ -102,8 +102,8 @@ public class Person {
      * @return the Person's realm.
      */
     public String getRealm() {
-        String[] split_email = this.getEmail().split("@");
-        return split_email[split_email.length - 1];
+        String[] splitEmail = this.getEmail().split("@");
+        return splitEmail[splitEmail.length - 1];
     }
 
     public boolean equals(Object obj) {

@@ -77,7 +77,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         }
 
         LinearLayout envelopeTile = (LinearLayout) tile.findViewById(R.id.envelopeTile);
-        TextView display_recipient = (TextView) tile.findViewById(R.id.displayRecipient);
+        TextView displayRecipient = (TextView) tile.findViewById(R.id.displayRecipient);
         ImageView muteImageView = (ImageView) tile.findViewById(R.id.muteMessageImage);
 
         if (message.getType() != MessageType.STREAM_MESSAGE) {
@@ -89,9 +89,9 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         }
 
         if (message.getType() != MessageType.STREAM_MESSAGE) {
-            display_recipient.setText(context.getString(R.string.huddle_text, message.getDisplayRecipient(context.app)));
-            display_recipient.setTextColor(Color.WHITE);
-            display_recipient.setOnClickListener(new View.OnClickListener() {
+            displayRecipient.setText(context.getString(R.string.huddle_text, message.getDisplayRecipient(context.app)));
+            displayRecipient.setTextColor(Color.WHITE);
+            displayRecipient.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (getContext() instanceof NarrowListener) {
@@ -101,9 +101,9 @@ public class MessageAdapter extends ArrayAdapter<Message> {
                 }
             });
         } else {
-            display_recipient.setText(message.getDisplayRecipient(context.app));
-            display_recipient.setTextColor(Color.BLACK);
-            display_recipient.setOnClickListener(new View.OnClickListener() {
+            displayRecipient.setText(message.getDisplayRecipient(context.app));
+            displayRecipient.setTextColor(Color.BLACK);
+            displayRecipient.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (getContext() instanceof NarrowListener) {
@@ -181,10 +181,10 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         }
 
         ImageView gravatar = (ImageView) tile.findViewById(R.id.gravatar);
-        Bitmap gravatar_img = context.getGravatars().get(message.getSender().getEmail());
-        if (gravatar_img != null) {
+        Bitmap gravatarImg = context.getGravatars().get(message.getSender().getEmail());
+        if (gravatarImg != null) {
             // Gravatar already exists for this image, set the ImageView to it
-            gravatar.setImageBitmap(gravatar_img);
+            gravatar.setImageBitmap(gravatarImg);
         } else {
             // Go get the Bitmap
             URL url = GravatarAsyncFetchTask.sizedURL(context, message.getSender().getAvatarURL(), 35);

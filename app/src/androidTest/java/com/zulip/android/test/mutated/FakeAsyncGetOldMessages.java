@@ -38,12 +38,12 @@ public class FakeAsyncGetOldMessages extends
     }
 
     @Override
-    protected boolean fetchMessages(int anchor, int num_before, int num_after,
+    protected boolean fetchMessages(int anchor, int numBefore, int numAfter,
             String[] params) {
         fmCalled = true;
         fmAnchor = anchor;
-        fmNumBefore = num_before;
-        fmNumAfter = num_after;
+        fmNumBefore = numBefore;
+        fmNumAfter = numAfter;
         if (appendTheseMessages != null) {
             this.receivedMessages.addAll(appendTheseMessages);
         }
