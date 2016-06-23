@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.support.annotation.Nullable;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
@@ -162,7 +164,15 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
                     @Override
                     public void onTaskFailure(String result) {
-
+                        connectionProgressDialog.dismiss();
+                        if(result.contains("GOOGLE_CLIENT_ID is not configured")){
+                         runOnUiThread(new Runnable() {
+                             @Override
+                             public void run() {
+                                 googleClientNotConfigured();
+                             }
+                         });
+                        }
                     }
                 });
                 asyncFetchGoogleID.execute();
@@ -234,6 +244,29 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             }
         }
         return isValid;
+    }
+
+    private void googleClientNotConfigured(){
+        Toast.makeText(LoginActivity.this, R.string.google_client_error, Toast.LENGTH_SHORT).show();
+        mGoogleSignInButton.setVisibility(View.GONE);
+        final TextWatcher textWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                mGoogleSignInButton.setVisibility(View.VISIBLE);
+                mServerEditText.removeTextChangedListener(this);
+            }
+        };
+        mServerEditText.addTextChangedListener(textWatcher);
     }
 
     private void setupSignIn(String clientId) {
