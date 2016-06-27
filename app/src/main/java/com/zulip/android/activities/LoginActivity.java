@@ -26,6 +26,7 @@ import com.zulip.android.BuildConfig;
 import com.zulip.android.R;
 import com.zulip.android.networking.AsyncDevGetEmails;
 import com.zulip.android.networking.AsyncGetBackends;
+import com.zulip.android.networking.LoginInterface;
 import com.zulip.android.util.AnimationHelper;
 import com.zulip.android.util.ZLog;
 import com.zulip.android.ZulipApp;
@@ -44,7 +45,7 @@ import java.util.List;
  * Currently supported LoginAuths are Emailbackend and DevAuthBackend.
  */
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener,
-        GoogleApiClient.OnConnectionFailedListener {
+        GoogleApiClient.OnConnectionFailedListener, LoginInterface {
     private static final String TAG = "LoginActivity";
     private static final int REQUEST_CODE_RESOLVE_ERR = 9000;
     private static final int REQUEST_CODE_SIGN_IN = 9001;
@@ -296,6 +297,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         startActivityForResult(i, 0);
     }
 
+    @Override
     public void openHome() {
         // Cancel before leaving activity to avoid leaking windows
         connectionProgressDialog.dismiss();

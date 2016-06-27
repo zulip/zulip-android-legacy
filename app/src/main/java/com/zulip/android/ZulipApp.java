@@ -386,6 +386,19 @@ public class ZulipApp extends Application {
         return mutedTopics.contains(id + subject);
     }
 
+    public void saveServerName(String serverName) {
+        String username=null;
+        try {
+            username = you.getEmail();
+        } catch (Exception e) {
+            //SQL Exception can occur if name is not updated!
+            ZLog.logException(e);
+        }
+        Editor globalEditor = this.globalSettings.edit();
+        serverStringSet.add((username != null) ? serverName + " - " + username : serverName);
+        globalEditor.putStringSet(GLOBAL_SETTINGS_REALMS, new HashSet<String>(serverStringSet));
+        globalEditor.apply();
+    }
     public void createNewRealm() {
         SharedPreferences.Editor editor = this.globalSettings.edit();
         currentRealm = serverStringSet.size();

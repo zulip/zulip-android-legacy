@@ -28,6 +28,7 @@ public class AsyncLogin extends ZulipAsyncPushTask {
     private String realmName;
     private String username;
     private String serverURL;
+    LoginInterface loginInterface;
 
     /**
      * @param activity Reference to the activity from this is called mainly {@link LoginActivity} and {@link DevAuthActivity}
@@ -53,6 +54,7 @@ public class AsyncLogin extends ZulipAsyncPushTask {
         this.realmName = realmName;
         this.setServerURL(serverURL);
         this.serverURL = serverURL;
+        loginInterface = (LoginInterface) context;
     }
 
     public final void execute() {
@@ -67,10 +69,15 @@ public class AsyncLogin extends ZulipAsyncPushTask {
                 JSONObject obj = new JSONObject(result);
 
                 if (obj.getString("result").equals("success")) {
-                    this.app.setLoggedInApiKey(obj.getString("api_key"));
-                    if (devServer) ((DevAuthActivity) activity).openHome();
-                    else ((LoginActivity) activity).openHome();
-                    callback.onTaskComplete(result, obj);
+                    if (startedFromAddRealm) {
+                        loginThroughAddRealm(obj);
+                        callback.onTaskComplete(result, obj);
+                    } else {
+                        this.app.setServerURL(serverURL);
+                        this.app.setLoggedInApiKey(obj.getString("api_key"));
+                        ZulipApp.get().saveServerName(realmName);
+                        loginInterface.openHome();
+                    }
                     return;
                 }
             } catch (JSONException e) {
