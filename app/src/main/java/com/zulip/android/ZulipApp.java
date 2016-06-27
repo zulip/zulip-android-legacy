@@ -386,4 +386,19 @@ public class ZulipApp extends Application {
     public boolean isTopicMute(int id, String subject) {
         return mutedTopics.contains(id + subject);
     }
+
+    public void createNewRealm() {
+        SharedPreferences.Editor editor = this.globalSettings.edit();
+        currentRealm = serverStringSet.size();
+        editor.putInt(GLOBAL_SETTINGS_CURRENT, currentRealm);
+        editor.apply();
+
+        databaseHelper = new DatabaseHelper(this, SERVER_SETTINGS + serverStringSet.size());
+
+        this.settings = getSharedPreferences(SERVER_SETTINGS + serverStringSet.size(), Context.MODE_PRIVATE);
+        max_message_id = settings.getInt("max_message_id", -1);
+        eventQueueId = settings.getString("eventQueueId", null);
+        lastEventId = settings.getInt("lastEventId", -1);
+        pointer = settings.getInt("pointer", -1);
+    }
 }
