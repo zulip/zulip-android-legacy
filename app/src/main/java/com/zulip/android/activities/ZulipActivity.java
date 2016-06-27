@@ -1340,6 +1340,10 @@ public class ZulipActivity extends AppCompatActivity implements
                 break;
             case R.id.today:
                 doNarrow(new NarrowFilterToday());
+            case R.id.menu_realm:
+                FragmentManager fm = getSupportFragmentManager();
+                RealmDialog dialogFragment = RealmDialog.newInstance();
+                dialogFragment.show(fm, "fragment_realm");
                 break;
             case R.id.logout:
                 logout();

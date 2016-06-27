@@ -74,4 +74,5 @@
     <string name="person_error">No person specified.</string>
     <string name="no_message_error">No message written.</string>
     <string name="realm_title">Realms</string>
+    <string name="realm_add">Add Realm</string>
 </resources>
