@@ -229,7 +229,7 @@ public class ZulipApp extends Application {
     }
 
     public void setEmail(String email) {
-        databaseHelper = new DatabaseHelper(this, email);
+        databaseHelper = new DatabaseHelper(this, SERVER_SETTINGS + currentRealm);
         this.you = Person.getOrUpdate(this, email, null, null);
     }
 
