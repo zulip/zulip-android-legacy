@@ -1491,4 +1491,24 @@ public class ZulipActivity extends AppCompatActivity implements
             narrowedList.onNewMessages(messages);
         }
     }
+
+    void switchRealm(final ProgressDialog progressDialog, final int position) {
+        if (event_poll != null) {
+            event_poll.abort();
+            event_poll = null;
+        }
+        statusUpdateHandler.removeMessages(0);
+        unregisterReceiver(onGcmMessage);
+        app.clearConnectionState();
+        app.switchToRealm(position);
+        app.resetDatabase();
+        app.setEmail(app.getYou().getEmail());
+        event_poll = new AsyncGetEvents(ZulipActivity.this);
+        event_poll.start();
+        IntentFilter filter = new IntentFilter(GcmBroadcastReceiver.getGCMReceiverAction(getApplicationContext()));
+        filter.setPriority(2);
+        registerReceiver(onGcmMessage, filter);
+        progressDialog.dismiss();
+    }
+
 }
