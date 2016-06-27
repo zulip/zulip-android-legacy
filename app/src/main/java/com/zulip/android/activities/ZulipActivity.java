@@ -152,6 +152,7 @@ public class ZulipActivity extends AppCompatActivity implements
     private SimpleCursorAdapter streamActvAdapter;
     private SimpleCursorAdapter subjectActvAdapter;
     private SimpleCursorAdapter emailActvAdapter;
+    public static final int ADDREALM_REQUEST_CODE = 201;
 
     private BroadcastReceiver onGcmMessage = new BroadcastReceiver() {
         public void onReceive(Context contenxt, Intent intent) {

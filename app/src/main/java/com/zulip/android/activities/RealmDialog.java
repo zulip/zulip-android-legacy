@@ -86,6 +86,10 @@ public class RealmDialog extends DialogFragment {
                 .setPositiveButton(R.string.realm_add, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
+                        Intent newIntent = new Intent(context, LoginActivity.class);
+                        newIntent.putExtra("FROM_ADDREALM", true);
+                        getActivity().startActivityForResult(newIntent, ZulipActivity.ADDREALM_REQUEST_CODE);
+                        RealmDialog.this.getDialog().cancel();
                     }
                 })
                 .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
