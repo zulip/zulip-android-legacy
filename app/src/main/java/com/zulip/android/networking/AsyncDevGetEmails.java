@@ -34,6 +34,7 @@ public class AsyncDevGetEmails extends ZulipAsyncPushTask {
         this.serverURL = serverURL;
         this.realmName = realmName;
         this.startedFromAddRealm = startedFromAddRealm;
+        this.setServerURL(serverURL);
     }
 
     public final void execute() {

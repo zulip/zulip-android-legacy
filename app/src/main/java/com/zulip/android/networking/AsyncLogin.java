@@ -51,6 +51,7 @@ public class AsyncLogin extends ZulipAsyncPushTask {
         }
         this.setProperty("password", password);
         this.realmName = realmName;
+        this.setServerURL(serverURL);
         this.serverURL = serverURL;
     }
 

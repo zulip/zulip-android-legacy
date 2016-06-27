@@ -13,6 +13,7 @@ public class AsyncGetBackends extends ZulipAsyncPushTask {
     public AsyncGetBackends(ZulipApp app, String url) {
         super(app);
         this.serverURL = url;
+        this.setServerURL(serverURL);
     }
 
     //Json Format - {"msg":"","password":false,"google":false,"result":"success","dev":true}

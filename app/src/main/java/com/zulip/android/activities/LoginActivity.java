@@ -57,7 +57,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private EditText mPassword;
     private EditText serverIn;
     private EditText realmNameET;
-    String serverURL;
+    private String serverURL;
     private View mGoogleSignInButton;
 
     @Override
@@ -176,8 +176,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         serverIn.setText(serverUri.toString());
         mServerEditText.setText(serverUri.toString());
         mServerEditText.setEnabled(false);
-        serverURL = serverUri.toString();
-        AsyncGetBackends asyncGetBackends = new AsyncGetBackends(ZulipApp.get(), serverURL);
+        this.serverURL = serverUri.toString();
+        AsyncGetBackends asyncGetBackends = new AsyncGetBackends(ZulipApp.get(), this.serverURL);
         asyncGetBackends.setCallback(new AsyncTaskCompleteListener() {
             @Override
             public void onTaskComplete(String result, JSONObject jsonObject) {
