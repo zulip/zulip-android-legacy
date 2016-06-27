@@ -52,6 +52,36 @@ public class RealmDialog extends DialogFragment {
         realmsList = new ArrayList<String>(app.serverStringSet);
         realmsAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, realmsList);
         listView.setAdapter(realmsAdapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
+                new AlertDialog.Builder(context)
+                        .setTitle(R.string.realm_switch)
+                        .setMessage(context.getString(R.string.realm_switch_confirm, realmsAdapter.getItem(position)))
+                        .setPositiveButton(getResources().getString(android.R.string.yes), new DialogInterface.OnClickListener() {
+                            public void onClick(final DialogInterface dialog, int whichButton) {
+                                if (position == app.currentRealm) {
+                                    Toast.makeText(context, R.string.realm_this_is_current, Toast.LENGTH_LONG).show();
+                                    return;
+                                }
+                                final ProgressDialog progressDialog = new ProgressDialog(getActivity());
+                                progressDialog.setCancelable(false);
+                                progressDialog.setTitle(app.getString(R.string.realm_switching));
+                                progressDialog.setMessage(app.getString(R.string.please_wait));
+                                progressDialog.show();
+                                ((ZulipActivity) getActivity()).switchRealm(progressDialog, position);
+                                if (RealmDialog.this.getDialog() != null)
+                                    RealmDialog.this.getDialog().cancel();
+                            }
+                        })
+                        .setNegativeButton(getResources().getString(android.R.string.cancel), new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .show();
+            }
+        });
         builder.setView(rootView)
                 .setPositiveButton(R.string.realm_add, new DialogInterface.OnClickListener() {
                     @Override

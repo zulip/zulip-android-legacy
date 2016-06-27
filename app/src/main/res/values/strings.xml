@@ -74,5 +74,10 @@
     <string name="person_error">No person specified.</string>
     <string name="no_message_error">No message written.</string>
     <string name="realm_title">Realms</string>
+    <string name="realm_switch">Switch to this realm</string>
+    <string name="realm_switch_confirm">"Do you want to switch to %s ?"</string>
+    <string name="realm_this_is_current">This is the current realm only!</string>
+    <string name="realm_switching">Switching realm</string>
+    <string name="please_wait">Please wait</string>
     <string name="realm_add">Add Realm</string>
 </resources>
