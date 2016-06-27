@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import android.animation.Animator;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
@@ -1513,4 +1514,44 @@ public class ZulipActivity extends AppCompatActivity implements
         progressDialog.dismiss();
     }
 
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == ADDREALM_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            this.currentList.adapter.clear();
+            this.currentList.adapter.setHeaderShowing(true);
+            final String realmName = data.getStringExtra("realmName");
+            final String apiKey = data.getStringExtra("api_key");
+            final String email = data.getStringExtra("email");
+            final String serverURL = data.getStringExtra("serverURL");
+            notifications.logOut(new Runnable() {
+                @Override
+                public void run() {
+                    if (event_poll != null) {
+                        event_poll.abort();
+                        event_poll = null;
+                    }
+                    statusUpdateHandler.removeMessages(0);
+                    try {
+                        unregisterReceiver(onGcmMessage);
+                    } catch (IllegalArgumentException e) {
+                        ZLog.logException(e);
+                    }
+
+                    app.clearConnectionState();
+                    app.createNewRealm();
+                    app.setEmail(email);
+                    app.setServerURL(serverURL);
+                    app.saveServerName(realmName);
+                    app.setLoggedInApiKey(apiKey);
+                    IntentFilter filter = new IntentFilter(GcmBroadcastReceiver.getGCMReceiverAction(getApplicationContext()));
+                    filter.setPriority(2);
+                    registerReceiver(onGcmMessage, filter);
+                    onRefresh();
+                }
+            });
+
+        }
+        this.currentList.adapter.setHeaderShowing(false);
+    }
 }
