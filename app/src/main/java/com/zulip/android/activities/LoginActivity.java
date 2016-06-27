@@ -13,7 +13,11 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
@@ -107,6 +111,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         AnimationHelper.showView(findViewById(R.id.serverInput), 201);
         AnimationHelper.hideView(findViewById(R.id.serverFieldLayout), 100);
         realmNameET = (EditText) findViewById(R.id.realmName);
+        if (getIntent().getBooleanExtra("FROM_ADDREALM", false)) {
+            startedFromAddRealm = true;
+            ((TextView) findViewById(R.id.welcome_zulip)).setText(R.string.add_realm);
+            ((Button) findViewById(R.id.zulip_login)).setText(R.string.add_realm_login);
+        }
     }
 
     @Override

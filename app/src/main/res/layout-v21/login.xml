@@ -26,6 +26,7 @@
         android:layout_marginTop="16dp"
         android:gravity="center|center_horizontal"
         android:padding="10dp"
+        android:id="@+id/welcome_zulip"
         android:text="@string/login_welcome_blurb"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 

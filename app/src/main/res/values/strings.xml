@@ -82,5 +82,6 @@
     <string name="realm_add">Add Realm</string>
     <string name="realm_name">Name of a realm (Optional)</string>
     <string name="realm_exists">Realm Name already exists, please change.</string>
-
+    <string name="add_realm">Add new Realm</string>
+    <string name="add_realm_login">Add</string>
 </resources>
