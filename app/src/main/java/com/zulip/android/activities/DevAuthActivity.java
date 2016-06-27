@@ -33,6 +33,9 @@ public class DevAuthActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dev_auth);
         String json = getIntent().getStringExtra(AsyncDevGetEmails.EMAIL_JSON);
+        final String realmName = getIntent().getStringExtra(AsyncDevGetEmails.REALM_NAME_JSON);
+        final String serverURL = getIntent().getStringExtra(AsyncDevGetEmails.SERVER_URL_JSON);
+        final boolean startedFromAddRealm = getIntent().getBooleanExtra(AsyncDevGetEmails.ADD_REALM_BOOLEAN_JSON, false);
         recyclerView = (RecyclerView) findViewById(R.id.devAuthRecyclerView);
         List<String> emails = new ArrayList<>();
         int directAdminSize = 1;
@@ -58,7 +61,7 @@ public class DevAuthActivity extends Activity {
         authEmailAdapter.setOnItemClickListener(new AuthClickListener() {
             @Override
             public void onItemClick(String email) {
-                AsyncLogin asyncLogin = new AsyncLogin(DevAuthActivity.this, email, null, true);
+                AsyncLogin asyncLogin = new AsyncLogin(DevAuthActivity.this, email, null, realmName, startedFromAddRealm, serverURL, true);
                 asyncLogin.execute();
                 connectionProgressDialog.show();
             }

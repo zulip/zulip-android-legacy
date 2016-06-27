@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
@@ -34,6 +35,8 @@ import com.zulip.android.networking.AsyncLogin;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 /**
@@ -46,6 +49,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private static final int REQUEST_CODE_RESOLVE_ERR = 9000;
     private static final int REQUEST_CODE_SIGN_IN = 9001;
 
+    private boolean startedFromAddRealm = false;
     private ProgressDialog connectionProgressDialog;
     private GoogleApiClient mGoogleApiClient;
     private EditText mServerEditText;
@@ -53,7 +57,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private EditText mPassword;
     private EditText serverIn;
     private EditText realmNameET;
-
+    String serverURL;
     private View mGoogleSignInButton;
 
     @Override
@@ -157,6 +161,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             }
         }
     }
+    
 
     private void showBackends(String httpScheme, String serverURL) {
         Uri serverUri = Uri.parse(serverURL);
@@ -171,8 +176,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         serverIn.setText(serverUri.toString());
         mServerEditText.setText(serverUri.toString());
         mServerEditText.setEnabled(false);
-        ((ZulipApp) getApplication()).setServerURL(serverUri.toString());
-        AsyncGetBackends asyncGetBackends = new AsyncGetBackends(ZulipApp.get());
+        serverURL = serverUri.toString();
+        AsyncGetBackends asyncGetBackends = new AsyncGetBackends(ZulipApp.get(), serverURL);
         asyncGetBackends.setCallback(new AsyncTaskCompleteListener() {
             @Override
             public void onTaskComplete(String result, JSONObject jsonObject) {
@@ -244,7 +249,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 return;
             }
 
-            final AsyncLogin loginTask = new AsyncLogin(LoginActivity.this, "google-oauth2-token", account.getIdToken(), false);
+            final AsyncLogin loginTask = new AsyncLogin(LoginActivity.this, "google-oauth2-token", account.getIdToken(), getRealmName(), startedFromAddRealm, serverURL, false);
             loginTask.setCallback(new AsyncTaskCompleteListener() {
                 @Override
                 public void onTaskComplete(String result, JSONObject object) {
@@ -272,7 +277,21 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    private void openLegal() {
+    private String getRealmName() {
+        if (TextUtils.isEmpty(realmNameET.getText())) {
+            String server = serverURL;
+            URI uri = null;
+            try {
+                uri = new URI(server);
+            } catch (URISyntaxException e) {
+                return server;
+            }
+            return uri.getHost();
+        }
+        return realmNameET.getText().toString();
+    }
+
+    protected void openLegal() {
         Intent i = new Intent(this, LegalActivity.class);
         startActivityForResult(i, 0);
     }
@@ -343,10 +362,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 if (!isInputValid()) {
                     return;
                 }
+                if (!isInputValid()) return;
+                if (serverURL == null) return;
                 connectionProgressDialog.show();
 
                 AsyncLogin alog = new AsyncLogin(LoginActivity.this,
-                        mUserName.getText().toString(), mPassword.getText().toString(), false);
+                        mUserName.getText().toString(), mPassword.getText().toString(),
+                        getRealmName(), startedFromAddRealm, serverURL, false);
+
                 // Remove the CPD when done
                 alog.setCallback(new AsyncTaskCompleteListener() {
                     @Override
@@ -368,7 +391,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             case R.id.local_server_button:
                 if (!isInputValidForDevAuth()) return;
                 connectionProgressDialog.show();
-                AsyncDevGetEmails asyncDevGetEmails = new AsyncDevGetEmails(LoginActivity.this);
+                AsyncDevGetEmails asyncDevGetEmails = new AsyncDevGetEmails(LoginActivity.this, serverURL, getRealmName(), startedFromAddRealm);
                 asyncDevGetEmails.setCallback(new AsyncTaskCompleteListener() {
                     @Override
                     public void onTaskComplete(String result, JSONObject jsonObject) {

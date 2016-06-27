@@ -22,18 +22,24 @@ public class AsyncLogin extends ZulipAsyncPushTask {
 
     private Activity activity;
     private boolean devServer = true; //If this is a DevAuthBackend server!
-    private LoginActivity context;
+    private Activity context;
     private boolean userDefinitelyInvalid = false;
+    boolean startedFromAddRealm = false;
+    private String realmName;
+    private String username;
+    private String serverURL;
 
     /**
      * @param activity Reference to the activity from this is called mainly {@link LoginActivity} and {@link DevAuthActivity}
      * @param username Stores the E-Mail of the user or a string "google-oauth2-token" if this is for Google Authentication
      * @param password Stores the password if EmailBackend, ID Token if GoogleMobileOauth2Backend, and blank if DevAuthBackend
      */
-    public AsyncLogin(Activity activity, String username, String password, boolean devServer) {
+    public AsyncLogin(Activity loginActivity, String username, String password, String realmName, boolean startedFromAddRealm, String serverURL, boolean devServer) {
         super(ZulipApp.get());
-        this.activity = activity;
-        if (username.contains("@")) {
+        this.startedFromAddRealm = startedFromAddRealm;
+        context = loginActivity;
+        this.username = username;
+        if (username.contains("@") && !startedFromAddRealm) {
             // @-less usernames are used as indicating special cases, for
             // example in OAuth2 authentication
             this.app.setEmail(username);
@@ -43,6 +49,9 @@ public class AsyncLogin extends ZulipAsyncPushTask {
             this.setProperty("password", password);
             this.devServer = false;
         }
+        this.setProperty("password", password);
+        this.realmName = realmName;
+        this.serverURL = serverURL;
     }
 
     public final void execute() {

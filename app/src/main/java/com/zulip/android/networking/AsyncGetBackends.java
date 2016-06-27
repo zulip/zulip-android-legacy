@@ -8,8 +8,11 @@ import com.zulip.android.ZulipApp;
  */
 public class AsyncGetBackends extends ZulipAsyncPushTask {
 
-    public AsyncGetBackends(ZulipApp app) {
+    private String serverURL;
+
+    public AsyncGetBackends(ZulipApp app, String url) {
         super(app);
+        this.serverURL = url;
     }
 
     //Json Format - {"msg":"","password":false,"google":false,"result":"success","dev":true}
