@@ -112,8 +112,7 @@ public class ZulipApp extends Application {
         currentRealm = globalSettings.getInt(GLOBAL_SETTINGS_CURRENT, currentRealm);
         serverStringSet = new HashSet<String>(globalSettings.getStringSet(GLOBAL_SETTINGS_REALMS, new HashSet<String>()));
 
-
-
+        switchToRealm(currentRealm);
         this.api_key = settings.getString(API_KEY, null);
 
         if (api_key != null) {
@@ -400,5 +399,23 @@ public class ZulipApp extends Application {
         eventQueueId = settings.getString("eventQueueId", null);
         lastEventId = settings.getInt("lastEventId", -1);
         pointer = settings.getInt("pointer", -1);
+    }
+
+    public void switchToRealm(int position) {
+        databaseHelper = new DatabaseHelper(this, SERVER_SETTINGS + position);
+        this.settings = getSharedPreferences(SERVER_SETTINGS + position, Context.MODE_PRIVATE);
+        this.api_key = settings.getString("api_key", null);
+        max_message_id = settings.getInt("max_message_id", -1);
+        eventQueueId = settings.getString("eventQueueId", null);
+        lastEventId = settings.getInt("lastEventId", -1);
+        pointer = settings.getInt("pointer", -1);
+        if (settings.contains("email"))
+            this.you = Person.getOrUpdate(this, settings.getString("email", null), null, null);
+        currentRealm = position;
+        if (position != currentRealm) {
+            SharedPreferences.Editor edit = globalSettings.edit();
+            edit.putInt(GLOBAL_SETTINGS_CURRENT, position);
+            edit.apply();
+        }
     }
 }
