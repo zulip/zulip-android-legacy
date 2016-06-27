@@ -60,6 +60,16 @@ public class ZulipApp extends Application {
     private Set<String> mutedTopics;
     private static final String MUTED_TOPIC_KEY = "mutedTopics";
 
+    private final static String GLOBAL_SETTINGS = "HumbugActivity";
+    private final static String SERVER_SETTINGS = "serverSettings";
+    private final static String GLOBAL_SETTINGS_CURRENT = "currentRealm";
+    private static final String GLOBAL_SETTINGS_REALMS = "REALMS";
+
+
+    public int currentRealm = 0;
+
+    public HashSet serverStringSet;
+    private SharedPreferences globalSettings;
     /**
      * Handler to manage batching of unread messages
      */
@@ -98,13 +108,10 @@ public class ZulipApp extends Application {
 
         // This used to be from HumbugActivity.getPreferences, so we keep that
         // file name.
-        this.settings = getSharedPreferences("HumbugActivity",
-                Context.MODE_PRIVATE);
+        globalSettings = getSharedPreferences(GLOBAL_SETTINGS, Context.MODE_PRIVATE);
+        currentRealm = globalSettings.getInt(GLOBAL_SETTINGS_CURRENT, currentRealm);
+        serverStringSet = new HashSet<String>(globalSettings.getStringSet(GLOBAL_SETTINGS_REALMS, new HashSet<String>()));
 
-        max_message_id = settings.getInt("max_message_id", -1);
-        eventQueueId = settings.getString("eventQueueId", null);
-        lastEventId = settings.getInt("lastEventId", -1);
-        pointer = settings.getInt("pointer", -1);
 
 
         this.api_key = settings.getString(API_KEY, null);
