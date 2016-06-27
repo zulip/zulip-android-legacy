@@ -4,11 +4,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.zulip.android.activities.DevAuthActivity;
 import com.zulip.android.activities.LoginActivity;
+import com.zulip.android.activities.ZulipActivity;
 import com.zulip.android.util.ZLog;
 import com.zulip.android.ZulipApp;
 
@@ -86,6 +88,20 @@ public class AsyncLogin extends ZulipAsyncPushTask {
         }
         Toast.makeText(activity, "Unknown error", Toast.LENGTH_LONG).show();
         Log.wtf("login", "We shouldn't have gotten this far.");
+    }
+
+    private void loginThroughAddRealm(JSONObject jsonObject) {
+        try {
+            Intent intent = new Intent(context, ZulipActivity.class);
+            intent.putExtra("realmName", realmName);
+            intent.putExtra("api_key", jsonObject.getString("api_key"));
+            intent.putExtra("email", username);
+            intent.putExtra("serverURL", serverURL);
+            context.setResult(Activity.RESULT_OK, intent);
+            context.finish();
+        } catch (JSONException e) {
+            ZLog.logException(e);
+        }
     }
 
     @Override
