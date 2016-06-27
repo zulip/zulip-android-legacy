@@ -52,6 +52,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private EditText mUserName;
     private EditText mPassword;
     private EditText serverIn;
+    private EditText realmNameET;
 
     private View mGoogleSignInButton;
 
@@ -100,6 +101,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private void showLoginFields() {
         AnimationHelper.showView(findViewById(R.id.serverInput), 201);
         AnimationHelper.hideView(findViewById(R.id.serverFieldLayout), 100);
+        realmNameET = (EditText) findViewById(R.id.realmName);
     }
 
     @Override

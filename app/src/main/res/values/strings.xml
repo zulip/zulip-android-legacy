@@ -80,4 +80,8 @@
     <string name="realm_switching">Switching realm</string>
     <string name="please_wait">Please wait</string>
     <string name="realm_add">Add Realm</string>
+    <string name="realm_name">Name of a realm (Optional)</string>
+
+
+
 </resources>
