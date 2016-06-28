@@ -42,7 +42,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:dropDownWidth="fill_parent"
-                android:hint="@string/stream_txt"
+                android:hint="@string/subject"
                 android:maxLines="1" />
 
             <ImageView
