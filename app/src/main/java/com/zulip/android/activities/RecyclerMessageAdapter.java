@@ -1,20 +1,22 @@
 package com.zulip.android.activities;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.support.annotation.ColorInt;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import com.zulip.android.ZulipApp;
 import com.zulip.android.filters.NarrowListener;
 import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageType;
 import com.zulip.android.viewholders.MessageHeaderParent;
+import com.zulip.android.viewholders.MessageHolder;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 
@@ -70,6 +72,20 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         for (int i = 0; i < messageList.size() - 1; i++) {
             headerParents = (addMessage(messageList.get(i), i + headerParents)) ? headerParents + 1 : headerParents;
         }
+    @Override
+    public int getItemViewType(int position) {
+        if (items.get(position) instanceof MessageHeaderParent)
+            return VIEWTYPE_MESSAGE_HEADER;
+        else if (items.get(position) instanceof Message)
+            return VIEWTYPE_MESSAGE;
+        else if (getItem(position) instanceof Integer && (Integer) getItem(position) == VIEWTYPE_HEADER)
+            return VIEWTYPE_HEADER;
+        else if (getItem(position) instanceof Integer && (Integer) getItem(position) == VIEWTYPE_FOOTER)
+            return VIEWTYPE_FOOTER;
+        else {
+            Log.e("ItemError", "object: " + items.get(position).toString());
+            throw new RuntimeException("MESSAGE TYPE NOT KNOWN & Position:"+position);
+        }
     }
 
     public boolean addMessage(Message message, int messageAndHeadersCount) {
@@ -100,5 +116,20 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
 
 
+    public RecyclerView.ViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
+        switch (viewType) {
+            case VIEWTYPE_MESSAGE_HEADER:
+                MessageHeaderParent.MessageHeaderHolder holder = new MessageHeaderParent.MessageHeaderHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.message_header, parent, false));
+                holder.streamTextView.setText(privateHuddleText);
+                holder.streamTextView.setTextColor(Color.WHITE);
+                return holder;
+            case VIEWTYPE_MESSAGE:
+                View messageView = LayoutInflater.from(parent.getContext()).inflate(R.layout.message_tile, parent, false);
+                MessageHolder messageHolder = new MessageHolder(messageView);
+                return messageHolder;
+        }
+        return null;
+    }
 
+    }
 }

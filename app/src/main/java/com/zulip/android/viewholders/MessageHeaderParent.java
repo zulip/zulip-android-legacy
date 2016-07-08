@@ -94,5 +94,20 @@ public class MessageHeaderParent {
         }
         return recipientsCache;
     }
+
+    public static class MessageHeaderHolder extends RecyclerView.ViewHolder {
+        public TextView streamTextView;
+        public TextView topicTextView;
+        public ImageView muteMessageImage;
+        public TextView arrowHead;
+
+        public MessageHeaderHolder(View itemView) {
+            super(itemView);
+            streamTextView = (TextView) itemView.findViewById(R.id.displayRecipient);
+            topicTextView = (TextView) itemView.findViewById(R.id.instance);
+            arrowHead = (TextView) itemView.findViewById(R.id.sep);
+            muteMessageImage = (ImageView) itemView.findViewById(R.id.muteMessageImage);
+        }
+    }
 }
 
