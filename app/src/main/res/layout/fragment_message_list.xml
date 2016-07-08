@@ -4,10 +4,9 @@
     android:layout_height="match_parent"
     tools:context=".activities.MessageListFragment" >
 
-    <ListView
-        android:id="@+id/listview"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerView"
         android:layout_width="match_parent"
-        android:layout_height="fill_parent" >
-    </ListView>
-
+        android:layout_height="fill_parent"
+        android:background="@android:color/white" />
 </FrameLayout>
