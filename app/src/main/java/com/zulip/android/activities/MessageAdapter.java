@@ -1,69 +1,76 @@
 package com.zulip.android.activities;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.Arrays;
-import java.util.List;
-
-import org.ccil.cowan.tagsoup.HTMLSchema;
-import org.ccil.cowan.tagsoup.Parser;
-
-import android.app.Activity;
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.support.annotation.ColorInt;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
-import android.text.Html;
-import android.text.Spanned;
+import android.support.v4.view.ViewCompat;
+import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
-import android.text.method.LinkMovementMethod;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
-import com.zulip.android.util.CustomHtmlToSpannedConverter;
+import com.zulip.android.R;
+import com.zulip.android.ZulipApp;
 import com.zulip.android.filters.NarrowFilterPM;
 import com.zulip.android.filters.NarrowFilterStream;
 import com.zulip.android.filters.NarrowListener;
-import com.zulip.android.R;
-import com.zulip.android.ZulipApp;
 import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageType;
 import com.zulip.android.models.Stream;
-import com.zulip.android.networking.GravatarAsyncFetchTask;
 
-/**
- * Adapter which stores Messages in a view, and generates LinearLayouts for
- * consumption by the ListView which displays the view.
- */
-public class MessageAdapter extends ArrayAdapter<Message> {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-    private static final String TAG = "MessageAdapter";
-    private static final HTMLSchema schema = new HTMLSchema();
+
+public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+    public static final int VIEWTYPE_MESSAGEHEADER = 1;
+    private static final int VIEWTYPE_MESSAGE = 2;
+    private static final int VIEWTYPE_HEADER = 3; //At position 0
+    private static final int VIEWTYPE_FOOTER = 4; //At end position
+
+    private static String privateHuddleText;
+    private List<Object> items;
+    private ZulipApp zulipApp;
+    private Context context;
+    private NarrowListener narrowListener;
+    private static final float HEIGHT_IN_DP = 48;
+    private
+    @ColorInt
+    int mDefaultStreamHeaderColor;
 
     @ColorInt
-    private int mDefaultStreamHeaderColor;
-    @ColorInt
-    private int mDefaultHuddleHeaderColor;
-    @ColorInt
-    private int mDefaultStreamMessageColor;
-    @ColorInt
-    private int mDefaultHuddleMessageColor;
+    private int mDefaultPrivateMessageColor;
+    private OnItemClickListener onItemClickListener;
+    private int contextMenuItemSelectedPosition;
+    private boolean startedFromFilter;
+    private View footerView;
+    private View headerView;
 
-    public MessageAdapter(Context context, List<Message> objects) {
-        super(context, 0, objects);
+    int getContextMenuItemSelectedPosition() {
+        return contextMenuItemSelectedPosition;
+    }
+
+    MessageAdapter(List<Message> messageList, final Context context, boolean startedFromFilter) {
+        super();
+        items = new ArrayList<>();
+        setupHeaderAndFooterViews();
+        zulipApp = ZulipApp.get();
+        this.context = context;
+        narrowListener = ((NarrowListener) context);
+        this.startedFromFilter = startedFromFilter;
         mDefaultStreamHeaderColor = ContextCompat.getColor(context, R.color.stream_header);
-        mDefaultStreamMessageColor = ContextCompat.getColor(context, R.color.stream_body);
-        mDefaultHuddleHeaderColor = ContextCompat.getColor(context, R.color.huddle_header);
-        mDefaultHuddleMessageColor = ContextCompat.getColor(context, R.color.huddle_body);
+        mDefaultPrivateMessageColor = ContextCompat.getColor(context, R.color.huddle_body);
+        privateHuddleText = context.getResources().getString(R.string.huddle_text);
+        setupLists(messageList);
     }
 
     public View getView(int position, View convertView, ViewGroup group) {
