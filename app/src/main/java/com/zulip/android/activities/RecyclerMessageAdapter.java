@@ -15,6 +15,8 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.zulip.android.models.Stream;
 import com.zulip.android.networking.AsyncPointerUpdate;
 
 import com.squareup.picasso.Picasso;
@@ -26,11 +28,13 @@ import com.zulip.android.filters.NarrowFilterStream;
 import com.zulip.android.filters.NarrowListener;
 import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageType;
+import com.zulip.android.util.ZLog;
 import com.zulip.android.viewholders.LoadingHolder;
 import com.zulip.android.viewholders.MessageHeaderParent;
 import com.zulip.android.viewholders.MessageHolder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -342,6 +346,16 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         return items.size();
     }
 
+    public void clear() {
+        items.clear();
+        setupHeaderAndFooterViews();
+        notifyDataSetChanged();
+    }
+
+    public void remove(Message msg) {
+        items.remove(msg);
+        notifyDataSetChanged();
+    }
 
     public int getItemIndex(Message message) {
         return items.indexOf(message);

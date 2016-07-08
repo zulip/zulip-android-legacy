@@ -8,6 +8,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -17,6 +19,8 @@ import android.view.ViewGroup;
 
 import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.stmt.Where;
+import com.zulip.android.R;
+import com.zulip.android.ZulipApp;
 import com.zulip.android.filters.NarrowFilter;
 import com.zulip.android.filters.NarrowFilterPM;
 import com.zulip.android.filters.NarrowFilterStream;
@@ -24,10 +28,21 @@ import com.zulip.android.filters.NarrowListener;
 import com.zulip.android.models.Message;
 import com.zulip.android.models.Stream;
 import com.zulip.android.networking.AsyncGetOldMessages;
+import com.zulip.android.networking.ZulipAsyncPushTask;
+import com.zulip.android.util.MessageListener;
+import com.zulip.android.viewholders.HeaderSpaceItemDecoration;
 
+import org.json.JSONObject;
+
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+
 public class MessageListFragment extends Fragment implements MessageListener {
+    private LinearLayoutManager linearLayoutManager;
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated to
@@ -48,13 +63,14 @@ public class MessageListFragment extends Fragment implements MessageListener {
     NarrowFilter filter;
 
     private Listener mListener;
+    private RecyclerView recyclerView;
     private View bottom_list_spacer;
 
     public ZulipApp app;
 
     SparseArray<Message> messageIndex;
+    RecyclerMessageAdapter adapter;
     boolean loadingMessages = true;
-
     // Whether we've loaded all available messages in that direction
     boolean loadedToTop = false;
     boolean loadedToBottom = false;
@@ -105,6 +121,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
     public void onActivityResume() {
         // Only when the activity resumes, not when the fragment is brought to
         // the top
+        adapter.setFooterShowing(true);
         loadingMessages = true;
     }
 
@@ -118,6 +135,12 @@ public class MessageListFragment extends Fragment implements MessageListener {
             ((AppCompatActivity) getActivity()).getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_arrow_back_black_24dp);
         else
             ((AppCompatActivity) getActivity()).getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
+        recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
+        linearLayoutManager = new LinearLayoutManager(getContext());
+        recyclerView.setLayoutManager(linearLayoutManager);
+        adapter = new RecyclerMessageAdapter(messageList, getActivity(), (filter==null));
+        recyclerView.setAdapter(adapter);
+        registerForContextMenu(recyclerView);
 
         return view;
     }
@@ -142,7 +165,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        Message message = itemFromMenuInfo(item.getMenuInfo());
+        Message message = (Message) adapter.getItem(adapter.getContextMenuItemSelectedPosition());
         switch (item.getItemId()) {
             case R.id.reply_to_stream:
                 ((NarrowListener) getActivity()).onNarrowFillSendBox(message);
@@ -183,7 +206,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
         if (initialized && !registered) {
             // Already have state, and already processed any events that came in
             // when resuming the existing queue.
-            showLoadIndicatorBottom(false);
+            adapter.setFooterShowing(false);
             loadingMessages = false;
             Log.i("onReadyToDisplay", "just a resume");
             return;
@@ -196,7 +219,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
         lastMessageId = -1;
 
         loadingMessages = true;
-        showLoadIndicatorBottom(true);
+        adapter.setFooterShowing(true);
 
         fetch();
         initialized = true;
@@ -222,6 +245,8 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
                 closestQuery.orderBy(Message.TIMESTAMP_FIELD, false).setWhere(
                         filteredWhere);
+
+                recyclerView.scrollToPosition(adapter.getItemIndex(closestQuery
                         .queryForFirst()));
 
             } catch (SQLException e) {
@@ -259,7 +284,9 @@ public class MessageListFragment extends Fragment implements MessageListener {
             return;
         }
         Log.i("onMessages", "Adding " + messages.length + " messages at " + pos);
+        int topPosBefore = linearLayoutManager.findFirstVisibleItemPosition();
         int addedCount = 0;
+        int headerParents = 0;
 
         if (pos == LoadPosition.NEW && !loadedToBottom) {
             // If we don't have intermediate messages loaded, don't add new
@@ -297,10 +324,11 @@ public class MessageListFragment extends Fragment implements MessageListener {
             }
 
             if (pos == LoadPosition.NEW || pos == LoadPosition.BELOW) {
-                this.adapter.add(message);
+                this.adapter.addMessage(message);
+                messageList.add(message);
             } else if (pos == LoadPosition.ABOVE || pos == LoadPosition.INITIAL) {
-                // TODO: Does this copy the array every time?
-                this.adapter.insert(message, addedCount);
+                headerParents = (this.adapter.addMessage(message, addedCount + headerParents)) ? headerParents + 1 : headerParents;
+                messageList.add(addedCount, message);
                 addedCount++;
             }
 
@@ -314,16 +342,15 @@ public class MessageListFragment extends Fragment implements MessageListener {
         }
 
         if (pos == LoadPosition.ABOVE) {
-            showLoadIndicatorTop(moreAbove);
+            adapter.setHeaderShowing(moreAbove);
             // Restore the position of the top item
-            this.listView.setSelectionFromTop(topPosBefore + addedCount,
-                    topOffsetBefore);
+            this.recyclerView.scrollToPosition(topPosBefore + addedCount);
 
             if (noFurtherMessages) {
                 loadedToTop = true;
             }
         } else if (pos == LoadPosition.BELOW) {
-            showLoadIndicatorBottom(moreBelow);
+            adapter.setFooterShowing(moreBelow);
 
             if (noFurtherMessages || listHasMostRecent()) {
                 loadedToBottom = true;
@@ -331,8 +358,8 @@ public class MessageListFragment extends Fragment implements MessageListener {
         } else if (pos == LoadPosition.INITIAL) {
             selectPointer();
 
-            showLoadIndicatorTop(moreAbove);
-            showLoadIndicatorBottom(moreBelow);
+            adapter.setHeaderShowing(moreAbove);
+            adapter.setFooterShowing(moreBelow);
 
             if (noFurtherMessages || listHasMostRecent()) {
                 loadedToBottom = true;
@@ -356,11 +383,11 @@ public class MessageListFragment extends Fragment implements MessageListener {
         if (pos == LoadPosition.ABOVE) {
             above = 100;
             around = firstMessageId;
-            showLoadIndicatorTop(true);
+            adapter.setHeaderShowing(true);
         } else if (pos == LoadPosition.BELOW) {
             below = 100;
             around = lastMessageId;
-            showLoadIndicatorBottom(true);
+            adapter.setFooterShowing(true);
         } else {
             Log.e("loadMoreMessages", "Invalid position");
             return;
@@ -373,6 +400,17 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
         AsyncGetOldMessages oldMessagesReq = new AsyncGetOldMessages(this);
         oldMessagesReq.execute(around, pos, above, below, filter);
+
+        oldMessagesReq.setCallback(new ZulipAsyncPushTask.AsyncTaskCompleteListener() {
+            @Override
+            public void onTaskComplete(String result, JSONObject jsonObject) {
+                adapter.setFooterShowing(false);
+            }
+
+            @Override
+            public void onTaskFailure(String result) {
+            }
+        });
     }
 
     public Boolean listHasMostRecent() {
@@ -380,7 +418,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
     }
 
     public void selectMessage(final Message message) {
-        listView.setSelection(adapter.getPosition(message));
+        recyclerView.scrollToPosition(adapter.getItemIndex(message));
     }
 
     public Message getMessageById(int id) {
