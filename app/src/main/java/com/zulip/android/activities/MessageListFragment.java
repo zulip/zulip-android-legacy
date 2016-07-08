@@ -1,9 +1,5 @@
 package com.zulip.android.activities;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ClipData;
@@ -14,37 +10,20 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.widget.AbsListView;
-import android.widget.AbsListView.OnScrollListener;
-import android.widget.AdapterView;
-import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
 
 import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.stmt.Where;
-import com.zulip.android.util.MessageListener;
 import com.zulip.android.filters.NarrowFilter;
 import com.zulip.android.filters.NarrowFilterPM;
 import com.zulip.android.filters.NarrowFilterStream;
 import com.zulip.android.filters.NarrowListener;
-import com.zulip.android.R;
-import com.zulip.android.ZulipApp;
 import com.zulip.android.models.Message;
-import com.zulip.android.models.MessageType;
 import com.zulip.android.models.Stream;
 import com.zulip.android.networking.AsyncGetOldMessages;
-import com.zulip.android.networking.AsyncPointerUpdate;
 
 import java.util.List;
 
@@ -65,21 +44,15 @@ public class MessageListFragment extends Fragment implements MessageListener {
         void clearChatBox();
     }
 
-    private static final String TAG = "MessageListFragment";
     private static final String PARAM_FILTER = "filter";
     NarrowFilter filter;
 
     private Listener mListener;
-
-    private ListView listView;
-    private View loadIndicatorTop;
-    private View loadIndicatorBottom;
     private View bottom_list_spacer;
 
     public ZulipApp app;
 
     SparseArray<Message> messageIndex;
-    MessageAdapter adapter;
     boolean loadingMessages = true;
 
     // Whether we've loaded all available messages in that direction
@@ -116,7 +89,6 @@ public class MessageListFragment extends Fragment implements MessageListener {
         mutedMessages = new ArrayList<>();
         messageIndex = new SparseArray<Message>();
         messageList = new ArrayList<>();
-        adapter = new MessageAdapter(getActivity(), messageList);
     }
 
     public void onPause() {
@@ -133,7 +105,6 @@ public class MessageListFragment extends Fragment implements MessageListener {
     public void onActivityResume() {
         // Only when the activity resumes, not when the fragment is brought to
         // the top
-        showLoadIndicatorBottom(true);
         loadingMessages = true;
     }
 
@@ -143,104 +114,10 @@ public class MessageListFragment extends Fragment implements MessageListener {
         View view = inflater.inflate(R.layout.fragment_message_list, container,
                 false);
 
-        listView = (ListView) view.findViewById(R.id.listview);
         if (filter != null && ((AppCompatActivity) getActivity()).getSupportActionBar() != null)
             ((AppCompatActivity) getActivity()).getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_arrow_back_black_24dp);
         else
             ((AppCompatActivity) getActivity()).getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
-        // Load indicator
-        View loadTopParent = inflater.inflate(R.layout.list_loading, null);
-        View loadBottomParent = inflater.inflate(R.layout.list_loading, null);
-        loadIndicatorTop = ((LinearLayout) loadTopParent).getChildAt(0);
-        loadIndicatorBottom = ((LinearLayout) loadBottomParent).getChildAt(0);
-        listView.addHeaderView(loadTopParent, null, false);
-        listView.addFooterView(loadBottomParent, null, false);
-
-        // Spacer
-        bottom_list_spacer = new ImageView(getActivity());
-        size_bottom_spacer();
-        listView.addFooterView(this.bottom_list_spacer);
-
-        listView.setAdapter(adapter);
-
-        // We want blue highlights when you longpress
-        listView.setDrawSelectorOnTop(true);
-
-        registerForContextMenu(listView);
-
-        listView.setOnScrollListener(new OnScrollListener() {
-
-            @Override
-            public void onScroll(AbsListView view, int firstVisibleItem,
-                                 int visibleItemCount, int totalItemCount) {
-
-                final int near = 6;
-
-                if (!paused && !loadingMessages && firstMessageId > 0
-                        && lastMessageId > 0) {
-                    if (firstVisibleItem + visibleItemCount > totalItemCount
-                            - near && !loadedToBottom) {
-                        // At the bottom of the list
-                        Log.i("scroll", "Starting request below");
-                        loadMoreMessages(LoadPosition.BELOW);
-                    }
-                    if (firstVisibleItem < near && !loadedToTop) {
-                        // At the top of the list
-                        Log.i("scroll", "Starting request above");
-                        loadMoreMessages(LoadPosition.ABOVE);
-                    }
-                }
-
-            }
-
-            @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) {
-                try {
-                    // Scrolling messages isn't meaningful unless we have
-                    // messages to scroll.
-                    Message message = (Message) view.getItemAtPosition(view
-                            .getFirstVisiblePosition());
-                    int mID = message.getID();
-                    if (filter == null && app.getPointer() < mID) {
-                        Log.i("scrolling", "Now at " + mID);
-                        (new AsyncPointerUpdate(app)).execute(mID);
-                        app.setPointer(mID);
-                    }
-
-                    app.markMessageAsRead(message);
-
-                } catch (NullPointerException e) {
-                    Log.w("scrolling",
-                            "Could not find a location to scroll to!", e);
-                }
-            }
-        });
-
-        listView.setOnItemSelectedListener(new OnItemSelectedListener() {
-
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view,
-                                       int position, long id) {
-                try {
-                    int mID = (Integer) view.getTag(R.id.messageID);
-                    if (app.getPointer() < mID) {
-                        Log.i("keyboard", "Now at " + mID);
-                        (new AsyncPointerUpdate(app)).execute(mID);
-                        app.setPointer(mID);
-                    }
-                } catch (NullPointerException e) {
-                    Log.e("selected", "None, because we couldn't find the tag.", e);
-                }
-
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                // pass
-
-            }
-
-        });
 
         return view;
     }
@@ -251,7 +128,6 @@ public class MessageListFragment extends Fragment implements MessageListener {
         try {
             mListener = (Listener) activity;
         } catch (ClassCastException e) {
-            Log.e(TAG, e.getMessage(), e);
             throw new ClassCastException(activity.toString()
                     + " must implement Listener");
         }
@@ -262,41 +138,6 @@ public class MessageListFragment extends Fragment implements MessageListener {
         super.onDetach();
         mListener.clearChatBox();
         mListener = null;
-    }
-
-    void showLoadIndicatorBottom(boolean show) {
-        loadIndicatorBottom.setVisibility(show ? View.VISIBLE : View.GONE);
-    }
-
-    void showLoadIndicatorTop(boolean show) {
-        loadIndicatorTop.setVisibility(show ? View.VISIBLE : View.GONE);
-    }
-
-    private Message itemFromMenuInfo(ContextMenuInfo menuInfo) {
-        AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
-        // Subtract 1 because it counts the header
-        return adapter.getItem(info.position - 1);
-    }
-
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v,
-                                    ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-
-        Message msg = itemFromMenuInfo(menuInfo);
-        if (msg == null) {
-            return;
-        }
-        if (msg.getType().equals(MessageType.STREAM_MESSAGE)) {
-            MenuInflater inflater = getActivity().getMenuInflater();
-            inflater.inflate(R.menu.context_stream, menu);
-        } else if (msg.getPersonalReplyTo(app).length > 1) {
-            MenuInflater inflater = getActivity().getMenuInflater();
-            inflater.inflate(R.menu.context_private, menu);
-        } else {
-            MenuInflater inflater = getActivity().getMenuInflater();
-            inflater.inflate(R.menu.context_single_private, menu);
-        }
     }
 
     @Override
@@ -381,7 +222,6 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
                 closestQuery.orderBy(Message.TIMESTAMP_FIELD, false).setWhere(
                         filteredWhere);
-                listView.setSelection(adapter.getPosition(closestQuery
                         .queryForFirst()));
 
             } catch (SQLException e) {
@@ -391,18 +231,6 @@ public class MessageListFragment extends Fragment implements MessageListener {
             int anc = app.getPointer();
             selectMessage(getMessageById(anc));
         }
-    }
-
-    private void size_bottom_spacer() {
-        @SuppressWarnings("deprecation")
-        // needed for compat with API <13
-                int windowHeight = ((WindowManager) app
-                .getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay()
-                .getHeight();
-
-        AbsListView.LayoutParams params = new AbsListView.LayoutParams(0, 0);
-        params.height = windowHeight / 2;
-        this.bottom_list_spacer.setLayoutParams(params);
     }
 
     @SuppressWarnings("deprecation")
@@ -430,18 +258,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
         if (!initialized) {
             return;
         }
-
         Log.i("onMessages", "Adding " + messages.length + " messages at " + pos);
-
-        // Collect state used to maintain scroll position
-        int topPosBefore = listView.getFirstVisiblePosition();
-        View topView = listView.getChildAt(0);
-        int topOffsetBefore = (topView != null) ? topView.getTop() : 0;
-        if (topOffsetBefore >= 0 && !moreAbove && !noFurtherMessages) {
-            // If the loading indicator was visible, show a new message in the
-            // space it took up. If it was not visible, avoid jumping.
-            topOffsetBefore -= loadIndicatorTop.getHeight();
-        }
         int addedCount = 0;
 
         if (pos == LoadPosition.NEW && !loadedToBottom) {
