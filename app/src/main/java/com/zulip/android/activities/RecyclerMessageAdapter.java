@@ -10,6 +10,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.text.format.DateUtils;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -181,7 +182,21 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                     messageHolder.messageTile.setBackgroundColor(mDefaultPrivateMessageColor);
                 }
                 setUpGravatar(message, messageHolder);
+                setUpTime(message, messageHolder);
                 break;
+        }
+    }
+
+
+    private void setUpTime(Message message, MessageHolder messageHolder) {
+        if (DateUtils.isToday(message.getTimestamp().getTime())) {
+            messageHolder.timestamp.setText(DateUtils.formatDateTime(context, message
+                    .getTimestamp().getTime(), DateUtils.FORMAT_SHOW_TIME));
+        } else {
+            messageHolder.timestamp.setText(DateUtils.formatDateTime(context, message
+                    .getTimestamp().getTime(), DateUtils.FORMAT_SHOW_DATE
+                    | DateUtils.FORMAT_ABBREV_MONTH
+                    | DateUtils.FORMAT_SHOW_TIME));
         }
     }
 
