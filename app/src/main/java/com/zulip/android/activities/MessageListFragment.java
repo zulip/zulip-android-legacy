@@ -30,7 +30,6 @@ import com.zulip.android.models.Stream;
 import com.zulip.android.networking.AsyncGetOldMessages;
 import com.zulip.android.networking.ZulipAsyncPushTask;
 import com.zulip.android.util.MessageListener;
-import com.zulip.android.viewholders.HeaderSpaceItemDecoration;
 
 import org.json.JSONObject;
 
@@ -141,7 +140,24 @@ public class MessageListFragment extends Fragment implements MessageListener {
         adapter = new RecyclerMessageAdapter(messageList, getActivity(), (filter==null));
         recyclerView.setAdapter(adapter);
         registerForContextMenu(recyclerView);
-
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                final int near = 6;
+                if (!paused && !loadingMessages && firstMessageId > 0 && lastMessageId > 0) {
+                    int lastVisiblePosition = linearLayoutManager.findLastVisibleItemPosition();
+                    if (lastVisiblePosition > adapter.getItemCount(false) - near) { // At the bottom of the list
+                        Log.i("scroll", "Starting request below");
+                        loadMoreMessages(LoadPosition.BELOW);
+                    }
+                    if (linearLayoutManager.findFirstCompletelyVisibleItemPosition() < near && !loadedToTop) {
+                        // At the top of the list
+                        Log.i("scroll", "Starting request above");
+                        loadMoreMessages(LoadPosition.ABOVE);
+                    }
+                }
+            }
+        });
         return view;
     }
 
