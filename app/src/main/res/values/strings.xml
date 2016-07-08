@@ -12,7 +12,7 @@
     <string name="logout">Log out</string>
     <string name="compose_stream">Compose message to Stream</string>
     <string name="compose_pm">Compose private message</string>
-    <string name="huddle_text">You and %s</string>
+    <string name="huddle_text">You</string>
     <string name="send">Send</string>
     <string name="compose_hint">Compose your message here…</string>
     <string name="stream">Stream</string>

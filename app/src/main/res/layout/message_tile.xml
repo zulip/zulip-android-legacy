@@ -1,117 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/messageTile"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@android:color/background_light"
-    android:orientation="vertical"
-    >
+    android:layout_height="wrap_content"
+    android:background="@android:color/white"
+    android:paddingEnd="8dp"
+    android:paddingRight="8dp">
 
-    <LinearLayout
-        android:id="@+id/envelopeTile"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="8dp"
-        tools:background="@android:color/holo_purple"
-        >
-
-        <TextView
-            android:id="@+id/displayRecipient"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:text="@string/stream_txt"
-            android:textStyle="bold"
-            tools:text="Stream"
-            />
-
-        <TextView
-            android:id="@+id/sep"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:text="@string/arrow" />
-
-        <TextView
-            android:id="@+id/instance"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="@string/subject" />
-
-        <ImageView
-            android:id="@+id/muteMessageImage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_volume_off_black_18dp"
-            android:visibility="gone" />
-    </LinearLayout>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="8dp"
-        android:paddingStart="8dp"
-        android:paddingLeft="8dp"
-        android:paddingEnd="8dp"
-        android:paddingRight="8dp"
-        >
-        <ImageView
-            android:id="@+id/gravatar"
-            android:layout_width="45dp"
-            android:layout_height="37dp"
-            android:scaleType="centerInside"
-            android:src="@android:drawable/presence_online" />
-
+    <View
+        android:id="@+id/leftBar"
+        android:layout_width="8dp"
+        android:layout_height="match_parent"
+        android:layout_alignBottom="@+id/contentView"
+        android:layout_alignParentTop="true"
+        android:background="@android:color/holo_blue_dark" />
 
     <LinearLayout
         android:id="@+id/senderTile"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_toEndOf="@+id/gravatar"
+        android:layout_toRightOf="@+id/gravatar"
         android:gravity="center_vertical"
-        android:layout_toEndOf="@id/gravatar"
-        android:layout_toRightOf="@id/gravatar"
-        android:paddingStart="8dp"
+        android:orientation="horizontal"
         android:paddingLeft="8dp"
-        tools:background="#FFF"
-        >
+        android:paddingStart="8dp"
+        tools:background="#FFF">
 
         <TextView
+            android:paddingTop="10dp"
             android:id="@+id/senderName"
-            android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@android:color/black"
             android:textStyle="bold"
-            tools:text="Sender &lt;alice@example.com&gt;"
-            />
+            tools:text="Sender &lt;alice@example.com&gt;" />
 
         <TextView
             android:id="@+id/timestamp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@android:color/darker_gray"
-            tools:text="17:45"/>
+            tools:text="17:45" />
 
 
     </LinearLayout>
-        <TextView
-            android:id="@+id/contentView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/gravatar"
-            android:layout_toRightOf="@id/gravatar"
-            android:layout_below="@id/senderTile"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="8dp"
-            android:paddingStart="8dp"
-            android:paddingLeft="8dp"
-            android:paddingEnd="16dp"
-            android:paddingRight="16dp"
-            tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam mollis pretium purus, faucibus accumsan enim placerat non. " />
 
-    </RelativeLayout>
+    <TextView
+        android:id="@+id/contentView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/senderTile"
+        android:layout_marginTop="4dp"
+        android:layout_toEndOf="@+id/gravatar"
+        android:layout_toRightOf="@+id/gravatar"
+        android:paddingEnd="16dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="16dp"
+        android:paddingStart="8dp"
+        tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam mollis pretium purus, faucibus accumsan enim placerat non. " />
 
-</LinearLayout>
+    <ImageView
+        android:paddingTop="10dp"
+        android:id="@+id/gravatar"
+        android:layout_width="45dp"
+        android:layout_height="37dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="10dp"
+        android:scaleType="centerInside"
+        android:src="@android:drawable/presence_online" />
+
+</RelativeLayout>

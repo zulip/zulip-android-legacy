@@ -1,14 +1,20 @@
 package com.zulip.android.activities;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.support.annotation.ColorInt;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.zulip.android.R;
 import com.zulip.android.ZulipApp;
 import com.zulip.android.filters.NarrowListener;
 import com.zulip.android.models.Message;
@@ -129,6 +135,51 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 return messageHolder;
         }
         return null;
+    }
+
+    @Override
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        switch (getItemViewType(position)) {
+            case VIEWTYPE_MESSAGE_HEADER:
+                final MessageHeaderParent messageHeaderParent = (MessageHeaderParent) getItem(position);
+                final MessageHeaderParent.MessageHeaderHolder messageHeaderHolder = ((MessageHeaderParent.MessageHeaderHolder) holder);
+
+                if (messageHeaderParent.getMessageType() == MessageType.STREAM_MESSAGE) {
+                    messageHeaderHolder.streamTextView.setText(messageHeaderParent.getStream());
+                    messageHeaderHolder.topicTextView.setText(messageHeaderParent.getSubject());
+
+                    ViewCompat.setBackgroundTintList(messageHeaderHolder.arrowHead, ColorStateList.valueOf(messageHeaderParent.getColor()));
+                    messageHeaderHolder.streamTextView.setBackgroundColor(messageHeaderParent.getColor());
+
+                    if (messageHeaderParent.isMute()) {
+                        messageHeaderHolder.muteMessageImage.setVisibility(View.VISIBLE);
+                    }
+
+                } else { //PRIVATE MESSAGE
+                    messageHeaderHolder.streamTextView.setText(privateHuddleText);
+                    messageHeaderHolder.streamTextView.setTextColor(Color.WHITE);
+                    messageHeaderHolder.topicTextView.setText(messageHeaderParent.getDisplayRecipent());
+                    ViewCompat.setBackgroundTintList(messageHeaderHolder.arrowHead, ColorStateList.valueOf(mDefaultStreamHeaderColor));
+                    messageHeaderHolder.streamTextView.setBackgroundColor(mDefaultStreamHeaderColor);
+                }
+                break;
+            case VIEWTYPE_MESSAGE:
+
+                MessageHolder messageHolder = ((MessageHolder) holder);
+                final Message message = ((Message) items.get(position));
+                messageHolder.contentView.setText(message.getFormattedContent(zulipApp));
+
+                if (message.getType() == MessageType.STREAM_MESSAGE) {
+                    messageHolder.senderName.setText(message.getSender().getName());
+                    messageHolder.leftBar.setBackgroundColor(message.getStream().getColor());
+                    messageHolder.messageTile.setBackgroundColor(Color.WHITE);
+                } else {
+                    messageHolder.senderName.setText(message.getSender().getName());
+                    messageHolder.leftBar.setBackgroundColor(mDefaultPrivateMessageColor);
+                    messageHolder.messageTile.setBackgroundColor(mDefaultPrivateMessageColor);
+                }
+                break;
+        }
     }
 
     }
