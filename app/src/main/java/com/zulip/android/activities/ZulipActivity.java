@@ -203,12 +203,16 @@ public class ZulipActivity extends AppCompatActivity implements
     @Override
     public void muteTopic(Message message) {
         app.muteTopic(message);
-        for (int i = homeList.adapter.getCount() - 1; i >= 0; i--) {
-            if (homeList.adapter.getItem(i).getStream() != null
-                    && homeList.adapter.getItem(i).getStream().getId() == message.getStream().getId()
-                    && homeList.adapter.getItem(i).getSubject().equals(message.getSubject())) {
-                mutedTopics.add(homeList.adapter.getItem(i));
-                homeList.adapter.remove(homeList.adapter.getItem(i));
+        for (int i = homeList.adapter.getItemCount() - 1; i >= 0; i--) {
+            Object object = homeList.adapter.getItem(i);
+            if (object instanceof Message) {
+                Message msg = (Message) object;
+                if (msg.getStream() != null
+                        && msg.getStream().getId() == message.getStream().getId()
+                        && msg.getSubject().equals(message.getSubject())) {
+                    mutedTopics.add(msg);
+                    homeList.adapter.remove(msg);
+                }
             }
         }
         homeList.adapter.notifyDataSetChanged();
