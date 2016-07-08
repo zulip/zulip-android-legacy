@@ -30,6 +30,7 @@ import com.zulip.android.models.Stream;
 import com.zulip.android.networking.AsyncGetOldMessages;
 import com.zulip.android.networking.ZulipAsyncPushTask;
 import com.zulip.android.util.MessageListener;
+import com.zulip.android.viewholders.HeaderSpaceItemDecoration;
 
 import org.json.JSONObject;
 
@@ -138,6 +139,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
         linearLayoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(linearLayoutManager);
         adapter = new RecyclerMessageAdapter(messageList, getActivity(), (filter==null));
+        recyclerView.addItemDecoration(new HeaderSpaceItemDecoration(24));
         recyclerView.setAdapter(adapter);
         registerForContextMenu(recyclerView);
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
