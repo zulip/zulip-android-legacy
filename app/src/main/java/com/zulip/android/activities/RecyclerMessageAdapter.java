@@ -3,6 +3,7 @@ package com.zulip.android.activities;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.support.annotation.ColorInt;
 import android.support.v4.content.ContextCompat;
@@ -14,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.squareup.picasso.Picasso;
 import com.zulip.android.R;
 import com.zulip.android.ZulipApp;
 import com.zulip.android.filters.NarrowListener;
@@ -178,7 +180,28 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                     messageHolder.leftBar.setBackgroundColor(mDefaultPrivateMessageColor);
                     messageHolder.messageTile.setBackgroundColor(mDefaultPrivateMessageColor);
                 }
+                setUpGravatar(message, messageHolder);
                 break;
+        }
+    }
+
+    private void setUpGravatar(Message message, MessageHolder messageHolder) {
+        //Setup Gravatar
+        Bitmap gravatarImg = ((ZulipActivity) context).getGravatars().get(message.getSender().getEmail());
+        if (gravatarImg != null) {
+            // Gravatar already exists for this image, set the ImageView to it
+            messageHolder.gravatar.setImageBitmap(gravatarImg);
+        } else {
+            // From http://stackoverflow.com/questions/4605527/
+            Resources resources = context.getResources();
+            float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                    35, resources.getDisplayMetrics());
+            String url = message.getSender().getAvatarURL() + "&s=" + px;
+            Picasso.with(context)
+                    .load(url)
+                    .placeholder(android.R.drawable.stat_notify_error)
+                    .error(android.R.drawable.presence_online)
+                    .into(messageHolder.gravatar);
         }
     }
 
