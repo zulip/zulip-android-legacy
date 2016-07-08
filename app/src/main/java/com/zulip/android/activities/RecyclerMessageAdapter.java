@@ -220,5 +220,20 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         }
     }
 
+    @Override
+    public int getItemCount() {
+        return items.size();
+    }
+
+
+    public int getItemIndex(Message message) {
+        return items.indexOf(message);
+    }
+
+    public Object getItem(int position) {
+        return items.get(position);
+    }
+
+
     }
 }
