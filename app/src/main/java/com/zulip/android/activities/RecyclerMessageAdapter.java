@@ -12,9 +12,11 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.text.format.DateUtils;
 import android.util.TypedValue;
+import com.zulip.android.util.ZLog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import com.zulip.android.networking.AsyncPointerUpdate;
 
 import com.squareup.picasso.Picasso;
 import com.zulip.android.R;
@@ -35,7 +37,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     private static final int VIEWTYPE_MESSAGE = 2;
     private static final int VIEWTYPE_HEADER = 3; //At position 0
     private static final int VIEWTYPE_FOOTER = 4; //At end position
-
+    private boolean startedFromFilter;
     private static String privateHuddleText;
     private List<Object> items;
     private ZulipApp zulipApp;
@@ -53,6 +55,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         zulipApp = ZulipApp.get();
         this.context = context;
         narrowListener = (NarrowListener) context;
+        this.startedFromFilter = startedFromFilter;
         mDefaultStreamHeaderColor = ContextCompat.getColor(context, R.color.stream_header);
         mDefaultPrivateMessageColor = ContextCompat.getColor(context, R.color.huddle_body);
         privateHuddleText = context.getResources().getString(R.string.huddle_text);
@@ -187,6 +190,25 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         }
     }
 
+    @Override
+    public void onViewAttachedToWindow(RecyclerView.ViewHolder holder) {
+        super.onViewRecycled(holder);
+        if (holder.getItemViewType() == VIEWTYPE_MESSAGE)
+            markThisMessageAsRead((Message) getItem(holder.getAdapterPosition()));
+    }
+
+    private void markThisMessageAsRead(Message message) {
+        try {
+            int mID = message.getID();
+            if (!startedFromFilter && zulipApp.getPointer() < mID) {
+                (new AsyncPointerUpdate(zulipApp)).execute(mID);
+                zulipApp.setPointer(mID);
+            }
+            zulipApp.markMessageAsRead(message);
+        } catch (NullPointerException e) {
+            Log.w("scrolling", "Could not find a location to scroll to!");
+        }
+    }
 
     private void setUpTime(Message message, MessageHolder messageHolder) {
         if (DateUtils.isToday(message.getTimestamp().getTime())) {
@@ -233,7 +255,6 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     public Object getItem(int position) {
         return items.get(position);
     }
-
 
     }
 }

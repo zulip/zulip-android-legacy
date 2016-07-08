@@ -9,7 +9,6 @@ import android.widget.TextView;
 
 import com.zulip.android.models.MessageType;
 import com.zulip.android.models.Person;
-import com.zulip.android.util.OnItemClickListener;
 import com.zulip.android.R;
 import com.zulip.android.ZulipApp;
 import com.zulip.android.util.ZLog;
