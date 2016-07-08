@@ -1,5 +1,6 @@
 package com.zulip.android.models;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,10 +11,15 @@ import java.util.concurrent.Callable;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.ccil.cowan.tagsoup.HTMLSchema;
+import org.ccil.cowan.tagsoup.Parser;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.text.Html;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.util.Log;
@@ -23,7 +29,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.misc.TransactionManager;
 import com.j256.ormlite.stmt.DeleteBuilder;
 import com.j256.ormlite.table.DatabaseTable;
-import com.zulip.android.activities.MessageAdapter;
+import com.zulip.android.util.CustomHtmlToSpannedConverter;
 import com.zulip.android.util.ZLog;
 import com.zulip.android.ZulipApp;
 
@@ -124,7 +130,7 @@ public class Message {
         this.setFormattedContent(html);
 
         // Use HTML to create formatted Spanned, then strip formatting
-        Spanned formattedContent = MessageAdapter.formatContent(html, app);
+        Spanned formattedContent = formatContent(html, app);
         this.setContent(formattedContent.toString());
 
         if (this.getType() == MessageType.STREAM_MESSAGE) {
@@ -431,4 +437,82 @@ public class Message {
     public String concatStreamAndTopic() {
         return getStream().getId() + getSubject();
     }
+
+    public String getIdForHolder() {
+        if (this.getType() == MessageType.PRIVATE_MESSAGE) {
+            return getRawRecipients();
+        }
+        return getStream().getId() + getSubject();
+    }
+
+    private static final HTMLSchema schema = new HTMLSchema();
+
+
+    public Spanned getFormattedContent(ZulipApp app) {
+
+        Spanned formattedMessage = formatContent(getFormattedContent(),
+                app);
+        while (formattedMessage.length() != 0
+                && formattedMessage.charAt(formattedMessage.length() - 1) == '\n') {
+            formattedMessage = (Spanned) formattedMessage.subSequence(0,
+                    formattedMessage.length() - 2);
+        }
+        return formattedMessage;
+    }
+
+    /**
+     * Copied from Html.fromHtml
+     *
+     * @param source HTML to be formatted
+     * @param app
+     * @return Span
+     */
+    public static Spanned formatContent(String source, ZulipApp app) {
+        final Context context = app.getApplicationContext();
+        final float density = context.getResources().getDisplayMetrics().density;
+        Parser parser = new Parser();
+        try {
+            parser.setProperty(Parser.schemaProperty, schema);
+        } catch (org.xml.sax.SAXNotRecognizedException e) {
+            // Should not happen.
+            throw new RuntimeException(e);
+        } catch (org.xml.sax.SAXNotSupportedException e) {
+            // Should not happen.
+            throw new RuntimeException(e);
+        }
+
+        Html.ImageGetter emojiGetter = new Html.ImageGetter() {
+            @Override
+            public Drawable getDrawable(String source) {
+                int lastIndex = -1;
+                if (source != null) {
+                    lastIndex = source.lastIndexOf('/');
+                }
+                if (lastIndex != -1) {
+                    String filename = source.substring(lastIndex + 1);
+                    try {
+                        Drawable drawable = Drawable.createFromStream(context
+                                        .getAssets().open("emoji/" + filename),
+                                "emoji/" + filename);
+                        // scaling down by half to fit well in message
+                        double scaleFactor = 0.5;
+                        drawable.setBounds(0, 0,
+                                (int) (drawable.getIntrinsicWidth()
+                                        * scaleFactor * density),
+                                (int) (drawable.getIntrinsicHeight()
+                                        * scaleFactor * density));
+                        return drawable;
+                    } catch (IOException e) {
+                        Log.e("RecyclerMessageAdapter", e.getMessage());
+                    }
+                }
+                return null;
+            }
+        };
+
+        CustomHtmlToSpannedConverter converter = new CustomHtmlToSpannedConverter(
+                source, null, null, parser, emojiGetter, app.getServerURI());
+        return converter.convert();
+    }
+
 }
