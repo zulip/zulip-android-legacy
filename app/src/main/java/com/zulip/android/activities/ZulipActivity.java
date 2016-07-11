@@ -12,6 +12,7 @@ import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -22,6 +23,7 @@ import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.database.MergeCursor;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.PorterDuff.Mode;
 import android.os.Build;
 import android.os.Bundle;
@@ -39,7 +41,6 @@ import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -860,26 +861,28 @@ public class ZulipActivity extends AppCompatActivity implements
         Log.d("ASD", "onCreateOptionsMenu: ");
         if (this.logged_in) {
             getMenuInflater().inflate(R.menu.options, menu);
+            prepareSearchView(menu);
             return true;
         }
 
         return false;
     }
+    private boolean prepareSearchView(Menu menu) {
         if (this.logged_in && Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             // Get the SearchView and set the searchable configuration
-            SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-            final MenuItem searchMenuItem = menu.findItem(R.id.search);
-            SearchView searchView = (SearchView) searchMenuItem.getActionView();
+            final SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
             // Assumes current activity is the searchable activity
-            searchView.setSearchableInfo(searchManager
-                    .getSearchableInfo(getComponentName()));
-
-            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            final MenuItem mSearchMenuItem = menu.findItem(R.id.search);
+            final android.support.v7.widget.SearchView searchView = (android.support.v7.widget.SearchView) MenuItemCompat.getActionView(mSearchMenuItem);
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(getApplicationContext(), ZulipActivity.class)));
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+            ((EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text)).setHintTextColor(Color.BLACK);
+            searchView.setOnQueryTextListener(new android.support.v7.widget.SearchView.OnQueryTextListener() {
                 @Override
                 public boolean onQueryTextSubmit(String s) {
                     doNarrow(new NarrowFilterSearch(s));
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-                                searchMenuItem.collapseActionView();
+                        mSearchMenuItem.collapseActionView();
                     }
                     return true;
                 }
