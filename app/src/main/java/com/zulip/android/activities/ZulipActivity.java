@@ -27,13 +27,15 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -49,7 +51,6 @@ import android.widget.FilterQueryProvider;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -79,7 +80,7 @@ import com.zulip.android.networking.ZulipAsyncPushTask;
 
 import org.json.JSONObject;
 
-public class ZulipActivity extends FragmentActivity implements
+public class ZulipActivity extends AppCompatActivity implements
         MessageListFragment.Listener, NarrowListener {
 
     public static final String NARROW = "narrow";
@@ -97,13 +98,13 @@ public class ZulipActivity extends FragmentActivity implements
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
 
-    private Menu menu;
-
     private HashMap<String, Bitmap> gravatars = new HashMap<>();
 
     private AsyncGetEvents event_poll;
 
     private Handler statusUpdateHandler;
+
+    private Toolbar toolbar;
 
     MessageListFragment currentList;
     MessageListFragment narrowedList;
@@ -255,15 +256,16 @@ public class ZulipActivity extends FragmentActivity implements
             openLogin();
             return;
         }
-
+        this.logged_in = true;
         notifications = new Notifications(this);
         notifications.register();
-
-        this.onPrepareOptionsMenu(menu);
-
-        this.logged_in = true;
-
         setContentView(R.layout.main);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setTitle(R.string.app_name);
+        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
         streamActv = (AutoCompleteTextView) findViewById(R.id.stream_actv);
         topicActv = (AutoCompleteTextView) findViewById(R.id.topic_actv);
         messageEt = (EditText) findViewById(R.id.message_et);
@@ -415,13 +417,6 @@ public class ZulipActivity extends FragmentActivity implements
             }
         };
         statusUpdateHandler.post(statusUpdateRunnable);
-
-        if (android.os.Build.VERSION.SDK_INT >= 11 && getActionBar() != null) {
-            // the AB is unavailable when invoked from JUnit
-            getActionBar().setDisplayHomeAsUpEnabled(true);
-            getActionBar().setHomeButtonEnabled(true);
-        }
-
         homeList = MessageListFragment.newInstance(null);
         pushListFragment(homeList, null);
         streamActv = (AutoCompleteTextView) findViewById(R.id.stream_actv);
@@ -506,6 +501,7 @@ public class ZulipActivity extends FragmentActivity implements
                 messageEt.setText("");
                 sendingMessage(false);
             }
+
             public void onTaskFailure(String result) {
                 Log.d("onTaskFailure", "Result: " + result);
                 Toast.makeText(ZulipActivity.this, R.string.message_error, Toast.LENGTH_SHORT).show();
@@ -725,6 +721,7 @@ public class ZulipActivity extends FragmentActivity implements
             topicActv.setAdapter(subjectActvAdapter);
         }
     }
+
     String tempStreamSave = null;
 
     @Override
@@ -736,6 +733,7 @@ public class ZulipActivity extends FragmentActivity implements
             }
         }
     }
+
     public void onBackPressed() {
         if (narrowedList != null) {
             narrowedList = null;
@@ -814,11 +812,9 @@ public class ZulipActivity extends FragmentActivity implements
     }
 
     private void setupTitleBar(String title, String subtitle) {
-        if (android.os.Build.VERSION.SDK_INT >= 11 && getActionBar() != null) {
-            if (title != null) {
-                getActionBar().setTitle(title);
-            }
-            getActionBar().setSubtitle(subtitle);
+        if (android.os.Build.VERSION.SDK_INT >= 11 && getSupportActionBar() != null) {
+            if (title != null) getSupportActionBar().setTitle(title);
+            getSupportActionBar().setSubtitle(subtitle);
         }
     }
 
@@ -831,7 +827,7 @@ public class ZulipActivity extends FragmentActivity implements
 
     @Override
     public void onNarrowFillSendBox(Message message) {
-        if(message.getType() == MessageType.PRIVATE_MESSAGE){
+        if (message.getType() == MessageType.PRIVATE_MESSAGE) {
             switchToPrivate();
             topicActv.setText(message.getReplyTo(app));
             messageEt.requestFocus();
@@ -858,25 +854,17 @@ public class ZulipActivity extends FragmentActivity implements
         drawerToggle.syncState();
     }
 
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        /*
-         * We want to show a menu only when we're logged in, so this function is
-         * called by both Android and our own app when we encounter state
-         * changes where we might want to update the menu.
-         */
-        if (menu == null) {
-            // We were called by a function before the menu had been
-            // initialised, so we should bail.
-            return false;
-        }
-        this.menu = menu;
-
-        menu.clear();
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        Log.d("ASD", "onCreateOptionsMenu: ");
         if (this.logged_in) {
-            MenuInflater inflater = getMenuInflater();
-            inflater.inflate(R.menu.options, menu);
+            getMenuInflater().inflate(R.menu.options, menu);
+            return true;
         }
 
+        return false;
+    }
         if (this.logged_in && Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             // Get the SearchView and set the searchable configuration
             SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
@@ -887,20 +875,20 @@ public class ZulipActivity extends FragmentActivity implements
                     .getSearchableInfo(getComponentName()));
 
             searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                        @Override
-                        public boolean onQueryTextSubmit(String s) {
-                            doNarrow(new NarrowFilterSearch(s));
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+                @Override
+                public boolean onQueryTextSubmit(String s) {
+                    doNarrow(new NarrowFilterSearch(s));
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
                                 searchMenuItem.collapseActionView();
-                            }
-                            return true;
-                        }
+                    }
+                    return true;
+                }
 
-                        @Override
-                        public boolean onQueryTextChange(String s) {
-                            return false;
-                        }
-                    });
+                @Override
+                public boolean onQueryTextChange(String s) {
+                    return false;
+                }
+            });
         }
         return true;
     }
