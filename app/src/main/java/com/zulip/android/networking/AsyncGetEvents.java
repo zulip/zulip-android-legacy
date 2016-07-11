@@ -105,8 +105,7 @@ public class AsyncGetEvents extends Thread {
                         register();
                     }
                     request.setProperty("queue_id", app.getEventQueueId());
-                    request.setProperty("last_event_id",
-                            "" + app.getLastEventId());
+                    request.setProperty("last_event_id", "" + app.getLastEventId());
                     if (!registeredOrGotEventsThisRun) {
                         request.setProperty("dont_block", "true");
                     }
@@ -116,38 +115,40 @@ public class AsyncGetEvents extends Thread {
                     String json = httpResponse.body().string();
                     if (!httpResponse.isSuccessful()) {
                         String msg = httpResponse.message();
-                        if (msg.contains("Bad event queue id")
-                                || msg.contains("too old")) {
+                        if (httpResponse.code() == 400 && (msg.contains("Bad event queue id")
+                                || msg.contains("too old"))) {
                             // Queue dead. Register again.
                             Log.w(ASYNC_GET_EVENTS, "Queue dead");
                             app.setEventQueueId(null);
+                            Log.i("WRONG", "run: " + json);
+                            continue;
                         }
                         Log.i("WRONG", "run: " + json);
-                        continue;
+                        backoff(null);
                     } else {
                         Log.i("OkHttp200GE", json);
-                    }
-                    JSONObject response = new JSONObject(json);
+                        JSONObject response = new JSONObject(json);
 
-                    JSONArray events = response.getJSONArray("events");
-                    if (events.length() > 0) {
-                        this.processEvents(events);
+                        JSONArray events = response.getJSONArray("events");
+                        if (events.length() > 0) {
+                            this.processEvents(events);
 
-                        JSONObject lastEvent = events.getJSONObject(events
-                                .length() - 1);
-                        app.setLastEventId(lastEvent.getInt("id"));
+                            JSONObject lastEvent = events.getJSONObject(events
+                                    .length() - 1);
+                            app.setLastEventId(lastEvent.getInt("id"));
 
-                        failures = 0;
-                    }
+                            failures = 0;
+                        }
 
-                    if (!registeredOrGotEventsThisRun) {
-                        registeredOrGotEventsThisRun = true;
-                        activity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                activity.onReadyToDisplay(false);
-                            }
-                        });
+                        if (!registeredOrGotEventsThisRun) {
+                            registeredOrGotEventsThisRun = true;
+                            activity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    activity.onReadyToDisplay(false);
+                                }
+                            });
+                        }
                     }
                 } catch (SocketTimeoutException e) {
                     Log.e(TAG, e.getMessage(), e);
