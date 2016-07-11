@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="colorPrimary">#efefef</color>
+    <color name="colorAccent">#899ab4</color>
+    <color name="colorPrimaryDark">#747474</color>
     <color name="dev_auth_admin">#ff4136</color>
     <color name="dev_auth_user">#428bca</color>
 </resources>
