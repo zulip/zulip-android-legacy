@@ -11,6 +11,7 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.ContextMenu;
@@ -143,7 +144,10 @@ public class MessageListFragment extends Fragment implements MessageListener {
                 false);
 
         listView = (ListView) view.findViewById(R.id.listview);
-
+        if (filter != null && ((AppCompatActivity) getActivity()).getSupportActionBar() != null)
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_arrow_back_black_24dp);
+        else
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
         // Load indicator
         View loadTopParent = inflater.inflate(R.layout.list_loading, null);
         View loadBottomParent = inflater.inflate(R.layout.list_loading, null);
