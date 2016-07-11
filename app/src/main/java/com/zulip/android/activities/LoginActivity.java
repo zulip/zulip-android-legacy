@@ -6,6 +6,7 @@ import android.content.IntentSender.SendIntentException;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
@@ -33,7 +34,7 @@ import org.json.JSONObject;
 
 import java.util.List;
 
-public class LoginActivity extends FragmentActivity implements View.OnClickListener,
+public class LoginActivity extends AppCompatActivity implements View.OnClickListener,
         GoogleApiClient.OnConnectionFailedListener, CompoundButton.OnCheckedChangeListener {
     private static final String TAG = "LoginActivity";
     private static final int REQUEST_CODE_RESOLVE_ERR = 9000;
@@ -52,6 +53,7 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.login);
+
 
         // Progress bar to be displayed if the connection failure is not resolved.
         connectionProgressDialog = new ProgressDialog(this);
