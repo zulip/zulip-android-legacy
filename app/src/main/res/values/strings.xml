@@ -68,4 +68,5 @@
     <string name="method_null">Method should not be null</string>
     <string name="method_error">Method not supported</string>
     <string name="tap_message">Tap on a message to compose reply</string>
+    <string name="title_login">Login</string>
 </resources>
