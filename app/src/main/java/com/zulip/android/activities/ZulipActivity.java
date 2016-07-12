@@ -137,32 +137,6 @@ public class ZulipActivity extends AppCompatActivity implements
         RESET_DATABASE,
     }
 
-    private SimpleCursorAdapter.ViewBinder streamBinder = new SimpleCursorAdapter.ViewBinder() {
-
-        @Override
-        public boolean setViewValue(View arg0, Cursor arg1, int arg2) {
-            switch (arg0.getId()) {
-                case R.id.name:
-                    TextView name = (TextView) arg0;
-                    name.setText(arg1.getString(arg2));
-                    //Change color in the drawer if this stream is inHomeView only.
-                    if (!Stream.getByName(app, arg1.getString(arg2)).getInHomeView())
-                        name.setTextColor(ContextCompat.getColor(ZulipActivity.this, android.R.color.tertiary_text_light));
-                    else name.setTextColor(ContextCompat.getColor(ZulipActivity.this, android.R.color.primary_text_light));
-                    return true;
-                case R.id.stream_dot:
-                    // Set the color of the (currently white) dot
-                    arg0.setVisibility(View.VISIBLE);
-                    arg0.getBackground().setColorFilter(arg1.getInt(arg2),
-                            Mode.MULTIPLY);
-                    return true;
-                default:
-                    break;
-            }
-            return false;
-        }
-
-    };
 
     public HashMap<String, Bitmap> getGravatars() {
         return gravatars;
@@ -209,7 +183,6 @@ public class ZulipActivity extends AppCompatActivity implements
         }
     };
 
-    protected RefreshableCursorAdapter streamsAdapter;
     protected RefreshableCursorAdapter peopleAdapter;
 
     @Override
@@ -233,10 +206,6 @@ public class ZulipActivity extends AppCompatActivity implements
 
     public RefreshableCursorAdapter getPeopleAdapter() {
         return peopleAdapter;
-    }
-
-    public RefreshableCursorAdapter getStreamsAdapter() {
-        return streamsAdapter;
     }
 
     /**
@@ -293,19 +262,7 @@ public class ZulipActivity extends AppCompatActivity implements
         // Set the drawer toggle as the DrawerListener
         drawerLayout.setDrawerListener(drawerToggle);
 
-        ListView streamsDrawer = (ListView) findViewById(R.id.streams_drawer);
         ListView peopleDrawer = (ListView) findViewById(R.id.people_drawer);
-
-        Callable<Cursor> streamsGenerator = new Callable<Cursor>() {
-            @Override
-            public Cursor call() throws Exception {
-                return ((AndroidDatabaseResults) app.getDao(Stream.class)
-                        .queryBuilder().selectRaw("rowid _id", "*")
-                        .orderByRaw(Stream.NAME_FIELD + " COLLATE NOCASE")
-                        .where().eq(Stream.SUBSCRIBED_FIELD, true).queryRaw()
-                        .closeableIterator().getRawResults()).getRawCursor();
-            }
-        };
 
         // row number which is used to differentiate the 'All private messages'
         // row from the people
@@ -347,14 +304,6 @@ public class ZulipActivity extends AppCompatActivity implements
 
         };
         try {
-            this.streamsAdapter = new RefreshableCursorAdapter(
-                    this.getApplicationContext(), R.layout.stream_tile,
-                    streamsGenerator.call(), streamsGenerator, new String[]{
-                    Stream.NAME_FIELD, Stream.COLOR_FIELD}, new int[]{
-                    R.id.name, R.id.stream_dot}, 0);
-            streamsAdapter.setViewBinder(streamBinder);
-            streamsDrawer.setAdapter(streamsAdapter);
-
             this.peopleAdapter = new RefreshableCursorAdapter(
                     this.getApplicationContext(), R.layout.stream_tile,
                     peopleGenerator.call(), peopleGenerator, new String[]{
@@ -368,20 +317,6 @@ public class ZulipActivity extends AppCompatActivity implements
         } catch (Exception e) {
             ZLog.logException(e);
         }
-
-        streamsDrawer.setOnItemClickListener(new OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view,
-                                    int position, long id) {
-                // TODO: is there a way to get the Stream from the adapter
-                // without re-querying it?
-                Stream stream = Stream.getById(app, (int) id);
-                narrow(stream);
-                streamActv.setText(stream.getName());
-                topicActv.setText("");
-            }
-        });
 
         peopleDrawer.setOnItemClickListener(new OnItemClickListener() {
             @Override
@@ -935,8 +870,6 @@ public class ZulipActivity extends AppCompatActivity implements
             case R.id.refresh:
                 Log.w("menu", "Refreshed manually by user. We shouldn't need this.");
                 onRefresh();
-                ((RefreshableCursorAdapter) ((ListView) findViewById(R.id.streams_drawer))
-                        .getAdapter()).refresh();
                 break;
             case R.id.logout:
                 logout();
