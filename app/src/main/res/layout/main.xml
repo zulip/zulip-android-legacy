@@ -129,7 +129,7 @@
         </LinearLayout>
     </android.support.design.widget.CoordinatorLayout>
 
-    <ListView
+    <ExpandableListView
         android:id="@+id/streams_drawer"
         android:layout_width="320dp"
         android:layout_height="match_parent"
