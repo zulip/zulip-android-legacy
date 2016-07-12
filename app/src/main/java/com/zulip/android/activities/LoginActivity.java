@@ -270,7 +270,19 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
             case R.id.local_server_button:
                 if (!isInputValidForDevAuth()) return;
                 saveServerURL();
+                connectionProgressDialog.show();
                 AsyncDevGetEmails asyncDevGetEmails = new AsyncDevGetEmails(LoginActivity.this);
+                asyncDevGetEmails.setCallback(new AsyncTaskCompleteListener() {
+                    @Override
+                    public void onTaskComplete(String result, JSONObject jsonObject) {
+                        connectionProgressDialog.dismiss();
+                    }
+
+                    @Override
+                    public void onTaskFailure(String result) {
+                        connectionProgressDialog.dismiss();
+                    }
+                });
                 asyncDevGetEmails.execute();
             default:
                 break;
