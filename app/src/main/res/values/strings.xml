@@ -56,7 +56,7 @@
     <string name="message_sent">Message Sent!</string>
     <string name="message_error">Error sending Message</string>
     <string name="stream_error">No Stream specified.</string>
-    <string name="stream_not_exists">Stream Does not Exists.</string>
+    <string name="stream_not_exists">Stream does not exist.</string>
     <string name="subject_error">No Subject specified.</string>
     <string name="person_error">No Person specified.</string>
     <string name="no_message_error">No Message Written.</string>
