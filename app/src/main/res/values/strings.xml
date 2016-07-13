@@ -36,7 +36,7 @@
     <string name="copy_message">Copy message</string>
     <string name="stream_txt">Stream</string>
     <string name="arrow">❯</string>
-    <string name="subject">Subject</string>
+    <string name="subject">Topic</string>
     <string name="timestamp">timestamp</string>
     <string name="reply_to_sender">Reply to sender</string>
     <string name="google_app_login_failed">Google Apps login failed for unknown reasons, please contact your distributor.</string>
@@ -51,13 +51,13 @@
     <string name="server_domain_required">Server domain required</string>
     <string name="invalid_domain">Invalid domain</string>
     <string name="hint_person">Person</string>
-    <string name="hint_subject">Subject</string>
+    <string name="hint_subject">Topic</string>
     <string name="hint_stream">Stream</string>
     <string name="message_sent">Message sent!</string>
     <string name="message_error">Error sending message</string>
     <string name="stream_error">Please specify stream.</string>
     <string name="stream_not_exists">Stream does not exist.</string>
-    <string name="subject_error">Please specify subject.</string>
+    <string name="subject_error">Please specify topic.</string>
     <string name="person_error">Please specify recipient.</string>
     <string name="no_message_error">No message written.</string>
     <string name="local_server">Dev backend testing server</string>
