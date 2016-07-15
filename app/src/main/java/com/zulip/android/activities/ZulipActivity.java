@@ -61,7 +61,11 @@ import android.widget.Toast;
 import com.j256.ormlite.android.AndroidDatabaseResults;
 import com.zulip.android.BuildConfig;
 import com.zulip.android.database.DatabaseHelper;
+<<<<<<< 570cc3a5e10b8fa1d614fb8f139261a05897c3a7
 import com.zulip.android.models.Emoji;
+=======
+import com.zulip.android.filters.NarrowFilterToday;
+>>>>>>> Filter by today's messages
 import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageType;
 import com.zulip.android.filters.NarrowFilter;
@@ -1094,6 +1098,9 @@ public class ZulipActivity extends AppCompatActivity implements
             case R.id.refresh:
                 Log.w("menu", "Refreshed manually by user. We shouldn't need this.");
                 onRefresh();
+                break;
+            case R.id.today:
+                doNarrow(new NarrowFilterToday());
                 break;
             case R.id.logout:
                 logout();

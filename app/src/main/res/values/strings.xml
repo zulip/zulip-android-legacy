@@ -72,5 +72,7 @@
     <string name="enter_server">Please enter your server URL</string>
     <string name="auth_login">Your server allows these Authentication Options:</string>
     <string name="another_server">Another server</string>
-    <string name="no_message">No Messages to receive.</string>
+    <string name="no_message">No messages to receive.</string>
+    <string name="menu_filter">Filter</string>
+    <string name="menu_today">Today</string>
 </resources>
