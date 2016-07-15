@@ -115,7 +115,7 @@ public class AsyncGetEvents extends Thread {
                     String json = httpResponse.body().string();
                     if (!httpResponse.isSuccessful()) {
                         String msg = httpResponse.message();
-                        if (httpResponse.code() == 400 && (msg.contains("Bad event queue id")
+                        if (httpResponse.code() == 400 && (json.contains("Bad event queue id")
                                 || msg.contains("too old"))) {
                             // Queue dead. Register again.
                             Log.w(ASYNC_GET_EVENTS, "Queue dead");
