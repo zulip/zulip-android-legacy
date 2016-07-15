@@ -13,8 +13,9 @@ import com.zulip.android.R;
 import com.zulip.android.ZulipApp;
 import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageType;
+import com.zulip.android.util.OnItemClickListener;
 
-public class MessageHolder extends RecyclerView.ViewHolder implements View.OnCreateContextMenuListener {
+public class MessageHolder extends RecyclerView.ViewHolder implements View.OnClickListener,View.OnCreateContextMenuListener {
 
     public ImageView gravatar;
     public TextView senderName;
@@ -22,6 +23,7 @@ public class MessageHolder extends RecyclerView.ViewHolder implements View.OnCre
     public TextView contentView;
     public View leftBar;
     public RelativeLayout messageTile;
+    private OnItemClickListener onItemClickListener;
 
     public MessageHolder(final View itemView) {
         super(itemView);
@@ -53,5 +55,14 @@ public class MessageHolder extends RecyclerView.ViewHolder implements View.OnCre
             MenuInflater inflater = ((Activity) v.getContext()).getMenuInflater();
             inflater.inflate(R.menu.context_single_private, menu);
         }
+    }
+
+    @Override
+    public void onClick(View view) {
+        onItemClickListener.onItemClick(view.getId(), getAdapterPosition());
+    }
+
+    public void setItemClickListener(OnItemClickListener itemClickListener) {
+        this.onItemClickListener = itemClickListener;
     }
 }

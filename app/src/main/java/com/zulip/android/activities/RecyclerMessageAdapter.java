@@ -18,8 +18,11 @@ import android.view.ViewGroup;
 import com.zulip.android.networking.AsyncPointerUpdate;
 
 import com.squareup.picasso.Picasso;
+import com.zulip.android.util.OnItemClickListener;
 import com.zulip.android.R;
 import com.zulip.android.ZulipApp;
+import com.zulip.android.filters.NarrowFilterPM;
+import com.zulip.android.filters.NarrowFilterStream;
 import com.zulip.android.filters.NarrowListener;
 import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageType;
@@ -42,6 +45,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     private List<Object> items;
     private ZulipApp zulipApp;
     private Context context;
+    private NarrowListener narrowListener;
     private static final float HEIGHT_IN_DP = 48;
     private
     @ColorInt
@@ -49,9 +53,14 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
     @ColorInt
     private int mDefaultPrivateMessageColor;
+    private OnItemClickListener onItemClickListener;
+    private int contextMenuItemSelectedPosition;
     private View footerView;
     private View headerView;
 
+    int getContextMenuItemSelectedPosition() {
+        return contextMenuItemSelectedPosition;
+    }
 
     RecyclerMessageAdapter(List<Message> messageList, final Context context, boolean startedFromFilter) {
         super();
@@ -64,6 +73,62 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         mDefaultPrivateMessageColor = ContextCompat.getColor(context, R.color.huddle_body);
         privateHuddleText = context.getResources().getString(R.string.huddle_text);
         setupHeaderAndFooterViews();
+        onItemClickListener = new OnItemClickListener() {
+            @Override
+            public void onItemClick(int viewId, int position) {
+                switch (viewId) {
+                    case R.id.displayRecipient: //StreamTV
+                        MessageHeaderParent messageHeaderParent = (MessageHeaderParent) getItem(position);
+                        if (messageHeaderParent.getMessageType() == MessageType.PRIVATE_MESSAGE) {
+                            narrowListener.onNarrow(new NarrowFilterPM(
+                                    Arrays.asList(messageHeaderParent.getRecipients((ZulipApp.get())))));
+                        } else {
+
+                            narrowListener.onNarrow(new NarrowFilterStream(Stream.getByName(zulipApp, messageHeaderParent.getStream()), ""));
+                            narrowListener.onNarrowFillSendBoxStream(messageHeaderParent.getStream(), "");
+                        }
+                        break;
+
+                    case R.id.instance: //Topic
+                        MessageHeaderParent messageParent = (MessageHeaderParent) getItem(position);
+                        narrowListener.onNarrow(new NarrowFilterStream(Stream.getByName(zulipApp, messageParent.getStream()), messageParent.getSubject()));
+                        narrowListener.onNarrowFillSendBoxStream(messageParent.getStream(), "");
+                        break;
+                    case R.id.contentView: //Main message
+                        Message message = (Message) getItem(position);
+                        narrowListener.onNarrowFillSendBox(message);
+                        break;
+
+                    case R.id.messageTile:
+                        Message msg = (Message) getItem(position);
+                        try {
+                            int mID = msg.getID();
+                            if (zulipApp.getPointer() < mID) {
+                                (new AsyncPointerUpdate(zulipApp)).execute(mID);
+                                zulipApp.setPointer(mID);
+                            }
+                        } catch (NullPointerException e) {
+                            ZLog.logException(e);
+                        }
+                        break;
+                    default:
+                        Log.e("onItemClick", "Click listener not setup for: " + context.getResources().getResourceName(viewId) + " at position - " + position);
+                }
+            }
+
+            @Override
+            public Message getMessageAtPosition(int position) {
+                if (getItem(position) instanceof Message) {
+                    return (Message) getItem(position);
+                }
+                return null;
+            }
+
+            @Override
+            public void setContextItemSelectedPosition(int adapterPosition) {
+                contextMenuItemSelectedPosition = adapterPosition;
+            }
+        };
         setupLists(messageList);
     }
 
@@ -152,10 +217,12 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 MessageHeaderParent.MessageHeaderHolder holder = new MessageHeaderParent.MessageHeaderHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.message_header, parent, false));
                 holder.streamTextView.setText(privateHuddleText);
                 holder.streamTextView.setTextColor(Color.WHITE);
+                holder.setOnItemClickListener(onItemClickListener);
                 return holder;
             case VIEWTYPE_MESSAGE:
                 View messageView = LayoutInflater.from(parent.getContext()).inflate(R.layout.message_tile, parent, false);
                 MessageHolder messageHolder = new MessageHolder(messageView);
+                messageHolder.setItemClickListener(onItemClickListener);
                 return messageHolder;
             case VIEWTYPE_FOOTER:
                 footerView = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_loading, parent, false);
@@ -210,6 +277,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                     messageHolder.leftBar.setBackgroundColor(mDefaultPrivateMessageColor);
                     messageHolder.messageTile.setBackgroundColor(mDefaultPrivateMessageColor);
                 }
+
                 setUpGravatar(message, messageHolder);
                 setUpTime(message, messageHolder);
                 break;
@@ -247,6 +315,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                     | DateUtils.FORMAT_SHOW_TIME));
         }
     }
+
 
     private void setUpGravatar(Message message, MessageHolder messageHolder) {
         //Setup Gravatar

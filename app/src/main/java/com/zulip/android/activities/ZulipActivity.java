@@ -987,7 +987,6 @@ public class ZulipActivity extends AppCompatActivity implements
         ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE)).toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
     }
 
-    @Override
     public void onNarrowFillSendBoxStream(String stream, String subject) {
         switchToStream();
         streamActv.setText(stream);
@@ -998,6 +997,7 @@ public class ZulipActivity extends AppCompatActivity implements
 
         ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE)).toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
     }
+
     public void onNarrow(NarrowFilter narrowFilter) {
         // TODO: check if already narrowed to this particular stream/subject
         doNarrow(narrowFilter);

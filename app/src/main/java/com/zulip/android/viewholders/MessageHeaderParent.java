@@ -11,6 +11,7 @@ import com.zulip.android.models.MessageType;
 import com.zulip.android.models.Person;
 import com.zulip.android.R;
 import com.zulip.android.ZulipApp;
+import com.zulip.android.util.OnItemClickListener;
 import com.zulip.android.util.ZLog;
 
 public class MessageHeaderParent {
@@ -93,12 +94,12 @@ public class MessageHeaderParent {
         }
         return recipientsCache;
     }
-
-    public static class MessageHeaderHolder extends RecyclerView.ViewHolder {
+    public static class MessageHeaderHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public TextView streamTextView;
         public TextView topicTextView;
         public ImageView muteMessageImage;
         public TextView arrowHead;
+        private OnItemClickListener onItemClickListener;
 
         public MessageHeaderHolder(View itemView) {
             super(itemView);
@@ -106,6 +107,18 @@ public class MessageHeaderParent {
             topicTextView = (TextView) itemView.findViewById(R.id.instance);
             arrowHead = (TextView) itemView.findViewById(R.id.sep);
             muteMessageImage = (ImageView) itemView.findViewById(R.id.muteMessageImage);
+            streamTextView.setOnClickListener(this);
+            topicTextView.setOnClickListener(this);
+        }
+
+
+        public void setOnItemClickListener(OnItemClickListener contentHolder) {
+            this.onItemClickListener = contentHolder;
+        }
+
+        @Override
+        public void onClick(View v) {
+            onItemClickListener.onItemClick(v.getId(), getAdapterPosition());
         }
     }
 }
