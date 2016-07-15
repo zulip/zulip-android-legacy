@@ -12,7 +12,6 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.text.format.DateUtils;
 import android.util.TypedValue;
-import com.zulip.android.util.ZLog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +23,7 @@ import com.zulip.android.ZulipApp;
 import com.zulip.android.filters.NarrowListener;
 import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageType;
+import com.zulip.android.viewholders.LoadingHolder;
 import com.zulip.android.viewholders.MessageHeaderParent;
 import com.zulip.android.viewholders.MessageHolder;
 
@@ -42,12 +42,16 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     private List<Object> items;
     private ZulipApp zulipApp;
     private Context context;
+    private static final float HEIGHT_IN_DP = 48;
     private
     @ColorInt
     int mDefaultStreamHeaderColor;
 
     @ColorInt
     private int mDefaultPrivateMessageColor;
+    private View footerView;
+    private View headerView;
+
 
     RecyclerMessageAdapter(List<Message> messageList, final Context context, boolean startedFromFilter) {
         super();
@@ -59,8 +63,18 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         mDefaultStreamHeaderColor = ContextCompat.getColor(context, R.color.stream_header);
         mDefaultPrivateMessageColor = ContextCompat.getColor(context, R.color.huddle_body);
         privateHuddleText = context.getResources().getString(R.string.huddle_text);
+        setupHeaderAndFooterViews();
         setupLists(messageList);
     }
+
+    private void setupHeaderAndFooterViews() {
+        items.add(0, VIEWTYPE_HEADER); //Placeholder for header
+        items.add(VIEWTYPE_FOOTER); //Placeholder for footer
+        notifyItemInserted(0);
+        notifyItemInserted(items.size() - 1);
+
+    }
+
     private int[] getHeaderAndNextIndex(String id) {
         //Return the next header, if this is the last header then returns the last index (loading view)
         int indices[] = {-1, -1};
@@ -84,6 +98,10 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         for (int i = 0; i < messageList.size() - 1; i++) {
             headerParents = (addMessage(messageList.get(i), i + headerParents)) ? headerParents + 1 : headerParents;
         }
+        setFooterShowing(false);
+        setHeaderShowing(false);
+    }
+
     @Override
     public int getItemViewType(int position) {
         if (items.get(position) instanceof MessageHeaderParent)
@@ -139,6 +157,14 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 View messageView = LayoutInflater.from(parent.getContext()).inflate(R.layout.message_tile, parent, false);
                 MessageHolder messageHolder = new MessageHolder(messageView);
                 return messageHolder;
+            case VIEWTYPE_FOOTER:
+                footerView = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_loading, parent, false);
+                return new LoadingHolder(footerView);
+            case VIEWTYPE_HEADER:
+                headerView = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_loading, parent, false);
+                LoadingHolder headerLoadingHolder = new LoadingHolder(headerView);
+                setHeaderShowing(false);
+                return headerLoadingHolder;
         }
         return null;
     }
@@ -256,5 +282,33 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         return items.get(position);
     }
 
+
+    public int getItemCount(boolean includeFooter) {
+        if (includeFooter) return getItemCount();
+        else return getItemCount() - 1;
+    }
+
+    public void setFooterShowing(boolean show) {
+        if (footerView == null) return;
+        if (show) {
+            final float scale = footerView.getContext().getResources().getDisplayMetrics().density;
+            footerView.getLayoutParams().height = (int) (HEIGHT_IN_DP * scale + 0.5f);
+            footerView.setVisibility(View.VISIBLE);
+        } else {
+            footerView.getLayoutParams().height = 0;
+            footerView.setVisibility(View.GONE);
+        }
+    }
+
+    public void setHeaderShowing(boolean show) {
+        if (headerView == null) return;
+        if (show) {
+            final float scale = headerView.getContext().getResources().getDisplayMetrics().density;
+            headerView.getLayoutParams().height = (int) (HEIGHT_IN_DP * scale + 0.5f);
+            headerView.setVisibility(View.VISIBLE);
+        } else {
+            headerView.getLayoutParams().height = 0;
+            headerView.setVisibility(View.GONE);
+        }
     }
 }
