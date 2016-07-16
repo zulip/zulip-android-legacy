@@ -16,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.stmt.Where;
@@ -56,6 +57,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
         void onListResume(MessageListFragment f);
         void addToList(Message message);
         void muteTopic(Message message);
+
         void clearChatBox();
     }
 
@@ -427,6 +429,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
             @Override
             public void onTaskFailure(String result) {
+                Toast.makeText(getActivity(), R.string.no_message, Toast.LENGTH_SHORT).show();
             }
         });
     }
