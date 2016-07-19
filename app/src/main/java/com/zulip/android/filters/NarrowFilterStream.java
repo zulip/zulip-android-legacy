@@ -37,6 +37,11 @@ public class NarrowFilterStream implements NarrowFilter {
         this.subject = subject;
     }
 
+    public NarrowFilterStream(String stream, String subject) {
+        this.stream = Stream.getByName(ZulipApp.get(), stream);
+        this.subject = subject;
+    }
+
     public int describeContents() {
         return 0;
     }

@@ -8,4 +8,5 @@ import com.zulip.android.models.Message;
 public interface NarrowListener {
     void onNarrow(NarrowFilter narrowFilter);
     void onNarrowFillSendBox(Message message);
+    void onNarrowFillSendBoxStream(String stream, String message);
 }

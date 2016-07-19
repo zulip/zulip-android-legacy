@@ -24,7 +24,7 @@ import android.database.MatrixCursor;
 import android.database.MergeCursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuff;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -53,6 +53,7 @@ import android.widget.FilterQueryProvider;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.SimpleCursorTreeAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -409,6 +410,45 @@ public class ZulipActivity extends AppCompatActivity implements
         } catch (Exception e) {
             ZLog.logException(e);
         }
+        streamsDrawerAdapter.setViewBinder(new SimpleCursorTreeAdapter.ViewBinder() {
+            @Override
+            public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
+                switch (view.getId()) {
+                    case R.id.name:
+                        TextView name = (TextView) view;
+                        final String streamName = cursor.getString(columnIndex);
+                        name.setText(streamName);
+                        //Change color in the drawer if this stream is inHomeView only.
+                        if (!Stream.getByName(app, streamName).getInHomeView()) {
+                            name.setTextColor(ContextCompat.getColor(ZulipActivity.this, android.R.color.secondary_text_light_nodisable));
+                        } else {
+                            name.setTextColor(ContextCompat.getColor(ZulipActivity.this, android.R.color.primary_text_light));
+                        }
+                        view.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                onNarrow(new NarrowFilterStream(streamName, null));
+                                onNarrowFillSendBoxStream(streamName, "");
+                            }
+                        });
+                        return true;
+                    case R.id.stream_dot:
+                        // Set the color of the (currently white) dot
+                        view.setVisibility(View.VISIBLE);
+                        view.getBackground().setColorFilter(cursor.getInt(columnIndex),
+                                PorterDuff.Mode.MULTIPLY);
+                        return true;
+                    case R.id.name_child:
+                        TextView name_child = (TextView) view;
+                        name_child.setText(cursor.getString(columnIndex));
+                        if (app.isTopicMute(cursor.getInt(1), cursor.getString(columnIndex))){
+                            name_child.setTextColor(ContextCompat.getColor(ZulipActivity.this, android.R.color.secondary_text_light_nodisable));
+                        }
+                        return true;
+                }
+                return false;
+            }
+        });
         streamsDrawer.setAdapter(streamsDrawerAdapter);
     }
 
@@ -820,6 +860,18 @@ public class ZulipActivity extends AppCompatActivity implements
             }
             else messageEt.requestFocus();
         }
+        ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE)).toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+    }
+
+    @Override
+    public void onNarrowFillSendBoxStream(String stream, String subject) {
+        switchToStream();
+        streamActv.setText(stream);
+        topicActv.setText(subject);
+        if ("".equals(subject)) {
+            topicActv.requestFocus();
+        } else messageEt.requestFocus();
+
         ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE)).toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
     }
     public void onNarrow(NarrowFilter narrowFilter) {

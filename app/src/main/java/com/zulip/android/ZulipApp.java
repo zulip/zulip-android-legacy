@@ -337,4 +337,8 @@ public class ZulipApp extends Application {
     public static void setInstance(ZulipApp instance) {
         ZulipApp.instance = instance;
     }
+
+    public boolean isTopicMute(int id, String subject) {
+        return mutedTopics.contains(id + subject);
+    }
 }
