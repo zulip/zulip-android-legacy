@@ -235,8 +235,8 @@ public class AsyncGetEvents extends Thread {
                 @Override
                 public void run() {
                     that.activity.getPeopleAdapter().refresh();
-                    that.activity.getStreamsAdapter().refresh();
                     activity.onReadyToDisplay(true);
+                    activity.checkAndSetupStreamsDrawer();
                 }
             });
         } catch (JSONException e) {
@@ -245,6 +245,8 @@ public class AsyncGetEvents extends Thread {
             ZLog.logException(e);
         }
     }
+
+
 
     /**
      * Handles any event returned by the server that we care about.
@@ -307,4 +309,5 @@ public class AsyncGetEvents extends Thread {
             }
         });
     }
+
 }

@@ -48,6 +48,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.ExpandableListView;
 import android.widget.FilterQueryProvider;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -98,6 +99,7 @@ public class ZulipActivity extends AppCompatActivity implements
 
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
+    ExpandableListView streamsDrawer;
 
     private HashMap<String, Bitmap> gravatars = new HashMap<>();
 
@@ -377,6 +379,48 @@ public class ZulipActivity extends AppCompatActivity implements
         setUpAdapter();
         streamActv.setAdapter(streamActvAdapter);
         topicActv.setAdapter(subjectActvAdapter);
+        checkAndSetupStreamsDrawer();
+    }
+
+    public void setupListViewAdapter() {
+        ExpandableStreamDrawerAdapter streamsDrawerAdapter = null;
+        Callable<Cursor> streamsGenerator = new Callable<Cursor>() {
+            @Override
+            public Cursor call() throws Exception {
+                return ((AndroidDatabaseResults) app.getDao(Stream.class)
+                        .queryBuilder().selectRaw("rowid _id", "name", "color")
+                        .orderByRaw(Stream.NAME_FIELD + " COLLATE NOCASE")
+                        .where().eq(Stream.SUBSCRIBED_FIELD, true).queryRaw()
+                        .closeableIterator().getRawResults()).getRawCursor();
+            }
+        };
+        String[] groupFrom = {Stream.NAME_FIELD, Stream.COLOR_FIELD};
+        int[] groupTo = {R.id.name, R.id.stream_dot};
+        // Comparison of data elements and View
+        String[] childFrom = {Message.SUBJECT_FIELD};
+        int[] childTo = {R.id.name_child};
+        final ExpandableListView streamsDrawer = (ExpandableListView) findViewById(R.id.streams_drawer);
+        streamsDrawer.setGroupIndicator(null);
+        try {
+            streamsDrawerAdapter = new ExpandableStreamDrawerAdapter(this, streamsGenerator.call(),
+                    R.layout.stream_tile_new, groupFrom,
+                    groupTo, R.layout.stream_tile_child, childFrom,
+                    childTo);
+        } catch (Exception e) {
+            ZLog.logException(e);
+        }
+        streamsDrawer.setAdapter(streamsDrawerAdapter);
+    }
+
+    public void checkAndSetupStreamsDrawer() {
+        try {
+            if (streamsDrawer.getAdapter().getCount() != 0) {
+                return;
+            }
+            setupListViewAdapter();
+        } catch (NullPointerException npe) {
+            setupListViewAdapter();
+        }
     }
 
     private void sendMessage() {
