@@ -1,13 +1,15 @@
 package com.zulip.android.activities;
 
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.IntentSender.SendIntentException;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.support.annotation.Nullable;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
@@ -16,38 +18,47 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.zulip.android.BuildConfig;
 import com.zulip.android.R;
 import com.zulip.android.networking.AsyncDevGetEmails;
 import com.zulip.android.util.ZLog;
+import com.zulip.android.networking.AsyncFetchGoogleID;
 import com.zulip.android.ZulipApp;
 import com.zulip.android.networking.ZulipAsyncPushTask.AsyncTaskCompleteListener;
 import com.zulip.android.networking.AsyncLogin;
+
+import net.openid.appauth.AuthState;
+import net.openid.appauth.AuthorizationException;
+import net.openid.appauth.AuthorizationRequest;
+import net.openid.appauth.AuthorizationResponse;
+import net.openid.appauth.AuthorizationService;
+import net.openid.appauth.AuthorizationServiceConfiguration;
+import net.openid.appauth.TokenResponse;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.List;
 
-public class LoginActivity extends AppCompatActivity implements View.OnClickListener,
-        GoogleApiClient.OnConnectionFailedListener, CompoundButton.OnCheckedChangeListener {
+public class LoginActivity extends AppCompatActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
     private static final String TAG = "LoginActivity";
     private static final int REQUEST_CODE_RESOLVE_ERR = 9000;
     private static final int REQUEST_CODE_SIGN_IN = 9001;
 
+    private static final String AUTH_ENDPOINT_URL = "https://accounts.google.com/o/oauth2/v2/auth";
+    private static final String TOKEN_ENDPOINT_URL = "https://www.googleapis.com/oauth2/v4/token";
+    private static final String AUTH_CALLBACK = "com.zulip.android:/oauth2callback";
+    private static final String AUTH_INTENT_ACTION = "com.zulip.android.HANDLE_AUTHORIZATION_RESPONSE";
+
+    private static final String USED_INTENT = "USED_INTENT";
     private ProgressDialog connectionProgressDialog;
-    private GoogleApiClient mGoogleApiClient;
     private EditText mServerEditText;
     private EditText mUserName;
     private EditText mPassword;
     private View mGoogleSignInButton;
     private CheckBox mUseZulipCheckbox;
+
+    private static final String GOOGLE_SIGN = "GOOGLE_SIGN";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,31 +86,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        super.onActivityResult(requestCode, resultCode, intent);
-        switch (requestCode) {
-            case REQUEST_CODE_SIGN_IN:
-                GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(intent);
-                handleSignInResult(result);
-                break;
-            default:
-                break;
-        }
-    }
-
-    @Override
     protected void onStart() {
         super.onStart();
-        if (mGoogleApiClient != null) {
-            mGoogleApiClient.connect();
-        }
+        checkIntent(getIntent());
     }
 
     @Override
     protected void onStop() {
-        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
-            mGoogleApiClient.disconnect();
-        }
         super.onStop();
     }
 
@@ -136,46 +129,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
 
-    private void handleSignInResult(GoogleSignInResult result) {
-        Log.d("Login", "handleSignInResult:" + result.isSuccess());
-        if (result.isSuccess()) {
-            GoogleSignInAccount account = result.getSignInAccount();
-
-            // if there's a problem with fetching the account, bail
-            if (account == null) {
-                connectionProgressDialog.dismiss();
-                Toast.makeText(LoginActivity.this, R.string.google_app_login_failed, Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            final AsyncLogin loginTask = new AsyncLogin(LoginActivity.this, "google-oauth2-token", account.getIdToken(), false);
-            loginTask.setCallback(new AsyncTaskCompleteListener() {
-                @Override
-                public void onTaskComplete(String result, JSONObject object) {
-                    try {
-                        String email = object.getString("email");
-                        ((ZulipApp) getApplication()).setEmail(email);
-                    } catch (JSONException e) {
-                        ZLog.logException(e);
-                    }
-                }
-
-                @Override
-                public void onTaskFailure(String result) {
-                    // Invalidate the token and try again, unless the user we
-                    // are authenticating as is not registered or is disabled.
-                    connectionProgressDialog.dismiss();
-
-                }
-            });
-            loginTask.execute();
-        } else {
-            // something bad happened. whoops.
-            connectionProgressDialog.dismiss();
-            Toast.makeText(LoginActivity.this, R.string.google_app_login_failed, Toast.LENGTH_SHORT).show();
-        }
-    }
-
     protected void openLegal() {
         Intent i = new Intent(this, LegalActivity.class);
         startActivityForResult(i, 0);
@@ -190,60 +143,39 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     @Override
-    public void onConnectionFailed(ConnectionResult result) {
-        if (connectionProgressDialog.isShowing()) {
-            // The user clicked the sign-in button already. Start to resolve
-            // connection errors. Wait until onConnected() to dismiss the
-            // connection dialog.
-            if (result.hasResolution()) {
-                try {
-                    result.startResolutionForResult(this, REQUEST_CODE_RESOLVE_ERR);
-                } catch (SendIntentException e) {
-                    Log.e(TAG, e.getMessage(), e);
-                    // Yeah, no idea what to do here.
-                    connectionProgressDialog.dismiss();
-                    Toast.makeText(LoginActivity.this, R.string.google_app_login_failed, Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                connectionProgressDialog.dismiss();
-                Toast.makeText(LoginActivity.this, R.string.google_app_login_failed, Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    public void setupGoogleSignIn() {
-        if (mGoogleApiClient == null) {
-            GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                    .requestEmail()
-                    .requestIdToken(BuildConfig.GOOGLE_CLIENT_ID)
-                    .build();
-
-            mGoogleApiClient = new GoogleApiClient.Builder(LoginActivity.this)
-                    .addApi(Auth.GOOGLE_SIGN_IN_API, googleSignInOptions)
-                    .addOnConnectionFailedListener(LoginActivity.this)
-                    .build();
-
-            mGoogleApiClient.connect();
-            allowUserToPickAccount();
-        } else {
-            allowUserToPickAccount();
-        }
-
-    }
-
-    private void allowUserToPickAccount() {
-        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-        startActivityForResult(signInIntent, REQUEST_CODE_SIGN_IN);
-    }
-
-    @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.google_sign_in_button:
                 connectionProgressDialog.show();
                 saveServerURL();
                 Toast.makeText(this, getString(R.string.logging_into_server, ZulipApp.get().getServerURI()), Toast.LENGTH_SHORT).show();
-                setupGoogleSignIn();
+                AsyncFetchGoogleID asyncFetchGoogleID = new AsyncFetchGoogleID(ZulipApp.get());
+                asyncFetchGoogleID.setCallback(new AsyncTaskCompleteListener() {
+                    @Override
+                    public void onTaskComplete(String result, JSONObject jsonObject) {
+                        try {
+                            JSONObject jsonObject1 = new JSONObject(result);
+                            setupSignIn(jsonObject1.getString("google_client_id"));
+                            connectionProgressDialog.dismiss();
+                        } catch (JSONException e) {
+                            ZLog.logException(e);
+                        }
+                    }
+
+                    @Override
+                    public void onTaskFailure(String result) {
+                        connectionProgressDialog.dismiss();
+                        if(result.contains("GOOGLE_CLIENT_ID is not configured")){
+                         runOnUiThread(new Runnable() {
+                             @Override
+                             public void run() {
+                                 googleClientNotConfigured();
+                             }
+                         });
+                        }
+                    }
+                });
+                asyncFetchGoogleID.execute();
                 break;
             case R.id.zulip_login:
                 if (!isInputValid()) {
@@ -311,8 +243,111 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 }
             }
         }
-
         return isValid;
+    }
+
+    private void googleClientNotConfigured(){
+        Toast.makeText(LoginActivity.this, R.string.google_client_error, Toast.LENGTH_SHORT).show();
+        mGoogleSignInButton.setVisibility(View.GONE);
+        final TextWatcher textWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                mGoogleSignInButton.setVisibility(View.VISIBLE);
+                mServerEditText.removeTextChangedListener(this);
+            }
+        };
+        mServerEditText.addTextChangedListener(textWatcher);
+    }
+
+    private void setupSignIn(String clientId) {
+        AuthorizationServiceConfiguration serviceConfiguration = new AuthorizationServiceConfiguration(
+                Uri.parse(AUTH_ENDPOINT_URL) /* auth endpoint */,
+                Uri.parse(TOKEN_ENDPOINT_URL) /* token endpoint */
+        );
+
+        Uri redirectUri = Uri.parse(AUTH_CALLBACK);
+        AuthorizationRequest.Builder builder = new AuthorizationRequest.Builder(
+                serviceConfiguration,
+                clientId,
+                AuthorizationRequest.RESPONSE_TYPE_CODE,
+                redirectUri
+        );
+        builder.setScopes("profile", "email");
+        AuthorizationRequest request = builder.build();
+        AuthorizationService authorizationService = new AuthorizationService(LoginActivity.this);
+        String action = AUTH_INTENT_ACTION;
+        Intent postAuthorizationIntent = new Intent(action);
+        PendingIntent pendingIntent = PendingIntent.getActivity(LoginActivity.this, request.hashCode(), postAuthorizationIntent, 0);
+        authorizationService.performAuthorizationRequest(request, pendingIntent);
+    }
+
+    private void checkIntent(@Nullable Intent intent) {
+        if (intent != null && intent.getAction() != null) {
+                    if (intent.getAction().equals(AUTH_INTENT_ACTION) && !intent.hasExtra(USED_INTENT)) {
+                        handleAuthorizationResponse(intent);
+                        intent.putExtra(USED_INTENT, true);
+            }
+        }
+    }
+
+    private void handleAuthorizationResponse(Intent intent) {
+        AuthorizationResponse response = AuthorizationResponse.fromIntent(intent);
+        AuthorizationException error = AuthorizationException.fromIntent(intent);
+        final AuthState authState = new AuthState(response, error);
+        if (response != null) {
+            Log.i(GOOGLE_SIGN, String.format("Handled Authorization Response %s ", authState.toJsonString()));
+            AuthorizationService service = new AuthorizationService(this);
+            service.performTokenRequest(response.createTokenExchangeRequest(), new AuthorizationService.TokenResponseCallback() {
+                @Override
+                public void onTokenRequestCompleted(@Nullable TokenResponse tokenResponse, @Nullable AuthorizationException exception) {
+                    if (exception != null) {
+                        Log.w(GOOGLE_SIGN, "Token Exchange failed", exception);
+                    } else {
+                        if (tokenResponse != null) {
+                            authState.update(tokenResponse, exception);
+                            AuthorizationService mAuthorizationService = new AuthorizationService(LoginActivity.this);
+                            authState.performActionWithFreshTokens(mAuthorizationService, new AuthState.AuthStateAction() {
+                                @Override
+                                public void execute(@Nullable final String accessToken, @Nullable final String idToken, @Nullable AuthorizationException exception) {
+                                    final AsyncLogin loginTask = new AsyncLogin(LoginActivity.this, "google-oauth2-token", idToken, false);
+                                    loginTask.setCallback(new AsyncTaskCompleteListener() {
+                                        @Override
+                                        public void onTaskComplete(String result, JSONObject object) {
+                                            Log.d("RECIEVED", "onTaskComplete: " + result);
+                                            try {
+                                                ((ZulipApp) getApplication()).setEmail(object.getString("email"));
+                                                connectionProgressDialog.dismiss();
+                                            } catch (JSONException e) {
+                                                ZLog.logException(e);
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onTaskFailure(String result) {
+                                            // Invalidate the token and try again, unless the user we
+                                            // are authenticating as is not registered or is disabled.
+                                            connectionProgressDialog.dismiss();
+                                        }
+                                    });
+                                    loginTask.execute();
+                                }
+                            });
+                            Log.i(GOOGLE_SIGN, String.format("Token Response [ Access Token: %s, ID Token: %s ]", tokenResponse.accessToken, tokenResponse.idToken));
+                        }
+                    }
+                }
+            });
+        }
     }
     private boolean isInputValid() {
         boolean isValid = true;
@@ -355,7 +390,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             mGoogleSignInButton.setVisibility(View.VISIBLE);
         } else {
             mServerEditText.setVisibility(View.VISIBLE);
-            mGoogleSignInButton.setVisibility(View.GONE);
         }
     }
 }
