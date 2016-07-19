@@ -410,6 +410,23 @@ public class ZulipActivity extends AppCompatActivity implements
         } catch (Exception e) {
             ZLog.logException(e);
         }
+
+        streamsDrawer.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+            @Override
+            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+                switch (v.getId()) {
+                    case R.id.name_child:
+                        String streamName = ((Cursor) streamsDrawer.getExpandableListAdapter().getGroup(groupPosition)).getString(1);
+                        String subjectName = ((TextView) v).getText().toString();
+                        onNarrow(new NarrowFilterStream(streamName, subjectName));
+                        onNarrowFillSendBoxStream(streamName, subjectName);
+                        break;
+                    default:
+                        return false;
+                }
+                return false;
+            }
+        });
         streamsDrawerAdapter.setViewBinder(new SimpleCursorTreeAdapter.ViewBinder() {
             @Override
             public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
