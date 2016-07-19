@@ -427,6 +427,15 @@ public class ZulipActivity extends AppCompatActivity implements
                 return false;
             }
         });
+        streamsDrawer.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
+            @Override
+            public boolean onGroupClick(ExpandableListView expandableListView, View view, int i, long l) {
+                String streamName = ((TextView) view.findViewById(R.id.name)).getText().toString();
+                doNarrow(new NarrowFilterStream(streamName, null));
+                drawerLayout.openDrawer(GravityCompat.START);
+                return false; //false is necessary to expand/collapse the group
+            }
+        });
         streamsDrawerAdapter.setViewBinder(new SimpleCursorTreeAdapter.ViewBinder() {
             @Override
             public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
