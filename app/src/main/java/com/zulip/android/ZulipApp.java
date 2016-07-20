@@ -87,6 +87,15 @@ public class ZulipApp extends Application {
     private static final String MUTED_TOPIC_KEY = "mutedTopics";
     private ZulipServices zulipServices;
     private ReferenceObjectCache objectCache;
+    private ZulipActivity zulipActivity;
+
+    public ZulipActivity getZulipActivity() {
+        return zulipActivity;
+    }
+
+    public void setZulipActivity(ZulipActivity zulipActivity) {
+        this.zulipActivity = zulipActivity;
+    }
 
     /**
      * Handler to manage batching of unread messages
