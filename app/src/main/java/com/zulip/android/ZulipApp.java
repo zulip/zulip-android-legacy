@@ -24,6 +24,7 @@ import android.util.Log;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.misc.TransactionManager;
+import com.zulip.android.activities.ZulipActivity;
 import com.zulip.android.database.DatabaseHelper;
 import com.zulip.android.models.Emoji;
 import com.zulip.android.models.Message;
@@ -59,6 +60,15 @@ public class ZulipApp extends Application {
     private DatabaseHelper databaseHelper;
     private Set<String> mutedTopics;
     private static final String MUTED_TOPIC_KEY = "mutedTopics";
+    private ZulipActivity zulipActivity;
+
+    public ZulipActivity getZulipActivity() {
+        return zulipActivity;
+    }
+
+    public void setZulipActivity(ZulipActivity zulipActivity) {
+        this.zulipActivity = zulipActivity;
+    }
 
     /**
      * Handler to manage batching of unread messages

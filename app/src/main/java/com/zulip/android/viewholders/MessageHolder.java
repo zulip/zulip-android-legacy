@@ -2,6 +2,7 @@ package com.zulip.android.viewholders;
 
 import android.app.Activity;
 import android.support.v7.widget.RecyclerView;
+import android.text.method.LinkMovementMethod;
 import android.view.ContextMenu;
 import android.view.MenuInflater;
 import android.view.View;
@@ -31,6 +32,7 @@ public class MessageHolder extends RecyclerView.ViewHolder implements View.OnCli
         senderName = (TextView) itemView.findViewById(R.id.senderName);
         timestamp = (TextView) itemView.findViewById(R.id.timestamp);
         contentView = (TextView) itemView.findViewById(R.id.contentView);
+        contentView.setMovementMethod(LinkMovementMethod.getInstance());
         leftBar = itemView.findViewById(R.id.leftBar);
         messageTile = (RelativeLayout) itemView.findViewById(R.id.messageTile);
         contentView.setOnClickListener(this);

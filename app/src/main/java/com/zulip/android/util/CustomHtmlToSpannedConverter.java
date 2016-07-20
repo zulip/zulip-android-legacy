@@ -155,6 +155,9 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
             start(mSpannableStringBuilder, new Monospace());
         } else if (tag.equalsIgnoreCase("a")) {
             startA(mSpannableStringBuilder, attributes, mBaseUri);
+        } else if (tag.equalsIgnoreCase("span")
+                && attributes.getValue("class").equals("user-mention")) {
+            startSpan(mSpannableStringBuilder, attributes);
         } else if (tag.equalsIgnoreCase("u")) {
             start(mSpannableStringBuilder, new Underline());
         } else if (tag.equalsIgnoreCase("sup")) {
@@ -252,6 +255,8 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
                     MONOSPACE));
         } else if (tag.equalsIgnoreCase("a")) {
             endA(mSpannableStringBuilder);
+        } else if (tag.equalsIgnoreCase("span")) {
+            endSpan(mSpannableStringBuilder);
         } else if (tag.equalsIgnoreCase("u")) {
             end(mSpannableStringBuilder, Underline.class, new UnderlineSpan());
         } else if (tag.equalsIgnoreCase("sup")) {
@@ -408,6 +413,26 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
 
             if (f.mFace != null) {
                 text.setSpan(new TypefaceSpan(f.mFace), where, len,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+        }
+    }
+
+    private static void startSpan(SpannableStringBuilder text, Attributes attributes) {
+        String email = attributes.getValue("data-user-email");
+        int len = text.length();
+        text.setSpan(new Href(email), len, len, Spannable.SPAN_MARK_MARK);
+    }
+
+    private static void endSpan(SpannableStringBuilder text) {
+        int len = text.length();
+        Object obj = getLast(text, Href.class);
+        int where = text.getSpanStart(obj);
+        text.removeSpan(obj);
+        if (where != len) {
+            Href h = (Href) obj;
+            if (h != null && h.mHref != null) {
+                text.setSpan(new ProfileSpan(h.mHref, userMentionColor), where, len,
                         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
         }
