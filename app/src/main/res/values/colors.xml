@@ -17,4 +17,5 @@
     <color name="stream_background">#ffff</color>
     <color name="loadingBackground">#eeeeee</color>
     <color name="indigo_material_500">#3F51B5</color>
+    <color name="dark_red">#d14444</color>
 </resources>

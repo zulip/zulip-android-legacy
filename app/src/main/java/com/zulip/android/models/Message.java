@@ -531,7 +531,7 @@ public class Message {
         };
 
         CustomHtmlToSpannedConverter converter = new CustomHtmlToSpannedConverter(
-                source, null, null, parser, emojiGetter, app.getServerURI());
+                source, null, null, parser, emojiGetter, app.getServerURI(), context);
 
         return CustomHtmlToSpannedConverter.linkifySpanned(converter.convert(), Linkify.ALL);
     }

@@ -16,6 +16,7 @@
 
 package com.zulip.android.util;
 
+import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Canvas;
@@ -23,6 +24,7 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.text.Html;
 import android.text.Layout;
 import android.text.Spannable;
@@ -43,6 +45,8 @@ import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
 import android.text.util.Linkify;
 import android.util.Pair;
+
+import com.zulip.android.R;
 
 import org.ccil.cowan.tagsoup.Parser;
 import org.xml.sax.Attributes;
@@ -72,10 +76,10 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
     private Html.TagHandler mTagHandler;
     private Html.ImageGetter mEmojiGetter;
     private String mBaseUri;
-
+    private static int userMentionColor;
     public CustomHtmlToSpannedConverter(String source,
                                         Html.ImageGetter imageGetter, Html.TagHandler tagHandler,
-                                        Parser parser, Html.ImageGetter emojiGetter, String baseUri) {
+                                        Parser parser, Html.ImageGetter emojiGetter, String baseUri, Context context) {
         mSource = source;
         mSpannableStringBuilder = new SpannableStringBuilder();
         mImageGetter = imageGetter;
@@ -83,6 +87,7 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
         mReader = parser;
         mEmojiGetter = emojiGetter;
         mBaseUri = baseUri;
+        userMentionColor = ContextCompat.getColor(context, R.color.dark_red);
     }
 
     public Spanned convert() {
