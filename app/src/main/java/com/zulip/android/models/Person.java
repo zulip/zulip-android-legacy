@@ -206,6 +206,11 @@ public class Person {
         return dao.queryForId(id);
     }
 
+    public static List<Person> getAllPeople(ZulipApp app) throws SQLException {
+        RuntimeExceptionDao<Person, Object> dao = app.getDao(Person.class);
+        return dao.queryBuilder().where().eq(Person.ISBOT_FIELD, false).query();
+    }
+
     public static void sortByPresence(ZulipApp app, List<Person> people) {
         final Map<String, Presence> presenceCopy = new HashMap<>(
                 app.presences);
