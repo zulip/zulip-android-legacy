@@ -127,7 +127,7 @@ public class Person {
                 .toHashCode();
     }
 
-    private static Person getByEmail(ZulipApp app, String email) {
+    public static Person getByEmail(ZulipApp app, String email) {
         try {
             Dao<Person, Integer> dao = app.getDatabaseHelper().getDao(
                     Person.class);
