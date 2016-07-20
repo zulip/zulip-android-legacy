@@ -11,8 +11,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -36,7 +34,7 @@ import org.json.JSONObject;
 import java.util.List;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener,
-        GoogleApiClient.OnConnectionFailedListener, CompoundButton.OnCheckedChangeListener {
+        GoogleApiClient.OnConnectionFailedListener {
     private static final String TAG = "LoginActivity";
     private static final int REQUEST_CODE_RESOLVE_ERR = 9000;
     private static final int REQUEST_CODE_SIGN_IN = 9001;
@@ -47,7 +45,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private EditText mUserName;
     private EditText mPassword;
     private View mGoogleSignInButton;
-    private CheckBox mUseZulipCheckbox;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,12 +60,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         connectionProgressDialog = new ProgressDialog(this);
         connectionProgressDialog.setMessage(getString(R.string.signing_in));
 
-        mUseZulipCheckbox = (CheckBox) findViewById(R.id.checkbox_usezulip);
         mServerEditText = (EditText) findViewById(R.id.server_url);
         mGoogleSignInButton = findViewById(R.id.google_sign_in_button);
         findViewById(R.id.google_sign_in_button).setOnClickListener(this);
         findViewById(R.id.zulip_login).setOnClickListener(this);
-        mUseZulipCheckbox.setOnCheckedChangeListener(this);
         mUserName = (EditText) findViewById(R.id.username);
         mPassword = (EditText) findViewById(R.id.password);
         if (!BuildConfig.DEBUG) findViewById(R.id.local_server_button).setVisibility(View.GONE);
@@ -104,11 +99,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void saveServerURL() {
-        if (mUseZulipCheckbox.isChecked()) {
-            ((ZulipApp) getApplication()).useDefaultServerURL();
-            return;
-        }
-
         String serverURL = mServerEditText.getText().toString();
         int errorMessage = R.string.invalid_server_domain;
 
@@ -297,21 +287,18 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private boolean isInputValidForDevAuth() {
         boolean isValid = true;
 
-        if (!mUseZulipCheckbox.isChecked()) {
-            if (mServerEditText.length() == 0) {
-                isValid = false;
-                mServerEditText.setError(getString(R.string.server_domain_required));
-            } else {
-                String serverString = mServerEditText.getText().toString();
-                if (!serverString.contains("://")) serverString = "https://" + serverString;
+        if (mServerEditText.length() == 0) {
+            isValid = false;
+            mServerEditText.setError(getString(R.string.server_domain_required));
+        } else {
+            String serverString = mServerEditText.getText().toString();
+            if (!serverString.contains("://")) serverString = "https://" + serverString;
 
-                if (!Patterns.WEB_URL.matcher(serverString).matches()) {
-                    mServerEditText.setError(getString(R.string.invalid_domain));
-                    isValid = false;
-                }
+            if (!Patterns.WEB_URL.matcher(serverString).matches()) {
+                mServerEditText.setError(getString(R.string.invalid_domain));
+                isValid = false;
             }
         }
-
         return isValid;
     }
     private boolean isInputValid() {
@@ -327,35 +314,20 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             mUserName.setError(getString(R.string.username_required));
         }
 
-        if (!mUseZulipCheckbox.isChecked()) {
-            if (mServerEditText.length() == 0) {
-                isValid = false;
-                mServerEditText.setError(getString(R.string.server_domain_required));
-            } else {
-                String serverString = mServerEditText.getText().toString();
-                if (!serverString.contains("://")) {
-                    serverString = "https://" + serverString;
-                }
+        if (mServerEditText.length() == 0) {
+            isValid = false;
+            mServerEditText.setError(getString(R.string.server_domain_required));
+        } else {
+            String serverString = mServerEditText.getText().toString();
+            if (!serverString.contains("://")) {
+                serverString = "https://" + serverString;
+            }
 
-                if (!Patterns.WEB_URL.matcher(serverString).matches()) {
-                    mServerEditText.setError(getString(R.string.invalid_domain));
-                    isValid = false;
-                }
+            if (!Patterns.WEB_URL.matcher(serverString).matches()) {
+                mServerEditText.setError(getString(R.string.invalid_domain));
+                isValid = false;
             }
         }
-
         return isValid;
-    }
-
-    @Override
-    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if (isChecked) {
-            mServerEditText.setVisibility(View.GONE);
-            mServerEditText.getText().clear();
-            mGoogleSignInButton.setVisibility(View.VISIBLE);
-        } else {
-            mServerEditText.setVisibility(View.VISIBLE);
-            mGoogleSignInButton.setVisibility(View.GONE);
-        }
     }
 }
