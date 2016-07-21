@@ -1091,6 +1091,8 @@ public class ZulipActivity extends AppCompatActivity implements
 
     @Override
     public void onNarrowFillSendBox(Message message) {
+        displayChatBox(true);
+        displayFAB(false);
         if (message.getType() == MessageType.PRIVATE_MESSAGE) {
             switchToPrivate();
             topicActv.setText(message.getReplyTo(app));
@@ -1108,6 +1110,8 @@ public class ZulipActivity extends AppCompatActivity implements
     }
 
     public void onNarrowFillSendBoxStream(String stream, String subject) {
+        displayChatBox(true);
+        displayFAB(false);
         switchToStream();
         streamActv.setText(stream);
         topicActv.setText(subject);
