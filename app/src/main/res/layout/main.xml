@@ -15,8 +15,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:theme="@style/AppTheme.AppBarOverlay"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            app:layout_scrollFlags="scroll|enterAlways">
+            app:layout_behavior="com.zulip.android.util.RemoveViewsOnScroll">
 
             <include
                 android:id="@+id/toolbar"
