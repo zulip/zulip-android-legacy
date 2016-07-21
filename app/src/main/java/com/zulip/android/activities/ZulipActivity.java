@@ -400,7 +400,18 @@ public class ZulipActivity extends AppCompatActivity implements
         streamActv.setAdapter(streamActvAdapter);
         topicActv.setAdapter(subjectActvAdapter);
         checkAndSetupStreamsDrawer();
-<<<<<<< a44f4687bd03950b07becf52be5222d106af8588
+
+        setupFab();
+        View.OnFocusChangeListener focusChangeListener = new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean focus) {
+                hideFABBlocked = focus;
+            }
+        };
+        messageEt.setOnFocusChangeListener(focusChangeListener);
+        topicActv.setOnFocusChangeListener(focusChangeListener);
+        streamActv.setOnFocusChangeListener(focusChangeListener);
+
         SimpleCursorAdapter combinedAdapter = new SimpleCursorAdapter(
                 that, R.layout.emoji_tile, null,
                 new String[]{Emoji.NAME_FIELD, Emoji.NAME_FIELD},
@@ -498,9 +509,6 @@ public class ZulipActivity extends AppCompatActivity implements
                                 + Person.NAME_FIELD + " COLLATE NOCASE",
                         DatabaseHelper.likeEscape(name.toString()) + "%")
                 .closeableIterator().getRawResults()).getRawCursor();
-=======
-        setupFab();
->>>>>>> Implement Floating ActionButton
     }
 
     private void setupFab() {
