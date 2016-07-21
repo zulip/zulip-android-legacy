@@ -47,7 +47,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private static final String AUTH_ENDPOINT_URL = "https://accounts.google.com/o/oauth2/v2/auth";
     private static final String TOKEN_ENDPOINT_URL = "https://www.googleapis.com/oauth2/v4/token";
-    private static final String AUTH_CALLBACK = "com.zulip.android:/oauth2callback";
+    private static final String AUTH_CALLBACK = "com.zulip.android.dev:/oauth2callback";
     private static final String AUTH_INTENT_ACTION = "com.zulip.android.HANDLE_AUTHORIZATION_RESPONSE";
 
     private static final String USED_INTENT = "USED_INTENT";
