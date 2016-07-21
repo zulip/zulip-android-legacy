@@ -29,6 +29,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -61,11 +62,8 @@ import android.widget.Toast;
 import com.j256.ormlite.android.AndroidDatabaseResults;
 import com.zulip.android.BuildConfig;
 import com.zulip.android.database.DatabaseHelper;
-<<<<<<< 570cc3a5e10b8fa1d614fb8f139261a05897c3a7
 import com.zulip.android.models.Emoji;
-=======
 import com.zulip.android.filters.NarrowFilterToday;
->>>>>>> Filter by today's messages
 import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageType;
 import com.zulip.android.filters.NarrowFilter;
@@ -112,6 +110,8 @@ public class ZulipActivity extends AppCompatActivity implements
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
     ExpandableListView streamsDrawer;
+    private LinearLayout chatBox;
+    private FloatingActionButton fab;
 
     private HashMap<String, Bitmap> gravatars = new HashMap<>();
 
@@ -390,6 +390,7 @@ public class ZulipActivity extends AppCompatActivity implements
         streamActv.setAdapter(streamActvAdapter);
         topicActv.setAdapter(subjectActvAdapter);
         checkAndSetupStreamsDrawer();
+<<<<<<< a44f4687bd03950b07becf52be5222d106af8588
         SimpleCursorAdapter combinedAdapter = new SimpleCursorAdapter(
                 that, R.layout.emoji_tile, null,
                 new String[]{Emoji.NAME_FIELD, Emoji.NAME_FIELD},
@@ -487,8 +488,15 @@ public class ZulipActivity extends AppCompatActivity implements
                                 + Person.NAME_FIELD + " COLLATE NOCASE",
                         DatabaseHelper.likeEscape(name.toString()) + "%")
                 .closeableIterator().getRawResults()).getRawCursor();
+=======
+        setupFab();
+>>>>>>> Implement Floating ActionButton
     }
 
+    private void setupFab() {
+        fab = (FloatingActionButton) findViewById(R.id.fab);
+        chatBox = (LinearLayout) findViewById(R.id.messageBoxContainer);
+    }
     public void setupListViewAdapter() {
         ExpandableStreamDrawerAdapter streamsDrawerAdapter = null;
         Callable<Cursor> streamsGenerator = new Callable<Cursor>() {
