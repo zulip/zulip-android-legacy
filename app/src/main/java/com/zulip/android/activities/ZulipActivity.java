@@ -232,6 +232,12 @@ public class ZulipActivity extends AppCompatActivity implements
         homeList.adapter.notifyDataSetChanged();
     }
 
+    @Override
+    public void recyclerViewScrolled() {
+        if (chatBox.getVisibility() == View.VISIBLE && hideFABBlocked) {
+            displayChatBox(false);
+        }
+    }
     public RefreshableCursorAdapter getPeopleAdapter() {
         return peopleAdapter;
     }

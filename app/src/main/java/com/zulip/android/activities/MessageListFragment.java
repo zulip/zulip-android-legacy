@@ -58,6 +58,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
         void addToList(Message message);
         void muteTopic(Message message);
 
+        void recyclerViewScrolled();
         void clearChatBox();
     }
 
@@ -147,6 +148,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                mListener.recyclerViewScrolled();
                 final int near = 6;
                 if (!paused && !loadingMessages && firstMessageId > 0 && lastMessageId > 0) {
                     int lastVisiblePosition = linearLayoutManager.findLastVisibleItemPosition();
