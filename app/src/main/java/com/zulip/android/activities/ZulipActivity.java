@@ -519,6 +519,14 @@ public class ZulipActivity extends AppCompatActivity implements
                 }
             }
         };
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                displayChatBox(true);
+                displayFAB(false);
+                fabHidder.start();
+            }
+        });
     }
 
     public void displayChatBox(boolean show) {
