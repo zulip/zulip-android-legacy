@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.ArrayList;
 
+import android.animation.Animator;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
@@ -28,7 +29,9 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.FragmentManager;
@@ -36,6 +39,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AppCompatActivity;
@@ -45,6 +49,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewPropertyAnimator;
+import android.view.animation.Interpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -110,8 +116,12 @@ public class ZulipActivity extends AppCompatActivity implements
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
     ExpandableListView streamsDrawer;
+    private static final Interpolator FAST_OUT_SLOW_IN_INTERPOLATOR = new FastOutSlowInInterpolator();
     private LinearLayout chatBox;
     private FloatingActionButton fab;
+    private CountDownTimer fabHidder;
+    private boolean hideFABBlocked = false;
+    private static final int HIDE_FAB_AFTER_SEC = 5;
 
     private HashMap<String, Bitmap> gravatars = new HashMap<>();
 
@@ -496,7 +506,93 @@ public class ZulipActivity extends AppCompatActivity implements
     private void setupFab() {
         fab = (FloatingActionButton) findViewById(R.id.fab);
         chatBox = (LinearLayout) findViewById(R.id.messageBoxContainer);
+        fabHidder = new CountDownTimer(HIDE_FAB_AFTER_SEC * 1000, HIDE_FAB_AFTER_SEC * 1000) {
+            public void onTick(long millisUntilFinished) {
+            }
+
+            public void onFinish() {
+                if (!hideFABBlocked) {
+                    displayFAB(true);
+                    displayChatBox(false);
+                } else {
+                    start();
+                }
+            }
+        };
     }
+
+    public void displayChatBox(boolean show) {
+        if (show) {
+            showView(chatBox);
+        } else {
+            hideView(chatBox);
+        }
+    }
+
+    public void displayFAB(boolean show) {
+        if (show) {
+            showView(fab);
+        } else {
+            hideView(fab);
+        }
+    }
+
+    private void hideView(final View view) {
+        ViewPropertyAnimator animator = view.animate()
+                .translationY((view instanceof AppBarLayout) ? -1 * view.getHeight() : view.getHeight())
+                .setInterpolator(FAST_OUT_SLOW_IN_INTERPOLATOR)
+                .setDuration(200);
+
+        animator.setListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animator) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animator) {
+                view.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animator) {
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animator) {
+            }
+        });
+        animator.start();
+    }
+
+    private void showView(final View view) {
+        ViewPropertyAnimator animator = view.animate()
+                .translationY(0)
+                .setInterpolator(FAST_OUT_SLOW_IN_INTERPOLATOR)
+                .setDuration(200);
+
+        animator.setListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animator) {
+                view.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animator) {
+
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animator) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animator) {
+            }
+        });
+        animator.start();
+    }
+
     public void setupListViewAdapter() {
         ExpandableStreamDrawerAdapter streamsDrawerAdapter = null;
         Callable<Cursor> streamsGenerator = new Callable<Cursor>() {
