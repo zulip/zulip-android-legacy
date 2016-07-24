@@ -1,7 +1,9 @@
 package com.zulip.android.viewholders;
 
+import android.content.Context;
 import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView;
+import android.util.TypedValue;
 import android.view.View;
 
 import com.zulip.android.activities.RecyclerMessageAdapter;
@@ -10,8 +12,14 @@ public class HeaderSpaceItemDecoration extends RecyclerView.ItemDecoration {
 
     private final int verticalMargin;
 
-    public HeaderSpaceItemDecoration(int verticalMargin) {
+    private int toolbarHeight;
+
+    public HeaderSpaceItemDecoration(int verticalMargin, Context context) {
         this.verticalMargin = verticalMargin;
+        TypedValue tv = new TypedValue();
+        if (context.getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
+            toolbarHeight = TypedValue.complexToDimensionPixelSize(tv.data, context.getResources().getDisplayMetrics());
+        }
     }
 
     @Override
@@ -23,6 +31,8 @@ public class HeaderSpaceItemDecoration extends RecyclerView.ItemDecoration {
         int viewType = parent.getAdapter().getItemViewType(position);
         if (viewType == RecyclerMessageAdapter.VIEWTYPE_MESSAGE_HEADER && position != 0) {
             outRect.top = verticalMargin;
+        } else if (viewType == RecyclerMessageAdapter.VIEWTYPE_HEADER) {
+            outRect.top = toolbarHeight;
         }
     }
 }

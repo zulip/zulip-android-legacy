@@ -42,6 +42,7 @@ import java.util.List;
 
 
 public class MessageListFragment extends Fragment implements MessageListener {
+    private static final int PIXEL_OFFSET_MESSAGE_HEADERS = 24;
     private LinearLayoutManager linearLayoutManager;
 
     /**
@@ -142,7 +143,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
         linearLayoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(linearLayoutManager);
         adapter = new RecyclerMessageAdapter(messageList, getActivity(), (filter==null));
-        recyclerView.addItemDecoration(new HeaderSpaceItemDecoration(24));
+        recyclerView.addItemDecoration(new HeaderSpaceItemDecoration(PIXEL_OFFSET_MESSAGE_HEADERS, getContext()));
         recyclerView.setAdapter(adapter);
         registerForContextMenu(recyclerView);
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {

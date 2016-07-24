@@ -42,7 +42,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
     public static final int VIEWTYPE_MESSAGE_HEADER = 1;
     private static final int VIEWTYPE_MESSAGE = 2;
-    private static final int VIEWTYPE_HEADER = 3; //At position 0
+    public static final int VIEWTYPE_HEADER = 3; //At position 0
     private static final int VIEWTYPE_FOOTER = 4; //At end position
     private boolean startedFromFilter;
     private static String privateHuddleText;
