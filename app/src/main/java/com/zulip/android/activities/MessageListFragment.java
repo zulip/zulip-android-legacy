@@ -151,16 +151,18 @@ public class MessageListFragment extends Fragment implements MessageListener {
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 mListener.recyclerViewScrolled();
                 final int near = 6;
-                if (!paused && !loadingMessages && firstMessageId > 0 && lastMessageId > 0) {
-                    int lastVisiblePosition = linearLayoutManager.findLastVisibleItemPosition();
-                    if (lastVisiblePosition > adapter.getItemCount(false) - near) { // At the bottom of the list
-                        Log.i("scroll", "Starting request below");
-                        loadMoreMessages(LoadPosition.BELOW);
-                    }
-                    if (linearLayoutManager.findFirstCompletelyVisibleItemPosition() < near && !loadedToTop) {
-                        // At the top of the list
-                        Log.i("scroll", "Starting request above");
-                        loadMoreMessages(LoadPosition.ABOVE);
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    if (!paused && !loadingMessages && firstMessageId > 0 && lastMessageId > 0) {
+                        int lastVisiblePosition = linearLayoutManager.findLastVisibleItemPosition();
+                        if (lastVisiblePosition > adapter.getItemCount(false) - near) { // At the bottom of the list
+                            Log.i("scroll", "Starting request below");
+                            loadMoreMessages(LoadPosition.BELOW);
+                        }
+                        if (linearLayoutManager.findFirstCompletelyVisibleItemPosition() < near && !loadedToTop) {
+                            // At the top of the list
+                            Log.i("scroll", "Starting request above");
+                            loadMoreMessages(LoadPosition.ABOVE);
+                        }
                     }
                 }
             }
@@ -360,7 +362,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
             }
 
             if (pos == LoadPosition.NEW || pos == LoadPosition.BELOW) {
-                this.adapter.addMessage(message);
+                this.adapter.addNewMessage(message);
                 messageList.add(message);
             } else if (pos == LoadPosition.ABOVE || pos == LoadPosition.INITIAL) {
                 headerParents = (this.adapter.addMessage(message, addedCount + headerParents)) ? headerParents + 1 : headerParents;

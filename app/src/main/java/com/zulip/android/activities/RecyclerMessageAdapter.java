@@ -214,6 +214,33 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
 
 
+    public void addNewMessage(Message message) {
+        MessageHeaderParent item = null;
+        for (int i = getItemCount(false) - 1; i > 1; i--) {
+            //Find the last header and check if it belongs to this message!
+            if (items.get(i) instanceof MessageHeaderParent) {
+                item = (MessageHeaderParent) items.get(i);
+                if (!item.getId().equals(message.getIdForHolder())) {
+                    item = null;
+                }
+                break;
+            }
+        }
+        if (item == null) {
+            item = new MessageHeaderParent((message.getStream() == null) ? null :
+                    message.getStream().getName(), message.getSubject(), message.getIdForHolder());
+            item.setMessageType(message.getType());
+            item.setDisplayRecipent(message.getDisplayRecipient(zulipApp));
+            if (message.getType() == MessageType.STREAM_MESSAGE)
+                item.setMute(zulipApp.isTopicMute(message));
+            item.setColor((message.getStream() == null) ? mDefaultStreamHeaderColor : message.getStream().getColor());
+            items.add(getItemCount(true) - 1, item);
+            notifyItemInserted(getItemCount(true) - 1);
+        }
+        items.add(getItemCount(true) - 1, message);
+        notifyItemInserted(getItemCount(true) - 1);
+    }
+
 
     public RecyclerView.ViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
         switch (viewType) {
