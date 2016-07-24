@@ -250,6 +250,19 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
     private void fetch() {
         final AsyncGetOldMessages oldMessagesReq = new AsyncGetOldMessages(this);
+        oldMessagesReq.setCallback(new ZulipAsyncPushTask.AsyncTaskCompleteListener() {
+            @Override
+            public void onTaskComplete(String result, JSONObject jsonObject) {
+                loadingMessages = false;
+                adapter.setHeaderShowing(false);
+            }
+
+            @Override
+            public void onTaskFailure(String result) {
+                loadingMessages = false;
+                adapter.setHeaderShowing(false);
+            }
+        });
         oldMessagesReq.execute(app.getPointer(), LoadPosition.INITIAL, 100,
                 100, filter);
     }
@@ -374,7 +387,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
             }
         } else if (pos == LoadPosition.BELOW) {
             adapter.setFooterShowing(moreBelow);
-
+            loadingMessages = moreBelow;
             if (noFurtherMessages || listHasMostRecent()) {
                 loadedToBottom = true;
             }
@@ -389,7 +402,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
             }
         }
 
-        loadingMessages = moreAbove || moreBelow;
+        loadingMessages = false;
     }
 
     public void onMessageError(LoadPosition pos) {
@@ -398,7 +411,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
         // successful
     }
 
-    public void loadMoreMessages(LoadPosition pos) {
+    public void loadMoreMessages(final LoadPosition pos) {
         int above = 0;
         int below = 0;
         int around;
@@ -411,6 +424,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
             below = 100;
             around = lastMessageId;
             adapter.setFooterShowing(true);
+            loadingMessages = true;
         } else {
             Log.e("loadMoreMessages", "Invalid position");
             return;
@@ -428,11 +442,23 @@ public class MessageListFragment extends Fragment implements MessageListener {
             @Override
             public void onTaskComplete(String result, JSONObject jsonObject) {
                 adapter.setFooterShowing(false);
+                if (pos == LoadPosition.ABOVE) {
+                    adapter.setHeaderShowing(false);
+                } else if (pos == LoadPosition.BELOW) {
+                    adapter.setFooterShowing(false);
+                }
+                loadingMessages = false;
             }
 
             @Override
             public void onTaskFailure(String result) {
                 Toast.makeText(getActivity(), R.string.no_message, Toast.LENGTH_SHORT).show();
+                if (pos == LoadPosition.ABOVE) {
+                    adapter.setHeaderShowing(false);
+                } else if (pos == LoadPosition.BELOW) {
+                    adapter.setFooterShowing(false);
+                }
+                loadingMessages = false;
             }
         });
     }
