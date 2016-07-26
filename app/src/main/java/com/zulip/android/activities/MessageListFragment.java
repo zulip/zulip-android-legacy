@@ -16,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.j256.ormlite.stmt.QueryBuilder;
@@ -86,6 +87,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
     boolean paused = false;
     boolean initialized = false;
     List<Message> messageList;
+    TextView emptyTextView;
 
     public MessageListFragment() {
         app = ZulipApp.get();
@@ -135,6 +137,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
         View view = inflater.inflate(R.layout.fragment_message_list, container,
                 false);
 
+        emptyTextView = (TextView) view.findViewById(R.id.emptyList);
         if (filter != null && ((AppCompatActivity) getActivity()).getSupportActionBar() != null)
             ((AppCompatActivity) getActivity()).getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_arrow_back_black_24dp);
         else
@@ -250,6 +253,12 @@ public class MessageListFragment extends Fragment implements MessageListener {
         initialized = true;
     }
 
+    private void showEmptyView() {
+        Log.d("ErrorRecieving", "No Messages found for current list" + ((filter != null) ? ":" + filter.getTitle() : ""));
+        recyclerView.setVisibility(View.GONE);
+        emptyTextView.setVisibility(View.VISIBLE);
+    }
+
     private void fetch() {
         final AsyncGetOldMessages oldMessagesReq = new AsyncGetOldMessages(this);
         oldMessagesReq.setCallback(new ZulipAsyncPushTask.AsyncTaskCompleteListener() {
@@ -257,6 +266,9 @@ public class MessageListFragment extends Fragment implements MessageListener {
             public void onTaskComplete(String result, JSONObject jsonObject) {
                 loadingMessages = false;
                 adapter.setHeaderShowing(false);
+                if(result.equals("0")){
+                    showEmptyView();
+                }
             }
 
             @Override
