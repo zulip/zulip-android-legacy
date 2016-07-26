@@ -68,4 +68,8 @@
     <string name="method_error">Method not supported</string>
     <string name="tap_message">Tap on a message to compose reply</string>
     <string name="title_login">Login</string>
+    <string name="enter">Enter</string>
+    <string name="enter_server">Please enter your server URL</string>
+    <string name="auth_login">Your server allows these Authentication Options:</string>
+    <string name="another_server">Another server</string>
 </resources>
