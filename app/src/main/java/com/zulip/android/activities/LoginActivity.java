@@ -23,6 +23,8 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.zulip.android.BuildConfig;
 import com.zulip.android.R;
 import com.zulip.android.networking.AsyncDevGetEmails;
+import com.zulip.android.networking.AsyncGetBackends;
+import com.zulip.android.util.AnimationHelper;
 import com.zulip.android.util.ZLog;
 import com.zulip.android.ZulipApp;
 import com.zulip.android.networking.ZulipAsyncPushTask.AsyncTaskCompleteListener;
@@ -44,8 +46,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private EditText mServerEditText;
     private EditText mUserName;
     private EditText mPassword;
-    private View mGoogleSignInButton;
+    private EditText serverIn;
 
+    private View mGoogleSignInButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,7 +69,69 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         findViewById(R.id.zulip_login).setOnClickListener(this);
         mUserName = (EditText) findViewById(R.id.username);
         mPassword = (EditText) findViewById(R.id.password);
-        if (!BuildConfig.DEBUG) findViewById(R.id.local_server_button).setVisibility(View.GONE);
+        serverIn = (EditText) findViewById(R.id.server_url_in);
+        findViewById(R.id.server_btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!checkForError()) {
+                    return;
+                }
+
+                AsyncGetBackends asyncGetBackends = new AsyncGetBackends(ZulipApp.get());
+                asyncGetBackends.setCallback(new AsyncTaskCompleteListener() {
+                    @Override
+                    public void onTaskComplete(String result, JSONObject jsonObject) {
+                        try {
+                            JSONObject object = new JSONObject(result);
+                            if (!object.getString("result").equals("success")) {
+                                onTaskFailure("");
+                                return;
+                            }
+
+                            if (object.getString("password").equals("true")) {
+                                findViewById(R.id.passwordAuthLayout).setVisibility(View.VISIBLE);
+                            }
+
+                            if (object.getString("google").equals("true")) {
+                                findViewById(R.id.google_sign_in_button).setVisibility(View.VISIBLE);
+                            }
+
+                            if (object.getString("dev").equals("true")) {
+                                findViewById(R.id.local_server_button).setVisibility(View.VISIBLE);
+                            }
+                            showLoginFields();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+
+                    @Override
+                    public void onTaskFailure(String result) {
+                        Toast.makeText(LoginActivity.this, "Failed to fetch Backends!", Toast.LENGTH_SHORT).show();
+                    }
+                });
+                asyncGetBackends.execute();
+            }
+        });
+
+        findViewById(R.id.input_another_server).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AnimationHelper.hideView(findViewById(R.id.serverInput), 100);
+                AnimationHelper.showView(findViewById(R.id.serverFieldLayout), 201);
+                mServerEditText.setText("");
+                mServerEditText.setEnabled(false);
+                findViewById(R.id.passwordAuthLayout).setVisibility(View.GONE);
+                findViewById(R.id.google_sign_in_button).setVisibility(View.GONE);
+                findViewById(R.id.local_server_button).setVisibility(View.GONE);
+            }
+        });
+    }
+
+    private void showLoginFields() {
+        AnimationHelper.showView(findViewById(R.id.serverInput), 201);
+        AnimationHelper.hideView(findViewById(R.id.serverFieldLayout), 100);
     }
 
     @Override
@@ -98,12 +163,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         super.onStop();
     }
 
-    private void saveServerURL() {
-        String serverURL = mServerEditText.getText().toString();
+    private boolean checkForError() {
+        String serverURL = serverIn.getText().toString();
         int errorMessage = R.string.invalid_server_domain;
 
         if (serverURL.isEmpty()) {
-            mServerEditText.setError(getString(errorMessage));
+            serverIn.setError(getString(errorMessage));
+            return false;
         }
 
         // add http if scheme is not included
@@ -121,10 +187,12 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         if (!serverUri.getHost().startsWith("api.") && paths.isEmpty()) {
             serverUri = serverUri.buildUpon().appendEncodedPath("api/").build();
         }
-
+        serverIn.setText(serverUri.toString());
+        mServerEditText.setText(serverUri.toString());
+        mServerEditText.setEnabled(false);
         ((ZulipApp) getApplication()).setServerURL(serverUri.toString());
+        return true;
     }
-
 
     private void handleSignInResult(GoogleSignInResult result) {
         Log.d("Login", "handleSignInResult:" + result.isSuccess());
@@ -231,7 +299,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         switch (v.getId()) {
             case R.id.google_sign_in_button:
                 connectionProgressDialog.show();
-                saveServerURL();
                 Toast.makeText(this, getString(R.string.logging_into_server, ZulipApp.get().getServerURI()), Toast.LENGTH_SHORT).show();
                 setupGoogleSignIn();
                 break;
@@ -239,7 +306,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 if (!isInputValid()) {
                     return;
                 }
-                saveServerURL();
                 Toast.makeText(this, getString(R.string.logging_into_server, ZulipApp.get().getServerURI()), Toast.LENGTH_SHORT).show();
                 connectionProgressDialog.show();
 
@@ -265,7 +331,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 break;
             case R.id.local_server_button:
                 if (!isInputValidForDevAuth()) return;
-                saveServerURL();
                 connectionProgressDialog.show();
                 AsyncDevGetEmails asyncDevGetEmails = new AsyncDevGetEmails(LoginActivity.this);
                 asyncDevGetEmails.setCallback(new AsyncTaskCompleteListener() {
@@ -294,11 +359,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             String serverString = mServerEditText.getText().toString();
             if (!serverString.contains("://")) serverString = "https://" + serverString;
 
-            if (!Patterns.WEB_URL.matcher(serverString).matches()) {
-                mServerEditText.setError(getString(R.string.invalid_domain));
-                isValid = false;
+                if (!Patterns.WEB_URL.matcher(serverString).matches()) {
+                    mServerEditText.setError(getString(R.string.invalid_domain));
+                    isValid = false;
+                }
             }
-        }
         return isValid;
     }
     private boolean isInputValid() {
