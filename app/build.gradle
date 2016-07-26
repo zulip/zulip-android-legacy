@@ -8,8 +8,8 @@ android {
         minSdkVersion 13
         targetSdkVersion 23
 
-        versionCode 13
-        versionName "0.8.10"
+        versionCode 14
+        versionName "0.8.11"
 
         testApplicationId "com.zulip.android.test"
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
