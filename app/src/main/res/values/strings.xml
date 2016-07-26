@@ -80,4 +80,5 @@
     <string name="http_message">HTTP is insecure, and we recommend using it only for testing the Zulip Android app against a development environment. Are you sure you want to use HTTP?</string>
     <string name="use_https">Use HTTPS</string>
     <string name="use_http">Use HTTP</string>
+    <string name="empty_list">Sorry, no messages here.</string>
 </resources>
