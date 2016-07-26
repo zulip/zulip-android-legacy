@@ -1,7 +1,23 @@
-<android.support.v7.widget.RecyclerView android:id="@+id/recyclerView"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="fill_parent"
-    android:scrollbars="vertical"
-    android:fadeScrollbars="false"
-    android:background="@android:color/white"
-    xmlns:android="http://schemas.android.com/apk/res/android" />
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent"
+        android:background="@android:color/white"
+        android:fadeScrollbars="false"
+        android:scrollbars="vertical" />
+
+    <TextView
+        android:id="@+id/emptyList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="?attr/actionBarSize"
+        android:gravity="center"
+        android:text="@string/empty_list"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:visibility="gone" />
+</LinearLayout>
