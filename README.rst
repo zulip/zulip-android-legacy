@@ -2,11 +2,14 @@
 Zulip for Android
 =================
 
-This is the Android client for `Zulip <http://www.zulip.org>`_.
-It is available `in the Google Play store 
+This is the Android client for `Zulip <http://www.zulip.org>`_.  It is
+available `in the Google Play store
 <https://play.google.com/store/apps/details?id=com.zulip.android>`_.
-You can also `join our beta channel <https://play.google.com/apps/testing/com.zulip.android>`_ 
-after which the Play store should auto-update you.
+If you have a taste for adventure, you can also `join our beta channel
+<https://play.google.com/apps/testing/com.zulip.android>`_ after which
+the Play store should auto-update you. (Caution: beta releases will
+have more bugs than final releases, including (potentially) security
+or data loss bugs.)
 
 This is a Gradle project, and can be built via the provided ``gradlew``
 or by using Android Studio.
