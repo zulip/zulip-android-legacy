@@ -270,7 +270,7 @@ public class ZulipActivity extends AppCompatActivity implements
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setTitle(R.string.app_name);
-        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
+        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_24dp);
         streamActv = (AutoCompleteTextView) findViewById(R.id.stream_actv);
         topicActv = (AutoCompleteTextView) findViewById(R.id.topic_actv);
         messageEt = (AutoCompleteTextView) findViewById(R.id.message_et);

@@ -41,7 +41,7 @@
         android:id="@+id/muteMessageImage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_volume_off_black_18dp"
+        android:src="@drawable/ic_volume_off_18dp"
         android:visibility="gone" />
 </LinearLayout>
 
