@@ -25,6 +25,7 @@ import android.database.MergeCursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -58,7 +59,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.j256.ormlite.android.AndroidDatabaseResults;
+import com.zulip.android.BuildConfig;
 import com.zulip.android.database.DatabaseHelper;
+import com.zulip.android.models.Emoji;
 import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageType;
 import com.zulip.android.filters.NarrowFilter;
@@ -375,6 +378,74 @@ public class ZulipActivity extends AppCompatActivity implements
         streamActv.setAdapter(streamActvAdapter);
         topicActv.setAdapter(subjectActvAdapter);
         checkAndSetupStreamsDrawer();
+        SimpleCursorAdapter combinedAdapter = new SimpleCursorAdapter(
+                that, R.layout.emoji_tile, null,
+                new String[]{Emoji.NAME_FIELD, Emoji.NAME_FIELD},
+                new int[]{R.id.emojiImageView, R.id.nameTV}, 0);
+
+        combinedAdapter.setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter() {
+            @Override
+            public CharSequence convertToString(Cursor cursor) {
+                if (cursor == null) return messageEt.getText();
+                int index = cursor.getColumnIndex(Emoji.NAME_FIELD);
+                String name = cursor.getString(index);
+                String currText = messageEt.getText().toString();
+                int last = (cursor.getColumnIndex(Emoji.NAME_FIELD) == 6) ? currText.lastIndexOf("@") : currText.lastIndexOf(":");
+                return TextUtils.substring(currText, 0, last) + ((cursor.getColumnIndex(Emoji.NAME_FIELD) == 6) ? "@**" + name + "**" : ":" + name.replace(".png", "") + ":");
+            }
+        });
+        combinedAdapter.setFilterQueryProvider(new FilterQueryProvider() {
+            @Override
+            public Cursor runQuery(CharSequence charSequence) {
+                if (charSequence == null) return null;
+                int length = charSequence.length();
+                int personLength = charSequence.toString().lastIndexOf("@");
+                int smileyLength = charSequence.toString().lastIndexOf(":");
+                if (length - 1 > Math.max(personLength, smileyLength) + MAX_THRESOLD_EMOJI_HINT
+                        || length - Math.max(personLength, smileyLength) - 1 < MIN_THRESOLD_EMOJI_HINT
+                        || (personLength + smileyLength == -2))
+                    return null;
+                try {
+                    if (personLength > smileyLength) {
+                        return makePeopleNameCursor(charSequence.subSequence(personLength + 1, length));
+                    } else {
+                        return makeEmojiCursor(charSequence.subSequence(smileyLength + 1, length));
+                    }
+                } catch (SQLException e) {
+                    Log.e("SQLException", "SQL not correct", e);
+                    return null;
+                }
+            }
+        });
+        messageEt.setAdapter(combinedAdapter);
+    }
+
+    private Cursor makeEmojiCursor(CharSequence emoji)
+            throws SQLException {
+        if (emoji == null) {
+            emoji = "";
+        }
+        return ((AndroidDatabaseResults) app
+                .getDao(Emoji.class)
+                .queryRaw("SELECT  rowid _id,name FROM emoji WHERE name LIKE '%" + emoji + "%'")
+                .closeableIterator().getRawResults()).getRawCursor();
+    }
+
+    private Cursor makePeopleNameCursor(CharSequence name) throws SQLException {
+        if (name == null) {
+            name = "";
+        }
+        return ((AndroidDatabaseResults) app
+                .getDao(Person.class)
+                .queryRaw(
+                        "SELECT rowid _id, * FROM people WHERE "
+                                + Person.ISBOT_FIELD + " = 0 AND "
+                                + Person.ISACTIVE_FIELD + " = 1 AND "
+                                + Person.NAME_FIELD
+                                + " LIKE ? ESCAPE '\\' ORDER BY "
+                                + Person.NAME_FIELD + " COLLATE NOCASE",
+                        DatabaseHelper.likeEscape(name.toString()) + "%")
+                .closeableIterator().getRawResults()).getRawCursor();
     }
 
     public void setupListViewAdapter() {
