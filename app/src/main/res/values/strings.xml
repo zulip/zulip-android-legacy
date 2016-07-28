@@ -79,4 +79,5 @@
     <string name="use_https">Use HTTPS</string>
     <string name="use_http">Use HTTP</string>
     <string name="empty_list">Sorry, no messages here.</string>
+    <string name="switch_theme">Switch Day/Night Theme</string>
 </resources>

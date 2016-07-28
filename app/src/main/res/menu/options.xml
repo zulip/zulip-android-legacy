@@ -26,6 +26,10 @@
     </item>
 
     <item
+        android:id="@+id/daynight"
+        android:title="@string/switch_theme" />
+
+    <item
         android:id="@+id/logout"
         android:title="@string/logout" />
     <item

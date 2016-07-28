@@ -43,6 +43,7 @@ import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
@@ -1235,6 +1236,20 @@ public class ZulipActivity extends AppCompatActivity implements
                     builder.show();
                 }
                 break;
+            case R.id.daynight:
+                switch (AppCompatDelegate.getDefaultNightMode()) {
+                    case -1:
+                    case AppCompatDelegate.MODE_NIGHT_NO:
+                        setNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                        break;
+                    case AppCompatDelegate.MODE_NIGHT_YES:
+                        setNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                        break;
+                    default:
+                        setNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                        break;
+                }
+                break;
             case R.id.refresh:
                 Log.w("menu", "Refreshed manually by user. We shouldn't need this.");
                 onRefresh();
@@ -1252,6 +1267,14 @@ public class ZulipActivity extends AppCompatActivity implements
                 return super.onOptionsItemSelected(item);
         }
         return true;
+    }
+
+    private void setNightMode(@AppCompatDelegate.NightMode int nightMode) {
+        AppCompatDelegate.setDefaultNightMode(nightMode);
+
+        if (Build.VERSION.SDK_INT >= 11) {
+            recreate();
+        }
     }
 
     /**
