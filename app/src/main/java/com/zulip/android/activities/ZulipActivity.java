@@ -91,6 +91,10 @@ public class ZulipActivity extends AppCompatActivity implements
 
     public static final String NARROW = "narrow";
     public static final String PARAMS = "params";
+    //At these many letters the emoji/person hint will not show now on
+    private static final int MAX_THRESOLD_EMOJI_HINT = 5;
+    //At these many letters the emoji/person hint starts to show up
+    private static final int MIN_THRESOLD_EMOJI_HINT = 1;
     ZulipApp app;
     List<Message> mutedTopics;
 
@@ -383,6 +387,35 @@ public class ZulipActivity extends AppCompatActivity implements
                 new String[]{Emoji.NAME_FIELD, Emoji.NAME_FIELD},
                 new int[]{R.id.emojiImageView, R.id.nameTV}, 0);
 
+        combinedAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
+            @Override
+            public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
+                //TODO - columnIndex is 6 for Person table and columnIndex is 1 for Emoji table, Confirm this will be perfect to distinguish between these two tables! It seems alphabetical ordering of columns!
+                boolean personTable = !(columnIndex == 1);
+                String name = cursor.getString(cursor.getColumnIndex(Emoji.NAME_FIELD));
+                switch (view.getId()) {
+                    case R.id.emojiImageView:
+                        if (personTable) {
+                            view.setVisibility(View.GONE);
+                        } else {
+                            try {
+                                Drawable drawable = Drawable.createFromStream(getApplicationContext().getAssets().open("emoji/" + name),
+                                        "emoji/" + name);
+                                ((ImageView) view).setImageDrawable(drawable);
+                            } catch (Exception e) {
+                                ZLog.logException(e);
+                            }
+                        }
+                        return true;
+                    case R.id.nameTV:
+                        ((TextView) view).setText(name);
+                        return true;
+                }
+                if (BuildConfig.DEBUG)
+                    ZLog.logException(new RuntimeException(getResources().getResourceName(view.getId()) + " - this view not binded!"));
+                return false;
+            }
+        });
         combinedAdapter.setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter() {
             @Override
             public CharSequence convertToString(Cursor cursor) {
