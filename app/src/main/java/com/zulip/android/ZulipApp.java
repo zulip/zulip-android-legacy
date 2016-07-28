@@ -1,10 +1,12 @@
 package com.zulip.android;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.Queue;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -20,7 +22,9 @@ import android.util.Log;
 import com.crashlytics.android.Crashlytics;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
+import com.j256.ormlite.misc.TransactionManager;
 import com.zulip.android.database.DatabaseHelper;
+import com.zulip.android.models.Emoji;
 import com.zulip.android.models.Message;
 import com.zulip.android.models.Person;
 import com.zulip.android.models.Presence;
@@ -134,6 +138,27 @@ public class ZulipApp extends Application {
     public void afterLogin() {
         String email = settings.getString(EMAIL, null);
         setEmail(email);
+        setupEmoji();
+    }
+
+    private void setupEmoji() {
+        try {
+            final RuntimeExceptionDao<Emoji, Object> dao = getDao(Emoji.class);
+            if (dao.queryForAll().size() != 0) return;
+            final String emojis[] = getAssets().list("emoji");
+            TransactionManager.callInTransaction(getDatabaseHelper()
+                            .getConnectionSource(),
+                new Callable<Void>() {
+                    public Void call() throws Exception {
+                        for (String newEmoji : emojis) {
+                            dao.create(new Emoji(newEmoji));
+                        }
+                        return null;
+                    }
+                });
+        } catch (SQLException | IOException e) {
+            ZLog.logException(e);
+        }
     }
 
     public Boolean isLoggedIn() {
