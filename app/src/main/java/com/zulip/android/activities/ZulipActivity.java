@@ -358,12 +358,6 @@ public class ZulipActivity extends AppCompatActivity implements
         statusUpdateHandler.post(statusUpdateRunnable);
         homeList = MessageListFragment.newInstance(null);
         pushListFragment(homeList, null);
-        streamActv = (AutoCompleteTextView) findViewById(R.id.stream_actv);
-        topicActv = (AutoCompleteTextView) findViewById(R.id.topic_actv);
-        messageEt = (EditText) findViewById(R.id.message_et);
-        textView = (TextView) findViewById(R.id.textView);
-        sendBtn = (ImageView) findViewById(R.id.send_btn);
-        togglePrivateStreamBtn = (ImageView) findViewById(R.id.togglePrivateStream_btn);
         togglePrivateStreamBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
