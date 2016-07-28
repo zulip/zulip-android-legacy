@@ -116,7 +116,7 @@ public class ZulipActivity extends AppCompatActivity implements
 
     AutoCompleteTextView streamActv;
     AutoCompleteTextView topicActv;
-    EditText messageEt;
+    private AutoCompleteTextView messageEt;
     private TextView textView;
     private ImageView sendBtn;
     private ImageView togglePrivateStreamBtn;
@@ -241,7 +241,7 @@ public class ZulipActivity extends AppCompatActivity implements
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
         streamActv = (AutoCompleteTextView) findViewById(R.id.stream_actv);
         topicActv = (AutoCompleteTextView) findViewById(R.id.topic_actv);
-        messageEt = (EditText) findViewById(R.id.message_et);
+        messageEt = (AutoCompleteTextView) findViewById(R.id.message_et);
         textView = (TextView) findViewById(R.id.textView);
         sendBtn = (ImageView) findViewById(R.id.send_btn);
         togglePrivateStreamBtn = (ImageView) findViewById(R.id.togglePrivateStream_btn);
