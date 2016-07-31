@@ -27,12 +27,13 @@ public class HeaderSpaceItemDecoration extends RecyclerView.ItemDecoration {
                                RecyclerView.State state) {
 
         int position = parent.getChildAdapterPosition(view);
-
+        int size = parent.getAdapter().getItemCount();
         int viewType = parent.getAdapter().getItemViewType(position);
         if (viewType == RecyclerMessageAdapter.VIEWTYPE_MESSAGE_HEADER && position != 0) {
             outRect.top = verticalMargin;
         } else if (viewType == RecyclerMessageAdapter.VIEWTYPE_HEADER) {
             outRect.top = toolbarHeight;
         }
+        outRect.bottom = (position == size - 2) ? verticalMargin : 0;
     }
 }
