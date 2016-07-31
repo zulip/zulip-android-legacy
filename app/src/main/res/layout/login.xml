@@ -154,6 +154,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="29dp"
+        android:onClick="onClick"
         android:paddingTop="8dp"
         android:text="@string/legal"
         android:textColor="#ff0099cc" />
