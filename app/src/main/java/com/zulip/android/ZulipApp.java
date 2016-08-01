@@ -17,7 +17,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Handler;
 import android.util.Log;
 
-import com.crashlytics.android.Crashlytics;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.zulip.android.database.DatabaseHelper;
@@ -92,7 +91,7 @@ public class ZulipApp extends Application {
         pointer = settings.getInt("pointer", -1);
 
         if (BuildHelper.shouldLogToCrashlytics()) {
-            Crashlytics.start(this);
+            // TODO(lfaraone): figure out what to do about crash reporting
         }
 
         this.api_key = settings.getString(API_KEY, null);
