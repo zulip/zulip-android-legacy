@@ -11,6 +11,7 @@ import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 import com.zulip.android.R;
 import com.zulip.android.ZulipApp;
+import com.zulip.android.models.Emoji;
 import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageRange;
 import com.zulip.android.models.Person;
@@ -29,7 +30,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
     private static final String DATABASE_NAME = "zulip-%s.db";
     // any time you make changes to your database objects, you may have to
     // increase the database version
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4;
 
     public DatabaseHelper(ZulipApp app, String email) {
         super(app, String.format(DATABASE_NAME, MD5Util.md5Hex(email)), null,
@@ -50,6 +51,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
             TableUtils.createTable(connectionSource, Stream.class);
             TableUtils.createTable(connectionSource, Message.class);
             TableUtils.createTable(connectionSource, MessageRange.class);
+            TableUtils.createTable(connectionSource, Emoji.class);
         } catch (SQLException e) {
             Log.e(DatabaseHelper.class.getName(), "Can't create database", e);
             throw new RuntimeException(e);
