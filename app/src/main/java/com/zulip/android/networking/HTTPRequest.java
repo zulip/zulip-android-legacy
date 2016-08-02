@@ -72,6 +72,7 @@ public class HTTPRequest {
         Request.Builder requestBuilder = new Request.Builder();
         String url = app.getServerURI() + path;
         requestBuilder.addHeader("client", "Android");
+        requestBuilder.addHeader("User-Agent", app.getUserAgent());
 
         switch (method) {
             case "GET":

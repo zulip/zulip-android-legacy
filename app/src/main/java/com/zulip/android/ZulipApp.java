@@ -35,7 +35,7 @@ public class ZulipApp extends Application {
     public static final String API_KEY = "api_key";
     public static final String EMAIL = "email";
     private static ZulipApp instance;
-    private static final String USER_AGENT = "ZulipMobile";
+    private static final String USER_AGENT = "ZulipAndroid";
     private static final String DEFAULT_SERVER_URL = "https://api.zulip.com/";
     private Person you;
     private SharedPreferences settings;
