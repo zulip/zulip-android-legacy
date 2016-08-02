@@ -89,7 +89,6 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
         }
 
         onCreate(db);
-        db.close();
     }
 
     /**
