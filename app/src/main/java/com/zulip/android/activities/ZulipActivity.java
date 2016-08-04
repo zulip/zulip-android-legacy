@@ -660,12 +660,19 @@ public class ZulipActivity extends AppCompatActivity implements
             }
         });
         streamsDrawer.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
+            int previousClick = -1;
+
             @Override
-            public boolean onGroupClick(ExpandableListView expandableListView, View view, int i, long l) {
+            public boolean onGroupClick(ExpandableListView expandableListView, View view, int position, long l) {
                 String streamName = ((TextView) view.findViewById(R.id.name)).getText().toString();
                 doNarrow(new NarrowFilterStream(streamName, null));
                 drawerLayout.openDrawer(GravityCompat.START);
-                return false; //false is necessary to expand/collapse the group
+                if (previousClick != -1 && expandableListView.getCount() > previousClick) {
+                    expandableListView.collapseGroup(previousClick);
+                }
+                expandableListView.expandGroup(position);
+                previousClick = position;
+                return true;
             }
         });
         streamsDrawerAdapter.setViewBinder(new SimpleCursorTreeAdapter.ViewBinder() {
