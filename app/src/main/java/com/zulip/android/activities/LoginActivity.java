@@ -73,45 +73,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         findViewById(R.id.server_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!checkForError()) {
-                    return;
-                }
-
-                AsyncGetBackends asyncGetBackends = new AsyncGetBackends(ZulipApp.get());
-                asyncGetBackends.setCallback(new AsyncTaskCompleteListener() {
-                    @Override
-                    public void onTaskComplete(String result, JSONObject jsonObject) {
-                        try {
-                            JSONObject object = new JSONObject(result);
-                            if (!object.getString("result").equals("success")) {
-                                onTaskFailure("");
-                                return;
-                            }
-
-                            if (object.getString("password").equals("true")) {
-                                findViewById(R.id.passwordAuthLayout).setVisibility(View.VISIBLE);
-                            }
-
-                            if (object.getString("google").equals("true")) {
-                                findViewById(R.id.google_sign_in_button).setVisibility(View.VISIBLE);
-                            }
-
-                            if (object.getString("dev").equals("true")) {
-                                findViewById(R.id.local_server_button).setVisibility(View.VISIBLE);
-                            }
-                            showLoginFields();
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
-                    }
-
-                    @Override
-                    public void onTaskFailure(String result) {
-                        Toast.makeText(LoginActivity.this, "Failed to fetch Backends!", Toast.LENGTH_SHORT).show();
-                    }
-                });
-                asyncGetBackends.execute();
+                checkForError();
             }
         });
 
@@ -163,19 +125,28 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         super.onStop();
     }
 
-    private boolean checkForError() {
+    private void checkForError() {
         String serverURL = serverIn.getText().toString();
         int errorMessage = R.string.invalid_server_domain;
+        String httpScheme = (BuildConfig.DEBUG) ? "http" : "https";
 
         if (serverURL.isEmpty()) {
             serverIn.setError(getString(errorMessage));
-            return false;
+            return;
         }
 
-        // add http if scheme is not included
+        // add http or https if scheme is not included
         if (!serverURL.contains("://")) {
-            serverURL = "http://" + serverURL;
+            serverURL = httpScheme + "://" + serverURL;
+            showBackends(httpScheme, serverURL);
+        } else {
+            Uri serverUri = Uri.parse(serverURL);
+
+            if (!BuildConfig.DEBUG && serverUri.getScheme().equals("http")) { //Production build and not https
+            } else {
+            }
         }
+    }
 
         Uri serverUri = Uri.parse(serverURL);
         if (serverUri.isRelative()) {
