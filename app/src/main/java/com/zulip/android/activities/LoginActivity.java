@@ -1,11 +1,13 @@
 package com.zulip.android.activities;
 
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -143,6 +145,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             Uri serverUri = Uri.parse(serverURL);
 
             if (!BuildConfig.DEBUG && serverUri.getScheme().equals("http")) { //Production build and not https
+                showHTTPDialog(serverURL);
             } else {
             }
         }
@@ -163,6 +166,26 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         mServerEditText.setEnabled(false);
         ((ZulipApp) getApplication()).setServerURL(serverUri.toString());
         return true;
+    private void showHTTPDialog(final String serverURL) {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.http_or_https)
+                .setMessage(R.string.http_message)
+                .setPositiveButton(R.string.use_https, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setNeutralButton(R.string.use_http, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int i) {
+                        dialog.dismiss();
+                    }
+                }).show();
     }
 
     private void handleSignInResult(GoogleSignInResult result) {
