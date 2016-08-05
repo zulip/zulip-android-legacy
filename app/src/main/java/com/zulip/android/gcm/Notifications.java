@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.SystemClock;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -22,7 +23,7 @@ import com.zulip.android.networking.HTTPRequest;
 public class Notifications {
 
     // Project Number from the Google Cloud Services console
-    private static final String SENDER_ID = "835904834568";
+    private static String SENDER_ID = "835904834568";
 
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
@@ -33,9 +34,10 @@ public class Notifications {
     String regid;
     Activity activity;
 
-    public Notifications(ZulipActivity activity) {
+    public Notifications(ZulipActivity activity, String clientID) {
         this.activity = activity;
         this.app = (ZulipApp) activity.getApplication();
+        SENDER_ID = TextUtils.substring(clientID, 0, clientID.indexOf('-'));
     }
 
     public void register() {
