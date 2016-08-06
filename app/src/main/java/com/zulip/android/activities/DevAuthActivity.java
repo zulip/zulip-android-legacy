@@ -66,6 +66,17 @@ public class DevAuthActivity extends Activity implements LoginInterface {
                 AsyncLogin asyncLogin = new AsyncLogin(DevAuthActivity.this, email, null, realmName, startedFromAddRealm, serverURL, true);
                 asyncLogin.execute();
                 connectionProgressDialog.show();
+                asyncLogin.setCallback(new ZulipAsyncPushTask.AsyncTaskCompleteListener() {
+                    @Override
+                    public void onTaskComplete(String result, JSONObject jsonObject) {
+                        connectionProgressDialog.dismiss();
+                    }
+
+                    @Override
+                    public void onTaskFailure(String result) {
+                        connectionProgressDialog.dismiss();
+                    }
+                });
             }
         });
         recyclerView.setLayoutManager(new LinearLayoutManager(DevAuthActivity.this) {
