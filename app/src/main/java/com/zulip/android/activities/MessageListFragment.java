@@ -73,21 +73,21 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
     public ZulipApp app;
 
-    SparseArray<Message> messageIndex;
+    private SparseArray<Message> messageIndex;
     RecyclerMessageAdapter adapter;
-    boolean loadingMessages = true;
+    private boolean loadingMessages = true;
     // Whether we've loaded all available messages in that direction
-    boolean loadedToTop = false;
-    boolean loadedToBottom = false;
+    private boolean loadedToTop = false;
+    private boolean loadedToBottom = false;
 
-    List<Message> mutedMessages;
-    int firstMessageId = -1;
-    int lastMessageId = -1;
+    private List<Message> mutedMessages;
+    private int firstMessageId = -1;
+    private int lastMessageId = -1;
 
-    boolean paused = false;
-    boolean initialized = false;
-    List<Message> messageList;
     TextView emptyTextView;
+    private boolean paused = false;
+    private boolean initialized = false;
+    private List<Message> messageList;
 
     public MessageListFragment() {
         app = ZulipApp.get();
@@ -425,7 +425,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
         // successful
     }
 
-    public void loadMoreMessages(final LoadPosition pos) {
+    private void loadMoreMessages(final LoadPosition pos) {
         int above = 0;
         int below = 0;
         int around;
@@ -477,15 +477,15 @@ public class MessageListFragment extends Fragment implements MessageListener {
         });
     }
 
-    public Boolean listHasMostRecent() {
+    private Boolean listHasMostRecent() {
         return lastMessageId == app.getMaxMessageId();
     }
 
-    public void selectMessage(final Message message) {
+    private void selectMessage(final Message message) {
         recyclerView.scrollToPosition(adapter.getItemIndex(message));
     }
 
-    public Message getMessageById(int id) {
+    private Message getMessageById(int id) {
         return this.messageIndex.get(id);
     }
 }

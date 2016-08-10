@@ -15,9 +15,9 @@ import com.zulip.android.util.OnItemClickListener;
 import com.zulip.android.util.ZLog;
 
 public class MessageHeaderParent {
-    public String stream;
-    public String subject;
-    public String id;
+    private String stream;
+    private String subject;
+    private String id;
     private boolean isMute;
     private MessageType messageType;
     private String displayRecipent;
@@ -30,7 +30,7 @@ public class MessageHeaderParent {
 
 
     @ColorInt
-    public int color;
+    private int color;
 
     public int getColor() {
         return color;

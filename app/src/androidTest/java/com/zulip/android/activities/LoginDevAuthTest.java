@@ -58,7 +58,7 @@ public class LoginDevAuthTest {
         closeSoftKeyboard();
     }
 
-    public void getDevEmails() {
+    private void getDevEmails() {
 
         closeSoftKeyboard();
         //Uncheck Checkbox
@@ -106,7 +106,7 @@ public class LoginDevAuthTest {
     }
 
 
-    public void loginThroughDevMail() {
+    private void loginThroughDevMail() {
 
         //If EMAIL not specified click on first EMAIL.
         if (EMAIL_TEST.equals("")) {
@@ -121,7 +121,7 @@ public class LoginDevAuthTest {
         assertThat(ZulipApp.get().getEmail(), is(EMAIL_TEST));
     }
 
-    public static ViewAssertion hasItemsCount() {
+    private static ViewAssertion hasItemsCount() {
         return new ViewAssertion() {
             @Override
             public void check(View view, NoMatchingViewException e) {

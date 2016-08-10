@@ -17,8 +17,8 @@ import com.zulip.android.models.MessageType;
 import com.zulip.android.models.Stream;
 
 public class NarrowFilterStream implements NarrowFilter {
-    Stream stream;
-    String subject;
+    private Stream stream;
+    private String subject;
 
     public static final Parcelable.Creator<NarrowFilterStream> CREATOR = new Parcelable.Creator<NarrowFilterStream>() {
         public NarrowFilterStream createFromParcel(Parcel in) {

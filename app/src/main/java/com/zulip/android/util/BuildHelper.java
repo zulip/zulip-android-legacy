@@ -12,7 +12,7 @@ public class BuildHelper {
         return !isEmulator() && !BuildConfig.DEBUG;
     }
 
-    public static boolean isEmulator() {
+    private static boolean isEmulator() {
         return Build.HARDWARE.contains("goldfish");
     }
 }

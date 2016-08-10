@@ -26,8 +26,8 @@ import com.zulip.android.activities.ZulipActivity;
  * wake lock.
  */
 public class GcmIntentService extends IntentService {
-    public static final int NOTIFICATION_ID = 1;
-    public static final String STREAM = "stream";
+    private static final int NOTIFICATION_ID = 1;
+    private static final String STREAM = "stream";
 
     public GcmIntentService() {
         super("GcmIntentService");

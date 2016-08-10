@@ -36,8 +36,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 public class ZulipApp extends Application {
-    public static final String API_KEY = "api_key";
-    public static final String EMAIL = "email";
+    private static final String API_KEY = "api_key";
+    private static final String EMAIL = "email";
     private static ZulipApp instance;
     private static final String USER_AGENT = "ZulipAndroid";
     private static final String DEFAULT_SERVER_URL = "https://api.zulip.com/";
@@ -45,8 +45,8 @@ public class ZulipApp extends Application {
     private SharedPreferences settings;
     private String api_key;
     private int max_message_id;
-    DatabaseHelper databaseHelper;
-    Set<String> mutedTopics;
+    private DatabaseHelper databaseHelper;
+    private Set<String> mutedTopics;
     private static final String MUTED_TOPIC_KEY = "mutedTopics";
 
     /**
@@ -134,7 +134,7 @@ public class ZulipApp extends Application {
         }
     }
 
-    public void afterLogin() {
+    private void afterLogin() {
         String email = settings.getString(EMAIL, null);
         setEmail(email);
         setupEmoji();
@@ -358,7 +358,7 @@ public class ZulipApp extends Application {
         return instance;
     }
 
-    public static void setInstance(ZulipApp instance) {
+    private static void setInstance(ZulipApp instance) {
         ZulipApp.instance = instance;
     }
 

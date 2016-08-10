@@ -57,7 +57,7 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
 
     private static final float[] HEADER_SIZES = {1.5f, 1.4f, 1.3f, 1.2f, 1.1f,
             1f,};
-    public static final String MONOSPACE = "monospace";
+    private static final String MONOSPACE = "monospace";
 
     private static HashMap<String, Integer> COLORS = buildColorMap();
     private String mSource;
@@ -648,8 +648,8 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
     /**
      * Copied from com.android.internal.util.XmlUtils from Android source
      */
-    public static int convertValueToInt(CharSequence charSeq,
-                                        int defaultValue) {
+    private static int convertValueToInt(CharSequence charSeq,
+                                         int defaultValue) {
         if (null == charSeq)
             return defaultValue;
 
