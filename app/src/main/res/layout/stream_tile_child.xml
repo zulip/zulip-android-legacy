@@ -8,6 +8,6 @@
     android:paddingLeft="48dp"
     android:paddingRight="16dp"
     android:paddingTop="16dp"
-    android:text="Subject"
+    android:text="@string/topic"
     android:textColor="@color/colorTextSecondary"
     android:textSize="16sp" />

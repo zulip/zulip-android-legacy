@@ -80,4 +80,8 @@
     <string name="use_http">Use HTTP</string>
     <string name="empty_list">Sorry, no messages here.</string>
     <string name="switch_theme">Switch Day/Night Theme</string>
+    <string name="reply_stream">Reply to Stream</string>
+    <string name="reply_sender">Reply to Sender</string>
+    <string name="narrow_stream">Narrow to this stream</string>
+    <string name="narrow_topic">Narrow to this topic</string>
 </resources>
