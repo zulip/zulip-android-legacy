@@ -19,7 +19,6 @@ per http://pivotallabs.com/android-tidbits-6-22-2011-hiding-header-views/
             android:layout_height="30dp" />
 
         <TextView
-            android:id="@+id/listFYI"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingLeft="16dp"
