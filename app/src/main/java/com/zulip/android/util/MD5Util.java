@@ -12,7 +12,8 @@ public class MD5Util {
 
     private static final String TAG = "MD5Util";
 
-    private MD5Util() {}
+    private MD5Util() {
+    }
 
     private static String hex(byte[] array) {
         StringBuilder sb = new StringBuilder();

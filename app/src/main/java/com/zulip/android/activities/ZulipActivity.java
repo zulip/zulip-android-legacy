@@ -238,6 +238,7 @@ public class ZulipActivity extends AppCompatActivity implements
             displayChatBox(false);
         }
     }
+
     public RefreshableCursorAdapter getPeopleAdapter() {
         return peopleAdapter;
     }
@@ -706,7 +707,7 @@ public class ZulipActivity extends AppCompatActivity implements
                     case R.id.name_child:
                         TextView name_child = (TextView) view;
                         name_child.setText(cursor.getString(columnIndex));
-                        if (app.isTopicMute(cursor.getInt(1), cursor.getString(columnIndex))){
+                        if (app.isTopicMute(cursor.getInt(1), cursor.getString(columnIndex))) {
                             name_child.setTextColor(ContextCompat.getColor(ZulipActivity.this, android.R.color.secondary_text_light_nodisable));
                         }
                         return true;
@@ -959,6 +960,7 @@ public class ZulipActivity extends AppCompatActivity implements
                         DatabaseHelper.likeEscape(piece) + "%")
                 .closeableIterator().getRawResults()).getRawCursor();
     }
+
     private void switchToStream() {
         removeEditTextErrors();
         if (!isCurrentModeStream()) {
@@ -1124,8 +1126,7 @@ public class ZulipActivity extends AppCompatActivity implements
             topicActv.setText(message.getSubject());
             if ("".equals(message.getSubject())) {
                 topicActv.requestFocus();
-            }
-            else messageEt.requestFocus();
+            } else messageEt.requestFocus();
         }
         if (openSoftKeyboard) {
             ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE)).toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
@@ -1170,6 +1171,7 @@ public class ZulipActivity extends AppCompatActivity implements
 
         return false;
     }
+
     private boolean prepareSearchView(Menu menu) {
         if (this.logged_in && Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             // Get the SearchView and set the searchable configuration

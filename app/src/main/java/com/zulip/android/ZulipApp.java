@@ -104,7 +104,7 @@ public class ZulipApp extends Application {
             afterLogin();
         }
 
-         mutedTopics = new HashSet<>(settings.getStringSet(MUTED_TOPIC_KEY, new HashSet<String>()));
+        mutedTopics = new HashSet<>(settings.getStringSet(MUTED_TOPIC_KEY, new HashSet<String>()));
         // create unread message queue
         unreadMessageHandler = new Handler(new Handler.Callback() {
             @Override
@@ -147,14 +147,14 @@ public class ZulipApp extends Application {
             final String emojis[] = getAssets().list("emoji");
             TransactionManager.callInTransaction(getDatabaseHelper()
                             .getConnectionSource(),
-                new Callable<Void>() {
-                    public Void call() throws Exception {
-                        for (String newEmoji : emojis) {
-                            dao.create(new Emoji(newEmoji));
+                    new Callable<Void>() {
+                        public Void call() throws Exception {
+                            for (String newEmoji : emojis) {
+                                dao.create(new Emoji(newEmoji));
+                            }
+                            return null;
                         }
-                        return null;
-                    }
-                });
+                    });
         } catch (SQLException | IOException e) {
             ZLog.logException(e);
         }
@@ -176,6 +176,7 @@ public class ZulipApp extends Application {
     public String getServerURI() {
         return settings.getString("server_url", DEFAULT_SERVER_URL);
     }
+
     public String getApiKey() {
         return api_key;
     }
@@ -221,7 +222,7 @@ public class ZulipApp extends Application {
     }
 
     public void useDefaultServerURL() {
-       setServerURL(DEFAULT_SERVER_URL);
+        setServerURL(DEFAULT_SERVER_URL);
     }
 
     public void setLoggedInApiKey(String apiKey) {
@@ -335,6 +336,7 @@ public class ZulipApp extends Application {
             unreadMessageHandler.sendEmptyMessageDelayed(0, 2000);
         }
     }
+
     public void muteTopic(Message message) {
         mutedTopics.add(message.concatStreamAndTopic());
         SharedPreferences.Editor editor = settings.edit();

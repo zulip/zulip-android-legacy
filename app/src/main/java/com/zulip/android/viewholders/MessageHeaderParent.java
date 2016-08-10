@@ -94,6 +94,7 @@ public class MessageHeaderParent {
         }
         return recipientsCache;
     }
+
     public static class MessageHeaderHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public TextView streamTextView;
         public TextView topicTextView;

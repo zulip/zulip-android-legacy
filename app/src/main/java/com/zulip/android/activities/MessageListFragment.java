@@ -57,10 +57,13 @@ public class MessageListFragment extends Fragment implements MessageListener {
      */
     public interface Listener {
         void onListResume(MessageListFragment f);
+
         void addToList(Message message);
+
         void muteTopic(Message message);
 
         void recyclerViewScrolled();
+
         void clearChatBox();
     }
 
@@ -145,7 +148,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
         recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
         linearLayoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(linearLayoutManager);
-        adapter = new RecyclerMessageAdapter(messageList, getActivity(), (filter==null));
+        adapter = new RecyclerMessageAdapter(messageList, getActivity(), (filter == null));
         recyclerView.addItemDecoration(new HeaderSpaceItemDecoration(PIXEL_OFFSET_MESSAGE_HEADERS, getContext()));
         recyclerView.setAdapter(adapter);
         registerForContextMenu(recyclerView);
