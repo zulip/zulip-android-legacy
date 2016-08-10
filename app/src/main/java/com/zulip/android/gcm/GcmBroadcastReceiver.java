@@ -21,7 +21,7 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 public class GcmBroadcastReceiver extends BroadcastReceiver {
 
-    public static final String TAG = "GCM";
+    private static final String TAG = "GCM";
     // FIXME Not sure if this is safe to change to a Zulip string
     public static final String BROADCAST = "com.humbughq.mobile.PushMessage.BROADCAST";
 

@@ -21,14 +21,14 @@ import com.zulip.android.ZulipApp;
 
 @DatabaseTable(tableName = "streams")
 public class Stream {
-    public static final int DEFAULT_COLOR = Color.GRAY;
+    private static final int DEFAULT_COLOR = Color.GRAY;
 
     public static final String ID_FIELD = "id";
     public static final String NAME_FIELD = "name";
-    public static final String MESSAGES_FIELD = "messages";
+    private static final String MESSAGES_FIELD = "messages";
     public static final String COLOR_FIELD = "color";
-    public static final String INHOMEVIEW_FIELD = "inHomeView";
-    public static final String INVITEONLY_FIELD = "inviteOnly";
+    private static final String INHOMEVIEW_FIELD = "inHomeView";
+    private static final String INVITEONLY_FIELD = "inviteOnly";
     public static final String SUBSCRIBED_FIELD = "subscribed";
 
     @DatabaseField(columnName = ID_FIELD, generatedId = true)
@@ -44,6 +44,7 @@ public class Stream {
     @DatabaseField(columnName = INVITEONLY_FIELD)
     private Boolean inviteOnly;
     @DatabaseField(columnName = SUBSCRIBED_FIELD)
+    private
     boolean subscribed;
 
     /**
@@ -91,7 +92,7 @@ public class Stream {
         subscribed = isSubscribed;
     }
 
-    public static int parseColor(String color) {
+    private static int parseColor(String color) {
         // Color.parseColor does not handle colors of the form #f00.
         // Pre-process them into normal 6-char hex form.
         if (color.length() == 4) {
@@ -154,7 +155,7 @@ public class Stream {
         }
     }
 
-    public void updateFromJSON(JSONObject message) throws JSONException {
+    private void updateFromJSON(JSONObject message) throws JSONException {
         color = parseColor(message.getString("color"));
         inHomeView = message.getBoolean("in_home_view");
         inviteOnly = message.getBoolean("invite_only");

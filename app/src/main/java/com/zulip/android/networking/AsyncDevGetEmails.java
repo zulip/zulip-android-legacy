@@ -15,7 +15,7 @@ import org.json.JSONObject;
 
 public class AsyncDevGetEmails extends ZulipAsyncPushTask {
     private static final String DISABLED = "dev_disabled";
-    Context context;
+    private Context context;
     public final static String EMAIL_JSON = "emails_json";
 
     public AsyncDevGetEmails(LoginActivity loginActivity) {

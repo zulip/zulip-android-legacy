@@ -266,7 +266,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    protected void openLegal() {
+    private void openLegal() {
         Intent i = new Intent(this, LegalActivity.class);
         startActivityForResult(i, 0);
     }
@@ -301,7 +301,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    public void setupGoogleSignIn() {
+    private void setupGoogleSignIn() {
         if (mGoogleApiClient == null) {
             GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                     .requestEmail()

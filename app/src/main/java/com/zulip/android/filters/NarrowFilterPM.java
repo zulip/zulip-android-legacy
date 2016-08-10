@@ -21,8 +21,8 @@ import com.zulip.android.models.Person;
 import com.zulip.android.models.Stream;
 
 public class NarrowFilterPM implements NarrowFilter {
-    List<Person> people;
-    String recipientString;
+    private List<Person> people;
+    private String recipientString;
 
     public static final Parcelable.Creator<NarrowFilterPM> CREATOR = new Parcelable.Creator<NarrowFilterPM>() {
         public NarrowFilterPM createFromParcel(Parcel in) {

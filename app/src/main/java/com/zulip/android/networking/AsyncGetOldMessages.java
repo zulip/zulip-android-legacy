@@ -26,21 +26,21 @@ import com.zulip.android.util.ZLog;
 import com.zulip.android.ZulipApp;
 
 public class AsyncGetOldMessages extends ZulipAsyncPushTask {
-    MessageListener listener;
+    private MessageListener listener;
     public List<Message> receivedMessages;
-    MessageListener.LoadPosition position;
+    private MessageListener.LoadPosition position;
     protected MessageRange rng;
-    protected int mainAnchor;
+    private int mainAnchor;
     protected NarrowFilter filter;
     private int before;
     private int afterAnchor;
     private int after;
 
-    boolean recursedAbove = false;
-    boolean recursedBelow = false;
+    private boolean recursedAbove = false;
+    private boolean recursedBelow = false;
 
-    boolean noFurtherMessages = false;
-    int rangeHigh = -2;
+    private boolean noFurtherMessages = false;
+    private int rangeHigh = -2;
 
     public AsyncGetOldMessages(MessageListener listener) {
         super(ZulipApp.get());

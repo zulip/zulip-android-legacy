@@ -97,25 +97,25 @@ import org.json.JSONObject;
 public class ZulipActivity extends AppCompatActivity implements
         MessageListFragment.Listener, NarrowListener {
 
-    public static final String NARROW = "narrow";
-    public static final String PARAMS = "params";
+    private static final String NARROW = "narrow";
+    private static final String PARAMS = "params";
     //At these many letters the emoji/person hint will not show now on
     private static final int MAX_THRESOLD_EMOJI_HINT = 5;
     //At these many letters the emoji/person hint starts to show up
     private static final int MIN_THRESOLD_EMOJI_HINT = 1;
-    ZulipApp app;
-    List<Message> mutedTopics;
+    private ZulipApp app;
+    private List<Message> mutedTopics;
 
-    boolean suspended = false;
-    boolean logged_in = false;
+    private boolean suspended = false;
+    private boolean logged_in = false;
 
-    ZulipActivity that = this; // self-ref
-    SharedPreferences settings;
+    private ZulipActivity that = this; // self-ref
+    private SharedPreferences settings;
     String client_id;
 
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
-    ExpandableListView streamsDrawer;
+    private ExpandableListView streamsDrawer;
     private static final Interpolator FAST_OUT_SLOW_IN_INTERPOLATOR = new FastOutSlowInInterpolator();
     private LinearLayout chatBox;
     private FloatingActionButton fab;
@@ -131,20 +131,20 @@ public class ZulipActivity extends AppCompatActivity implements
 
     private Toolbar toolbar;
 
-    MessageListFragment currentList;
-    MessageListFragment narrowedList;
-    MessageListFragment homeList;
+    private MessageListFragment currentList;
+    private MessageListFragment narrowedList;
+    private MessageListFragment homeList;
 
-    AutoCompleteTextView streamActv;
-    AutoCompleteTextView topicActv;
+    private AutoCompleteTextView streamActv;
+    private AutoCompleteTextView topicActv;
     private AutoCompleteTextView messageEt;
     private TextView textView;
     private ImageView sendBtn;
     private ImageView togglePrivateStreamBtn;
-    Notifications notifications;
-    SimpleCursorAdapter streamActvAdapter;
-    SimpleCursorAdapter subjectActvAdapter;
-    SimpleCursorAdapter emailActvAdapter;
+    private Notifications notifications;
+    private SimpleCursorAdapter streamActvAdapter;
+    private SimpleCursorAdapter subjectActvAdapter;
+    private SimpleCursorAdapter emailActvAdapter;
 
     private BroadcastReceiver onGcmMessage = new BroadcastReceiver() {
         public void onReceive(Context contenxt, Intent intent) {
@@ -207,7 +207,7 @@ public class ZulipActivity extends AppCompatActivity implements
         }
     };
 
-    protected RefreshableCursorAdapter peopleAdapter;
+    private RefreshableCursorAdapter peopleAdapter;
 
     @Override
     public void addToList(Message message) {
@@ -544,7 +544,7 @@ public class ZulipActivity extends AppCompatActivity implements
         });
     }
 
-    public void displayChatBox(boolean show) {
+    private void displayChatBox(boolean show) {
         if (show) {
             showView(chatBox);
         } else {
@@ -552,7 +552,7 @@ public class ZulipActivity extends AppCompatActivity implements
         }
     }
 
-    public void displayFAB(boolean show) {
+    private void displayFAB(boolean show) {
         if (show) {
             showView(fab);
         } else {
@@ -616,7 +616,7 @@ public class ZulipActivity extends AppCompatActivity implements
         animator.start();
     }
 
-    public void setupListViewAdapter() {
+    private void setupListViewAdapter() {
         ExpandableStreamDrawerAdapter streamsDrawerAdapter = null;
         Callable<Cursor> streamsGenerator = new Callable<Cursor>() {
             @Override
@@ -810,9 +810,9 @@ public class ZulipActivity extends AppCompatActivity implements
             composeStatus.setVisibility(View.GONE);
     }
 
-    LinearLayout composeStatus;
+    private LinearLayout composeStatus;
 
-    public void setUpAdapter() {
+    private void setUpAdapter() {
         streamActvAdapter = new SimpleCursorAdapter(
                 that, R.layout.stream_tile, null,
                 new String[]{Stream.NAME_FIELD},
@@ -960,32 +960,32 @@ public class ZulipActivity extends AppCompatActivity implements
                         DatabaseHelper.likeEscape(piece) + "%")
                 .closeableIterator().getRawResults()).getRawCursor();
     }
-    public void switchToStream() {
+    private void switchToStream() {
         removeEditTextErrors();
         if (!isCurrentModeStream()) {
             switchView();
         }
     }
 
-    public void switchToPrivate() {
+    private void switchToPrivate() {
         removeEditTextErrors();
         if (isCurrentModeStream()) {
             switchView();
         }
     }
 
-    public boolean isCurrentModeStream() {
+    private boolean isCurrentModeStream() {
         //The TextView is VISIBLE which means currently send to stream is on.
         return textView.getVisibility() == View.VISIBLE;
     }
 
-    public void removeEditTextErrors() {
+    private void removeEditTextErrors() {
         streamActv.setError(null);
         topicActv.setError(null);
         messageEt.setError(null);
     }
 
-    public void switchView() {
+    private void switchView() {
         if (isCurrentModeStream()) { //Person
             togglePrivateStreamBtn.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_action_bullhorn));
             tempStreamSave = topicActv.getText().toString();
@@ -1008,7 +1008,7 @@ public class ZulipActivity extends AppCompatActivity implements
         }
     }
 
-    String tempStreamSave = null;
+    private String tempStreamSave = null;
 
     @Override
     public void clearChatBox() {
@@ -1077,7 +1077,7 @@ public class ZulipActivity extends AppCompatActivity implements
         doNarrow(new NarrowFilterStream(stream, null));
     }
 
-    protected void narrow_pm_with(final Person person) {
+    private void narrow_pm_with(final Person person) {
         doNarrow(new NarrowFilterPM(Arrays.asList(app.getYou(), person)));
     }
 
@@ -1104,7 +1104,7 @@ public class ZulipActivity extends AppCompatActivity implements
         }
     }
 
-    public void doNarrow(NarrowFilter filter) {
+    private void doNarrow(NarrowFilter filter) {
         narrowedList = MessageListFragment.newInstance(filter);
         // Push to the back stack if we are not already narrowed
         pushListFragment(narrowedList, NARROW);
@@ -1295,13 +1295,13 @@ public class ZulipActivity extends AppCompatActivity implements
     /**
      * Switch to the login view.
      */
-    protected void openLogin() {
+    private void openLogin() {
         Intent i = new Intent(this, LoginActivity.class);
         startActivity(i);
         finish();
     }
 
-    protected void openLegal() {
+    private void openLegal() {
         Intent i = new Intent(this, LegalActivity.class);
         startActivityForResult(i, 0);
     }
@@ -1358,7 +1358,7 @@ public class ZulipActivity extends AppCompatActivity implements
         }
     }
 
-    protected void onRefresh() {
+    private void onRefresh() {
         super.onResume();
 
         if (event_poll != null) {
@@ -1371,7 +1371,7 @@ public class ZulipActivity extends AppCompatActivity implements
         startRequests();
     }
 
-    protected void startRequests() {
+    private void startRequests() {
         Log.i("zulip", "Starting requests");
 
         if (event_poll != null) {

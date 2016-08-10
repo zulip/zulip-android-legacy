@@ -26,12 +26,12 @@ public class Notifications {
 
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
-    static final String TAG = "GCM";
+    private static final String TAG = "GCM";
 
-    ZulipApp app;
-    GoogleCloudMessaging gcm;
-    String regid;
-    Activity activity;
+    private ZulipApp app;
+    private GoogleCloudMessaging gcm;
+    private String regid;
+    private Activity activity;
 
     public Notifications(ZulipActivity activity) {
         this.activity = activity;

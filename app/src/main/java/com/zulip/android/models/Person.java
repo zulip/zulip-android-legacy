@@ -20,11 +20,11 @@ import com.zulip.android.ZulipApp;
 
 @DatabaseTable(tableName = "people")
 public class Person {
-    public static final String ID_FIELD = "id";
+    private static final String ID_FIELD = "id";
     public static final String NAME_FIELD = "name";
     public static final String MESSAGESPARTICIPATEDIN_FIELD = "messagesParticipatedIn";
     public static final String EMAIL_FIELD = "email";
-    public static final String AVATARURL_FIELD = "avatarUrl";
+    private static final String AVATARURL_FIELD = "avatarUrl";
     public static final String ISBOT_FIELD = "isBot";
     public static final String ISACTIVE_FIELD = "isActive";
 
@@ -39,6 +39,7 @@ public class Person {
     @DatabaseField(columnName = ISBOT_FIELD)
     private boolean isBot;
     @DatabaseField(columnName = ISACTIVE_FIELD)
+    private
     boolean isActive;
 
     public Person(String name, String email) {
@@ -89,7 +90,7 @@ public class Person {
         return avatarURL;
     }
 
-    public void setAvatarURL(String avatarURL) {
+    private void setAvatarURL(String avatarURL) {
         this.avatarURL = avatarURL;
     }
 
@@ -126,7 +127,7 @@ public class Person {
                 .toHashCode();
     }
 
-    static Person getByEmail(ZulipApp app, String email) {
+    private static Person getByEmail(ZulipApp app, String email) {
         try {
             Dao<Person, Integer> dao = app.getDatabaseHelper().getDao(
                     Person.class);
@@ -183,7 +184,7 @@ public class Person {
         isActive = active;
     }
 
-    void updateFromJSON(JSONObject jPerson) throws JSONException {
+    private void updateFromJSON(JSONObject jPerson) throws JSONException {
         name = jPerson.getString("full_name");
         isBot = jPerson.getBoolean("is_bot");
         // It would be nice if the server gave us avatarURL here, but it doesn't
