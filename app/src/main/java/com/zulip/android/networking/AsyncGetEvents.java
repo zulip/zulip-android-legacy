@@ -247,7 +247,6 @@ public class AsyncGetEvents extends Thread {
     }
 
 
-
     /**
      * Handles any event returned by the server that we care about.
      */

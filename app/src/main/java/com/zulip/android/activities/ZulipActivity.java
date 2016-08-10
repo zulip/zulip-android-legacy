@@ -960,6 +960,7 @@ public class ZulipActivity extends AppCompatActivity implements
                         DatabaseHelper.likeEscape(piece) + "%")
                 .closeableIterator().getRawResults()).getRawCursor();
     }
+
     private void switchToStream() {
         removeEditTextErrors();
         if (!isCurrentModeStream()) {
@@ -1125,8 +1126,7 @@ public class ZulipActivity extends AppCompatActivity implements
             topicActv.setText(message.getSubject());
             if ("".equals(message.getSubject())) {
                 topicActv.requestFocus();
-            }
-            else messageEt.requestFocus();
+            } else messageEt.requestFocus();
         }
         if (openSoftKeyboard) {
             ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE)).toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);

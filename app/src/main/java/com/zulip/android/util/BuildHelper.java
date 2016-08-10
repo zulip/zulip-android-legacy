@@ -6,7 +6,8 @@ import com.zulip.android.BuildConfig;
 
 public class BuildHelper {
 
-    private BuildHelper() {}
+    private BuildHelper() {
+    }
 
     public static boolean shouldLogToCrashlytics() {
         return !isEmulator() && !BuildConfig.DEBUG;

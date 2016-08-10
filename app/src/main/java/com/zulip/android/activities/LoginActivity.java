@@ -50,6 +50,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private EditText serverIn;
 
     private View mGoogleSignInButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -378,6 +379,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 break;
         }
     }
+
     private boolean isInputValidForDevAuth() {
         boolean isValid = true;
 
@@ -388,13 +390,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             String serverString = mServerEditText.getText().toString();
             if (!serverString.contains("://")) serverString = "https://" + serverString;
 
-                if (!Patterns.WEB_URL.matcher(serverString).matches()) {
-                    mServerEditText.setError(getString(R.string.invalid_domain));
-                    isValid = false;
-                }
+            if (!Patterns.WEB_URL.matcher(serverString).matches()) {
+                mServerEditText.setError(getString(R.string.invalid_domain));
+                isValid = false;
             }
+        }
         return isValid;
     }
+
     private boolean isInputValid() {
         boolean isValid = true;
 

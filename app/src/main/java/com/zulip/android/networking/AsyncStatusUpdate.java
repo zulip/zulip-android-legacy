@@ -78,9 +78,9 @@ public class AsyncStatusUpdate extends ZulipAsyncPushTask {
                             latestPresence = presence;
                         }
                     } else if (status.equals(PresenceType.IDLE.toString())
-                                && latestStatus.equals(PresenceType.IDLE.toString())
-                                && latestPresence.getLong(TIMESTAMP) < timestamp) {
-                            latestPresence = presence;
+                            && latestStatus.equals(PresenceType.IDLE.toString())
+                            && latestPresence.getLong(TIMESTAMP) < timestamp) {
+                        latestPresence = presence;
                     }
                 }
             }

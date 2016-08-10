@@ -222,7 +222,6 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     }
 
 
-
     public void addNewMessage(Message message) {
         MessageHeaderParent item = null;
         for (int i = getItemCount(false) - 1; i > 1; i--) {
