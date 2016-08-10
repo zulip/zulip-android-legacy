@@ -64,7 +64,7 @@ public class AsyncGetOldMessages extends ZulipAsyncPushTask {
         this.after = after;
         this.filter = filter;
         position = pos;
-        this.receivedMessages = new ArrayList<Message>();
+        this.receivedMessages = new ArrayList<>();
         Log.i("AGOM", "executing " + anchor + " " + before + " " + after);
         execute("GET", "v1/messages");
     }
@@ -236,11 +236,11 @@ public class AsyncGetOldMessages extends ZulipAsyncPushTask {
                 watch.reset();
                 watch.start();
                 JSONArray objects = response.getJSONArray("messages");
-                ArrayList<Message> fetchedMessages = new ArrayList<Message>(
+                ArrayList<Message> fetchedMessages = new ArrayList<>(
                         objects.length());
 
-                HashMap<String, Person> personCache = new HashMap<String, Person>();
-                HashMap<String, Stream> streamCache = new HashMap<String, Stream>();
+                HashMap<String, Person> personCache = new HashMap<>();
+                HashMap<String, Stream> streamCache = new HashMap<>();
 
                 for (int i = 0; i < objects.length(); i++) {
                     Message message = new Message(this.app,

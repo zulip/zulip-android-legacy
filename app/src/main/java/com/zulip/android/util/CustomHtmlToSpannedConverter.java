@@ -602,7 +602,7 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
     }
 
     private static HashMap<String, Integer> buildColorMap() {
-        HashMap<String, Integer> map = new HashMap<String, Integer>();
+        HashMap<String, Integer> map = new HashMap<>();
         map.put("aqua", 0x00FFFF);
         map.put("black", 0x000000);
         map.put("blue", 0x0000FF);

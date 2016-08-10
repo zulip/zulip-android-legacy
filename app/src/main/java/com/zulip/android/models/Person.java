@@ -207,7 +207,7 @@ public class Person {
     }
 
     public static void sortByPresence(ZulipApp app, List<Person> people) {
-        final Map<String, Presence> presenceCopy = new HashMap<String, Presence>(
+        final Map<String, Presence> presenceCopy = new HashMap<>(
                 app.presences);
 
         Collections.sort(people, new Comparator<Person>() {

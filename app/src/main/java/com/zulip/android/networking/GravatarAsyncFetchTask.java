@@ -36,7 +36,7 @@ public class GravatarAsyncFetchTask extends AsyncTask<URL, Void, Bitmap> {
     private GravatarAsyncFetchTask(ZulipActivity context, ImageView imageView,
                                    Person person) {
         // Use a WeakReference to ensure the ImageView can be garbage collected
-        imageViewReference = new WeakReference<ImageView>(imageView);
+        imageViewReference = new WeakReference<>(imageView);
         this.person = person;
         this.context = context;
     }
@@ -106,7 +106,7 @@ public class GravatarAsyncFetchTask extends AsyncTask<URL, Void, Bitmap> {
         public AsyncDrawable(Resources res, Bitmap bitmap,
                              GravatarAsyncFetchTask bitmapWorkerTask) {
             super(res, bitmap);
-            taskReference = new WeakReference<GravatarAsyncFetchTask>(
+            taskReference = new WeakReference<>(
                     bitmapWorkerTask);
         }
 
