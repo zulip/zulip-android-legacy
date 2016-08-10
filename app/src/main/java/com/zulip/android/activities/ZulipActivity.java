@@ -84,6 +84,7 @@ import com.zulip.android.models.Presence;
 import com.zulip.android.models.PresenceType;
 import com.zulip.android.R;
 import com.zulip.android.models.Stream;
+import com.zulip.android.networking.AsyncFetchGoogleID;
 import com.zulip.android.networking.AsyncSend;
 import com.zulip.android.util.ZLog;
 import com.zulip.android.ZulipApp;
@@ -92,6 +93,7 @@ import com.zulip.android.networking.AsyncGetEvents;
 import com.zulip.android.networking.AsyncStatusUpdate;
 import com.zulip.android.networking.ZulipAsyncPushTask;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class ZulipActivity extends AppCompatActivity implements
@@ -261,8 +263,8 @@ public class ZulipActivity extends AppCompatActivity implements
             return;
         }
         this.logged_in = true;
-        notifications = new Notifications(this);
-        notifications.register();
+        registerGCM(); //Register the GCM to the server
+        unRegisterGCMReceiver(); //If GCM broadcast is registered, unregister it
         setContentView(R.layout.main);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -487,6 +489,45 @@ public class ZulipActivity extends AppCompatActivity implements
             }
         });
         messageEt.setAdapter(combinedAdapter);
+    }
+
+    private void unRegisterGCMReceiver() {
+        try {
+            unregisterReceiver(onGcmMessage);
+        } catch (IllegalArgumentException e){
+            Log.e("GCM", "GCM was not registerd");
+        }
+    }
+
+    private void registerGCM() {
+        final String clientID = app.getSettings().getString("google_client_id", null);
+        if (clientID == null) {
+            AsyncFetchGoogleID asyncFetchGoogleID = new AsyncFetchGoogleID(app);
+            asyncFetchGoogleID.setCallback(new ZulipAsyncPushTask.AsyncTaskCompleteListener() {
+                @Override
+                public void onTaskComplete(String result, JSONObject jsonObject) {
+                    try {
+                        JSONObject jsonObject1 = new JSONObject(result);
+                        SharedPreferences.Editor edit = app.getSettings().edit();
+                        edit.putString("google_client_id", jsonObject1.getString("google_client_id"));
+                        edit.apply();
+                        notifications = new Notifications(ZulipActivity.this, jsonObject1.getString("google_client_id"));
+                        notifications.register();
+                    } catch (JSONException e) {
+                        ZLog.logException(e);
+                    }
+                }
+
+                @Override
+                public void onTaskFailure(String result) {
+
+                }
+            });
+            asyncFetchGoogleID.execute();
+        } else {
+            notifications = new Notifications(this, clientID);
+            notifications.register();
+        }
     }
 
     private Cursor makeEmojiCursor(CharSequence emoji)
@@ -1286,7 +1327,7 @@ public class ZulipActivity extends AppCompatActivity implements
         Log.i("status", "suspend");
         this.suspended = true;
 
-        unregisterReceiver(onGcmMessage);
+        registerGCMReciever();
 
         if (event_poll != null) {
             event_poll.abort();
@@ -1303,11 +1344,7 @@ public class ZulipActivity extends AppCompatActivity implements
         Log.i("status", "resume");
         this.suspended = false;
 
-        // Set up the BroadcastReceiver to trap GCM messages so notifications
-        // don't show while in the app
-        IntentFilter filter = new IntentFilter(GcmBroadcastReceiver.BROADCAST);
-        filter.setPriority(2);
-        registerReceiver(onGcmMessage, filter);
+        unRegisterGCMReceiver();
 
         homeList.onActivityResume();
         if (narrowedList != null) {
@@ -1316,12 +1353,25 @@ public class ZulipActivity extends AppCompatActivity implements
         startRequests();
     }
 
+    private void registerGCMReciever() {
+        // Set up the BroadcastReceiver to trap GCM messages so notifications
+        // don't show while in the app
+        IntentFilter filter = new IntentFilter(GcmBroadcastReceiver.BROADCAST);
+        filter.setPriority(2);
+        registerReceiver(onGcmMessage, filter);
+
+        Log.d("GCM", "GCM Broadcast started.");
+    }
+
+
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
         if (statusUpdateHandler != null) {
             statusUpdateHandler.removeMessages(0);
         }
+        registerGCMReciever();
     }
 
     protected void onRefresh() {
