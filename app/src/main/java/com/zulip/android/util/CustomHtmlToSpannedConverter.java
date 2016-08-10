@@ -85,11 +85,8 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
         mReader.setContentHandler(this);
         try {
             mReader.parse(new InputSource(new StringReader(mSource)));
-        } catch (IOException e) {
+        } catch (IOException | SAXException e) {
             // We are reading from a string. There should not be IO problems.
-            throw new RuntimeException(e);
-        } catch (SAXException e) {
-            // TagSoup doesn't throw parse exceptions.
             throw new RuntimeException(e);
         }
 
