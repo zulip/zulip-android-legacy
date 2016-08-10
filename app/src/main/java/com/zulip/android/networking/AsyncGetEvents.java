@@ -257,9 +257,9 @@ public class AsyncGetEvents extends Thread {
             StopWatch watch = new StopWatch();
             watch.start();
 
-            ArrayList<Message> messages = new ArrayList<Message>();
-            HashMap<String, Person> personCache = new HashMap<String, Person>();
-            HashMap<String, Stream> streamCache = new HashMap<String, Stream>();
+            ArrayList<Message> messages = new ArrayList<>();
+            HashMap<String, Person> personCache = new HashMap<>();
+            HashMap<String, Stream> streamCache = new HashMap<>();
 
             for (int i = 0; i < events.length(); i++) {
                 JSONObject event = events.getJSONObject(i);

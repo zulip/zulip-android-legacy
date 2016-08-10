@@ -42,7 +42,7 @@ public class NarrowFilterPM implements NarrowFilter {
 
     private NarrowFilterPM(String recipientString) {
         this.recipientString = recipientString;
-        this.people = new ArrayList<Person>();
+        this.people = new ArrayList<>();
         for (String id : this.recipientString.split(",")) {
             this.people
                     .add(Person.getById(ZulipApp.get(), Integer.valueOf(id)));
@@ -72,7 +72,7 @@ public class NarrowFilterPM implements NarrowFilter {
 
     @Override
     public String getTitle() {
-        ArrayList<String> names = new ArrayList<String>();
+        ArrayList<String> names = new ArrayList<>();
         for (Person person : people) {
             if (!person.equals(ZulipApp.get().getYou())) {
                 names.add(person.getName());
@@ -98,7 +98,7 @@ public class NarrowFilterPM implements NarrowFilter {
 
     @Override
     public String getJsonFilter() throws JSONException {
-        ArrayList<String> emails = new ArrayList<String>();
+        ArrayList<String> emails = new ArrayList<>();
         for (Person person : this.people) {
             if (!person.equals(ZulipApp.get().getYou())) {
                 emails.add(person.getEmail());

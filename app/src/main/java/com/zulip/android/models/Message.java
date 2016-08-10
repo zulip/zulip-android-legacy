@@ -240,7 +240,7 @@ public class Message {
             return this.getStream().getName();
         } else {
             Person[] people = this.getRecipients(app);
-            ArrayList<String> names = new ArrayList<String>();
+            ArrayList<String> names = new ArrayList<>();
 
             for (Person person : people) {
                 if (person.id != app.getYou().id) {
@@ -268,7 +268,7 @@ public class Message {
     }
 
     public static String emailsMinusYou(List<Person> people, Person you) {
-        ArrayList<String> names = new ArrayList<String>();
+        ArrayList<String> names = new ArrayList<>();
 
         for (Person person : people) {
             if (person.id != you.id) {
@@ -286,7 +286,7 @@ public class Message {
      */
     public Person[] getPersonalReplyTo(ZulipApp app) {
         Person[] people = this.getRecipients(app);
-        ArrayList<Person> names = new ArrayList<Person>();
+        ArrayList<Person> names = new ArrayList<>();
 
         for (Person person : people) {
             if (person.id != app.getYou().id) {

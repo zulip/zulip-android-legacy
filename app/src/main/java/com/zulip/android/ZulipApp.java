@@ -67,13 +67,13 @@ public class ZulipApp extends Application {
      * Mapping of email address to presence information for that user. This is
      * updated every 2 minutes by a background thread (see AsyncStatusUpdate)
      */
-    public final Map<String, Presence> presences = new ConcurrentHashMap<String, Presence>();
+    public final Map<String, Presence> presences = new ConcurrentHashMap<>();
 
     /**
      * Queue of message ids to be marked as read. This queue should be emptied
      * every couple of seconds
      */
-    public final Queue<Integer> unreadMessageQueue = new ConcurrentLinkedQueue<Integer>();
+    public final Queue<Integer> unreadMessageQueue = new ConcurrentLinkedQueue<>();
 
     public static ZulipApp get() {
         return instance;
@@ -104,7 +104,7 @@ public class ZulipApp extends Application {
             afterLogin();
         }
 
-         mutedTopics = new HashSet<String>(settings.getStringSet(MUTED_TOPIC_KEY, new HashSet<String>()));
+         mutedTopics = new HashSet<>(settings.getStringSet(MUTED_TOPIC_KEY, new HashSet<String>()));
         // create unread message queue
         unreadMessageHandler = new Handler(new Handler.Callback() {
             @Override
@@ -205,7 +205,7 @@ public class ZulipApp extends Application {
             }
         }
         SharedPreferences.Editor editor = settings.edit();
-        editor.putStringSet(MUTED_TOPIC_KEY, new HashSet<String>(mutedTopics));
+        editor.putStringSet(MUTED_TOPIC_KEY, new HashSet<>(mutedTopics));
         editor.apply();
     }
 
@@ -254,7 +254,7 @@ public class ZulipApp extends Application {
     @SuppressWarnings("unchecked")
     public <C, T> RuntimeExceptionDao<C, T> getDao(Class<C> cls) {
         try {
-            return new RuntimeExceptionDao<C, T>(
+            return new RuntimeExceptionDao<>(
                     (Dao<C, T>) databaseHelper.getDao(cls));
         } catch (SQLException e) {
             // Well that's sort of awkward.
@@ -338,7 +338,7 @@ public class ZulipApp extends Application {
     public void muteTopic(Message message) {
         mutedTopics.add(message.concatStreamAndTopic());
         SharedPreferences.Editor editor = settings.edit();
-        editor.putStringSet(MUTED_TOPIC_KEY, new HashSet<String>(mutedTopics));
+        editor.putStringSet(MUTED_TOPIC_KEY, new HashSet<>(mutedTopics));
         editor.apply();
     }
 

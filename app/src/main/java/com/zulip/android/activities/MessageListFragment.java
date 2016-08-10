@@ -109,7 +109,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
             filter = getArguments().getParcelable(PARAM_FILTER);
         }
         mutedMessages = new ArrayList<>();
-        messageIndex = new SparseArray<Message>();
+        messageIndex = new SparseArray<>();
         messageList = new ArrayList<>();
     }
 

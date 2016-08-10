@@ -14,7 +14,7 @@ public class AsyncUnreadMessagesUpdate extends ZulipAsyncPushTask {
     }
 
     public final void execute() {
-        ArrayList<Integer> messageIds = new ArrayList<Integer>();
+        ArrayList<Integer> messageIds = new ArrayList<>();
         while (true) {
             Integer item = app.unreadMessageQueue.poll();
             if (item == null) {
