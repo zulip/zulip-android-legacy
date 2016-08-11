@@ -651,7 +651,7 @@ public class ZulipActivity extends AppCompatActivity implements
                         String streamName = ((Cursor) streamsDrawer.getExpandableListAdapter().getGroup(groupPosition)).getString(1);
                         String subjectName = ((TextView) v).getText().toString();
                         onNarrow(new NarrowFilterStream(streamName, subjectName));
-                        onNarrowFillSendBoxStream(streamName, subjectName);
+                        onNarrowFillSendBoxStream(streamName, subjectName, false);
                         break;
                     default:
                         return false;
@@ -693,7 +693,7 @@ public class ZulipActivity extends AppCompatActivity implements
                             @Override
                             public void onClick(View v) {
                                 onNarrow(new NarrowFilterStream(streamName, null));
-                                onNarrowFillSendBoxStream(streamName, "");
+                                onNarrowFillSendBoxStream(streamName, "", false);
                             }
                         });
                         return true;
@@ -1111,7 +1111,7 @@ public class ZulipActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onNarrowFillSendBox(Message message) {
+    public void onNarrowFillSendBox(Message message, boolean openSoftKeyboard) {
         displayChatBox(true);
         displayFAB(false);
         if (message.getType() == MessageType.PRIVATE_MESSAGE) {
@@ -1127,10 +1127,12 @@ public class ZulipActivity extends AppCompatActivity implements
             }
             else messageEt.requestFocus();
         }
-        ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE)).toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+        if (openSoftKeyboard) {
+            ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE)).toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+        }
     }
 
-    public void onNarrowFillSendBoxStream(String stream, String subject) {
+    public void onNarrowFillSendBoxStream(String stream, String subject, boolean openSoftKeyboard) {
         displayChatBox(true);
         displayFAB(false);
         switchToStream();
@@ -1139,8 +1141,9 @@ public class ZulipActivity extends AppCompatActivity implements
         if ("".equals(subject)) {
             topicActv.requestFocus();
         } else messageEt.requestFocus();
-
-        ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE)).toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+        if (openSoftKeyboard) {
+            ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE)).toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+        }
     }
 
     public void onNarrow(NarrowFilter narrowFilter) {
