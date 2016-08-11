@@ -193,30 +193,30 @@ public class MessageListFragment extends Fragment implements MessageListener {
         Message message = (Message) adapter.getItem(adapter.getContextMenuItemSelectedPosition());
         switch (item.getItemId()) {
             case R.id.reply_to_stream:
-                ((NarrowListener) getActivity()).onNarrowFillSendBox(message);
+                ((NarrowListener) getActivity()).onNarrowFillSendBox(message, true);
                 return true;
             case R.id.reply_to_private:
-                ((NarrowListener) getActivity()).onNarrowFillSendBox(message);
+                ((NarrowListener) getActivity()).onNarrowFillSendBox(message, true);
                 return true;
             case R.id.reply_to_sender:
-                ((NarrowListener) getActivity()).onNarrowFillSendBox(message);
+                ((NarrowListener) getActivity()).onNarrowFillSendBox(message, true);
                 return true;
             case R.id.narrow_to_private:
                 if (getActivity() instanceof NarrowListener) {
                     ((NarrowListener) getActivity()).onNarrow(new NarrowFilterPM(Arrays.asList(message.getRecipients(app))));
-                    ((NarrowListener) getActivity()).onNarrowFillSendBox(message);
+                    ((NarrowListener) getActivity()).onNarrowFillSendBox(message, false);
                 }
                 return true;
             case R.id.narrow_to_stream:
                 if (getActivity() instanceof NarrowListener) {
                     ((NarrowListener) getActivity()).onNarrow(new NarrowFilterStream(message.getStream(), null));
-                    ((NarrowListener) getActivity()).onNarrowFillSendBox(message);
+                    ((NarrowListener) getActivity()).onNarrowFillSendBox(message, false);
                 }
                 return true;
             case R.id.narrow_to_subject:
                 if (getActivity() instanceof NarrowListener) {
                     ((NarrowListener) getActivity()).onNarrow(new NarrowFilterStream(message.getStream(), message.getSubject()));
-                    ((NarrowListener) getActivity()).onNarrowFillSendBox(message);
+                    ((NarrowListener) getActivity()).onNarrowFillSendBox(message, false);
                 }
                 return true;
             case R.id.copy_message:

@@ -89,18 +89,18 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                         } else {
 
                             narrowListener.onNarrow(new NarrowFilterStream(Stream.getByName(zulipApp, messageHeaderParent.getStream()), ""));
-                            narrowListener.onNarrowFillSendBoxStream(messageHeaderParent.getStream(), "");
+                            narrowListener.onNarrowFillSendBoxStream(messageHeaderParent.getStream(), "", false);
                         }
                         break;
 
                     case R.id.instance: //Topic
                         MessageHeaderParent messageParent = (MessageHeaderParent) getItem(position);
                         narrowListener.onNarrow(new NarrowFilterStream(Stream.getByName(zulipApp, messageParent.getStream()), messageParent.getSubject()));
-                        narrowListener.onNarrowFillSendBoxStream(messageParent.getStream(), "");
+                        narrowListener.onNarrowFillSendBoxStream(messageParent.getStream(), "", false);
                         break;
                     case R.id.contentView: //Main message
                         Message message = (Message) getItem(position);
-                        narrowListener.onNarrowFillSendBox(message);
+                        narrowListener.onNarrowFillSendBox(message, false);
                         break;
 
                     case R.id.messageTile:
