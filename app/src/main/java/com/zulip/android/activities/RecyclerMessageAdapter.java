@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.support.annotation.ColorInt;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
+import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.text.format.DateUtils;
@@ -56,11 +57,16 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     int mDefaultStreamHeaderColor;
 
     @ColorInt
-    private int mDefaultPrivateMessageColor;
+    private int streamMessageBackground;
+
+    @ColorInt
+    private int privateMessageBackground;
     private OnItemClickListener onItemClickListener;
     private int contextMenuItemSelectedPosition;
     private View footerView;
     private View headerView;
+
+    private boolean isCurrentThemeNight;
 
     int getContextMenuItemSelectedPosition() {
         return contextMenuItemSelectedPosition;
@@ -73,8 +79,11 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         this.context = context;
         narrowListener = (NarrowListener) context;
         this.startedFromFilter = startedFromFilter;
+        isCurrentThemeNight = (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES);
         mDefaultStreamHeaderColor = ContextCompat.getColor(context, R.color.stream_header);
-        mDefaultPrivateMessageColor = ContextCompat.getColor(context, R.color.huddle_body);
+        privateMessageBackground = ContextCompat.getColor(context, R.color.private_background);
+        streamMessageBackground = ContextCompat.getColor(context, R.color.stream_background);
+
         privateHuddleText = context.getResources().getString(R.string.huddle_text);
         setupHeaderAndFooterViews();
         onItemClickListener = new OnItemClickListener() {
@@ -183,7 +192,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             return VIEWTYPE_FOOTER;
         else {
             Log.e("ItemError", "object: " + items.get(position).toString());
-            throw new RuntimeException("MESSAGE TYPE NOT KNOWN & Position:"+position);
+            throw new RuntimeException("MESSAGE TYPE NOT KNOWN & Position:" + position);
         }
     }
 
@@ -254,6 +263,9 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 View messageView = LayoutInflater.from(parent.getContext()).inflate(R.layout.message_tile, parent, false);
                 MessageHolder messageHolder = new MessageHolder(messageView);
                 messageHolder.setItemClickListener(onItemClickListener);
+                if (isCurrentThemeNight) {
+                    messageHolder.leftBar.setVisibility(View.GONE);
+                }
                 return messageHolder;
             case VIEWTYPE_FOOTER:
                 footerView = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_loading, parent, false);
@@ -278,7 +290,10 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                     messageHeaderHolder.streamTextView.setText(messageHeaderParent.getStream());
                     messageHeaderHolder.topicTextView.setText(messageHeaderParent.getSubject());
 
-                    ViewCompat.setBackgroundTintList(messageHeaderHolder.arrowHead, ColorStateList.valueOf(messageHeaderParent.getColor()));
+                    if (!isCurrentThemeNight) {
+                        messageHeaderHolder.streamTextView.setBackgroundColor(messageHeaderParent.getColor());
+                        ViewCompat.setBackgroundTintList(messageHeaderHolder.arrowHead, ColorStateList.valueOf(messageHeaderParent.getColor()));
+                    }
                     messageHeaderHolder.streamTextView.setBackgroundColor(messageHeaderParent.getColor());
 
                     if (messageHeaderParent.isMute()) {
@@ -301,12 +316,14 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
                 if (message.getType() == MessageType.STREAM_MESSAGE) {
                     messageHolder.senderName.setText(message.getSender().getName());
-                    messageHolder.leftBar.setBackgroundColor(message.getStream().getColor());
-                    messageHolder.messageTile.setBackgroundColor(Color.WHITE);
+                    if (!isCurrentThemeNight)
+                        messageHolder.leftBar.setBackgroundColor(message.getStream().getColor());
+                    messageHolder.messageTile.setBackgroundColor(streamMessageBackground);
                 } else {
                     messageHolder.senderName.setText(message.getSender().getName());
-                    messageHolder.leftBar.setBackgroundColor(mDefaultPrivateMessageColor);
-                    messageHolder.messageTile.setBackgroundColor(mDefaultPrivateMessageColor);
+                    if (!isCurrentThemeNight)
+                        messageHolder.leftBar.setBackgroundColor(privateMessageBackground);
+                    messageHolder.messageTile.setBackgroundColor(privateMessageBackground);
                 }
 
                 setUpGravatar(message, messageHolder);
