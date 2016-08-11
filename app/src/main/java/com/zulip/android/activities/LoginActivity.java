@@ -1,11 +1,13 @@
 package com.zulip.android.activities;
 
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -73,45 +75,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         findViewById(R.id.server_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!checkForError()) {
-                    return;
-                }
-
-                AsyncGetBackends asyncGetBackends = new AsyncGetBackends(ZulipApp.get());
-                asyncGetBackends.setCallback(new AsyncTaskCompleteListener() {
-                    @Override
-                    public void onTaskComplete(String result, JSONObject jsonObject) {
-                        try {
-                            JSONObject object = new JSONObject(result);
-                            if (!object.getString("result").equals("success")) {
-                                onTaskFailure("");
-                                return;
-                            }
-
-                            if (object.getString("password").equals("true")) {
-                                findViewById(R.id.passwordAuthLayout).setVisibility(View.VISIBLE);
-                            }
-
-                            if (object.getString("google").equals("true")) {
-                                findViewById(R.id.google_sign_in_button).setVisibility(View.VISIBLE);
-                            }
-
-                            if (object.getString("dev").equals("true")) {
-                                findViewById(R.id.local_server_button).setVisibility(View.VISIBLE);
-                            }
-                            showLoginFields();
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
-                    }
-
-                    @Override
-                    public void onTaskFailure(String result) {
-                        Toast.makeText(LoginActivity.this, "Failed to fetch Backends!", Toast.LENGTH_SHORT).show();
-                    }
-                });
-                asyncGetBackends.execute();
+                checkForError();
             }
         });
 
@@ -163,23 +127,36 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         super.onStop();
     }
 
-    private boolean checkForError() {
+    private void checkForError() {
         String serverURL = serverIn.getText().toString();
         int errorMessage = R.string.invalid_server_domain;
+        String httpScheme = (BuildConfig.DEBUG) ? "http" : "https";
 
         if (serverURL.isEmpty()) {
             serverIn.setError(getString(errorMessage));
-            return false;
+            return;
         }
 
-        // add http if scheme is not included
+        // add http or https if scheme is not included
         if (!serverURL.contains("://")) {
-            serverURL = "http://" + serverURL;
-        }
+            serverURL = httpScheme + "://" + serverURL;
+            showBackends(httpScheme, serverURL);
+        } else {
+            Uri serverUri = Uri.parse(serverURL);
 
+            if (!BuildConfig.DEBUG && serverUri.getScheme().equals("http")) { //Production build and not https
+                showHTTPDialog(serverURL);
+            } else {
+                showBackends(httpScheme, serverURL);
+            }
+        }
+    }
+
+    private void showBackends(String httpScheme, String serverURL) {
         Uri serverUri = Uri.parse(serverURL);
+
         if (serverUri.isRelative()) {
-            serverUri = serverUri.buildUpon().scheme("http").build();
+            serverUri = serverUri.buildUpon().scheme(httpScheme).build();
         }
 
         // if does not begin with "api.zulip.com" and if the path is empty, use "/api" as first segment in the path
@@ -191,7 +168,64 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         mServerEditText.setText(serverUri.toString());
         mServerEditText.setEnabled(false);
         ((ZulipApp) getApplication()).setServerURL(serverUri.toString());
-        return true;
+        AsyncGetBackends asyncGetBackends = new AsyncGetBackends(ZulipApp.get());
+        asyncGetBackends.setCallback(new AsyncTaskCompleteListener() {
+            @Override
+            public void onTaskComplete(String result, JSONObject jsonObject) {
+                try {
+                    JSONObject object = new JSONObject(result);
+                    if (!object.getString("result").equals("success")) {
+                        onTaskFailure("");
+                        return;
+                    }
+
+                    if (object.getString("password").equals("true")) {
+                        findViewById(R.id.passwordAuthLayout).setVisibility(View.VISIBLE);
+                    }
+
+                    if (object.getString("google").equals("true")) {
+                        findViewById(R.id.google_sign_in_button).setVisibility(View.VISIBLE);
+                    }
+
+                    if (object.getString("dev").equals("true")) {
+                        findViewById(R.id.local_server_button).setVisibility(View.VISIBLE);
+                    }
+                    showLoginFields();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onTaskFailure(String result) {
+                Toast.makeText(LoginActivity.this, "Failed to fetch Backends!", Toast.LENGTH_SHORT).show();
+            }
+        });
+        asyncGetBackends.execute();
+    }
+
+    private void showHTTPDialog(final String serverURL) {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.http_or_https)
+                .setMessage(R.string.http_message)
+                .setPositiveButton(R.string.use_https, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        showBackends("https", serverURL);
+                    }
+                })
+                .setNeutralButton(R.string.use_http, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        showBackends("http", serverURL);
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int i) {
+                        dialog.dismiss();
+                    }
+                }).show();
     }
 
     private void handleSignInResult(GoogleSignInResult result) {

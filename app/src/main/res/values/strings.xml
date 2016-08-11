@@ -75,4 +75,8 @@
     <string name="no_message">No messages to receive.</string>
     <string name="menu_filter">Filter</string>
     <string name="menu_today">Today</string>
+    <string name="http_or_https">HTTP/HTTPS</string>
+    <string name="http_message">HTTP is insecure, and we recommend using it only for testing the Zulip Android app against a development environment. Are you sure you want to use HTTP?</string>
+    <string name="use_https">Use HTTPS</string>
+    <string name="use_http">Use HTTP</string>
 </resources>
