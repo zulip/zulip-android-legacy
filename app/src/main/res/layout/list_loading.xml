@@ -11,7 +11,7 @@ per http://pivotallabs.com/android-tidbits-6-22-2011-hiding-header-views/
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:layout_gravity="center"
-        android:background="#eeeeee"
+        android:background="@color/loadingBackground"
         android:gravity="center|center_vertical">
 
         <ProgressBar
@@ -23,6 +23,7 @@ per http://pivotallabs.com/android-tidbits-6-22-2011-hiding-header-views/
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingLeft="16dp"
+            android:textColor="@color/colorTextPrimary"
             android:text="@string/loading_messages"
             android:textSize="18sp" />
     </LinearLayout>

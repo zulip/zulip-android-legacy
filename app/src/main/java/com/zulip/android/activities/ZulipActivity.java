@@ -24,7 +24,6 @@ import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.database.MergeCursor;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -239,6 +238,7 @@ public class ZulipActivity extends AppCompatActivity implements
             displayChatBox(false);
         }
     }
+
     public RefreshableCursorAdapter getPeopleAdapter() {
         return peopleAdapter;
     }
@@ -686,9 +686,9 @@ public class ZulipActivity extends AppCompatActivity implements
                         name.setText(streamName);
                         //Change color in the drawer if this stream is inHomeView only.
                         if (!Stream.getByName(app, streamName).getInHomeView()) {
-                            name.setTextColor(ContextCompat.getColor(ZulipActivity.this, android.R.color.secondary_text_light_nodisable));
+                            name.setTextColor(ContextCompat.getColor(ZulipActivity.this, R.color.colorTextTertiary));
                         } else {
-                            name.setTextColor(ContextCompat.getColor(ZulipActivity.this, android.R.color.primary_text_light));
+                            name.setTextColor(ContextCompat.getColor(ZulipActivity.this, R.color.colorTextPrimary));
                         }
                         view.setOnClickListener(new View.OnClickListener() {
                             @Override
@@ -707,8 +707,8 @@ public class ZulipActivity extends AppCompatActivity implements
                     case R.id.name_child:
                         TextView name_child = (TextView) view;
                         name_child.setText(cursor.getString(columnIndex));
-                        if (app.isTopicMute(cursor.getInt(1), cursor.getString(columnIndex))){
-                            name_child.setTextColor(ContextCompat.getColor(ZulipActivity.this, android.R.color.secondary_text_light_nodisable));
+                        if (app.isTopicMute(cursor.getInt(1), cursor.getString(columnIndex))) {
+                            name_child.setTextColor(ContextCompat.getColor(ZulipActivity.this, R.color.colorTextSecondary));
                         }
                         return true;
                 }
@@ -1171,6 +1171,7 @@ public class ZulipActivity extends AppCompatActivity implements
 
         return false;
     }
+
     private boolean prepareSearchView(Menu menu) {
         if (this.logged_in && Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             // Get the SearchView and set the searchable configuration
@@ -1180,7 +1181,7 @@ public class ZulipActivity extends AppCompatActivity implements
             final android.support.v7.widget.SearchView searchView = (android.support.v7.widget.SearchView) MenuItemCompat.getActionView(mSearchMenuItem);
             searchView.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(getApplicationContext(), ZulipActivity.class)));
             searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-            ((EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text)).setHintTextColor(Color.BLACK);
+            ((EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text)).setHintTextColor(ContextCompat.getColor(this,R.color.colorTextPrimary));
             searchView.setOnQueryTextListener(new android.support.v7.widget.SearchView.OnQueryTextListener() {
                 @Override
                 public boolean onQueryTextSubmit(String s) {

@@ -4,7 +4,7 @@
     android:id="@+id/messageTile"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@android:color/white"
+    android:background="@color/stream_background"
     android:paddingEnd="8dp"
     android:paddingRight="8dp">
 
@@ -34,7 +34,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textColor="@android:color/black"
+            android:textColor="@color/colorTextPrimary"
             android:textStyle="bold"
             tools:text="Sender &lt;alice@example.com&gt;" />
 
@@ -42,7 +42,7 @@
             android:id="@+id/timestamp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@android:color/darker_gray"
+            android:textColor="@color/colorTextTertiary"
             tools:text="17:45" />
 
 

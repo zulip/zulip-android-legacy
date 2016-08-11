@@ -57,7 +57,7 @@
         android:layout_width="320dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="#FFF"
+        android:background="@color/listBackground"
         android:choiceMode="singleChoice" />
 
     <ListView
@@ -65,7 +65,7 @@
         android:layout_width="320dp"
         android:layout_height="match_parent"
         android:layout_gravity="end"
-        android:background="#FFF"
+        android:background="@color/listBackground"
         android:choiceMode="singleChoice" />
 
 </android.support.v4.widget.DrawerLayout>

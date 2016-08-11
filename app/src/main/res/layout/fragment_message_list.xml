@@ -7,7 +7,7 @@
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
-        android:background="@android:color/white"
+        android:background="@color/listBackground"
         android:fadeScrollbars="false"
         android:scrollbars="vertical" />
 

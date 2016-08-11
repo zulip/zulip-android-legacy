@@ -9,5 +9,5 @@
     android:paddingRight="16dp"
     android:paddingTop="16dp"
     android:text="Subject"
-    android:textColor="@android:color/secondary_text_light"
+    android:textColor="@color/colorTextSecondary"
     android:textSize="16sp" />
