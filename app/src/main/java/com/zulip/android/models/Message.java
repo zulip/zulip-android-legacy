@@ -18,6 +18,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.Html;
 import android.text.Spanned;
@@ -494,6 +497,12 @@ public class Message {
                         Drawable drawable = Drawable.createFromStream(context
                                         .getAssets().open("emoji/" + filename),
                                 "emoji/" + filename);
+                        if (drawable == null) {
+                            Drawable transparentDrawable = new ColorDrawable(Color.TRANSPARENT);
+                            transparentDrawable.setBounds(new Rect(0, 0, 0, 0));
+                            return transparentDrawable;
+                        }
+
                         // scaling down by half to fit well in message
                         double scaleFactor = 0.5;
                         drawable.setBounds(0, 0,
