@@ -44,7 +44,6 @@
     <string name="signing_in">Signing in...</string>
     <string name="network_error">Network error</string>
     <string name="invalid_server_domain">Invalid server domain</string>
-    <string name="logging_into_server">Logging into server: %s</string>
     <string name="password_required">Password required</string>
     <string name="username_required">Username required</string>
     <string name="server_domain_required">Server domain required</string>

@@ -331,14 +331,12 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         switch (v.getId()) {
             case R.id.google_sign_in_button:
                 connectionProgressDialog.show();
-                Toast.makeText(this, getString(R.string.logging_into_server, ZulipApp.get().getServerURI()), Toast.LENGTH_SHORT).show();
                 setupGoogleSignIn();
                 break;
             case R.id.zulip_login:
                 if (!isInputValid()) {
                     return;
                 }
-                Toast.makeText(this, getString(R.string.logging_into_server, ZulipApp.get().getServerURI()), Toast.LENGTH_SHORT).show();
                 connectionProgressDialog.show();
 
                 AsyncLogin alog = new AsyncLogin(LoginActivity.this,
