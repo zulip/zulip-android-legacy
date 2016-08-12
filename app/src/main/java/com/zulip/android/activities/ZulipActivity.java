@@ -725,6 +725,26 @@ public class ZulipActivity extends AppCompatActivity implements
                         view.getBackground().setColorFilter(cursor.getInt(columnIndex),
                                 PorterDuff.Mode.MULTIPLY);
                         return true;
+                    case R.id.unread_group:
+                        TextView unreadGroupTextView = (TextView) view;
+                        final String unreadGroupCount = cursor.getString(columnIndex);
+                        if (unreadGroupCount.equals("0")) {
+                            unreadGroupTextView.setVisibility(View.GONE);
+                        } else {
+                            unreadGroupTextView.setText(unreadGroupCount);
+                            unreadGroupTextView.setVisibility(View.VISIBLE);
+                        }
+                        return true;
+                    case R.id.unread_child:
+                        TextView unreadChildTextView = (TextView) view;
+                        final String unreadChildNumber = cursor.getString(columnIndex);
+                        if (unreadChildNumber.equals("0")) {
+                            unreadChildTextView.setVisibility(View.GONE);
+                        } else {
+                            unreadChildTextView.setText(unreadChildNumber);
+                            unreadChildTextView.setVisibility(View.VISIBLE);
+                        }
+                        return true;
                     case R.id.name_child:
                         TextView name_child = (TextView) view;
                         name_child.setText(cursor.getString(columnIndex));
