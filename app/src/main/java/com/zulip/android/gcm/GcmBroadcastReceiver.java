@@ -14,7 +14,7 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 // http://commonsware.com/blog/2010/08/11/activity-notification-ordered-broadcast.html
 // for the inspiration for the dispatch strategy.
 
-// A com.humbughq.mobile.PushMessage.BROADCAST is broadcast to ordered receivers. If the
+// A com.zulip.android.PushMessage.BROADCAST is broadcast to ordered receivers. If the
 // HumbugActivity is active, its receiver gets the message first and inhibits it. Otherwise,
 // it is received by GcmShowNotificationReceiver. That launches a GcmIntentService that
 // displays the notification.
@@ -22,8 +22,10 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 public class GcmBroadcastReceiver extends BroadcastReceiver {
 
     private static final String TAG = "GCM";
-    // FIXME Not sure if this is safe to change to a Zulip string
-    public static final String BROADCAST = "com.humbughq.mobile.PushMessage.BROADCAST";
+
+    public static String getGCMReceiverAction(Context appContext) {
+        return appContext.getPackageName() + ".PushMessage.BROADCAST";
+    }
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -49,7 +51,7 @@ public class GcmBroadcastReceiver extends BroadcastReceiver {
 
                 Log.i(TAG, "Received: " + extras.toString());
                 if (extras.getString("event").equals("message")) {
-                    Intent broadcast = new Intent(BROADCAST);
+                    Intent broadcast = new Intent(getGCMReceiverAction(context.getApplicationContext()));
                     broadcast.putExtras(extras);
                     context.sendOrderedBroadcast(broadcast, null);
                 }

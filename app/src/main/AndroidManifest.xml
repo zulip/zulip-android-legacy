@@ -9,10 +9,10 @@
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
     <permission
-        android:name="${permissionPackage}.permission.C2D_MESSAGE"
+        android:name="${applicationId}.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
 
-    <uses-permission android:name="${permissionPackage}.permission.C2D_MESSAGE" />
+    <uses-permission android:name="${applicationId}.permission.C2D_MESSAGE" />
     <uses-permission android:name="android.permission.USE_CREDENTIALS"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
 
@@ -49,14 +49,14 @@
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
 
-                <category android:name="com.humbughq.mobile" />
+                <category android:name="${applicationId}" />
             </intent-filter>
         </receiver>
         <receiver
             android:name=".gcm.GcmShowNotificationReceiver"
             android:exported="false" >
             <intent-filter>
-                <action android:name="com.humbughq.mobile.PushMessage.BROADCAST" />
+                <action android:name="${applicationId}.PushMessage.BROADCAST" />
             </intent-filter>
         </receiver>
 

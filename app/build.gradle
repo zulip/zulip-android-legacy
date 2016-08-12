@@ -41,16 +41,14 @@ android {
     buildTypes {
         debug {
             applicationIdSuffix '.dev'
-            manifestPlaceholders = [ permissionPackage : "com.humbughq.mobile.dev"]
-            manifestPlaceholders += [ fabricKey : ""]
+            manifestPlaceholders = [ fabricKey : ""]
             ext.enableCrashlytics = false
             buildConfigField "String", "GOOGLE_CLIENT_ID", "\"659545034376-78hg5hmrvqr50nn53t0nme97ndhqjmvs.apps.googleusercontent.com\""
         }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
-            manifestPlaceholders = [ permissionPackage : "com.humbughq.mobile"]
-            manifestPlaceholders += [ fabricKey : project.property("fabricKey")]
+            manifestPlaceholders = [ fabricKey : project.property("fabricKey")]
             buildConfigField "String", "GOOGLE_CLIENT_ID", "TODO: FILL THIS IN"
         }
     }
