@@ -147,7 +147,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             if (!BuildConfig.DEBUG && serverUri.getScheme().equals("http")) { //Production build and not https
                 showHTTPDialog(serverURL);
             } else {
-                showBackends(httpScheme, serverURL);
+                showBackends(serverUri.getScheme(), serverURL);
             }
         }
     }
@@ -155,9 +155,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private void showBackends(String httpScheme, String serverURL) {
         Uri serverUri = Uri.parse(serverURL);
 
-        if (serverUri.isRelative()) {
-            serverUri = serverUri.buildUpon().scheme(httpScheme).build();
-        }
+        serverUri = serverUri.buildUpon().scheme(httpScheme).build();
 
         // if does not begin with "api.zulip.com" and if the path is empty, use "/api" as first segment in the path
         List<String> paths = serverUri.getPathSegments();
