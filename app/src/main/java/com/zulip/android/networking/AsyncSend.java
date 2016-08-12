@@ -13,17 +13,17 @@ public class AsyncSend extends ZulipAsyncPushTask {
     /**
      * Initialise an AsyncSend task to send a specific message.
      *
-     * @param humbugActivity The calling Activity
+     * @param zulipActivity The calling Activity
      * @param msg            The message to send.
      */
-    public AsyncSend(ZulipActivity humbugActivity, Message msg) {
-        super((ZulipApp) humbugActivity.getApplication());
+    public AsyncSend(ZulipActivity zulipActivity, Message msg) {
+        super((ZulipApp) zulipActivity.getApplication());
         this.setProperty("type", msg.getType().toString());
         if (msg.getType() == MessageType.STREAM_MESSAGE) {
             this.setProperty("to", msg.getStream().getName());
         } else {
             JSONArray arr = new JSONArray();
-            for (Person recipient : msg.getPersonalReplyTo((ZulipApp) humbugActivity.getApplication())) {
+            for (Person recipient : msg.getPersonalReplyTo((ZulipApp) zulipActivity.getApplication())) {
                 arr.put(recipient.getEmail());
             }
             this.setProperty("to", arr.toString());
