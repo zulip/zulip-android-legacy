@@ -634,21 +634,21 @@ public class ZulipActivity extends AppCompatActivity implements
         animator.start();
     }
 
+    Callable<Cursor> streamsGenerator = new Callable<Cursor>() {
+        @Override
+        public Cursor call() throws Exception {
+            int pointer = app.getPointer();
+            return ((AndroidDatabaseResults) app.getDao(Stream.class).queryRaw("SELECT s.id as _id,  s.name, s.color," +
+                    " count(case when m.id > " + pointer + " then 1 end) as " + ExpandableStreamDrawerAdapter.UNREAD_TABLE_NAME
+                    + " FROM streams as s LEFT JOIN messages as m ON s.id=m.stream group by s.name order by s.name COLLATE NOCASE").closeableIterator().getRawResults()).getRawCursor();
+        }
+    };
+
     /**
      * Setup the streams Drawer which has a {@link ExpandableListView} categorizes the stream and subject
      */
     private void setupListViewAdapter() {
         ExpandableStreamDrawerAdapter streamsDrawerAdapter = null;
-        Callable<Cursor> streamsGenerator = new Callable<Cursor>() {
-            @Override
-            public Cursor call() throws Exception {
-                return ((AndroidDatabaseResults) app.getDao(Stream.class)
-                        .queryBuilder().selectRaw("rowid _id", "name", "color")
-                        .orderByRaw(Stream.NAME_FIELD + " COLLATE NOCASE")
-                        .where().eq(Stream.SUBSCRIBED_FIELD, true).queryRaw()
-                        .closeableIterator().getRawResults()).getRawCursor();
-            }
-        };
         String[] groupFrom = {Stream.NAME_FIELD, Stream.COLOR_FIELD};
         int[] groupTo = {R.id.name, R.id.stream_dot};
         // Comparison of data elements and View
