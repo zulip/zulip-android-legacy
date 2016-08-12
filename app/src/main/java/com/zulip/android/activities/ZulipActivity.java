@@ -649,11 +649,11 @@ public class ZulipActivity extends AppCompatActivity implements
      */
     private void setupListViewAdapter() {
         ExpandableStreamDrawerAdapter streamsDrawerAdapter = null;
-        String[] groupFrom = {Stream.NAME_FIELD, Stream.COLOR_FIELD};
-        int[] groupTo = {R.id.name, R.id.stream_dot};
+        String[] groupFrom = {Stream.NAME_FIELD, Stream.COLOR_FIELD, ExpandableStreamDrawerAdapter.UNREAD_TABLE_NAME};
+        int[] groupTo = {R.id.name, R.id.stream_dot, R.id.unread_group};
         // Comparison of data elements and View
-        String[] childFrom = {Message.SUBJECT_FIELD};
-        int[] childTo = {R.id.name_child};
+        String[] childFrom = {Message.SUBJECT_FIELD, ExpandableStreamDrawerAdapter.UNREAD_TABLE_NAME};
+        int[] childTo = {R.id.name_child, R.id.unread_child};
         final ExpandableListView streamsDrawer = (ExpandableListView) findViewById(R.id.streams_drawer);
         streamsDrawer.setGroupIndicator(null);
         try {
