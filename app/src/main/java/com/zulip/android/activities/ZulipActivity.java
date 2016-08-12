@@ -86,6 +86,7 @@ import com.zulip.android.R;
 import com.zulip.android.models.Stream;
 import com.zulip.android.networking.AsyncFetchGoogleID;
 import com.zulip.android.networking.AsyncSend;
+import com.zulip.android.util.Constants;
 import com.zulip.android.util.ZLog;
 import com.zulip.android.ZulipApp;
 import com.zulip.android.gcm.GcmBroadcastReceiver;
@@ -491,7 +492,7 @@ public class ZulipActivity extends AppCompatActivity implements
     }
 
     private void registerGCM() {
-        final String clientID = app.getSettings().getString("google_client_id", null);
+        final String clientID = app.getSettings().getString(Constants.KEY_GOOGLE_CLIENT_ID, null);
         if (clientID == null) {
             AsyncFetchGoogleID asyncFetchGoogleID = new AsyncFetchGoogleID(app);
             asyncFetchGoogleID.setCallback(new ZulipAsyncPushTask.AsyncTaskCompleteListener() {
@@ -500,7 +501,7 @@ public class ZulipActivity extends AppCompatActivity implements
                     try {
                         JSONObject jsonObject1 = new JSONObject(result);
                         SharedPreferences.Editor edit = app.getSettings().edit();
-                        edit.putString("google_client_id", jsonObject1.getString("google_client_id"));
+                        edit.putString(Constants.KEY_GOOGLE_CLIENT_ID, jsonObject1.getString("google_client_id"));
                         edit.apply();
                         notifications = new Notifications(ZulipActivity.this, jsonObject1.getString("google_client_id"));
                         notifications.register();

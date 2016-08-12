@@ -13,6 +13,7 @@ import android.util.Log;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.zulip.android.util.Constants;
 import com.zulip.android.util.ZLog;
 import com.zulip.android.ZulipApp;
 import com.zulip.android.activities.ZulipActivity;
@@ -23,7 +24,7 @@ import com.zulip.android.networking.HTTPRequest;
 public class Notifications {
 
     // Project Number from the Google Cloud Services console
-    private static String SENDER_ID = "835904834568";
+    private static String mSenderId = "";
 
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
@@ -37,7 +38,7 @@ public class Notifications {
     public Notifications(ZulipActivity activity, String clientID) {
         this.activity = activity;
         this.app = (ZulipApp) activity.getApplication();
-        SENDER_ID = TextUtils.substring(clientID, 0, clientID.indexOf('-'));
+        mSenderId = TextUtils.substring(clientID, 0, clientID.indexOf('-'));
     }
 
     public void register() {
@@ -71,10 +72,10 @@ public class Notifications {
     }
 
     private String getRegistrationId() {
-        String regID = app.getSettings().getString("gcm_reg_id", "");
+        String regID = app.getSettings().getString(Constants.KEY_GCM_REG_ID, "");
 
         long registeredVersion = app.getSettings()
-                .getLong("gcm_reg_last_version", 0);
+                .getLong(Constants.KEY_GCM_LATEST_VERSION, 0);
         long currentVersion = app.getAppVersion();
 
         if (registeredVersion != currentVersion) {
@@ -87,8 +88,8 @@ public class Notifications {
 
     private void storeRegistrationId(Context context, String regId) {
         Editor ed = app.getSettings().edit();
-        ed.putString("gcm_reg_id", regId);
-        ed.putLong("gcm_reg_last_version", app.getAppVersion());
+        ed.putString(Constants.KEY_GCM_REG_ID, regId);
+        ed.putLong("", app.getAppVersion());
         ed.apply();
     }
 
@@ -104,7 +105,7 @@ public class Notifications {
                     int failures = 0;
                     while (true) {
                         try {
-                            regid = gcm.register(SENDER_ID);
+                            regid = gcm.register(mSenderId);
                             break;
                         } catch (IOException e) {
                             ZLog.logException(e);
