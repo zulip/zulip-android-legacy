@@ -1315,7 +1315,7 @@ public class ZulipActivity extends AppCompatActivity implements
 
         // Set up the BroadcastReceiver to trap GCM messages so notifications
         // don't show while in the app
-        IntentFilter filter = new IntentFilter(GcmBroadcastReceiver.BROADCAST);
+        IntentFilter filter = new IntentFilter(GcmBroadcastReceiver.getGCMReceiverAction(getApplicationContext()));
         filter.setPriority(2);
         registerReceiver(onGcmMessage, filter);
 
