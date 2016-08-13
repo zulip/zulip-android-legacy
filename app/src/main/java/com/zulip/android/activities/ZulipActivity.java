@@ -1113,6 +1113,24 @@ public class ZulipActivity extends AppCompatActivity implements
     }
 
     @Override
+    public void onNarrowFillSendBoxPrivate(Person peopleList[], boolean openSoftKeyboard) {
+        displayChatBox(true);
+        displayFAB(false);
+        switchToPrivate();
+        ArrayList<String> names = new ArrayList<String>();
+        for (Person person : peopleList) {
+            if (person.getId() != app.getYou().getId()) {
+                names.add(person.getEmail());
+            }
+        }
+        topicActv.setText(TextUtils.join(", ", names));
+        messageEt.requestFocus();
+        if (openSoftKeyboard) {
+            ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE)).toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+        }
+    }
+
+    @Override
     public void onNarrowFillSendBox(Message message, boolean openSoftKeyboard) {
         displayChatBox(true);
         displayFAB(false);
