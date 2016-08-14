@@ -16,8 +16,8 @@ public class AsyncLogin extends ZulipAsyncPushTask {
     private static final String UNREGISTERED = "unregistered";
     private static final String DISABLED = "disabled";
 
-    Activity activity;
-    boolean devServer = true; //If this is a DevAuthBackend server!
+    private Activity activity;
+    private boolean devServer = true; //If this is a DevAuthBackend server!
     private LoginActivity context;
     private boolean userDefinitelyInvalid = false;
 

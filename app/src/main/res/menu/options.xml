@@ -14,7 +14,6 @@
         android:title="@string/refresh" />
 
     <item
-        android:id="@+id/filter"
         android:icon="@drawable/ic_filter_list_black_24dp"
         android:title="@string/menu_filter"
         app:showAsAction="ifRoom">

@@ -15,7 +15,6 @@
         android:background="@drawable/toolbar_shadow" />
 
     <TextView
-        android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -34,7 +33,6 @@
         android:padding="16dp">
 
         <TextView
-            android:id="@+id/info_txt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center|center_horizontal"
@@ -47,7 +45,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:hint="Server URL"
+            android:hint="@string/server_url"
             android:inputType="textUri"
             android:selectAllOnFocus="true" />
 

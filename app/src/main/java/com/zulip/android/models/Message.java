@@ -37,10 +37,10 @@ import com.zulip.android.ZulipApp;
 public class Message {
 
     public static final String ID_FIELD = "id";
-    public static final String SENDER_FIELD = "sender";
+    private static final String SENDER_FIELD = "sender";
     public static final String TYPE_FIELD = "type";
     public static final String CONTENT_FIELD = "content";
-    public static final String FORMATTED_CONTENT_FIELD = "formattedContent";
+    private static final String FORMATTED_CONTENT_FIELD = "formattedContent";
     public static final String SUBJECT_FIELD = "subject";
     public static final String TIMESTAMP_FIELD = "timestamp";
     public static final String RECIPIENTS_FIELD = "recipients";
@@ -203,7 +203,7 @@ public class Message {
         return recipientsCache;
     }
 
-    public void setRecipients(Person[] list) {
+    private void setRecipients(Person[] list) {
         this.recipientsCache = list;
         this.recipients = recipientList(list);
     }
@@ -240,7 +240,7 @@ public class Message {
             return this.getStream().getName();
         } else {
             Person[] people = this.getRecipients(app);
-            ArrayList<String> names = new ArrayList<String>();
+            ArrayList<String> names = new ArrayList<>();
 
             for (Person person : people) {
                 if (person.id != app.getYou().id) {
@@ -268,7 +268,7 @@ public class Message {
     }
 
     public static String emailsMinusYou(List<Person> people, Person you) {
-        ArrayList<String> names = new ArrayList<String>();
+        ArrayList<String> names = new ArrayList<>();
 
         for (Person person : people) {
             if (person.id != you.id) {
@@ -286,7 +286,7 @@ public class Message {
      */
     public Person[] getPersonalReplyTo(ZulipApp app) {
         Person[] people = this.getRecipients(app);
-        ArrayList<Person> names = new ArrayList<Person>();
+        ArrayList<Person> names = new ArrayList<>();
 
         for (Person person : people) {
             if (person.id != app.getYou().id) {
@@ -319,11 +319,11 @@ public class Message {
         this.content = content;
     }
 
-    public String getFormattedContent() {
+    private String getFormattedContent() {
         return formattedContent;
     }
 
-    public void setFormattedContent(String formattedContent) {
+    private void setFormattedContent(String formattedContent) {
         this.formattedContent = formattedContent;
     }
 
@@ -339,7 +339,7 @@ public class Message {
         return timestamp;
     }
 
-    public void setTimestamp(Date curDateTime) {
+    private void setTimestamp(Date curDateTime) {
         this.timestamp = curDateTime;
     }
 
@@ -467,16 +467,13 @@ public class Message {
      * @param app
      * @return Span
      */
-    public static Spanned formatContent(String source, ZulipApp app) {
+    private static Spanned formatContent(String source, ZulipApp app) {
         final Context context = app.getApplicationContext();
         final float density = context.getResources().getDisplayMetrics().density;
         Parser parser = new Parser();
         try {
             parser.setProperty(Parser.schemaProperty, schema);
-        } catch (org.xml.sax.SAXNotRecognizedException e) {
-            // Should not happen.
-            throw new RuntimeException(e);
-        } catch (org.xml.sax.SAXNotSupportedException e) {
+        } catch (org.xml.sax.SAXNotRecognizedException | org.xml.sax.SAXNotSupportedException e) {
             // Should not happen.
             throw new RuntimeException(e);
         }

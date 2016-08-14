@@ -183,7 +183,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             return VIEWTYPE_FOOTER;
         else {
             Log.e("ItemError", "object: " + items.get(position).toString());
-            throw new RuntimeException("MESSAGE TYPE NOT KNOWN & Position:"+position);
+            throw new RuntimeException("MESSAGE TYPE NOT KNOWN & Position:" + position);
         }
     }
 
@@ -211,7 +211,6 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             return false;
         }
     }
-
 
 
     public void addNewMessage(Message message) {

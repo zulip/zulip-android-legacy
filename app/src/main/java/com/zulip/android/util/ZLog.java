@@ -6,7 +6,8 @@ import com.zulip.android.util.BuildHelper;
 
 public class ZLog {
 
-    private ZLog() {}
+    private ZLog() {
+    }
 
     public static void logException(Throwable e) {
         if (!BuildHelper.shouldLogToCrashlytics()) {

@@ -36,8 +36,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 public class ZulipApp extends Application {
-    public static final String API_KEY = "api_key";
-    public static final String EMAIL = "email";
+    private static final String API_KEY = "api_key";
+    private static final String EMAIL = "email";
     private static ZulipApp instance;
     private static final String USER_AGENT = "ZulipAndroid";
     private static final String DEFAULT_SERVER_URL = "https://api.zulip.com/";
@@ -45,8 +45,8 @@ public class ZulipApp extends Application {
     private SharedPreferences settings;
     private String api_key;
     private int max_message_id;
-    DatabaseHelper databaseHelper;
-    Set<String> mutedTopics;
+    private DatabaseHelper databaseHelper;
+    private Set<String> mutedTopics;
     private static final String MUTED_TOPIC_KEY = "mutedTopics";
 
     /**
@@ -67,13 +67,13 @@ public class ZulipApp extends Application {
      * Mapping of email address to presence information for that user. This is
      * updated every 2 minutes by a background thread (see AsyncStatusUpdate)
      */
-    public final Map<String, Presence> presences = new ConcurrentHashMap<String, Presence>();
+    public final Map<String, Presence> presences = new ConcurrentHashMap<>();
 
     /**
      * Queue of message ids to be marked as read. This queue should be emptied
      * every couple of seconds
      */
-    public final Queue<Integer> unreadMessageQueue = new ConcurrentLinkedQueue<Integer>();
+    public final Queue<Integer> unreadMessageQueue = new ConcurrentLinkedQueue<>();
 
     public static ZulipApp get() {
         return instance;
@@ -104,7 +104,7 @@ public class ZulipApp extends Application {
             afterLogin();
         }
 
-         mutedTopics = new HashSet<String>(settings.getStringSet(MUTED_TOPIC_KEY, new HashSet<String>()));
+        mutedTopics = new HashSet<>(settings.getStringSet(MUTED_TOPIC_KEY, new HashSet<String>()));
         // create unread message queue
         unreadMessageHandler = new Handler(new Handler.Callback() {
             @Override
@@ -134,7 +134,7 @@ public class ZulipApp extends Application {
         }
     }
 
-    public void afterLogin() {
+    private void afterLogin() {
         String email = settings.getString(EMAIL, null);
         setEmail(email);
         setupEmoji();
@@ -147,14 +147,14 @@ public class ZulipApp extends Application {
             final String emojis[] = getAssets().list("emoji");
             TransactionManager.callInTransaction(getDatabaseHelper()
                             .getConnectionSource(),
-                new Callable<Void>() {
-                    public Void call() throws Exception {
-                        for (String newEmoji : emojis) {
-                            dao.create(new Emoji(newEmoji));
+                    new Callable<Void>() {
+                        public Void call() throws Exception {
+                            for (String newEmoji : emojis) {
+                                dao.create(new Emoji(newEmoji));
+                            }
+                            return null;
                         }
-                        return null;
-                    }
-                });
+                    });
         } catch (SQLException | IOException e) {
             ZLog.logException(e);
         }
@@ -176,6 +176,7 @@ public class ZulipApp extends Application {
     public String getServerURI() {
         return settings.getString("server_url", DEFAULT_SERVER_URL);
     }
+
     public String getApiKey() {
         return api_key;
     }
@@ -205,7 +206,7 @@ public class ZulipApp extends Application {
             }
         }
         SharedPreferences.Editor editor = settings.edit();
-        editor.putStringSet(MUTED_TOPIC_KEY, new HashSet<String>(mutedTopics));
+        editor.putStringSet(MUTED_TOPIC_KEY, new HashSet<>(mutedTopics));
         editor.apply();
     }
 
@@ -221,7 +222,7 @@ public class ZulipApp extends Application {
     }
 
     public void useDefaultServerURL() {
-       setServerURL(DEFAULT_SERVER_URL);
+        setServerURL(DEFAULT_SERVER_URL);
     }
 
     public void setLoggedInApiKey(String apiKey) {
@@ -254,7 +255,7 @@ public class ZulipApp extends Application {
     @SuppressWarnings("unchecked")
     public <C, T> RuntimeExceptionDao<C, T> getDao(Class<C> cls) {
         try {
-            return new RuntimeExceptionDao<C, T>(
+            return new RuntimeExceptionDao<>(
                     (Dao<C, T>) databaseHelper.getDao(cls));
         } catch (SQLException e) {
             // Well that's sort of awkward.
@@ -335,10 +336,11 @@ public class ZulipApp extends Application {
             unreadMessageHandler.sendEmptyMessageDelayed(0, 2000);
         }
     }
+
     public void muteTopic(Message message) {
         mutedTopics.add(message.concatStreamAndTopic());
         SharedPreferences.Editor editor = settings.edit();
-        editor.putStringSet(MUTED_TOPIC_KEY, new HashSet<String>(mutedTopics));
+        editor.putStringSet(MUTED_TOPIC_KEY, new HashSet<>(mutedTopics));
         editor.apply();
     }
 
@@ -358,7 +360,7 @@ public class ZulipApp extends Application {
         return instance;
     }
 
-    public static void setInstance(ZulipApp instance) {
+    private static void setInstance(ZulipApp instance) {
         ZulipApp.instance = instance;
     }
 

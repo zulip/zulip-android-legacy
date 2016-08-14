@@ -28,9 +28,9 @@ import com.zulip.android.test.mutated.FakeAsyncGetOldMessages;
 
 public class UnsortedTests extends ActivityUnitTestCase<ZulipActivity> {
 
-    public static final String TESTUSER_EXAMPLE_COM = "testuser@example.com";
+    private static final String TESTUSER_EXAMPLE_COM = "testuser@example.com";
     private ZulipApp app;
-    RuntimeExceptionDao<Message, Object> messageDao;
+    private RuntimeExceptionDao<Message, Object> messageDao;
 
     public UnsortedTests() {
         super(ZulipActivity.class);
@@ -54,7 +54,7 @@ public class UnsortedTests extends ActivityUnitTestCase<ZulipActivity> {
                 "lfaraone@zulip.com"));
     }
 
-    public void checkRanges(String rangestr) throws SQLException {
+    private void checkRanges(String rangestr) throws SQLException {
         List<MessageRange> ranges = app.getDao(MessageRange.class)
                 .queryBuilder().orderBy("low", true).query();
         String s = "";
@@ -214,7 +214,7 @@ public class UnsortedTests extends ActivityUnitTestCase<ZulipActivity> {
 
     }
 
-    protected Message sampleMessage(ZulipApp app, int id) throws SQLException {
+    private Message sampleMessage(ZulipApp app, int id) throws SQLException {
         Message rtr = new Message(app);
         rtr.setSender(Person.getOrUpdate(app, "Test User",
                 TESTUSER_EXAMPLE_COM, ""));
@@ -230,7 +230,7 @@ public class UnsortedTests extends ActivityUnitTestCase<ZulipActivity> {
      * Run this before each test to set up the activity.
      */
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-    protected void prepTests() {
+    private void prepTests() {
         setApplication(app);
         this.startActivity(new Intent(getInstrumentation().getTargetContext(),
                 ZulipActivity.class), null, null);

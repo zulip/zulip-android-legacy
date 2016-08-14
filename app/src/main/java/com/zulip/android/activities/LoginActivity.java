@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -51,6 +50,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private EditText serverIn;
 
     private View mGoogleSignInButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -266,7 +266,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    protected void openLegal() {
+    private void openLegal() {
         Intent i = new Intent(this, LegalActivity.class);
         startActivityForResult(i, 0);
     }
@@ -301,7 +301,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    public void setupGoogleSignIn() {
+    private void setupGoogleSignIn() {
         if (mGoogleApiClient == null) {
             GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                     .requestEmail()
@@ -379,6 +379,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 break;
         }
     }
+
     private boolean isInputValidForDevAuth() {
         boolean isValid = true;
 
@@ -389,13 +390,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             String serverString = mServerEditText.getText().toString();
             if (!serverString.contains("://")) serverString = "https://" + serverString;
 
-                if (!Patterns.WEB_URL.matcher(serverString).matches()) {
-                    mServerEditText.setError(getString(R.string.invalid_domain));
-                    isValid = false;
-                }
+            if (!Patterns.WEB_URL.matcher(serverString).matches()) {
+                mServerEditText.setError(getString(R.string.invalid_domain));
+                isValid = false;
             }
+        }
         return isValid;
     }
+
     private boolean isInputValid() {
         boolean isValid = true;
 

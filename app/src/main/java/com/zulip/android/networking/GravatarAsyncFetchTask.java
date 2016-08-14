@@ -33,10 +33,10 @@ public class GravatarAsyncFetchTask extends AsyncTask<URL, Void, Bitmap> {
     private Person person;
     private ZulipActivity context;
 
-    public GravatarAsyncFetchTask(ZulipActivity context, ImageView imageView,
-                                  Person person) {
+    private GravatarAsyncFetchTask(ZulipActivity context, ImageView imageView,
+                                   Person person) {
         // Use a WeakReference to ensure the ImageView can be garbage collected
-        imageViewReference = new WeakReference<ImageView>(imageView);
+        imageViewReference = new WeakReference<>(imageView);
         this.person = person;
         this.context = context;
     }
@@ -106,7 +106,7 @@ public class GravatarAsyncFetchTask extends AsyncTask<URL, Void, Bitmap> {
         public AsyncDrawable(Resources res, Bitmap bitmap,
                              GravatarAsyncFetchTask bitmapWorkerTask) {
             super(res, bitmap);
-            taskReference = new WeakReference<GravatarAsyncFetchTask>(
+            taskReference = new WeakReference<>(
                     bitmapWorkerTask);
         }
 
@@ -138,7 +138,7 @@ public class GravatarAsyncFetchTask extends AsyncTask<URL, Void, Bitmap> {
         }
     }
 
-    public static boolean cancelPotentialWork(Person person, ImageView imageView) {
+    private static boolean cancelPotentialWork(Person person, ImageView imageView) {
         final GravatarAsyncFetchTask bitmapWorkerTask = getBitmapWorkerTask(imageView);
 
         if (bitmapWorkerTask != null) {

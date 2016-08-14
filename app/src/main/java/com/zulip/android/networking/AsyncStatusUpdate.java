@@ -21,9 +21,9 @@ import java.util.Map;
  */
 public class AsyncStatusUpdate extends ZulipAsyncPushTask {
 
-    public static final String STATUS = "status";
-    public static final String TIMESTAMP = "timestamp";
-    public static final String STATUS_UPDATE = "statusUpdate";
+    private static final String STATUS = "status";
+    private static final String TIMESTAMP = "timestamp";
+    private static final String STATUS_UPDATE = "statusUpdate";
     private final Context context;
 
     /**
@@ -78,9 +78,9 @@ public class AsyncStatusUpdate extends ZulipAsyncPushTask {
                             latestPresence = presence;
                         }
                     } else if (status.equals(PresenceType.IDLE.toString())
-                                && latestStatus.equals(PresenceType.IDLE.toString())
-                                && latestPresence.getLong(TIMESTAMP) < timestamp) {
-                            latestPresence = presence;
+                            && latestStatus.equals(PresenceType.IDLE.toString())
+                            && latestPresence.getLong(TIMESTAMP) < timestamp) {
+                        latestPresence = presence;
                     }
                 }
             }

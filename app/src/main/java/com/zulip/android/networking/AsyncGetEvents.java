@@ -31,14 +31,14 @@ public class AsyncGetEvents extends Thread {
     private static final String TAG = "AsyncGetEvents";
     private static final String ASYNC_GET_EVENTS = "asyncGetEvents";
     private static final String POINTER = "pointer";
-    ZulipActivity activity;
-    ZulipApp app;
+    private ZulipActivity activity;
+    private ZulipApp app;
 
-    HTTPRequest request;
+    private HTTPRequest request;
 
-    AsyncGetEvents that = this;
-    int failures = 0;
-    boolean registeredOrGotEventsThisRun;
+    private AsyncGetEvents that = this;
+    private int failures = 0;
+    private boolean registeredOrGotEventsThisRun;
 
     public AsyncGetEvents(ZulipActivity humbugActivity) {
         super();
@@ -171,7 +171,7 @@ public class AsyncGetEvents extends Thread {
         }
     }
 
-    protected void processRegister(final JSONObject response) {
+    private void processRegister(final JSONObject response) {
         // In task thread
         try {
             app.setPointer(response.getInt(POINTER));
@@ -247,19 +247,18 @@ public class AsyncGetEvents extends Thread {
     }
 
 
-
     /**
      * Handles any event returned by the server that we care about.
      */
-    protected void processEvents(JSONArray events) {
+    private void processEvents(JSONArray events) {
         // In task thread
         try {
             StopWatch watch = new StopWatch();
             watch.start();
 
-            ArrayList<Message> messages = new ArrayList<Message>();
-            HashMap<String, Person> personCache = new HashMap<String, Person>();
-            HashMap<String, Stream> streamCache = new HashMap<String, Stream>();
+            ArrayList<Message> messages = new ArrayList<>();
+            HashMap<String, Person> personCache = new HashMap<>();
+            HashMap<String, Stream> streamCache = new HashMap<>();
 
             for (int i = 0; i < events.length(); i++) {
                 JSONObject event = events.getJSONObject(i);
@@ -297,7 +296,7 @@ public class AsyncGetEvents extends Thread {
         }
     }
 
-    protected void processMessages(final ArrayList<Message> messages) {
+    private void processMessages(final ArrayList<Message> messages) {
         // In task thread
         int lastMessageId = messages.get(messages.size() - 1).getID();
         MessageRange.updateNewMessagesRange(app, lastMessageId);

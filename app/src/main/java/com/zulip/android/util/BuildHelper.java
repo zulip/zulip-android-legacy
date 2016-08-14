@@ -6,13 +6,14 @@ import com.zulip.android.BuildConfig;
 
 public class BuildHelper {
 
-    private BuildHelper() {}
+    private BuildHelper() {
+    }
 
     public static boolean shouldLogToCrashlytics() {
         return !isEmulator() && !BuildConfig.DEBUG;
     }
 
-    public static boolean isEmulator() {
+    private static boolean isEmulator() {
         return Build.HARDWARE.contains("goldfish");
     }
 }

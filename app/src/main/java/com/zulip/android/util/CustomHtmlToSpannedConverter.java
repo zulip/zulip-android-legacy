@@ -57,7 +57,7 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
 
     private static final float[] HEADER_SIZES = {1.5f, 1.4f, 1.3f, 1.2f, 1.1f,
             1f,};
-    public static final String MONOSPACE = "monospace";
+    private static final String MONOSPACE = "monospace";
 
     private static HashMap<String, Integer> COLORS = buildColorMap();
     private String mSource;
@@ -85,11 +85,8 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
         mReader.setContentHandler(this);
         try {
             mReader.parse(new InputSource(new StringReader(mSource)));
-        } catch (IOException e) {
+        } catch (IOException | SAXException e) {
             // We are reading from a string. There should not be IO problems.
-            throw new RuntimeException(e);
-        } catch (SAXException e) {
-            // TagSoup doesn't throw parse exceptions.
             throw new RuntimeException(e);
         }
 
@@ -605,7 +602,7 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
     }
 
     private static HashMap<String, Integer> buildColorMap() {
-        HashMap<String, Integer> map = new HashMap<String, Integer>();
+        HashMap<String, Integer> map = new HashMap<>();
         map.put("aqua", 0x00FFFF);
         map.put("black", 0x000000);
         map.put("blue", 0x0000FF);
@@ -648,8 +645,8 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
     /**
      * Copied from com.android.internal.util.XmlUtils from Android source
      */
-    public static int convertValueToInt(CharSequence charSeq,
-                                        int defaultValue) {
+    private static int convertValueToInt(CharSequence charSeq,
+                                         int defaultValue) {
         if (null == charSeq)
             return defaultValue;
 
