@@ -48,6 +48,7 @@ public class Message {
     public static final String TIMESTAMP_FIELD = "timestamp";
     public static final String RECIPIENTS_FIELD = "recipients";
     public static final String STREAM_FIELD = "stream";
+    public static final String MESSAGE_READ_FIELD = "read";
 
     @DatabaseField(foreign = true, columnName = SENDER_FIELD, foreignAutoRefresh = true)
     private Person sender;
@@ -68,6 +69,8 @@ public class Message {
     private int id;
     @DatabaseField(foreign = true, columnName = STREAM_FIELD, foreignAutoRefresh = true)
     private Stream stream;
+    @DatabaseField(columnName = MESSAGE_READ_FIELD)
+    private Boolean messageRead;
 
     /**
      * Construct an empty Message object.
@@ -143,6 +146,15 @@ public class Message {
         }
 
         this.setTimestamp(new Date(message.getLong("timestamp") * 1000));
+        this.setMessageRead(false);
+    }
+
+    public Boolean getMessageRead() {
+        return messageRead;
+    }
+
+    public void setMessageRead(Boolean messageRead) {
+        this.messageRead = messageRead;
     }
 
     public Message(ZulipApp app, JSONObject message) throws JSONException {
