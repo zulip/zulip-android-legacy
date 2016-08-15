@@ -17,6 +17,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.zulip.android.models.Person;
+import com.j256.ormlite.stmt.UpdateBuilder;
+import com.zulip.android.models.Stream;
+import com.zulip.android.networking.AsyncPointerUpdate;
+
 import com.squareup.picasso.Picasso;
 import com.zulip.android.R;
 import com.zulip.android.ZulipApp;
@@ -34,6 +39,7 @@ import com.zulip.android.viewholders.LoadingHolder;
 import com.zulip.android.viewholders.MessageHeaderParent;
 import com.zulip.android.viewholders.MessageHolder;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -77,6 +83,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     private int contextMenuItemSelectedPosition;
     private View footerView;
     private View headerView;
+    private UpdateBuilder<Message, Object> updateBuilder;
 
     private boolean isCurrentThemeNight;
 
@@ -169,6 +176,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             }
         };
         setupLists(messageList);
+        updateBuilder = zulipApp.getDao(Message.class).updateBuilder();
     }
 
     /**
@@ -390,6 +398,15 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             if (!startedFromFilter && zulipApp.getPointer() < mID) {
                 (new AsyncPointerUpdate(zulipApp)).execute(mID);
                 zulipApp.setPointer(mID);
+            }
+            if (!message.getMessageRead()) {
+                try {
+                    updateBuilder.where().eq(Message.ID_FIELD, message.getID());
+                    updateBuilder.updateColumnValue(Message.MESSAGE_READ_FIELD, true);
+                    updateBuilder.update();
+                } catch (SQLException e) {
+                    ZLog.logException(e);
+                }
             }
             zulipApp.markMessageAsRead(message);
         } catch (NullPointerException e) {
