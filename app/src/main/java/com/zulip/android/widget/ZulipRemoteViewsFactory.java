@@ -3,6 +3,7 @@ package com.zulip.android.widget;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
+import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
 import com.j256.ormlite.stmt.QueryBuilder;
@@ -50,6 +51,29 @@ public class ZulipRemoteViewsFactory implements RemoteViewsService.RemoteViewsFa
 
     public int getCount() {
         return messageList.size();
+    }
+
+    @Override
+    public RemoteViews getViewAt(int position) {
+        RemoteViews remoteView = new RemoteViews(context.getPackageName(), R.layout.widget_row);
+        Message message = messageList.get(position);
+        if (message.getType() == MessageType.STREAM_MESSAGE) {
+            remoteView.setTextViewText(R.id.widget_header, message.getStream().getName() + " > " + message.getSubject());
+        } else {
+            remoteView.setTextViewText(R.id.widget_header, message.getDisplayRecipient(ZulipApp.get()));
+        }
+        remoteView.setTextViewText(R.id.widget_sendername, message.getSender().getName());
+        remoteView.setTextViewText(R.id.widget_message, message.getFormattedContent(ZulipApp.get()));
+
+        if (from.equals("today")) {
+            remoteView.setTextViewText(R.id.widget_timestamp, DateUtils.formatDateTime(context, message.getTimestamp().getTime(), DateUtils.FORMAT_SHOW_TIME));
+        } else {
+            remoteView.setTextViewText(R.id.widget_timestamp, DateUtils.formatDateTime(context, message
+                    .getTimestamp().getTime(), DateUtils.FORMAT_SHOW_DATE
+                    | DateUtils.FORMAT_ABBREV_MONTH
+                    | DateUtils.FORMAT_SHOW_TIME));
+        }
+        return remoteView;
     }
 
     @Override
