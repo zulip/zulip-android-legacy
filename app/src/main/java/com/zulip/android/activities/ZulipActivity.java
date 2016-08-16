@@ -84,7 +84,9 @@ import com.zulip.android.models.Presence;
 import com.zulip.android.models.PresenceType;
 import com.zulip.android.R;
 import com.zulip.android.models.Stream;
+import com.zulip.android.networking.AsyncFetchGoogleID;
 import com.zulip.android.networking.AsyncSend;
+import com.zulip.android.util.Constants;
 import com.zulip.android.util.ZLog;
 import com.zulip.android.ZulipApp;
 import com.zulip.android.gcm.GcmBroadcastReceiver;
@@ -92,6 +94,7 @@ import com.zulip.android.networking.AsyncGetEvents;
 import com.zulip.android.networking.AsyncStatusUpdate;
 import com.zulip.android.networking.ZulipAsyncPushTask;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class ZulipActivity extends AppCompatActivity implements
@@ -262,8 +265,7 @@ public class ZulipActivity extends AppCompatActivity implements
             return;
         }
         this.logged_in = true;
-        notifications = new Notifications(this);
-        notifications.register();
+        registerGCM();
         setContentView(R.layout.main);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -488,6 +490,37 @@ public class ZulipActivity extends AppCompatActivity implements
             }
         });
         messageEt.setAdapter(combinedAdapter);
+    }
+
+    private void registerGCM() {
+        final String clientID = app.getSettings().getString(Constants.KEY_GOOGLE_CLIENT_ID, null);
+        if (clientID == null) {
+            AsyncFetchGoogleID asyncFetchGoogleID = new AsyncFetchGoogleID(app);
+            asyncFetchGoogleID.setCallback(new ZulipAsyncPushTask.AsyncTaskCompleteListener() {
+                @Override
+                public void onTaskComplete(String result, JSONObject jsonObject) {
+                    try {
+                        JSONObject jsonObject1 = new JSONObject(result);
+                        SharedPreferences.Editor edit = app.getSettings().edit();
+                        edit.putString(Constants.KEY_GOOGLE_CLIENT_ID, jsonObject1.getString("google_client_id"));
+                        edit.apply();
+                        notifications = new Notifications(ZulipActivity.this, jsonObject1.getString("google_client_id"));
+                        notifications.register();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                @Override
+                public void onTaskFailure(String result) {
+
+                }
+            });
+            asyncFetchGoogleID.execute();
+        } else {
+            notifications = new Notifications(this, clientID);
+            notifications.register();
+        }
     }
 
     private Cursor makeEmojiCursor(CharSequence emoji)

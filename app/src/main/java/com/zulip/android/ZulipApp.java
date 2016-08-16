@@ -30,6 +30,7 @@ import com.zulip.android.models.Presence;
 import com.zulip.android.models.Stream;
 import com.zulip.android.networking.AsyncUnreadMessagesUpdate;
 import com.zulip.android.util.BuildHelper;
+import com.zulip.android.util.Constants;
 import com.zulip.android.util.ZLog;
 
 import org.json.JSONArray;
@@ -239,6 +240,8 @@ public class ZulipApp extends Application {
         ed.remove(EMAIL);
         ed.remove(API_KEY);
         ed.remove("server_url");
+        ed.remove(Constants.KEY_GOOGLE_CLIENT_ID);
+        ed.remove(Constants.KEY_GCM_REG_ID);
         ed.apply();
         this.api_key = null;
         setEventQueueId(null);
