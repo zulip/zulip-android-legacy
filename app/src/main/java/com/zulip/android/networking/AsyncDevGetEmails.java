@@ -13,6 +13,9 @@ import com.zulip.android.util.ZLog;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+
+import static com.zulip.android.activities.DevAuthActivity.ADD_REALM_REQUEST;
+
 /**
  * A background task which asynchronously fetches the Emails (Admins or Users) for the devAuthBackend
  * Mainly used Development builds.
@@ -51,7 +54,7 @@ public class AsyncDevGetEmails extends ZulipAsyncPushTask {
                 intent.putExtra(REALM_NAME_JSON, realmName);
                 intent.putExtra(SERVER_URL_JSON, serverURL);
                 intent.putExtra(ADD_REALM_BOOLEAN_JSON, startedFromAddRealm);
-                context.startActivity(intent);
+                ((LoginActivity) context).startActivityForResult(intent, ADD_REALM_REQUEST);
             }
         } catch (JSONException e) {
             ZLog.logException(e);

@@ -92,7 +92,14 @@ public class AsyncLogin extends ZulipAsyncPushTask {
 
     private void loginThroughAddRealm(JSONObject jsonObject) {
         try {
-            Intent intent = new Intent(context, ZulipActivity.class);
+            Intent intent = null;
+            //This is done to start ZulipActivity from DevAuthActivity which cannot be done directly as DevAuthActivity was called from LoginActivity
+            //And Therefore we have to finish two activities (DevAuthActivity and LoginActivity) if started from DevAuthActivity.
+            if (context instanceof DevAuthActivity) {
+                intent = new Intent();
+            } else if (context instanceof LoginActivity) {
+                intent = new Intent(context, ZulipActivity.class);
+            }
             intent.putExtra("realmName", realmName);
             intent.putExtra("api_key", jsonObject.getString("api_key"));
             intent.putExtra("email", username);

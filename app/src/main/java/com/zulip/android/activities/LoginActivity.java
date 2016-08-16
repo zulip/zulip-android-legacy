@@ -1,5 +1,6 @@
 package com.zulip.android.activities;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -43,6 +44,8 @@ import org.json.JSONObject;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+
+import static com.zulip.android.activities.DevAuthActivity.ADD_REALM_REQUEST;
 
 /**
  * Activity to Login through various backends on a specified server.
@@ -126,6 +129,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(intent);
                 handleSignInResult(result);
                 break;
+            case ADD_REALM_REQUEST:
+                if (resultCode == Activity.RESULT_OK) {
+                    setResult(Activity.RESULT_OK, intent);
+                    finish();
+                }
             default:
                 break;
         }
@@ -171,7 +179,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             }
         }
     }
-    
+
 
     private void showBackends(String httpScheme, String serverURL) {
         Uri serverUri = Uri.parse(serverURL);

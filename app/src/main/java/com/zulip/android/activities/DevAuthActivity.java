@@ -28,7 +28,7 @@ import java.util.List;
 public class DevAuthActivity extends Activity implements LoginInterface {
     private RecyclerView recyclerView;
     private ProgressDialog connectionProgressDialog;
-
+    public static final int ADD_REALM_REQUEST = 566;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
