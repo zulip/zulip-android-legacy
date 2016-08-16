@@ -79,6 +79,17 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/zulip_widget_info" />
         </receiver>
+
+        <service
+            android:name=".widget.ZulipWidgetService"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
+
+        <activity android:name=".widget.ZulipWidgetConfigureActivity">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
     </application>
 
 </manifest>
