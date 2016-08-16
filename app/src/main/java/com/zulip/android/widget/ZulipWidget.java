@@ -3,6 +3,7 @@ package com.zulip.android.widget;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -21,6 +22,7 @@ import static com.zulip.android.widget.WidgetPreferenceFragment.TITLE_PREFRENCE;
 public class ZulipWidget extends AppWidgetProvider {
     private static AsyncGetEvents asyncGetEvents;
     private static int intervalMilliseconds = 0;
+    public static String WIDGET_REFRESH = "com.zulip.android.zulipwidget.REFRESH";
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
         String title = ZulipWidgetConfigureActivity.loadPref(context, appWidgetId, TITLE_PREFRENCE);
@@ -42,6 +44,10 @@ public class ZulipWidget extends AppWidgetProvider {
             if (asyncGetEvents == null) {
                 setupGetEvents();
             }
+            final Intent refreshIntent = new Intent(context, ZulipWidget.class);
+            refreshIntent.setAction(ZulipWidget.WIDGET_REFRESH);
+            final PendingIntent refreshPendingIntent = PendingIntent.getBroadcast(context, 0, refreshIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            remoteViews.setOnClickPendingIntent(R.id.widget_refresh, refreshPendingIntent);
             appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
         }
     }
@@ -51,6 +57,12 @@ public class ZulipWidget extends AppWidgetProvider {
         final String action = intent.getAction();
         if (asyncGetEvents == null) {
             setupGetEvents();
+        }
+        if (action.equals(WIDGET_REFRESH)) {
+            final AppWidgetManager mgr = AppWidgetManager.getInstance(context);
+            final ComponentName cn = new ComponentName(context, ZulipWidget.class);
+            mgr.notifyAppWidgetViewDataChanged(mgr.getAppWidgetIds(cn), R.id.widget_list);
+            asyncGetEvents.interrupt();
         }
         super.onReceive(context, intent);
     }
