@@ -69,7 +69,9 @@ public class AsyncGetEvents extends Thread {
 
     public void start() {
         registeredOrGotEventsThisRun = false;
-        super.start();
+        if (!calledFromWidget) {
+            super.start();
+        }
     }
 
     public void abort() {
@@ -251,15 +253,16 @@ public class AsyncGetEvents extends Thread {
             });
             watch.stop();
             Log.i("perf", "DB people and streams: " + watch.toString());
-
-            activity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    that.activity.getPeopleAdapter().refresh();
-                    activity.onReadyToDisplay(true);
-                    activity.checkAndSetupStreamsDrawer();
-                }
-            });
+            if (!calledFromWidget) {
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        that.activity.getPeopleAdapter().refresh();
+                        activity.onReadyToDisplay(true);
+                        activity.checkAndSetupStreamsDrawer();
+                    }
+                });
+            }
         } catch (JSONException e) {
             ZLog.logException(e);
         } catch (SQLException e) {
@@ -326,12 +329,14 @@ public class AsyncGetEvents extends Thread {
         int lastMessageId = messages.get(messages.size() - 1).getID();
         MessageRange.updateNewMessagesRange(app, lastMessageId);
 
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                activity.onNewMessages(messages.toArray(new Message[messages.size()]));
-            }
-        });
+        if (!calledFromWidget) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    activity.onNewMessages(messages.toArray(new Message[messages.size()]));
+                }
+            });
+        }
     }
 
 }
