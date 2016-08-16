@@ -82,7 +82,7 @@ public class MessageHeaderParent {
 
     public Person[] getRecipients(ZulipApp app) {
         Person[] recipientsCache;
-        String[] ids = TextUtils.split(this.getDisplayRecipent(), ",");
+        String[] ids = TextUtils.split(this.getId(), ",");
         recipientsCache = new Person[ids.length];
         for (int i = 0; i < ids.length; i++) {
             try {

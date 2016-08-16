@@ -17,6 +17,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.zulip.android.models.Person;
 import com.zulip.android.models.Stream;
 import com.zulip.android.networking.AsyncPointerUpdate;
 
@@ -104,8 +105,14 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
                     case R.id.instance: //Topic
                         MessageHeaderParent messageParent = (MessageHeaderParent) getItem(position);
-                        narrowListener.onNarrow(new NarrowFilterStream(Stream.getByName(zulipApp, messageParent.getStream()), messageParent.getSubject()));
-                        narrowListener.onNarrowFillSendBoxStream(messageParent.getStream(), "", false);
+                        if (messageParent.getMessageType() == MessageType.STREAM_MESSAGE) {
+                            narrowListener.onNarrow(new NarrowFilterStream(Stream.getByName(zulipApp, messageParent.getStream()), messageParent.getSubject()));
+                            narrowListener.onNarrowFillSendBoxStream(messageParent.getStream(), "", false);
+                        } else {
+                            Person[] recipentArray = messageParent.getRecipients(zulipApp);
+                            narrowListener.onNarrow(new NarrowFilterPM(Arrays.asList(recipentArray)));
+                            narrowListener.onNarrowFillSendBoxPrivate(recipentArray, false);
+                        }
                         break;
                     case R.id.contentView: //Main message
                         Message message = (Message) getItem(position);
