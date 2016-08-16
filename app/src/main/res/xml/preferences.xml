@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="Widget Settings">
+
+    <EditTextPreference
+        android:defaultValue="@string/widget_today_default_value"
+        android:dialogTitle="@string/widget_title"
+        android:key="title_preference"
+        android:summary="@string/widget_today_default_value"
+        android:title="@string/widget_title" />
+
+    <ListPreference
+        android:defaultValue="10m"
+        android:entries="@array/interval"
+        android:entryValues="@array/interval_values"
+        android:key="interval_preference"
+        android:summary="@string/default_summary_interval"
+        android:title="@string/update_interval" />
+
+    <ListPreference
+        android:defaultValue="today"
+        android:entries="@array/from_entries"
+        android:entryValues="@array/from_values"
+        android:key="from_preference"
+        android:summary="@string/default_summary_from"
+        android:title="@string/widget_title_from" />
+</PreferenceScreen>
