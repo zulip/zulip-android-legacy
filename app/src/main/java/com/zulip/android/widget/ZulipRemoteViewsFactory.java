@@ -2,6 +2,7 @@ package com.zulip.android.widget;
 
 import android.content.Context;
 import android.content.Intent;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
@@ -32,10 +33,31 @@ public class ZulipRemoteViewsFactory implements RemoteViewsService.RemoteViewsFa
     public void onCreate() {
 
     }
+
+    private String setupWhere() {
+        switch (from) {
+            //These values present in R.arrays.from_values
+            case "today":
+                return "timestamp BETWEEN DATE('now') AND DATE('now', '+1 day')";
+            case "yesterday":
+                return "DATE(timestamp) >= DATE('now',  '-1 days')";
+            case "week":
+                return "DATE(timestamp) >= DATE('now', 'weekday 0', '-7 days')";
+            case "all":
+            default:
+                return "";
+        }
+    }
+
     @Override
     public void onDataSetChanged() {
         Log.i("ZULIP_WIDGET", "onDataSetChanged() = Data reloaded");
         QueryBuilder<Message, Object> queryBuilder = ZulipApp.get().getDao(Message.class).queryBuilder();
+        String filter;
+        filter = setupWhere();
+        if (!filter.equals("")) {
+            queryBuilder.where().raw(filter);
+        }
 
         try {
             messageList = queryBuilder.query();
