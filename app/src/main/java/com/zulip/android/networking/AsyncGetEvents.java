@@ -33,7 +33,7 @@ public class AsyncGetEvents extends Thread {
     private static final String POINTER = "pointer";
     ZulipActivity activity;
     ZulipApp app;
-
+    private boolean keepThisRunning = true;
     HTTPRequest request;
 
     AsyncGetEvents that = this;
@@ -56,6 +56,7 @@ public class AsyncGetEvents extends Thread {
         // TODO: does this have race conditions? (if the thread is not in a
         // request when called)
         Log.i(ASYNC_GET_EVENTS, "Interrupting thread");
+        keepThisRunning = false;
         request.abort();
     }
 
@@ -98,7 +99,7 @@ public class AsyncGetEvents extends Thread {
 
     public void run() {
         try {
-            while (true) {
+            while (keepThisRunning) {
                 try {
                     request.clearProperties();
                     if (app.getEventQueueId() == null) {
