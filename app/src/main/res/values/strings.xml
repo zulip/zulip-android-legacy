@@ -73,4 +73,13 @@
     <string name="reply_sender">Reply to Sender</string>
     <string name="narrow_stream">Narrow to this stream</string>
     <string name="narrow_topic">Narrow to this topic</string>
+    <string name="configure">Configure</string>
+    <string name="add_widget">Add widget</string>
+    <string name="widget_today_default_value">Today\'s Messages</string>
+    <string name="widget_title">Widget Title</string>
+    <string name="default_summary_interval">30 Minutes</string>
+    <string name="update_interval">Update interval</string>
+    <string name="default_summary_from">Today</string>
+    <string name="widget_title_from">Show messages since</string>
+    <string name="no_login_error_widget">First login to Zulip app.</string>
 </resources>
