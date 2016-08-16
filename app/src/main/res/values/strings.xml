@@ -73,5 +73,4 @@
     <string name="reply_sender">Reply to Sender</string>
     <string name="narrow_stream">Narrow to this stream</string>
     <string name="narrow_topic">Narrow to this topic</string>
-    <string name="switch_theme">Switch Day/Night Theme</string>
 </resources>
