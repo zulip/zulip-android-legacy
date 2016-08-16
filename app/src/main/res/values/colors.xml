@@ -16,4 +16,5 @@
     <color name="messageHeaderBackground">#e5e5e5</color>
     <color name="stream_background">#ffff</color>
     <color name="loadingBackground">#eeeeee</color>
+    <color name="indigo_material_500">#3F51B5</color>
 </resources>
