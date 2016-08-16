@@ -12,6 +12,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.Intent;
 import android.os.SystemClock;
 import android.util.Log;
 
@@ -24,6 +25,7 @@ import com.zulip.android.models.Stream;
 import com.zulip.android.util.ZLog;
 import com.zulip.android.activities.ZulipActivity;
 import com.zulip.android.ZulipApp;
+import com.zulip.android.widget.ZulipWidget;
 
 import okhttp3.Response;
 
@@ -336,6 +338,14 @@ public class AsyncGetEvents extends Thread {
                     activity.onNewMessages(messages.toArray(new Message[messages.size()]));
                 }
             });
+        } else {
+            if (!messages.isEmpty()) {
+                //Reload Widget on new messages
+                Log.d(TAG, "New messages recieved for calledFromWidget: " + messages.size());
+                final Intent refreshIntent = new Intent(app, ZulipWidget.class);
+                refreshIntent.setAction(ZulipWidget.WIDGET_REFRESH);
+                app.startActivity(refreshIntent);
+            }
         }
     }
 
