@@ -1394,6 +1394,7 @@ public class ZulipActivity extends AppCompatActivity implements
 
         if (event_poll != null) {
             event_poll.abort();
+            event_poll = null;
         }
 
         event_poll = new AsyncGetEvents(this);
