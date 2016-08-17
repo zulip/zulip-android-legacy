@@ -2,7 +2,10 @@ package com.zulip.android.util;
 
 import android.util.Log;
 
+import com.crashlytics.android.Crashlytics;
 import com.zulip.android.util.BuildHelper;
+
+import io.fabric.sdk.android.Fabric;
 
 public class ZLog {
 
@@ -13,7 +16,7 @@ public class ZLog {
         if (!BuildHelper.shouldLogToCrashlytics()) {
             Log.e("Error", "oops", e);
         } else {
-            // TODO(lfaraone): figure out what to do about crash reporting
+            Crashlytics.logException(e);
         }
     }
 

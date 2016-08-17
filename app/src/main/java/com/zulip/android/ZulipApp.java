@@ -1,5 +1,7 @@
 package com.zulip.android;
 
+import com.crashlytics.android.Crashlytics;
+import io.fabric.sdk.android.Fabric;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Map;
@@ -82,6 +84,7 @@ public class ZulipApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        Fabric.with(this, new Crashlytics());
         ZulipApp.setInstance(this);
 
         // This used to be from HumbugActivity.getPreferences, so we keep that
@@ -94,9 +97,6 @@ public class ZulipApp extends Application {
         lastEventId = settings.getInt("lastEventId", -1);
         pointer = settings.getInt("pointer", -1);
 
-        if (BuildHelper.shouldLogToCrashlytics()) {
-            // TODO(lfaraone): figure out what to do about crash reporting
-        }
 
         this.api_key = settings.getString(API_KEY, null);
 
