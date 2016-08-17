@@ -41,6 +41,8 @@ public class AsyncGetEvents extends Thread {
     private static final String POINTER = "pointer";
     private ZulipActivity activity;
     private ZulipApp app;
+    private static int interval = 1000;
+    private boolean calledFromWidget = false;
 
     private boolean keepThisRunning = true;
     private HTTPRequest request;
@@ -54,6 +56,15 @@ public class AsyncGetEvents extends Thread {
         app = (ZulipApp) zulipActivity.getApplication();
         activity = zulipActivity;
         request = new HTTPRequest(app);
+    }
+
+    public AsyncGetEvents(ZulipApp zulipApp, int interval) {
+        super();
+        app = zulipApp;
+        activity = null;
+        request = new HTTPRequest(app);
+        calledFromWidget = true;
+        this.interval = interval;
     }
 
     public void start() {
@@ -174,7 +185,7 @@ public class AsyncGetEvents extends Thread {
                 } catch (JSONException e) {
                     backoff(e);
                 }
-                Thread.sleep(1000);
+                Thread.sleep(interval);
             }
         } catch (Exception e) {
             ZLog.logException(e);
