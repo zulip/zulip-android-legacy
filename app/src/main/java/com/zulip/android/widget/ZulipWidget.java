@@ -11,6 +11,7 @@ import android.widget.RemoteViews;
 
 import com.zulip.android.R;
 import com.zulip.android.ZulipApp;
+import com.zulip.android.networking.AsyncGetEvents;
 
 import static com.zulip.android.widget.WidgetPreferenceFragment.FROM_PREFERENCE;
 import static com.zulip.android.widget.WidgetPreferenceFragment.INTERVAL_PREFERENCE;
@@ -18,6 +19,7 @@ import static com.zulip.android.widget.WidgetPreferenceFragment.TITLE_PREFRENCE;
 
 
 public class ZulipWidget extends AppWidgetProvider {
+    private static AsyncGetEvents asyncGetEvents;
     private static int intervalMilliseconds = 0;
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
@@ -37,6 +39,9 @@ public class ZulipWidget extends AppWidgetProvider {
             remoteViews.setRemoteAdapter(appWidgetId, R.id.widget_list, intent);
             remoteViews.setEmptyView(R.id.widget_list, R.id.widget_nomsg);
 
+            if (asyncGetEvents == null) {
+                setupGetEvents();
+            }
             appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
         }
     }
@@ -44,6 +49,9 @@ public class ZulipWidget extends AppWidgetProvider {
     @Override
     public void onReceive(Context context, Intent intent) {
         final String action = intent.getAction();
+        if (asyncGetEvents == null) {
+            setupGetEvents();
+        }
         super.onReceive(context, intent);
     }
 
@@ -55,6 +63,10 @@ public class ZulipWidget extends AppWidgetProvider {
         }
     }
 
+    private static void setupGetEvents() {
+        asyncGetEvents = new AsyncGetEvents(ZulipApp.get(), intervalMilliseconds);
+        asyncGetEvents.start();
+    }
 
     @Override
     public void onDeleted(Context context, int[] appWidgetIds) {
@@ -66,6 +78,7 @@ public class ZulipWidget extends AppWidgetProvider {
 
     @Override
     public void onDisabled(Context context) {
+        asyncGetEvents = null;
     }
 }
 
