@@ -44,6 +44,7 @@ import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
 
 import com.zulip.android.R;
+import com.zulip.android.ZulipApp;
 
 import org.ccil.cowan.tagsoup.Parser;
 import org.xml.sax.Attributes;
@@ -72,6 +73,7 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
     private Html.ImageGetter mEmojiGetter;
     private String mBaseUri;
     private static int userMentionColor;
+    private static int userMentionSelfColor;
     public CustomHtmlToSpannedConverter(String source,
                                         Html.ImageGetter imageGetter, Html.TagHandler tagHandler,
                                         Parser parser, Html.ImageGetter emojiGetter, String baseUri, Context context) {
@@ -83,6 +85,7 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
         mEmojiGetter = emojiGetter;
         mBaseUri = baseUri;
         userMentionColor = ContextCompat.getColor(context, R.color.dark_red);
+        userMentionSelfColor = ContextCompat.getColor(context, R.color.dark_blue);
     }
 
     public Spanned convert() {
@@ -432,8 +435,11 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
         if (where != len) {
             Href h = (Href) obj;
             if (h != null && h.mHref != null) {
-                text.setSpan(new ProfileSpan(h.mHref, userMentionColor), where, len,
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                if (ZulipApp.get().getEmail().equals(h.mHref)) {
+                    text.setSpan(new ForegroundColorSpan(userMentionSelfColor), where, len, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                } else {
+                    text.setSpan(new ProfileSpan(h.mHref, userMentionColor), where, len, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
             }
         }
     }
