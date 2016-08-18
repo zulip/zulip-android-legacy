@@ -231,7 +231,7 @@ public class Message {
 
     /**
      * Constructs a pretty-printable-to-the-user string consisting of the names
-     * of all of the participants in the message, minus you.
+     * of all of the participants in the message.
      * <p/>
      * For MessageType.STREAM_MESSAGE, return the stream name instead.
      *
@@ -246,13 +246,14 @@ public class Message {
             ArrayList<String> names = new ArrayList<>();
 
             for (Person person : people) {
-                if (person.id != app.getYou().id) {
+                if (person.id != app.getYou().id || people.length == 1) {
                     names.add(person.getName());
                 }
             }
             return TextUtils.join(", ", names);
         }
     }
+
 
     /**
      * Creates a comma-separated String of the email addressed of all the

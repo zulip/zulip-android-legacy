@@ -74,7 +74,7 @@ public class NarrowFilterPM implements NarrowFilter {
     public String getTitle() {
         ArrayList<String> names = new ArrayList<>();
         for (Person person : people) {
-            if (!person.equals(ZulipApp.get().getYou())) {
+            if (!person.equals(ZulipApp.get().getYou()) || people.size() == 1) { //If PM to self then show title as your name
                 names.add(person.getName());
             }
         }
