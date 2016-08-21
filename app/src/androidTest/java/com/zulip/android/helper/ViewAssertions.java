@@ -22,7 +22,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import static android.support.test.espresso.matcher.ViewMatchers.assertThat;
-import static com.zulip.android.activities.ChatBoxTest.LOG_TAG;
+import static com.zulip.android.activities.RecyclerViewTests.LOG_TAG;
 import static junit.framework.Assert.assertTrue;
 
 public class ViewAssertions {

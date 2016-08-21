@@ -46,11 +46,11 @@ import static org.hamcrest.Matchers.not;
 @LargeTest
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(AndroidJUnit4.class)
-public class ChatBoxTest {
+public class RecyclerViewTests {
     @Rule
     public ActivityTestRule<ZulipActivity> mActivityTestRule = new ActivityTestRule<>(ZulipActivity.class);
 
-    public static String LOG_TAG = ChatBoxTest.class.getName();
+    public static String LOG_TAG = RecyclerViewTests.class.getName();
     private static String testMessageStream;
     private static String testMessagePrivate;
 
@@ -268,7 +268,7 @@ public class ChatBoxTest {
     }
 
     public static void setTestMessageStream(String testMessageStream) {
-        ChatBoxTest.testMessageStream = testMessageStream;
+        RecyclerViewTests.testMessageStream = testMessageStream;
     }
 
     public static String getTestMessagePrivate() {
@@ -276,6 +276,6 @@ public class ChatBoxTest {
     }
 
     public static void setTestMessagePrivate(String testMessagePrivate) {
-        ChatBoxTest.testMessagePrivate = testMessagePrivate;
+        RecyclerViewTests.testMessagePrivate = testMessagePrivate;
     }
 }
