@@ -68,7 +68,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
     }
 
     private static final String PARAM_FILTER = "filter";
-    NarrowFilter filter;
+    public NarrowFilter filter;
 
     private Listener mListener;
     private RecyclerView recyclerView;
