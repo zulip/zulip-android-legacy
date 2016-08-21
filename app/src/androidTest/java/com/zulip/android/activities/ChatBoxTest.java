@@ -2,21 +2,20 @@ package com.zulip.android.activities;
 
 
 import android.support.test.espresso.ViewInteraction;
-import android.support.test.espresso.matcher.BoundedMatcher;
+import android.support.test.espresso.contrib.RecyclerViewActions;
+import android.support.test.filters.LargeTest;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.text.TextUtils;
 
-import com.j256.ormlite.stmt.QueryBuilder;
 import com.zulip.android.R;
 import com.zulip.android.ZulipApp;
-import com.zulip.android.models.Message;
+import com.zulip.android.filters.NarrowFilterToday;
+import com.zulip.android.helper.ViewAssertions;
 import com.zulip.android.models.MessageType;
-import com.zulip.android.models.Person;
+import com.zulip.android.util.ZLog;
 
 import org.apache.commons.lang.RandomStringUtils;
-import org.hamcrest.Matcher;
+import org.hamcrest.core.AllOf;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Rule;
@@ -24,172 +23,244 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import static android.support.test.espresso.Espresso.onData;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.action.ViewActions.replaceText;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static android.support.test.espresso.matcher.ViewMatchers.withText;
+import static com.zulip.android.helper.Matchers.withFirstId;
+import static com.zulip.android.helper.Matchers.withMessageHeaderHolder;
+import static com.zulip.android.helper.Matchers.withMessageHolder;
+import static com.zulip.android.helper.Matchers.withMessageHolderAndClick;
+import static com.zulip.android.helper.ViewAssertions.checkMessagesOnlyFromToday;
 import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.not;
 
 
+/**
+ * Make sure you have entered the login details here{@link BaseTest#EMAIL_TEST}
+ * And your password here{@link BaseTest#PASSWORD_TEST} to login if you have not logged in!
+ */
 @LargeTest
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(AndroidJUnit4.class)
-public class ChatBoxTest extends BaseTest {
+public class ChatBoxTest {
     @Rule
     public ActivityTestRule<ZulipActivity> mActivityTestRule = new ActivityTestRule<>(ZulipActivity.class);
 
+    public static String LOG_TAG = ChatBoxTest.class.getName();
     private static String testMessageStream;
     private static String testMessagePrivate;
 
-    private static String testStreamName;
-    private static String testSubjectStream;
-    private List<Person> testPersons;
     private ZulipApp app;
 
     @Before
     public void setUp() {
+        app = ZulipApp.get();
+
+        if (ZulipApp.get().getApiKey() == null) {
+            BaseTest baseTest = new BaseTest();
+            baseTest.login();
+            sleep(4000);
+        }
+
+        //This is to make sure the latest recieved messages will be added to the list!
+        app.setPointer(app.getMaxMessageId());
         setTestMessageStream((testMessageStream == null) ? RandomStringUtils.randomAlphanumeric(10) : testMessageStream);
         setTestMessagePrivate((testMessagePrivate == null) ? RandomStringUtils.randomAlphanumeric(15) : testMessagePrivate);
-        if (ZulipApp.get().getApiKey() == null) {
-            login();
-        }
-        app = ZulipApp.get();
-        setUpTestStream();
-        setUpPrivate();
+
     }
 
-    private void setUpPrivate() {
+    private void sleep(int millis) {
         try {
-            QueryBuilder<Message, Object> orderQb = app.getDao(Message.class).queryBuilder();
-            orderQb.where().eq(Message.TYPE_FIELD, MessageType.PRIVATE_MESSAGE).and()
-                    .isNotNull(Message.RECIPIENTS_FIELD);
-            Message message = orderQb.queryForFirst();
-            testPersons = Arrays.asList(message.getPersonalReplyTo(app));
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void setUpTestStream() {
-        try {
-            QueryBuilder<Message, Object> messageQueryBuilder = app.getDao(Message.class).queryBuilder();
-            messageQueryBuilder.where().eq(Message.TYPE_FIELD, MessageType.STREAM_MESSAGE).and()
-                    .isNotNull(Message.SUBJECT_FIELD).and()
-                    .isNotNull(Message.STREAM_FIELD);
-            Message message = messageQueryBuilder.queryForFirst();
-            testStreamName = message.getStream().getName();
-            testSubjectStream = message.getSubject();
-        } catch (SQLException e) {
-            e.printStackTrace();
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            ZLog.logException(e);
         }
     }
 
     @Test
     public void sendStreamMessage() {
-        //Fill message EditText
-        ViewInteraction streamET = onView(allOf(withId(R.id.stream_actv), isDisplayed()));
-        streamET.perform(replaceText(testStreamName));
+        //Wait to make sure the messages are loaded
+        sleep(2000);
+
+        onView(withId(R.id.recyclerView)).perform(RecyclerViewActions.scrollToHolder(withMessageHolderAndClick(MessageType.STREAM_MESSAGE, R.id.contentView)));
+        sleep(1000);
 
         //Fill message EditText
-        ViewInteraction subjectET = onView(allOf(withId(R.id.topic_actv), isDisplayed()));
-        subjectET.perform(replaceText(testSubjectStream));
-
-        //Fill message EditText
-        ViewInteraction editText2 = onView(allOf(withId(R.id.message_et), isDisplayed()));
-        editText2.perform(replaceText(testMessageStream));
+        ViewInteraction messageInteraction = onView(allOf(withId(R.id.message_et), isDisplayed()));
+        messageInteraction.perform(replaceText(testMessageStream));
 
         //Click Send Button
         ViewInteraction imageView = onView(allOf(withId(R.id.send_btn), isDisplayed()));
         imageView.perform(click());
 
-        //Verify sent Message
-        onData(allOf(instanceOf(Message.class),
-                getMessageFromTypeAndContentString(MessageType.STREAM_MESSAGE, testMessageStream)))
-                .inAdapterView(withId(R.id.listview))
-                .check(matches(isDisplayed()));
+        sleep(2000);
+
+        //Scroll And check the new sent message
+        onView(withId(R.id.recyclerView)).perform(RecyclerViewActions.scrollToHolder(withMessageHolder(testMessageStream, R.id.contentView)));
+
+        onView(AllOf.allOf(withId(R.id.contentView), withText(testMessageStream))).check(matches(isDisplayed()));
+
+        checkIfMessagesMatchTheHeaderParent();
+        checkOrderOfMessagesCurrentList();
     }
 
-    private String getDisplayRecipents() {
-        ArrayList<String> names = new ArrayList<String>();
-        for (Person person : testPersons) {
-            if (person.getId() != app.getYou().getId()) {
-                names.add(person.getEmail());
-            }
+    private void hideToolBar() {
+        try {
+            mActivityTestRule.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mActivityTestRule.getActivity().hideView(mActivityTestRule.getActivity().findViewById(R.id.appBarLayout));
+                }
+            });
+        } catch (Throwable throwable) {
+            ZLog.logException(throwable);
         }
-        return TextUtils.join(", ", names);
     }
 
     @Test
+    public void checkAfterNarrowToStream() {
+        sleep(2000);
+
+        hideToolBar();
+
+        sleep(2000);
+
+        //Scroll to Stream MessageHeaderParent
+        onView(withId(R.id.recyclerView)).perform(RecyclerViewActions.scrollToHolder(withMessageHeaderHolder(MessageType.STREAM_MESSAGE)));
+
+        //Perform a click on the subject textView to narrow to the topic
+        onView(withFirstId(R.id.instance)).perform(click());
+
+        sleep(4000);
+        //Check if all messages belong to this subject
+        onView(withId(R.id.recyclerView)).check(ViewAssertions.checkIfBelongToSameNarrow(mActivityTestRule.getActivity()));
+    }
+
+    @Test
+    public void checkAfterNarrowToPrivate() {
+        sleep(2000);
+
+        try {
+            mActivityTestRule.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mActivityTestRule.getActivity().hideView(mActivityTestRule.getActivity().findViewById(R.id.appBarLayout));
+                }
+            });
+        } catch (Throwable throwable) {
+            ZLog.logException(throwable);
+        }
+        sleep(2000);
+
+        //Scroll to private MessageHeaderParent
+        onView(withId(R.id.recyclerView)).perform(RecyclerViewActions.scrollToHolder(withMessageHeaderHolder(MessageType.PRIVATE_MESSAGE)));
+
+        //Perform a click on the recipients to narrow to that group or single person
+        onView(withFirstId(R.id.instance)).perform(click());
+
+        sleep(4000);
+
+        //Check if all messages belong to this private message group
+        onView(withId(R.id.recyclerView)).check(ViewAssertions.checkIfBelongToSameNarrow(mActivityTestRule.getActivity()));
+    }
+
+
+    @Test
+    public void checkOrderOfMessagesCurrentList() {
+        sleep(2000);
+        onView(withId(R.id.recyclerView)).check(ViewAssertions.checkOrderOfMessages(mActivityTestRule.getActivity()));
+    }
+
+    @Test
+    public void checkIfMessagesMatchTheHeaderParent() {
+        sleep(2000);
+        onView(withId(R.id.recyclerView)).check(ViewAssertions.checkIfMessagesMatchTheHeaderParent(mActivityTestRule.getActivity()));
+    }
+
+
+    @Test
+    public void checkTodaysFilter() {
+        sleep(2000);
+        /**
+         * Narrow to today messages
+         * runOnUiThread for changing fragment here{@link ZulipActivity#pushListFragment(MessageListFragment, String)}
+         */
+        try {
+            mActivityTestRule.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mActivityTestRule.getActivity().doNarrow(new NarrowFilterToday());
+                }
+            });
+        } catch (Throwable throwable) {
+            ZLog.logException(throwable);
+        }
+
+        sleep(2000);
+        //Check messages if only they are from today
+        onView(withId(R.id.recyclerView)).check(checkMessagesOnlyFromToday());
+    }
+
+
+    @Test
     public void sendPrivateMessage() {
-        //Click Switch Button
-        ViewInteraction imageView = onView(allOf(withId(R.id.togglePrivateStream_btn), isDisplayed()));
-        imageView.perform(click());
+        //Wait to make sure the messages are loaded
+        sleep(2000);
+
+        onView(withId(R.id.recyclerView)).perform(RecyclerViewActions.scrollToHolder(withMessageHolderAndClick(MessageType.PRIVATE_MESSAGE, R.id.contentView)));
+        sleep(1000);
 
         //Fill message EditText
-        ViewInteraction recipentET = onView(allOf(withId(R.id.topic_actv), isDisplayed()));
-        recipentET.perform(replaceText(getDisplayRecipents()));
-
-        //Fill message EditText
-        ViewInteraction editText2 = onView(allOf(withId(R.id.message_et), isDisplayed()));
-        editText2.perform(replaceText(testMessagePrivate));
+        ViewInteraction messageInteraction = onView(allOf(withId(R.id.message_et), isDisplayed()));
+        messageInteraction.perform(replaceText(testMessagePrivate));
 
         //Click Send Button
-        ViewInteraction sendBtn = onView(allOf(withId(R.id.send_btn), isDisplayed()));
-        sendBtn.perform(click());
+        ViewInteraction imageView = onView(allOf(withId(R.id.send_btn), isDisplayed()));
+        imageView.perform(click());
 
-        //Verify sent Message
-        onData(allOf(instanceOf(Message.class),
-                getMessageFromTypeAndContentString(MessageType.PRIVATE_MESSAGE, testMessagePrivate)))
-                .inAdapterView(withId(R.id.listview))
-                .check(matches(isDisplayed()));
+        sleep(2000);
+
+        //Scroll And check the new sent message
+        onView(withId(R.id.recyclerView)).perform(RecyclerViewActions.scrollToHolder(withMessageHolder(testMessagePrivate, R.id.contentView)));
+
+        onView(AllOf.allOf(withId(R.id.contentView), withText(testMessagePrivate))).check(matches(isDisplayed()));
+
+        checkIfMessagesMatchTheHeaderParent();
+        checkOrderOfMessagesCurrentList();
     }
 
     @Test
     public void switchChatBox() {
-        //Click Switch Button
-        ViewInteraction imageView = onView(allOf(withId(R.id.togglePrivateStream_btn), isDisplayed()));
-        imageView.perform(click());
+        sleep(2000);
+        //Show the Fab button
+        try {
+            mActivityTestRule.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mActivityTestRule.getActivity().showView(mActivityTestRule.getActivity().fab);
+                }
+            });
+        } catch (Throwable throwable) {
+            ZLog.logException(throwable);
+        }
 
+        sleep(500);
+        //Click Fab Button
+        ViewInteraction fabInteraction = onView(allOf(withId(R.id.fab), isDisplayed()));
+        fabInteraction.perform(click());
+
+        sleep(500);
+        //Click Switch Button
+        ViewInteraction switchBtnInteraction = onView(allOf(withId(R.id.togglePrivateStream_btn), isDisplayed()));
+        switchBtnInteraction.perform(click());
+
+        sleep(500);
         //Check if Arrow TextView is not displayed for switchingChatBox
         onView(withId(R.id.textView)).check(matches(not(isDisplayed())));
-    }
-
-    public static Matcher<Object> getMessageFromType(final MessageType messageType) {
-        return new BoundedMatcher<Object, Message>(Message.class) {
-            @Override
-            public void describeTo(org.hamcrest.Description description) {
-                description.appendText("Error");
-            }
-
-            @Override
-            protected boolean matchesSafely(Message item) {
-                return item.getType() == messageType;
-            }
-        };
-    }
-
-    public static Matcher<Object> getMessageFromTypeAndContentString(final MessageType messageType, final String text) {
-        return new BoundedMatcher<Object, Message>(Message.class) {
-            @Override
-            public void describeTo(org.hamcrest.Description description) {
-                description.appendText("Error");
-            }
-
-            @Override
-            protected boolean matchesSafely(Message item) {
-                return item.getType() == messageType && item.getContent().contains(text);
-            }
-        };
     }
 
     public static String getTestMessageStream() {

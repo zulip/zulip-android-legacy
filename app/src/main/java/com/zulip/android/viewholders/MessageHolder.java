@@ -23,7 +23,7 @@ public class MessageHolder extends RecyclerView.ViewHolder implements View.OnCli
     public TextView contentView;
     public View leftBar;
     public RelativeLayout messageTile;
-    private OnItemClickListener onItemClickListener;
+    public OnItemClickListener onItemClickListener;
 
     public MessageHolder(final View itemView) {
         super(itemView);
