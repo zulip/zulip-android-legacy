@@ -122,7 +122,7 @@ public class ZulipActivity extends AppCompatActivity implements
     private ExpandableListView streamsDrawer;
     private static final Interpolator FAST_OUT_SLOW_IN_INTERPOLATOR = new FastOutSlowInInterpolator();
     private LinearLayout chatBox;
-    private FloatingActionButton fab;
+    public FloatingActionButton fab;
     private CountDownTimer fabHidder;
     private boolean hideFABBlocked = false;
     private static final int HIDE_FAB_AFTER_SEC = 5;
@@ -135,7 +135,7 @@ public class ZulipActivity extends AppCompatActivity implements
 
     private Toolbar toolbar;
 
-    private MessageListFragment currentList;
+    public MessageListFragment currentList;
     private MessageListFragment narrowedList;
     private MessageListFragment homeList;
 
@@ -568,7 +568,7 @@ public class ZulipActivity extends AppCompatActivity implements
         }
     }
 
-    private void hideView(final View view) {
+    public void hideView(final View view) {
         ViewPropertyAnimator animator = view.animate()
                 .translationY((view instanceof AppBarLayout) ? -1 * view.getHeight() : view.getHeight())
                 .setInterpolator(FAST_OUT_SLOW_IN_INTERPOLATOR)
@@ -595,7 +595,7 @@ public class ZulipActivity extends AppCompatActivity implements
         animator.start();
     }
 
-    private void showView(final View view) {
+    public void showView(final View view) {
         ViewPropertyAnimator animator = view.animate()
                 .translationY(0)
                 .setInterpolator(FAST_OUT_SLOW_IN_INTERPOLATOR)
@@ -1150,7 +1150,7 @@ public class ZulipActivity extends AppCompatActivity implements
     /**
      * This method creates a new Instance of the MessageListFragment and displays it with the filter.
      */
-    private void doNarrow(NarrowFilter filter) {
+    public void doNarrow(NarrowFilter filter) {
         narrowedList = MessageListFragment.newInstance(filter);
         // Push to the back stack if we are not already narrowed
         pushListFragment(narrowedList, NARROW);

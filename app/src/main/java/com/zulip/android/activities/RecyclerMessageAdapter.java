@@ -157,6 +157,14 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             }
 
             @Override
+            public MessageHeaderParent getMessageHeaderParentAtPosition(int position) {
+                if (getItem(position) instanceof MessageHeaderParent) {
+                    return (MessageHeaderParent) getItem(position);
+                }
+                return null;
+            }
+
+            @Override
             public void setContextItemSelectedPosition(int adapterPosition) {
                 contextMenuItemSelectedPosition = adapterPosition;
             }

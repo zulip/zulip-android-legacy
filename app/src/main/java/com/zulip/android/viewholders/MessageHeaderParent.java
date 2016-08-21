@@ -112,7 +112,7 @@ public class MessageHeaderParent {
         public TextView topicTextView;
         public ImageView muteMessageImage;
         public TextView arrowHead;
-        private OnItemClickListener onItemClickListener;
+        public OnItemClickListener onItemClickListener;
 
         public MessageHeaderHolder(View itemView) {
             super(itemView);
