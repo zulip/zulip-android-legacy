@@ -431,6 +431,10 @@ public class MessageListFragment extends Fragment implements MessageListener {
         // successful
     }
 
+    public void stopRecyclerViewScroll() {
+        recyclerView.stopScroll();
+    }
+
     private void loadMoreMessages(final LoadPosition pos) {
         int above = 0;
         int below = 0;

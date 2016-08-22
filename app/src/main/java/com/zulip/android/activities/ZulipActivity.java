@@ -124,7 +124,7 @@ public class ZulipActivity extends AppCompatActivity implements
     private LinearLayout chatBox;
     public FloatingActionButton fab;
     private CountDownTimer fabHidder;
-    private boolean hideFABBlocked = false;
+    private boolean isTextFieldFocused = false;
     private static final int HIDE_FAB_AFTER_SEC = 5;
 
     private HashMap<String, Bitmap> gravatars = new HashMap<>();
@@ -238,8 +238,9 @@ public class ZulipActivity extends AppCompatActivity implements
 
     @Override
     public void recyclerViewScrolled() {
-        if (chatBox.getVisibility() == View.VISIBLE && hideFABBlocked) {
+        if (chatBox.getVisibility() == View.VISIBLE && !isTextFieldFocused) {
             displayChatBox(false);
+            displayFAB(true);
         }
     }
 
@@ -416,7 +417,7 @@ public class ZulipActivity extends AppCompatActivity implements
         View.OnFocusChangeListener focusChangeListener = new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean focus) {
-                hideFABBlocked = focus;
+                isTextFieldFocused = focus;
             }
         };
         messageEt.setOnFocusChangeListener(focusChangeListener);
@@ -528,13 +529,14 @@ public class ZulipActivity extends AppCompatActivity implements
 
     private void setupFab() {
         fab = (FloatingActionButton) findViewById(R.id.fab);
-        chatBox = (LinearLayout) findViewById(R.id.messageBoxContainer);
+        chatBox = (SwipeRemoveLinearLayout) findViewById(R.id.messageBoxContainer);
+        chatBox.registerToSwipeEvents(this);
         fabHidder = new CountDownTimer(HIDE_FAB_AFTER_SEC * 1000, HIDE_FAB_AFTER_SEC * 1000) {
             public void onTick(long millisUntilFinished) {
             }
 
             public void onFinish() {
-                if (!hideFABBlocked) {
+                if (!isTextFieldFocused) {
                     displayFAB(true);
                     displayChatBox(false);
                 } else {
@@ -545,6 +547,7 @@ public class ZulipActivity extends AppCompatActivity implements
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                currentList.stopRecyclerViewScroll();
                 displayChatBox(true);
                 displayFAB(false);
                 fabHidder.start();
