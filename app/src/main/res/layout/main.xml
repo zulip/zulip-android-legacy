@@ -29,7 +29,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-        <LinearLayout
+        <com.zulip.android.util.SwipeRemoveLinearLayout
             android:id="@+id/messageBoxContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -39,7 +39,7 @@
             android:background="@color/colorPrimary">
 
             <include layout="@layout/chatbox" />
-        </LinearLayout>
+        </com.zulip.android.util.SwipeRemoveLinearLayout>
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/fab"

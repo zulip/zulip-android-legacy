@@ -85,6 +85,7 @@ import com.zulip.android.models.PresenceType;
 import com.zulip.android.R;
 import com.zulip.android.models.Stream;
 import com.zulip.android.networking.AsyncSend;
+import com.zulip.android.util.SwipeRemoveLinearLayout;
 import com.zulip.android.util.ZLog;
 import com.zulip.android.ZulipApp;
 import com.zulip.android.gcm.GcmBroadcastReceiver;
@@ -99,7 +100,7 @@ import org.json.JSONObject;
  * messages
  * */
 public class ZulipActivity extends AppCompatActivity implements
-        MessageListFragment.Listener, NarrowListener {
+        MessageListFragment.Listener, NarrowListener, SwipeRemoveLinearLayout.leftToRightSwipeListener {
 
     private static final String NARROW = "narrow";
     private static final String PARAMS = "params";
@@ -121,8 +122,8 @@ public class ZulipActivity extends AppCompatActivity implements
     private ActionBarDrawerToggle drawerToggle;
     private ExpandableListView streamsDrawer;
     private static final Interpolator FAST_OUT_SLOW_IN_INTERPOLATOR = new FastOutSlowInInterpolator();
-    private LinearLayout chatBox;
-    public FloatingActionButton fab;
+    private SwipeRemoveLinearLayout chatBox;
+    private FloatingActionButton fab;
     private CountDownTimer fabHidder;
     private boolean isTextFieldFocused = false;
     private static final int HIDE_FAB_AFTER_SEC = 5;
@@ -159,6 +160,11 @@ public class ZulipActivity extends AppCompatActivity implements
             abortBroadcast();
         }
     };
+
+    @Override
+    public void removeChatBox() {
+        chatBox.setVisibility(View.GONE);
+    }
 
     // Intent Extra constants
     public enum Flag {
