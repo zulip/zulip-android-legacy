@@ -12,6 +12,10 @@ import com.zulip.android.activities.LoginActivity;
 import com.zulip.android.util.ZLog;
 import com.zulip.android.ZulipApp;
 
+/**
+ * A background task which is used to authenticate from the server.
+ * Currently this files handles EmailBackend, DevAuthBackend and GoogleMobileOauth2Backend.
+ */
 public class AsyncLogin extends ZulipAsyncPushTask {
     private static final String UNREGISTERED = "unregistered";
     private static final String DISABLED = "disabled";
@@ -21,6 +25,11 @@ public class AsyncLogin extends ZulipAsyncPushTask {
     private LoginActivity context;
     private boolean userDefinitelyInvalid = false;
 
+    /**
+     * @param activity Reference to the activity from this is called mainly {@link LoginActivity} and {@link DevAuthActivity}
+     * @param username Stores the E-Mail of the user or a string "google-oauth2-token" if this is for Google Authentication
+     * @param password Stores the password if EmailBackend, ID Token if GoogleMobileOauth2Backend, and blank if DevAuthBackend
+     */
     public AsyncLogin(Activity activity, String username, String password, boolean devServer) {
         super(ZulipApp.get());
         this.activity = activity;

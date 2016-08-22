@@ -13,6 +13,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Adapter for the left side drawer of the streams and subjects.
+ */
 public class ExpandableStreamDrawerAdapter extends SimpleCursorTreeAdapter {
 
     public ExpandableStreamDrawerAdapter(final Context context, Cursor cursor, int groupLayout,

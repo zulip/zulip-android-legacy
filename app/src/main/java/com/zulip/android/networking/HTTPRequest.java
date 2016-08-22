@@ -24,6 +24,7 @@ import okhttp3.Response;
 
 /**
  * Simplified HTTP request API
+ * Uses the {@link OkHttpClient} for requests.
  */
 public class HTTPRequest {
     private ZulipApp app;

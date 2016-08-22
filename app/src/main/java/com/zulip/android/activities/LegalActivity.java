@@ -7,6 +7,9 @@ import android.webkit.WebView;
 
 import com.zulip.android.R;
 
+/**
+ * Activity to display Legal Information
+ */
 public class LegalActivity extends Activity {
 
     @Override

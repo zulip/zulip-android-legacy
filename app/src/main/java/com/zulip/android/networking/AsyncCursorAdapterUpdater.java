@@ -8,6 +8,11 @@ import android.support.v4.widget.SimpleCursorAdapter;
 
 import com.zulip.android.util.ZLog;
 
+/**
+ * A background task which asynchronously updates data.
+ * Used here{@link com.zulip.android.activities.RefreshableCursorAdapter} for updating the
+ * online people in the person (right) drawer.
+ */
 public class AsyncCursorAdapterUpdater extends
         AsyncTask<String, String, Cursor> {
 

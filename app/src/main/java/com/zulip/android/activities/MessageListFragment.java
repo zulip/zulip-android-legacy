@@ -41,7 +41,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
+/**
+ * This is a Fragment which holds the recyclerView for displaying the messages
+ * initiated and called by {@link ZulipActivity}
+ */
 public class MessageListFragment extends Fragment implements MessageListener {
     private static final int PIXEL_OFFSET_MESSAGE_HEADERS = 24;
     private LinearLayoutManager linearLayoutManager;

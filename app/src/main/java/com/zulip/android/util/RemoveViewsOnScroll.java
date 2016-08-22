@@ -12,6 +12,10 @@ import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.Interpolator;
 
+/**
+ * This hides the {@link AppBarLayout} and {@link android.support.design.widget.FloatingActionButton} when the
+ * recyclerView is scrolled, used in here {@link com.zulip.android.R.layout#main} as a behaviour.
+ */
 public class RemoveViewsOnScroll extends CoordinatorLayout.Behavior<View> {
     private static final Interpolator FAST_OUT_SLOW_IN_INTERPOLATOR = new FastOutSlowInInterpolator();
     private int changeInYDir;

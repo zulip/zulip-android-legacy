@@ -8,6 +8,10 @@ import android.view.View;
 
 import com.zulip.android.activities.RecyclerMessageAdapter;
 
+/**
+ * An {@link android.support.v7.widget.RecyclerView.ItemDecoration} for the recyclerView
+ * which adds margin to every MessageHeader.
+ */
 public class HeaderSpaceItemDecoration extends RecyclerView.ItemDecoration {
 
     private final int verticalMargin;

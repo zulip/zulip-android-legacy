@@ -37,6 +37,15 @@ import com.zulip.android.util.ZLog;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+/**
+ * Stores the global variables which are frequently used.
+ *
+ * {@link #max_message_id} This is the last Message ID stored in our database.
+ * {@link #you} A reference to the user currently logged in.
+ * {@link #api_key} Stores the API_KEY which was obtained from the server on successful authentication.
+ * {@link #mutedTopics} Stores the concatenated ID for the stream and topic (Same strings as {@link Message#getIdForHolder()}
+ * {@link #setupEmoji()} This is called to initialize and add records the existing emoticons in the assets folder.
+ */
 public class ZulipApp extends Application {
     private static final String API_KEY = "api_key";
     private static final String EMAIL = "email";

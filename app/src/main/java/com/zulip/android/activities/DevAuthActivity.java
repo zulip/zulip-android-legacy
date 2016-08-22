@@ -20,6 +20,9 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Activity where the Emails for the DevAuthBackend are displayed.
+ */
 public class DevAuthActivity extends Activity {
     private RecyclerView recyclerView;
     private ProgressDialog connectionProgressDialog;

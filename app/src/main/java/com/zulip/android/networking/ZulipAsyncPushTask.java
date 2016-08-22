@@ -12,7 +12,8 @@ import org.json.JSONObject;
 
 import okhttp3.Response;
 
-/* General AsyncTask for use in making various web requests to Humbug.
+/**
+ *  General AsyncTask for use in making various web requests to Humbug.
  *
  * This class should be extended by each asynchronous operation you
  * want to run. Most clients will need to override onPostExecute.

@@ -13,6 +13,10 @@ import com.zulip.android.util.ZLog;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * A background task which asynchronously fetches the Emails (Admins or Users) for the devAuthBackend
+ * Mainly used Development builds.
+ */
 public class AsyncDevGetEmails extends ZulipAsyncPushTask {
     private static final String DISABLED = "dev_disabled";
     private Context context;

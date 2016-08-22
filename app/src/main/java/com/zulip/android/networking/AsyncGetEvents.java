@@ -27,6 +27,14 @@ import com.zulip.android.ZulipApp;
 
 import okhttp3.Response;
 
+/**
+ * A background task which asynchronously fetches the updates from the server.
+ * The run method {@link #run()} which has an infinite loop and keeps fetching the latest updates
+ * and handles the events appropriately.
+ * If the user is not registered to a queue this registers {@link #register()} for a new lastEventId and queueID
+ *
+ * lastEventId {@link ZulipApp#lastEventId} which is used to fetch after this ID events from the server.
+ */
 public class AsyncGetEvents extends Thread {
     private static final String TAG = "AsyncGetEvents";
     private static final String ASYNC_GET_EVENTS = "asyncGetEvents";

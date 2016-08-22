@@ -15,6 +15,9 @@ import com.zulip.android.util.AuthClickListener;
 
 import java.util.List;
 
+/**
+ * Adapter used for the RecyclerView here{@link DevAuthActivity} for showing Emails in the DevAuthBackend
+ */
 class AuthEmailAdapter extends RecyclerView.Adapter<AuthEmailAdapter.AuthEmailViewHolder> {
 
     private static final int VIEW_TYPE_HEADER = 0;

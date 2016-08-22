@@ -94,6 +94,10 @@ import com.zulip.android.networking.ZulipAsyncPushTask;
 
 import org.json.JSONObject;
 
+/**
+ * The main Activity responsible for holding the {@link MessageListFragment} which has the list to the
+ * messages
+ * */
 public class ZulipActivity extends AppCompatActivity implements
         MessageListFragment.Listener, NarrowListener {
 

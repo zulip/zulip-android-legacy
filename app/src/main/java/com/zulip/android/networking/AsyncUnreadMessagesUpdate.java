@@ -6,6 +6,11 @@ import com.zulip.android.ZulipApp;
 
 import java.util.ArrayList;
 
+/**
+ * A background task used to notify the server that certain messages have been read.
+ * This queue {@link ZulipApp#unreadMessageQueue} stores the messages ID's and
+ * queue is emptied every couple of seconds.
+ */
 public class AsyncUnreadMessagesUpdate extends ZulipAsyncPushTask {
 
     public AsyncUnreadMessagesUpdate(ZulipApp app) {

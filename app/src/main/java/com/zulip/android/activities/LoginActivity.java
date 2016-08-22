@@ -36,6 +36,10 @@ import org.json.JSONObject;
 
 import java.util.List;
 
+/**
+ * Activity to Login through various backends on a specified server.
+ * Currently supported LoginAuths are Emailbackend and DevAuthBackend.
+ */
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener,
         GoogleApiClient.OnConnectionFailedListener {
     private static final String TAG = "LoginActivity";

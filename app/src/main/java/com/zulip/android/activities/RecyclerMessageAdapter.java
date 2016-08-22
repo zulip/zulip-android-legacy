@@ -39,7 +39,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
+/**
+ * An adapter to bind the messages to a RecyclerView.
+ * This has two main ViewTypes {@link MessageHeaderParent.MessageHeaderHolder} and {@link MessageHolder}
+ * Each Message is inserted to its MessageHeader which are distinguished by the {@link Message#getIdForHolder()}
+ * saved in {@link MessageHeaderParent#getId()}
+ *
+ * There are two ways to insert a message in this adapter one {@link RecyclerMessageAdapter#addMessage(Message, int)}
+ * and second one {@link RecyclerMessageAdapter#addNewMessage(Message)}
+ * The first one is used to add old messages from the databases with {@link com.zulip.android.util.MessageListener.LoadPosition#BELOW}
+ * and {@link com.zulip.android.util.MessageListener.LoadPosition#INITIAL}. This is for the threaded view and the messages are added
+ * to the existing messageHeaderParents.
+ * In addNewMessages the messages are loaded in the bottom and new headers are created if it does not matches the last header.
+ */
 public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public static final int VIEWTYPE_MESSAGE_HEADER = 1;
