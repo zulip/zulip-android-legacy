@@ -149,6 +149,9 @@ public class ZulipApp extends Application {
         setupEmoji();
     }
 
+    /**
+     * Fills the Emoji Table with the existing emoticons saved in the assets folder.
+     */
     private void setupEmoji() {
         try {
             final RuntimeExceptionDao<Emoji, Object> dao = getDao(Emoji.class);

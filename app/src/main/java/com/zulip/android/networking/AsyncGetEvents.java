@@ -306,6 +306,10 @@ public class AsyncGetEvents extends Thread {
         }
     }
 
+    /**
+     * Add messages to the list {@link com.zulip.android.activities.MessageListFragment} which are already added to the database
+     * @param messages List of messages to be added
+     */
     private void processMessages(final ArrayList<Message> messages) {
         // In task thread
         int lastMessageId = messages.get(messages.size() - 1).getID();
