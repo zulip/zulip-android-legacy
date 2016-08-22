@@ -43,7 +43,7 @@ public class SwipeRemoveLinearLayout extends LinearLayout {
                 x2 = ev.getX();
                 float deltaX = x2 - x1;
                 if (Math.abs(deltaX) > MIN_DISTANCE) {
-                    leftToRightSwipeListen.removeChatBox();
+                    leftToRightSwipeListen.removeChatBox((deltaX > 0));
                     return true;
                 }
                 break;
@@ -52,7 +52,7 @@ public class SwipeRemoveLinearLayout extends LinearLayout {
     }
 
     public interface leftToRightSwipeListener {
-        void removeChatBox();
+        void removeChatBox(boolean animToRight);
     }
 
     public void registerToSwipeEvents(leftToRightSwipeListener listener) {

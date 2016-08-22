@@ -1,6 +1,7 @@
 package com.zulip.android.util;
 
 import android.animation.Animator;
+import android.support.design.widget.AppBarLayout;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
@@ -65,4 +66,33 @@ public class AnimationHelper {
         });
         slideOutAnimator.start();
     }
+
+    public static void hideViewX(final View view, boolean animToRight) {
+        ViewPropertyAnimator animator = view.animate()
+                .translationX((animToRight) ? view.getWidth() : view.getWidth() * -1)
+                .setInterpolator(FAST_OUT_SLOW_IN_INTERPOLATOR)
+                .setDuration(200);
+
+        animator.setListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animator) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animator) {
+                view.setVisibility(View.GONE);
+                view.setX(0);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animator) {
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animator) {
+            }
+        });
+        animator.start();
+    }
+
 }

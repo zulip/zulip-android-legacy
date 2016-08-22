@@ -85,6 +85,7 @@ import com.zulip.android.models.PresenceType;
 import com.zulip.android.R;
 import com.zulip.android.models.Stream;
 import com.zulip.android.networking.AsyncSend;
+import com.zulip.android.util.AnimationHelper;
 import com.zulip.android.util.SwipeRemoveLinearLayout;
 import com.zulip.android.util.ZLog;
 import com.zulip.android.ZulipApp;
@@ -162,8 +163,8 @@ public class ZulipActivity extends AppCompatActivity implements
     };
 
     @Override
-    public void removeChatBox() {
-        chatBox.setVisibility(View.GONE);
+    public void removeChatBox(boolean animToRight) {
+        AnimationHelper.hideViewX(chatBox, animToRight);
     }
 
     // Intent Extra constants
@@ -1263,7 +1264,7 @@ public class ZulipActivity extends AppCompatActivity implements
             final android.support.v7.widget.SearchView searchView = (android.support.v7.widget.SearchView) MenuItemCompat.getActionView(mSearchMenuItem);
             searchView.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(getApplicationContext(), ZulipActivity.class)));
             searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-            ((EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text)).setHintTextColor(ContextCompat.getColor(this,R.color.colorTextPrimary));
+            ((EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text)).setHintTextColor(ContextCompat.getColor(this, R.color.colorTextPrimary));
             searchView.setOnQueryTextListener(new android.support.v7.widget.SearchView.OnQueryTextListener() {
                 @Override
                 public boolean onQueryTextSubmit(String s) {
