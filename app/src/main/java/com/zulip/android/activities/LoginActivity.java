@@ -12,6 +12,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -23,13 +24,13 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.zulip.android.BuildConfig;
 import com.zulip.android.R;
+import com.zulip.android.ZulipApp;
 import com.zulip.android.networking.AsyncDevGetEmails;
 import com.zulip.android.networking.AsyncGetBackends;
+import com.zulip.android.networking.AsyncLogin;
+import com.zulip.android.networking.ZulipAsyncPushTask.AsyncTaskCompleteListener;
 import com.zulip.android.util.AnimationHelper;
 import com.zulip.android.util.ZLog;
-import com.zulip.android.ZulipApp;
-import com.zulip.android.networking.ZulipAsyncPushTask.AsyncTaskCompleteListener;
-import com.zulip.android.networking.AsyncLogin;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -52,6 +53,12 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private EditText mUserName;
     private EditText mPassword;
     private EditText serverIn;
+    //region state-restoration
+    static final String USERNAME = "username";
+    static final String PASSWORD = "password";
+    static final String SERVER_IN = "serverIn";
+    private boolean skipAnimations = false;
+    //endregion
 
     private View mGoogleSignInButton;
 
@@ -95,11 +102,19 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 findViewById(R.id.local_server_button).setVisibility(View.GONE);
             }
         });
+        //restore instance state on orientation change
+        if (savedInstanceState != null){
+            skipAnimations = true;
+            serverIn.setText(savedInstanceState.getString(SERVER_IN));
+            ((Button) findViewById(R.id.server_btn)).performClick();
+            mUserName.setText(savedInstanceState.getString(USERNAME));
+            mPassword.setText(savedInstanceState.getString(PASSWORD));
+        }
     }
 
     private void showLoginFields() {
-        AnimationHelper.showView(findViewById(R.id.serverInput), 201);
-        AnimationHelper.hideView(findViewById(R.id.serverFieldLayout), 100);
+        AnimationHelper.showView(findViewById(R.id.serverInput), skipAnimations ? 0 : 201);
+        AnimationHelper.hideView(findViewById(R.id.serverFieldLayout), skipAnimations ? 0 : 100);
     }
 
     @Override
@@ -154,6 +169,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 showBackends(serverUri.getScheme(), serverURL);
             }
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState){
+        Boolean inLogin = mUserName.isShown();
+        savedInstanceState.putString(SERVER_IN,mServerEditText.getText().toString());
+        savedInstanceState.putString(USERNAME,mUserName.getText().toString());
+        savedInstanceState.putString(PASSWORD,mPassword.getText().toString());
     }
 
     private void showBackends(String httpScheme, String serverURL) {
