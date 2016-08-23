@@ -1,29 +1,29 @@
 package com.zulip.android.networking;
 
-import java.io.IOException;
-import java.net.SocketTimeoutException;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.concurrent.Callable;
+import android.os.SystemClock;
+import android.util.Log;
+
+import com.j256.ormlite.dao.RuntimeExceptionDao;
+import com.j256.ormlite.misc.TransactionManager;
+import com.zulip.android.ZulipApp;
+import com.zulip.android.activities.ZulipActivity;
+import com.zulip.android.models.Message;
+import com.zulip.android.models.MessageRange;
+import com.zulip.android.models.Person;
+import com.zulip.android.models.Stream;
+import com.zulip.android.util.ZLog;
 
 import org.apache.commons.lang.time.StopWatch;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.os.SystemClock;
-import android.util.Log;
-
-import com.j256.ormlite.dao.RuntimeExceptionDao;
-import com.j256.ormlite.misc.TransactionManager;
-import com.zulip.android.models.Message;
-import com.zulip.android.models.MessageRange;
-import com.zulip.android.models.Person;
-import com.zulip.android.models.Stream;
-import com.zulip.android.util.ZLog;
-import com.zulip.android.activities.ZulipActivity;
-import com.zulip.android.ZulipApp;
+import java.io.IOException;
+import java.net.SocketTimeoutException;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.concurrent.Callable;
 
 import okhttp3.Response;
 
@@ -89,21 +89,23 @@ public class AsyncGetEvents extends Thread {
         StopWatch watch = new StopWatch();
         watch.start();
         request.setMethodAndUrl("POST", "v1/register");
-        String responseData = request.execute().body().string();
+        Response responseData = request.execute();
         watch.stop();
         Log.i("perf", "net: v1/register: " + watch.toString());
 
         watch.reset();
         watch.start();
-        JSONObject response = new JSONObject(responseData);
+        JSONObject response = new JSONObject(responseData.body().toString());
         watch.stop();
         Log.i("perf", "json: v1/register: " + watch.toString());
 
-        registeredOrGotEventsThisRun = true;
-        app.setEventQueueId(response.getString("queue_id"));
-        app.setLastEventId(response.getInt("last_event_id"));
+        if(responseData.isSuccessful()) {
+            registeredOrGotEventsThisRun = true;
+            app.setEventQueueId(response.getString("queue_id"));
+            app.setLastEventId(response.getInt("last_event_id"));
 
-        processRegister(response);
+            processRegister(response);
+        }
     }
 
     public void run() {
