@@ -324,7 +324,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
         switch (getItemViewType(position)) {
             case VIEWTYPE_MESSAGE_HEADER:
                 final MessageHeaderParent messageHeaderParent = (MessageHeaderParent) getItem(position);
@@ -356,6 +356,13 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
                 MessageHolder messageHolder = ((MessageHolder) holder);
                 final Message message = ((Message) items.get(position));
+                message.setValueChangedPromise(new Runnable() {
+                    @Override
+                    public void run() {
+                        onBindViewHolder(holder, position);
+                        message.setValueChangedPromise(null);
+                    }
+                });
                 messageHolder.contentView.setText(message.getFormattedContent(zulipApp));
                 messageHolder.contentView.setMovementMethod(LinkMovementMethod.getInstance());
 

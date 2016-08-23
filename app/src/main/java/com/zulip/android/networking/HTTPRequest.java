@@ -32,6 +32,7 @@ public class HTTPRequest {
     private HashMap<String, String> properties;
     private OkHttpClient okHttpClient;
     private Response response = null;
+    private final Object synchronization = new Object();
     private String method, path;
     private Object synchronization = new Object();
 

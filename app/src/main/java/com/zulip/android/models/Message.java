@@ -18,29 +18,9 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.misc.TransactionManager;
 import com.j256.ormlite.stmt.DeleteBuilder;
 import com.j256.ormlite.table.DatabaseTable;
-import com.zulip.android.R;
-import com.zulip.android.ZulipApp;
 import com.zulip.android.util.CustomHtmlToSpannedConverter;
 import com.zulip.android.util.ZLog;
-
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.ccil.cowan.tagsoup.HTMLSchema;
-import org.ccil.cowan.tagsoup.Parser;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.xml.sax.SAXNotRecognizedException;
-import org.xml.sax.SAXNotSupportedException;
-
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
+import com.zulip.android.ZulipApp;
 
 @DatabaseTable(tableName = "messages")
 public class Message {
@@ -54,10 +34,7 @@ public class Message {
     public static final String TIMESTAMP_FIELD = "timestamp";
     public static final String RECIPIENTS_FIELD = "recipients";
     public static final String STREAM_FIELD = "stream";
-    public static final String MESSAGE_READ_FIELD = "read";
-    private static final String MESSAGE_EDITED = "MESSAGE_EDITED";
-    private static final String MESSAGE_EDIT_DATE = "MESSAGE_EDIT_DATE";
-
+    private Map<String, Drawable> cachedImages = new HashMap<>(1);
 
     //region fields
     @SerializedName("recipient_id")
@@ -144,8 +121,7 @@ public class Message {
     public List<MessageHistory> _history;
 
     //endregion
-
-
+    private Runnable promise;
 
     /**
      * Construct an empty Message object.
@@ -483,6 +459,14 @@ public class Message {
 
     }
 
+    /**
+     * Used to notify an outside observer if the state of a message has changed... e.g. offthread loaded images.
+     * @param runnable
+     */
+    public void setValueChangedPromise(Runnable runnable){
+        this.promise = runnable;
+    }
+
     public String concatStreamAndTopic() {
         return getStream().getId() + getSubject();
     }
@@ -496,11 +480,12 @@ public class Message {
 
     private static final HTMLSchema schema = new HTMLSchema();
 
-
     public Spanned getFormattedContent(ZulipApp app) {
+//        if(getContent() != null && getContent().contains("<img"))
 
         Spanned formattedMessage = formatContent(getFormattedContent(),
                 app);
+
         while (formattedMessage.length() != 0
                 && formattedMessage.charAt(formattedMessage.length() - 1) == '\n') {
             formattedMessage = (Spanned) formattedMessage.subSequence(0,
@@ -516,7 +501,7 @@ public class Message {
      * @param app
      * @return Span
      */
-    public static Spanned formatContent(String source, ZulipApp app) {
+    private static Spanned formatContent(String source, final ZulipApp app) {
         final Context context = app.getApplicationContext();
         final float density = context.getResources().getDisplayMetrics().density;
         Parser parser = new Parser();
@@ -765,5 +750,45 @@ public class Message {
             return displayRecipient;
         }
     }
+
+//    private static Drawable getDrawable(final String source, final Context context, final Message message) {
+//
+//        Drawable val = message.cachedImages.get(source);
+//        if(val != null) {
+//            message.cachedImages.remove(source);
+//            return val;
+//        }
+//
+//        AsyncTask<Void, Void, Drawable> k = new AsyncTask<Void, Void, Drawable>() {
+//            @Override
+//            protected Drawable doInBackground(Void... voids) {
+//                Bitmap res = null;
+//                try {
+//                    res = Picasso.with(context)
+//                            .load(source)
+//                            .priority(Picasso.Priority.HIGH)
+//                            .get();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//
+//                if (res == null) {
+//                    return null;
+//                }
+//                return new BitmapDrawable(context.getResources(), res);
+//            }
+//
+//            @Override
+//            protected void onPostExecute(Drawable drawable) {
+//                super.onPostExecute(drawable);
+//                if(message.promise != null) {
+//                    message.cachedImages.put(source, drawable);
+//                    message.promise.run();
+//                }
+//            }
+//        }.execute();
+//
+//        return null;
+//    }
 
 }
