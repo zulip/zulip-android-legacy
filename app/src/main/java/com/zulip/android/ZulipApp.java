@@ -1,17 +1,5 @@
 package com.zulip.android;
 
-import com.crashlytics.android.Crashlytics;
-import io.fabric.sdk.android.Fabric;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.Map;
-import java.util.Queue;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -21,6 +9,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Handler;
 import android.util.Log;
 
+import com.crashlytics.android.Crashlytics;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.misc.TransactionManager;
@@ -31,11 +20,34 @@ import com.zulip.android.models.Person;
 import com.zulip.android.models.Presence;
 import com.zulip.android.models.Stream;
 import com.zulip.android.networking.AsyncUnreadMessagesUpdate;
-import com.zulip.android.util.BuildHelper;
+import com.zulip.android.networking.ZulipInterceptor;
+import com.zulip.android.service.ZulipServices;
 import com.zulip.android.util.ZLog;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
+
+import io.fabric.sdk.android.Fabric;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.ResponseBody;
+import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Stores the global variables which are frequently used.
@@ -59,6 +71,10 @@ public class ZulipApp extends Application {
     private DatabaseHelper databaseHelper;
     private Set<String> mutedTopics;
     private static final String MUTED_TOPIC_KEY = "mutedTopics";
+    private ZulipServices zulipServices;
+
+    public Request goodRequest;
+    public Request badRequest;
 
     /**
      * Handler to manage batching of unread messages
@@ -147,6 +163,24 @@ public class ZulipApp extends Application {
         String email = settings.getString(EMAIL, null);
         setEmail(email);
         setupEmoji();
+    }
+
+    public ZulipServices getZulipServices() {
+        if(zulipServices == null) {
+            HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+            logging.setLevel(HttpLoggingInterceptor.Level.BASIC);
+
+            zulipServices = new Retrofit.Builder()
+                    .client(new OkHttpClient.Builder().readTimeout(60, TimeUnit.SECONDS)
+                            .addInterceptor(new ZulipInterceptor())
+                            .addInterceptor(logging)
+                            .build())
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .baseUrl(getServerURI())
+                    .build()
+                    .create(ZulipServices.class);
+        }
+        return zulipServices;
     }
 
     /**
@@ -378,5 +412,21 @@ public class ZulipApp extends Application {
 
     public boolean isTopicMute(int id, String subject) {
         return mutedTopics.contains(id + subject);
+    }
+
+    public void syncPointer(final int mID) {
+
+        getZulipServices().updatePointer(Integer.toString(mID))
+        .enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                setPointer(mID);
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                //do nothing.. don't want to mis-update the pointer.
+            }
+        });
     }
 }

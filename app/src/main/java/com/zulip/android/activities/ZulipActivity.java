@@ -85,6 +85,7 @@ import com.zulip.android.models.PresenceType;
 import com.zulip.android.R;
 import com.zulip.android.models.Stream;
 import com.zulip.android.networking.AsyncSend;
+import com.zulip.android.networking.response.UserConfigurationResponse;
 import com.zulip.android.util.AnimationHelper;
 import com.zulip.android.util.SwipeRemoveLinearLayout;
 import com.zulip.android.util.ZLog;
@@ -95,6 +96,11 @@ import com.zulip.android.networking.AsyncStatusUpdate;
 import com.zulip.android.networking.ZulipAsyncPushTask;
 
 import org.json.JSONObject;
+
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
 
 /**
  * The main Activity responsible for holding the {@link MessageListFragment} which has the list to the
@@ -1462,6 +1468,20 @@ public class ZulipActivity extends AppCompatActivity implements
             narrowedList.onActivityResume();
         }
         startRequests();
+        final Handler handler = new Handler();
+        ZulipApp.get().getZulipServices()
+                .register()
+                .enqueue(new Callback<UserConfigurationResponse>() {
+                    @Override
+                    public void onResponse(Call<UserConfigurationResponse> call, retrofit2.Response<UserConfigurationResponse> response) {
+                        String k = "";
+                    }
+
+                    @Override
+                    public void onFailure(Call<UserConfigurationResponse> call, Throwable t) {
+                        String k = "";
+                    }
+                });
     }
 
     @Override

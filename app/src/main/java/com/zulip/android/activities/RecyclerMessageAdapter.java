@@ -17,11 +17,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.zulip.android.models.Person;
 import com.j256.ormlite.stmt.UpdateBuilder;
-import com.zulip.android.models.Stream;
-import com.zulip.android.networking.AsyncPointerUpdate;
-
 import com.squareup.picasso.Picasso;
 import com.zulip.android.R;
 import com.zulip.android.ZulipApp;
@@ -32,7 +28,6 @@ import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageType;
 import com.zulip.android.models.Person;
 import com.zulip.android.models.Stream;
-import com.zulip.android.networking.AsyncPointerUpdate;
 import com.zulip.android.util.OnItemClickListener;
 import com.zulip.android.util.ZLog;
 import com.zulip.android.viewholders.LoadingHolder;
@@ -142,8 +137,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                         try {
                             int mID = msg.getID();
                             if (zulipApp.getPointer() < mID) {
-                                (new AsyncPointerUpdate(zulipApp)).execute(mID);
-                                zulipApp.setPointer(mID);
+                                zulipApp.syncPointer(mID);
                             }
                         } catch (NullPointerException e) {
                             ZLog.logException(e);
@@ -396,8 +390,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         try {
             int mID = message.getID();
             if (!startedFromFilter && zulipApp.getPointer() < mID) {
-                (new AsyncPointerUpdate(zulipApp)).execute(mID);
-                zulipApp.setPointer(mID);
+                zulipApp.syncPointer(mID);
             }
             if (!message.getMessageRead()) {
                 try {
