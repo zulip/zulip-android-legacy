@@ -32,7 +32,6 @@ public class HTTPRequest {
     private HashMap<String, String> properties;
     private OkHttpClient okHttpClient;
     private Response response = null;
-    private final Object synchronization = new Object();
     private String method, path;
     private Object synchronization = new Object();
 
@@ -58,22 +57,14 @@ public class HTTPRequest {
 
     void abort() {
         aborting = true;
-        synchronized (synchronization) {
-            if (response != null) {
-                final Response finalResponse = response;
-                response = null;
-                (new AsyncTask<Void, Void, Void>() {
-                    @Override
-                    protected Void doInBackground(Void... voids) {
-                        try {
-                            finalResponse.body().close();
-                        } catch (IllegalStateException e) {
-                            //fail silently
-                        }
-                        return null;
-                    }
-                }).execute();
-            }
+        if (response != null) {
+            (new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... voids) {
+                    response.body().close();
+                    return null;
+                }
+            }).execute();
         }
     }
 

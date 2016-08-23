@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/messageTile"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/stream_background"
-    android:paddingEnd="8dp"
-    android:paddingRight="8dp">
+                xmlns:tools="http://schemas.android.com/tools"
+                android:id="@+id/messageTile"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/stream_background"
+                android:paddingEnd="8dp"
+                android:paddingRight="8dp">
 
     <View
         android:id="@+id/leftBar"
@@ -62,14 +62,28 @@
         android:paddingStart="8dp"
         tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam mollis pretium purus, faucibus accumsan enim placerat non. " />
 
-    <!--<ImageView-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:scaleType="fitCenter"-->
-        <!--android:maxHeight="200dp"-->
-        <!--android:visibility="gone"-->
-        <!--android:id="@+id/load_image"-->
-        <!--l/>-->
+    <FrameLayout
+        android:id="@+id/load_image_container"
+        android:layout_width="match_parent"
+        android:layout_height="175dp"
+        android:layout_below="@id/contentView"
+        android:layout_centerHorizontal="true"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="20dp"
+        android:maxHeight="200dp"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <ImageView
+            android:id="@+id/load_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@color/colorAccent"
+            android:scaleType="centerInside"
+            tools:src="@drawable/ic_arrow_back_24dp"/>
+
+    </FrameLayout>
 
     <ImageView
         android:paddingTop="10dp"

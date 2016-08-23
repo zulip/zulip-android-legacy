@@ -94,7 +94,6 @@ public abstract class ZulipAsyncPushTask extends AsyncTask<String, String, Strin
         Crashlytics.log(Log.VERBOSE, "Network call", getClass().getCanonicalName() + request);
 
         try {
-            Crashlytics.log(Log.VERBOSE, "Network call", getClass().getCanonicalName() + request.toString());
             Response response = request.execute();
             String responseString = response.body().string();
             if (response.isSuccessful()) {
