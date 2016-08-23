@@ -669,9 +669,9 @@ public class ZulipActivity extends AppCompatActivity implements
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
                 switch (v.getId()) {
-                    case R.id.name_child:
+                    case R.id.name_child_container:
                         String streamName = ((Cursor) streamsDrawer.getExpandableListAdapter().getGroup(groupPosition)).getString(1);
-                        String subjectName = ((TextView) v).getText().toString();
+                        String subjectName = ((Cursor) streamsDrawer.getExpandableListAdapter().getChild(groupPosition, childPosition)).getString(0);
                         onNarrow(new NarrowFilterStream(streamName, subjectName));
                         onNarrowFillSendBoxStream(streamName, subjectName, false);
                         break;
