@@ -1,18 +1,20 @@
 package com.zulip.android.activities;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.Uri;
 import android.support.annotation.ColorInt;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
-import android.text.method.LinkMovementMethod;
 import android.util.Log;
+import android.text.method.LinkMovementMethod;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -356,16 +358,31 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
                 MessageHolder messageHolder = ((MessageHolder) holder);
                 final Message message = ((Message) items.get(position));
-                message.setValueChangedPromise(new Runnable() {
-                    @Override
-                    public void run() {
-                        onBindViewHolder(holder, position);
-                        message.setValueChangedPromise(null);
-                    }
-                });
+
                 messageHolder.contentView.setText(message.getFormattedContent(zulipApp));
                 messageHolder.contentView.setMovementMethod(LinkMovementMethod.getInstance());
 
+                final String url = message.extractImageUrl(zulipApp);
+                if(url != null) {
+                    messageHolder.contentImageContainer.setVisibility(View.VISIBLE);
+                    Picasso.with(context).load(url)
+                            .into(messageHolder.contentImage);
+
+                    messageHolder.contentImageContainer
+                            .setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    Intent i = new Intent(Intent.ACTION_VIEW);
+                                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    i.setData(Uri.parse(url));
+                                    zulipApp.startActivity(i);
+                                }
+                            });
+                }
+                else {
+                    messageHolder.contentImageContainer.setVisibility(View.GONE);
+                    messageHolder.contentImage.setImageDrawable(null);
+                }
                 if (message.getType() == MessageType.STREAM_MESSAGE) {
                     messageHolder.senderName.setText(message.getSender().getName());
                     if (!isCurrentThemeNight)
@@ -373,8 +390,9 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                     messageHolder.messageTile.setBackgroundColor(streamMessageBackground);
                 } else {
                     messageHolder.senderName.setText(message.getSender().getName());
-                    if (!isCurrentThemeNight)
+                    if (!isCurrentThemeNight) {
                         messageHolder.leftBar.setBackgroundColor(privateMessageBackground);
+                    }
                     messageHolder.messageTile.setBackgroundColor(privateMessageBackground);
                 }
 

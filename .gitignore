@@ -1,5 +1,6 @@
 gen/
 bin/
+build.gradle
 /res/raw/ormlite_config.txt
 .settings
 *-sources.jar
