@@ -8,9 +8,10 @@ buildscript {
         classpath 'com.google.gms:google-services:2.1.0'
     }
 }
-
+project.ext.fabricKey = "";
 allprojects {
     repositories {
         jcenter()
     }
+
 }

@@ -119,6 +119,8 @@ public class HTTPRequest {
         }
         Request request = requestBuilder.build();
         Log.i("OkHTTP.request", method + " " + request.url().toString());
+        if(request.url().toString().contains("pointer"))
+        ZulipApp.get().goodRequest = request;
         response = okHttpClient.newCall(request).execute();
         return response;
     }

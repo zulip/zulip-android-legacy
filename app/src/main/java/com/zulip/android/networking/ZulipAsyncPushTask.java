@@ -92,7 +92,7 @@ public abstract class ZulipAsyncPushTask extends AsyncTask<String, String, Strin
 
     protected String doInBackground(String... api_path) {
         Crashlytics.log(Log.VERBOSE, "Network call", getClass().getCanonicalName() + request);
-        
+
         try {
             Response response = request.execute();
             String responseString = response.body().string();
