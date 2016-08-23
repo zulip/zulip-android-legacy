@@ -1,5 +1,6 @@
 package com.zulip.android.activities;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -9,10 +10,15 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
@@ -25,6 +31,7 @@ import com.zulip.android.BuildConfig;
 import com.zulip.android.R;
 import com.zulip.android.networking.AsyncDevGetEmails;
 import com.zulip.android.networking.AsyncGetBackends;
+import com.zulip.android.networking.LoginInterface;
 import com.zulip.android.util.AnimationHelper;
 import com.zulip.android.util.ZLog;
 import com.zulip.android.ZulipApp;
@@ -34,25 +41,31 @@ import com.zulip.android.networking.AsyncLogin;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
+
+import static com.zulip.android.activities.DevAuthActivity.ADD_REALM_REQUEST;
 
 /**
  * Activity to Login through various backends on a specified server.
  * Currently supported LoginAuths are Emailbackend and DevAuthBackend.
  */
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener,
-        GoogleApiClient.OnConnectionFailedListener {
+        GoogleApiClient.OnConnectionFailedListener, LoginInterface {
     private static final String TAG = "LoginActivity";
     private static final int REQUEST_CODE_RESOLVE_ERR = 9000;
     private static final int REQUEST_CODE_SIGN_IN = 9001;
 
+    private boolean startedFromAddRealm = false;
     private ProgressDialog connectionProgressDialog;
     private GoogleApiClient mGoogleApiClient;
     private EditText mServerEditText;
     private EditText mUserName;
     private EditText mPassword;
     private EditText serverIn;
-
+    private EditText realmNameET;
+    private String serverURL;
     private View mGoogleSignInButton;
 
     @Override
@@ -100,6 +113,12 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private void showLoginFields() {
         AnimationHelper.showView(findViewById(R.id.serverInput), 201);
         AnimationHelper.hideView(findViewById(R.id.serverFieldLayout), 100);
+        realmNameET = (EditText) findViewById(R.id.realmName);
+        if (getIntent().getBooleanExtra("FROM_ADDREALM", false)) {
+            startedFromAddRealm = true;
+            ((TextView) findViewById(R.id.welcome_zulip)).setText(R.string.add_realm);
+            ((Button) findViewById(R.id.zulip_login)).setText(R.string.add_realm_login);
+        }
     }
 
     @Override
@@ -110,6 +129,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(intent);
                 handleSignInResult(result);
                 break;
+            case ADD_REALM_REQUEST:
+                if (resultCode == Activity.RESULT_OK) {
+                    setResult(Activity.RESULT_OK, intent);
+                    finish();
+                }
             default:
                 break;
         }
@@ -156,6 +180,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
+
     private void showBackends(String httpScheme, String serverURL) {
         Uri serverUri = Uri.parse(serverURL);
 
@@ -169,8 +194,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         serverIn.setText(serverUri.toString());
         mServerEditText.setText(serverUri.toString());
         mServerEditText.setEnabled(false);
-        ((ZulipApp) getApplication()).setServerURL(serverUri.toString());
-        AsyncGetBackends asyncGetBackends = new AsyncGetBackends(ZulipApp.get());
+        this.serverURL = serverUri.toString();
+        AsyncGetBackends asyncGetBackends = new AsyncGetBackends(ZulipApp.get(), this.serverURL);
         asyncGetBackends.setCallback(new AsyncTaskCompleteListener() {
             @Override
             public void onTaskComplete(String result, JSONObject jsonObject) {
@@ -242,7 +267,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 return;
             }
 
-            final AsyncLogin loginTask = new AsyncLogin(LoginActivity.this, "google-oauth2-token", account.getIdToken(), false);
+            final AsyncLogin loginTask = new AsyncLogin(LoginActivity.this, "google-oauth2-token", account.getIdToken(), getRealmName(), startedFromAddRealm, serverURL, false);
             loginTask.setCallback(new AsyncTaskCompleteListener() {
                 @Override
                 public void onTaskComplete(String result, JSONObject object) {
@@ -270,11 +295,26 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    private void openLegal() {
+    private String getRealmName() {
+        if (TextUtils.isEmpty(realmNameET.getText())) {
+            String server = serverURL;
+            URI uri = null;
+            try {
+                uri = new URI(server);
+            } catch (URISyntaxException e) {
+                return server;
+            }
+            return uri.getHost();
+        }
+        return realmNameET.getText().toString();
+    }
+
+    protected void openLegal() {
         Intent i = new Intent(this, LegalActivity.class);
         startActivityForResult(i, 0);
     }
 
+    @Override
     public void openHome() {
         // Cancel before leaving activity to avoid leaking windows
         connectionProgressDialog.dismiss();
@@ -341,10 +381,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 if (!isInputValid()) {
                     return;
                 }
+                if (!isInputValid()) return;
+                if (serverURL == null) return;
                 connectionProgressDialog.show();
 
                 AsyncLogin alog = new AsyncLogin(LoginActivity.this,
-                        mUserName.getText().toString(), mPassword.getText().toString(), false);
+                        mUserName.getText().toString(), mPassword.getText().toString(),
+                        getRealmName(), startedFromAddRealm, serverURL, false);
+
                 // Remove the CPD when done
                 alog.setCallback(new AsyncTaskCompleteListener() {
                     @Override
@@ -366,7 +410,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             case R.id.local_server_button:
                 if (!isInputValidForDevAuth()) return;
                 connectionProgressDialog.show();
-                AsyncDevGetEmails asyncDevGetEmails = new AsyncDevGetEmails(LoginActivity.this);
+                AsyncDevGetEmails asyncDevGetEmails = new AsyncDevGetEmails(LoginActivity.this, serverURL, getRealmName(), startedFromAddRealm);
                 asyncDevGetEmails.setCallback(new AsyncTaskCompleteListener() {
                     @Override
                     public void onTaskComplete(String result, JSONObject jsonObject) {

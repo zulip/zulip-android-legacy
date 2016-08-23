@@ -10,6 +10,9 @@
         app:showAsAction="ifRoom" />
 
     <item
+        android:id="@+id/menu_realm"
+        android:title="@string/realm_title" />
+    <item
         android:id="@+id/refresh"
         android:title="@string/refresh" />
 

@@ -24,6 +24,10 @@ public abstract class ZulipAsyncPushTask extends AsyncTask<String, String, Strin
     private HTTPRequest request;
     AsyncTaskCompleteListener callback;
 
+    public void setServerURL(String serverURL) {
+        request.setServerURL(serverURL);
+    }
+
     /**
      * Interface implemented by callbacks which are run at the end of a task.
      * <p/>

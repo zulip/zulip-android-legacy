@@ -4,11 +4,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.zulip.android.activities.DevAuthActivity;
 import com.zulip.android.activities.LoginActivity;
+import com.zulip.android.activities.ZulipActivity;
 import com.zulip.android.util.ZLog;
 import com.zulip.android.ZulipApp;
 
@@ -22,18 +24,25 @@ public class AsyncLogin extends ZulipAsyncPushTask {
 
     private Activity activity;
     private boolean devServer = true; //If this is a DevAuthBackend server!
-    private LoginActivity context;
+    private Activity context;
     private boolean userDefinitelyInvalid = false;
+    boolean startedFromAddRealm = false;
+    private String realmName;
+    private String username;
+    private String serverURL;
+    LoginInterface loginInterface;
 
     /**
      * @param activity Reference to the activity from this is called mainly {@link LoginActivity} and {@link DevAuthActivity}
      * @param username Stores the E-Mail of the user or a string "google-oauth2-token" if this is for Google Authentication
      * @param password Stores the password if EmailBackend, ID Token if GoogleMobileOauth2Backend, and blank if DevAuthBackend
      */
-    public AsyncLogin(Activity activity, String username, String password, boolean devServer) {
+    public AsyncLogin(Activity loginActivity, String username, String password, String realmName, boolean startedFromAddRealm, String serverURL, boolean devServer) {
         super(ZulipApp.get());
-        this.activity = activity;
-        if (username.contains("@")) {
+        this.startedFromAddRealm = startedFromAddRealm;
+        context = loginActivity;
+        this.username = username;
+        if (username.contains("@") && !startedFromAddRealm) {
             // @-less usernames are used as indicating special cases, for
             // example in OAuth2 authentication
             this.app.setEmail(username);
@@ -43,6 +52,11 @@ public class AsyncLogin extends ZulipAsyncPushTask {
             this.setProperty("password", password);
             this.devServer = false;
         }
+        this.setProperty("password", password);
+        this.realmName = realmName;
+        this.setServerURL(serverURL);
+        this.serverURL = serverURL;
+        loginInterface = (LoginInterface) context;
     }
 
     public final void execute() {
@@ -57,10 +71,15 @@ public class AsyncLogin extends ZulipAsyncPushTask {
                 JSONObject obj = new JSONObject(result);
 
                 if (obj.getString("result").equals("success")) {
-                    this.app.setLoggedInApiKey(obj.getString("api_key"));
-                    if (devServer) ((DevAuthActivity) activity).openHome();
-                    else ((LoginActivity) activity).openHome();
-                    callback.onTaskComplete(result, obj);
+                    if (startedFromAddRealm) {
+                        loginThroughAddRealm(obj);
+                        callback.onTaskComplete(result, obj);
+                    } else {
+                        this.app.setServerURL(serverURL);
+                        this.app.setLoggedInApiKey(obj.getString("api_key"));
+                        ZulipApp.get().saveServerName(realmName);
+                        loginInterface.openHome();
+                    }
                     return;
                 }
             } catch (JSONException e) {
@@ -69,6 +88,27 @@ public class AsyncLogin extends ZulipAsyncPushTask {
         }
         Toast.makeText(activity, "Unknown error", Toast.LENGTH_LONG).show();
         Log.wtf("login", "We shouldn't have gotten this far.");
+    }
+
+    private void loginThroughAddRealm(JSONObject jsonObject) {
+        try {
+            Intent intent = null;
+            //This is done to start ZulipActivity from DevAuthActivity which cannot be done directly as DevAuthActivity was called from LoginActivity
+            //And Therefore we have to finish two activities (DevAuthActivity and LoginActivity) if started from DevAuthActivity.
+            if (context instanceof DevAuthActivity) {
+                intent = new Intent();
+            } else if (context instanceof LoginActivity) {
+                intent = new Intent(context, ZulipActivity.class);
+            }
+            intent.putExtra("realmName", realmName);
+            intent.putExtra("api_key", jsonObject.getString("api_key"));
+            intent.putExtra("email", username);
+            intent.putExtra("serverURL", serverURL);
+            context.setResult(Activity.RESULT_OK, intent);
+            context.finish();
+        } catch (JSONException e) {
+            ZLog.logException(e);
+        }
     }
 
     @Override

@@ -10,7 +10,9 @@ import java.util.ArrayList;
 import android.animation.Animator;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -151,6 +153,7 @@ public class ZulipActivity extends AppCompatActivity implements
     private SimpleCursorAdapter streamActvAdapter;
     private SimpleCursorAdapter subjectActvAdapter;
     private SimpleCursorAdapter emailActvAdapter;
+    public static final int ADDREALM_REQUEST_CODE = 201;
 
     private BroadcastReceiver onGcmMessage = new BroadcastReceiver() {
         public void onReceive(Context contenxt, Intent intent) {
@@ -1340,6 +1343,10 @@ public class ZulipActivity extends AppCompatActivity implements
                 break;
             case R.id.today:
                 doNarrow(new NarrowFilterToday());
+            case R.id.menu_realm:
+                FragmentManager fm = getSupportFragmentManager();
+                RealmDialog dialogFragment = RealmDialog.newInstance();
+                dialogFragment.show(fm, "fragment_realm");
                 break;
             case R.id.logout:
                 logout();
@@ -1486,5 +1493,65 @@ public class ZulipActivity extends AppCompatActivity implements
         if (narrowedList != null) {
             narrowedList.onNewMessages(messages);
         }
+    }
+
+    void switchRealm(final ProgressDialog progressDialog, final int position) {
+        if (event_poll != null) {
+            event_poll.abort();
+            event_poll = null;
+        }
+        statusUpdateHandler.removeMessages(0);
+        unregisterReceiver(onGcmMessage);
+        app.clearConnectionState();
+        app.switchToRealm(position);
+        app.resetDatabase();
+        app.setEmail(app.getYou().getEmail());
+        event_poll = new AsyncGetEvents(ZulipActivity.this);
+        event_poll.start();
+        IntentFilter filter = new IntentFilter(GcmBroadcastReceiver.getGCMReceiverAction(getApplicationContext()));
+        filter.setPriority(2);
+        registerReceiver(onGcmMessage, filter);
+        progressDialog.dismiss();
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == ADDREALM_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            this.currentList.adapter.clear();
+            this.currentList.adapter.setHeaderShowing(true);
+            final String realmName = data.getStringExtra("realmName");
+            final String apiKey = data.getStringExtra("api_key");
+            final String email = data.getStringExtra("email");
+            final String serverURL = data.getStringExtra("serverURL");
+            notifications.logOut(new Runnable() {
+                @Override
+                public void run() {
+                    if (event_poll != null) {
+                        event_poll.abort();
+                        event_poll = null;
+                    }
+                    statusUpdateHandler.removeMessages(0);
+                    try {
+                        unregisterReceiver(onGcmMessage);
+                    } catch (IllegalArgumentException e) {
+                        ZLog.logException(e);
+                    }
+
+                    app.clearConnectionState();
+                    app.createNewRealm();
+                    app.setEmail(email);
+                    app.setServerURL(serverURL);
+                    app.saveServerName(realmName);
+                    app.setLoggedInApiKey(apiKey);
+                    IntentFilter filter = new IntentFilter(GcmBroadcastReceiver.getGCMReceiverAction(getApplicationContext()));
+                    filter.setPriority(2);
+                    registerReceiver(onGcmMessage, filter);
+                    onRefresh();
+                }
+            });
+
+        }
+        this.currentList.adapter.setHeaderShowing(false);
     }
 }

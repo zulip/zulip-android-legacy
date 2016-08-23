@@ -13,6 +13,9 @@ import com.zulip.android.util.ZLog;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+
+import static com.zulip.android.activities.DevAuthActivity.ADD_REALM_REQUEST;
+
 /**
  * A background task which asynchronously fetches the Emails (Admins or Users) for the devAuthBackend
  * Mainly used Development builds.
@@ -20,11 +23,21 @@ import org.json.JSONObject;
 public class AsyncDevGetEmails extends ZulipAsyncPushTask {
     private static final String DISABLED = "dev_disabled";
     private Context context;
+    public static final String SERVER_URL_JSON = "server_url";
+    public static final String REALM_NAME_JSON = "realm_json";
+    public static final String ADD_REALM_BOOLEAN_JSON = "add_realm_bool_json";
     public final static String EMAIL_JSON = "emails_json";
+    private String serverURL;
+    private String realmName;
+    private boolean startedFromAddRealm;
 
-    public AsyncDevGetEmails(LoginActivity loginActivity) {
+    public AsyncDevGetEmails(LoginActivity loginActivity, String serverURL, String realmName, boolean startedFromAddRealm) {
         super((ZulipApp) loginActivity.getApplication());
         context = loginActivity;
+        this.serverURL = serverURL;
+        this.realmName = realmName;
+        this.startedFromAddRealm = startedFromAddRealm;
+        this.setServerURL(serverURL);
     }
 
     public final void execute() {
@@ -38,7 +51,10 @@ public class AsyncDevGetEmails extends ZulipAsyncPushTask {
             if (obj.getString("result").equals("success")) {
                 Intent intent = new Intent(context, DevAuthActivity.class);
                 intent.putExtra(EMAIL_JSON, result);
-                context.startActivity(intent);
+                intent.putExtra(REALM_NAME_JSON, realmName);
+                intent.putExtra(SERVER_URL_JSON, serverURL);
+                intent.putExtra(ADD_REALM_BOOLEAN_JSON, startedFromAddRealm);
+                ((LoginActivity) context).startActivityForResult(intent, ADD_REALM_REQUEST);
             }
         } catch (JSONException e) {
             ZLog.logException(e);

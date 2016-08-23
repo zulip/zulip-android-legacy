@@ -33,6 +33,7 @@ public class HTTPRequest {
     private OkHttpClient okHttpClient;
     private Response response = null;
     private String method, path;
+    private String serverURL;
 
     public void setMethodAndUrl(String method, String URL) {
         this.method = method;
@@ -43,8 +44,12 @@ public class HTTPRequest {
         properties = new HashMap<>();
         this.app = app;
         okHttpClient = new OkHttpClient.Builder().readTimeout(60, TimeUnit.SECONDS).build();
+        this.serverURL = app.getServerURI();
     }
 
+    public void setServerURL(String serverURL) {
+        this.serverURL = serverURL;
+    }
 
     public void setProperty(String key, String value) {
         properties.put((key == null) ? "" : key, (value == null) ? "" : value);
@@ -71,7 +76,7 @@ public class HTTPRequest {
         if (method == null)
             throw new IOException(app.getString(R.string.method_null));
         Request.Builder requestBuilder = new Request.Builder();
-        String url = app.getServerURI() + path;
+        String url = serverURL + path;
         requestBuilder.addHeader("client", "Android");
         requestBuilder.addHeader("User-Agent", app.getUserAgent());
 

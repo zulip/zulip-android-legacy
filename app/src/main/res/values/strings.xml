@@ -40,13 +40,6 @@
     <string name="hint_person">Person</string>
     <string name="hint_subject">Topic</string>
     <string name="hint_stream">Stream</string>
-    <string name="message_sent">Message sent!</string>
-    <string name="message_error">Error sending message</string>
-    <string name="stream_error">Please specify stream.</string>
-    <string name="stream_not_exists">Stream does not exist.</string>
-    <string name="subject_error">Please specify topic.</string>
-    <string name="person_error">Please specify recipient.</string>
-    <string name="no_message_error">No message written.</string>
     <string name="local_server">Dev backend testing server</string>
     <string name="zulip_dev_login">Zulip Dev login</string>
     <string name="admin_none">Administrators (None)</string>
@@ -73,4 +66,22 @@
     <string name="reply_sender">Reply to Sender</string>
     <string name="narrow_stream">Narrow to this stream</string>
     <string name="narrow_topic">Narrow to this topic</string>
+    <string name="message_sent">Message sent!</string>
+    <string name="message_error">Error sending message</string>
+    <string name="stream_error">No stream specified.</string>
+    <string name="stream_not_exists">Stream does not exists.</string>
+    <string name="subject_error">No subject specified.</string>
+    <string name="person_error">No person specified.</string>
+    <string name="no_message_error">No message written.</string>
+    <string name="realm_title">Realms</string>
+    <string name="realm_switch">Switch to this realm</string>
+    <string name="realm_switch_confirm">"Do you want to switch to %s ?"</string>
+    <string name="realm_this_is_current">This is the current realm only!</string>
+    <string name="realm_switching">Switching realm</string>
+    <string name="please_wait">Please wait</string>
+    <string name="realm_add">Add Realm</string>
+    <string name="realm_name">Name of a realm (Optional)</string>
+    <string name="realm_exists">Realm Name already exists, please change.</string>
+    <string name="add_realm">Add new Realm</string>
+    <string name="add_realm_login">Add</string>
 </resources>

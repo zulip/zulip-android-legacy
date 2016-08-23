@@ -60,6 +60,16 @@ public class ZulipApp extends Application {
     private Set<String> mutedTopics;
     private static final String MUTED_TOPIC_KEY = "mutedTopics";
 
+    private final static String GLOBAL_SETTINGS = "HumbugActivity";
+    private final static String SERVER_SETTINGS = "serverSettings";
+    private final static String GLOBAL_SETTINGS_CURRENT = "currentRealm";
+    private static final String GLOBAL_SETTINGS_REALMS = "REALMS";
+
+
+    public int currentRealm = 0;
+
+    public HashSet serverStringSet;
+    private SharedPreferences globalSettings;
     /**
      * Handler to manage batching of unread messages
      */
@@ -98,15 +108,11 @@ public class ZulipApp extends Application {
 
         // This used to be from HumbugActivity.getPreferences, so we keep that
         // file name.
-        this.settings = getSharedPreferences("HumbugActivity",
-                Context.MODE_PRIVATE);
+        globalSettings = getSharedPreferences(GLOBAL_SETTINGS, Context.MODE_PRIVATE);
+        currentRealm = globalSettings.getInt(GLOBAL_SETTINGS_CURRENT, currentRealm);
+        serverStringSet = new HashSet<String>(globalSettings.getStringSet(GLOBAL_SETTINGS_REALMS, new HashSet<String>()));
 
-        max_message_id = settings.getInt("max_message_id", -1);
-        eventQueueId = settings.getString("eventQueueId", null);
-        lastEventId = settings.getInt("lastEventId", -1);
-        pointer = settings.getInt("pointer", -1);
-
-
+        switchToRealm(currentRealm);
         this.api_key = settings.getString(API_KEY, null);
 
         if (api_key != null) {
@@ -223,7 +229,7 @@ public class ZulipApp extends Application {
     }
 
     public void setEmail(String email) {
-        databaseHelper = new DatabaseHelper(this, email);
+        databaseHelper = new DatabaseHelper(this, SERVER_SETTINGS + currentRealm);
         this.you = Person.getOrUpdate(this, email, null, null);
     }
 
@@ -378,5 +384,51 @@ public class ZulipApp extends Application {
 
     public boolean isTopicMute(int id, String subject) {
         return mutedTopics.contains(id + subject);
+    }
+
+    public void saveServerName(String serverName) {
+        String username=null;
+        try {
+            username = you.getEmail();
+        } catch (Exception e) {
+            //SQL Exception can occur if name is not updated!
+            ZLog.logException(e);
+        }
+        Editor globalEditor = this.globalSettings.edit();
+        serverStringSet.add((username != null) ? serverName + " - " + username : serverName);
+        globalEditor.putStringSet(GLOBAL_SETTINGS_REALMS, new HashSet<String>(serverStringSet));
+        globalEditor.apply();
+    }
+    public void createNewRealm() {
+        SharedPreferences.Editor editor = this.globalSettings.edit();
+        currentRealm = serverStringSet.size();
+        editor.putInt(GLOBAL_SETTINGS_CURRENT, currentRealm);
+        editor.apply();
+
+        databaseHelper = new DatabaseHelper(this, SERVER_SETTINGS + serverStringSet.size());
+
+        this.settings = getSharedPreferences(SERVER_SETTINGS + serverStringSet.size(), Context.MODE_PRIVATE);
+        max_message_id = settings.getInt("max_message_id", -1);
+        eventQueueId = settings.getString("eventQueueId", null);
+        lastEventId = settings.getInt("lastEventId", -1);
+        pointer = settings.getInt("pointer", -1);
+    }
+
+    public void switchToRealm(int position) {
+        databaseHelper = new DatabaseHelper(this, SERVER_SETTINGS + position);
+        this.settings = getSharedPreferences(SERVER_SETTINGS + position, Context.MODE_PRIVATE);
+        this.api_key = settings.getString("api_key", null);
+        max_message_id = settings.getInt("max_message_id", -1);
+        eventQueueId = settings.getString("eventQueueId", null);
+        lastEventId = settings.getInt("lastEventId", -1);
+        pointer = settings.getInt("pointer", -1);
+        if (settings.contains("email"))
+            this.you = Person.getOrUpdate(this, settings.getString("email", null), null, null);
+        currentRealm = position;
+        if (position != currentRealm) {
+            SharedPreferences.Editor edit = globalSettings.edit();
+            edit.putInt(GLOBAL_SETTINGS_CURRENT, position);
+            edit.apply();
+        }
     }
 }

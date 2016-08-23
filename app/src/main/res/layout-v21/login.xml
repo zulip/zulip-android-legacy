@@ -26,6 +26,7 @@
         android:layout_marginTop="16dp"
         android:gravity="center|center_horizontal"
         android:padding="10dp"
+        android:id="@+id/welcome_zulip"
         android:text="@string/login_welcome_blurb"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
@@ -45,6 +46,12 @@
             android:padding="10dp"
             android:text="@string/enter_server"
             android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <EditText
+            android:id="@+id/realmName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/realm_name" />
 
         <EditText
             android:id="@+id/server_url_in"
