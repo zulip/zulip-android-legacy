@@ -49,10 +49,10 @@ public class AsyncGetEvents extends Thread {
     private int failures = 0;
     private boolean registeredOrGotEventsThisRun;
 
-    public AsyncGetEvents(ZulipActivity zulipActivity) {
+    public AsyncGetEvents(ZulipActivity humbugActivity) {
         super();
-        app = (ZulipApp) zulipActivity.getApplication();
-        activity = zulipActivity;
+        app = (ZulipApp) humbugActivity.getApplication();
+        activity = humbugActivity;
         request = new HTTPRequest(app);
     }
 
