@@ -161,6 +161,7 @@ public class ZulipActivity extends AppCompatActivity implements
             abortBroadcast();
         }
     };
+    private ExpandableStreamDrawerAdapter streamsDrawerAdapter;
 
     @Override
     public void removeChatBox(boolean animToRight) {
@@ -303,6 +304,12 @@ public class ZulipActivity extends AppCompatActivity implements
             /** Called when a drawer has settled in a completely open state. */
             public void onDrawerOpened(View drawerView) {
                 // pass
+                try {
+                    streamsDrawerAdapter.changeCursor(streamsGenerator.call());
+                } catch (Exception e) {
+                    ZLog.logException(e);
+                }
+                streamsDrawerAdapter.notifyDataSetChanged();
             }
         };
 
@@ -648,7 +655,7 @@ public class ZulipActivity extends AppCompatActivity implements
      * Setup the streams Drawer which has a {@link ExpandableListView} categorizes the stream and subject
      */
     private void setupListViewAdapter() {
-        ExpandableStreamDrawerAdapter streamsDrawerAdapter = null;
+        streamsDrawerAdapter = null;
         String[] groupFrom = {Stream.NAME_FIELD, Stream.COLOR_FIELD, ExpandableStreamDrawerAdapter.UNREAD_TABLE_NAME};
         int[] groupTo = {R.id.name, R.id.stream_dot, R.id.unread_group};
         // Comparison of data elements and View
