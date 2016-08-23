@@ -343,7 +343,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
         int topPosBefore = linearLayoutManager.findFirstVisibleItemPosition();
         int addedCount = 0;
         int headerParents = 0;
-
+        StringBuilder stringBuilder = new StringBuilder ();
         if (pos == LoadPosition.NEW && !loadedToBottom) {
             // If we don't have intermediate messages loaded, don't add new
             // messages -- they'll be loaded when we scroll down.
@@ -383,7 +383,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
                 this.adapter.addNewMessage(message);
                 messageList.add(message);
             } else if (pos == LoadPosition.ABOVE || pos == LoadPosition.INITIAL) {
-                headerParents = (this.adapter.addMessage(message, addedCount + headerParents)) ? headerParents + 1 : headerParents;
+                headerParents = (this.adapter.addOldMessage(message, addedCount + headerParents, stringBuilder)) ? headerParents + 1 : headerParents;
                 messageList.add(addedCount, message);
                 addedCount++;
             }

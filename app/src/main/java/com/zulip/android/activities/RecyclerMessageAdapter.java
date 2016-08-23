@@ -10,19 +10,14 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.zulip.android.models.Person;
-import com.zulip.android.models.Stream;
-import com.zulip.android.networking.AsyncPointerUpdate;
-
 import com.squareup.picasso.Picasso;
-import com.zulip.android.util.OnItemClickListener;
 import com.zulip.android.R;
 import com.zulip.android.ZulipApp;
 import com.zulip.android.filters.NarrowFilterPM;
@@ -30,6 +25,10 @@ import com.zulip.android.filters.NarrowFilterStream;
 import com.zulip.android.filters.NarrowListener;
 import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageType;
+import com.zulip.android.models.Person;
+import com.zulip.android.models.Stream;
+import com.zulip.android.networking.AsyncPointerUpdate;
+import com.zulip.android.util.OnItemClickListener;
 import com.zulip.android.util.ZLog;
 import com.zulip.android.viewholders.LoadingHolder;
 import com.zulip.android.viewholders.MessageHeaderParent;
@@ -204,8 +203,10 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
     private void setupLists(List<Message> messageList) {
         int headerParents = 0;
+        StringBuilder stringBuilder = new StringBuilder();
         for (int i = 0; i < messageList.size() - 1; i++) {
-            headerParents = (addMessage(messageList.get(i), i + headerParents)) ? headerParents + 1 : headerParents;
+            Message message = messageList.get(i);
+            headerParents = (addOldMessage(message, i + headerParents, stringBuilder)) ? headerParents + 1 : headerParents;
         }
         setFooterShowing(false);
         setHeaderShowing(false);
@@ -234,11 +235,8 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
      * @param messageAndHeadersCount Count of the (messages + messageHeaderParent) added in the loop from where this function is being called
      * @return returns true if a new messageHeaderParent is created for this message so as to increment the count by where this function is being called.
      */
-    public boolean addMessage(Message message, int messageAndHeadersCount) {
-
-        int[] index = getHeaderAndNextIndex(message.getIdForHolder());
-
-        if (index[0] < 0) { //No messageParent for this one
+    public boolean addOldMessage(Message message, int messageAndHeadersCount, StringBuilder lastHolderId) {
+        if (!lastHolderId.toString().equals(message.getIdForHolder()) || lastHolderId.toString().equals("")) {
             MessageHeaderParent messageHeaderParent = new MessageHeaderParent((message.getStream() == null) ? null : message.getStream().getName(), message.getSubject(), message.getIdForHolder());
             messageHeaderParent.setMessageType(message.getType());
             messageHeaderParent.setDisplayRecipent(message.getDisplayRecipient(zulipApp));
@@ -250,11 +248,12 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             notifyItemInserted(messageAndHeadersCount + 1);
             items.add(messageAndHeadersCount + 2, message);
             notifyItemInserted(messageAndHeadersCount + 2);
+            lastHolderId.setLength(0);
+            lastHolderId.append(messageHeaderParent.getId());
             return true;
         } else {
-            int nextHeader = (index[1] != -1) ? index[1] : getItemCount(false);
-            items.add(nextHeader, message);
-            notifyItemInserted(nextHeader);
+            items.add(messageAndHeadersCount + 1, message);
+            notifyItemInserted(messageAndHeadersCount + 1);
             return false;
         }
     }
