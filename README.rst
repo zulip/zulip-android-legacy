@@ -1,3 +1,5 @@
+
+
 =================
 Zulip for Android
 =================
@@ -13,6 +15,39 @@ or data loss bugs.)
 
 This is a Gradle project, and can be built via the provided ``gradlew``
 or by using Android Studio.
+
+Index
+
+Index
+
+-  `Getting Started`_
+-  `Build instructions (Android Studio)`_)
+-  `Build instructions (without Android Studio)`_)
+-  `Running server on device`_
+-  `Coding Style`_
+-  `Mailing List`_
+-  `Export`_
+-  `License`_
+
+.. _Getting Started: #getting-started
+.. _Build instructions (Android Studio): #build-instructions-android-studio
+.. _Build instructions (without Android Studio): #build-instructions-without-android-studio
+.. _Running server on device: #browsing-server-on-device
+.. _Coding Style: #coding-style
+.. _Mailing List: #mailing-list
+.. _Export: #export
+.. _License: #license
+
+Getting Started
+---------------
+
+-  Firstly setup a development environment of the Zulip python Server
+   https://github.com/zulip/zulip/blob/master/README.dev.md#brief-installation-instructions-for-vagrant-development-environment
+-  Now follow the build instructions to compile the project
+-  And then follow `Running server on device`_ to get the server running
+   on the device.
+
+.. _Running server on device: #browsing-server-on-device
 
 Build instructions (Android Studio)
 -----------------------------------
@@ -100,6 +135,45 @@ Build instructions (without Android Studio)
    default because it is unsigned. You will be told the APK cannot be
    parsed.
 
+Browsing server on device
+-------------------------
+
+| For a Vagrant server
+| If you are using a Genymotion Emulator you can access the server by
+  browsing to http://10.0.3.2:9991 or http://10.0.3.1:9991 (one of these
+  two URL’s)
+
+To access the vagrant server on a physical device connect computer and
+mobile to the same network (router) modify ``VagrantFile`` `here`_ in
+the server change the host\_ip ‘127.0.0.1’ to ‘0.0.0.0’ Like this-
+
+    config.vm.network “forwarded\_port”, guest: 9991, host: host\_port,
+    host\_ip: “0.0.0.0”
+
+Now find the IP address of the computer use this IP address and port
+number and browse the Zulip Server on the mobile device. For example -
+
+    192.168.0.1:9991
+
+|
+| You can also route the IP address to a domain name like
+  www.local.test.com (this routing is useful when tesing Google OAuth
+  Backend)
+| No need to modify the ``VagrantFile`` to achieve this
+
+-  Remap the hosts by fiddler by adding this line in TOOLS> HOSTS
+
+    localhost:9991 www.local.test.com
+
+If unclear you can follow tutorial here `Host Remapping`_
+
+-  Now configure your android device following `this`_ detailed tutorial
+
+.. _here: https://github.com/zulip/zulip/blob/1c40df9363b70af0e275c44a03f9627808852616/Vagrantfile#L37
+.. _Host Remapping: http://docs.telerik.com/fiddler/KnowledgeBase/HOSTS
+.. _this: http://docs.telerik.com/fiddler/Configure-Fiddler/Tasks/ConfigureForAndroid
+
+
 Coding Style
 ------------
 
@@ -150,3 +224,4 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
