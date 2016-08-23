@@ -44,11 +44,11 @@ import java.util.List;
  * Each Message is inserted to its MessageHeader which are distinguished by the {@link Message#getIdForHolder()}
  * saved in {@link MessageHeaderParent#getId()}
  *
- * There are two ways to insert a message in this adapter one {@link RecyclerMessageAdapter#addMessage(Message, int)}
+ * There are two ways to insert a message in this adapter one {@link RecyclerMessageAdapter#addOldMessage(Message, int, StringBuilder)}
  * and second one {@link RecyclerMessageAdapter#addNewMessage(Message)}
  * The first one is used to add old messages from the databases with {@link com.zulip.android.util.MessageListener.LoadPosition#BELOW}
- * and {@link com.zulip.android.util.MessageListener.LoadPosition#INITIAL}. This is for the threaded view and the messages are added
- * to the existing messageHeaderParents.
+ * and {@link com.zulip.android.util.MessageListener.LoadPosition#INITIAL}. Messages are added from 1st index of the adapter and new
+ * headerParents are created if it doesn't matches the current header where the adding is being placed, this is done to match the UI as the web.
  * In addNewMessages the messages are loaded in the bottom and new headers are created if it does not matches the last header.
  */
 public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -233,6 +233,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
      * messageHeader is found then create a new messageHeader
      * @param message Message to be added
      * @param messageAndHeadersCount Count of the (messages + messageHeaderParent) added in the loop from where this function is being called
+     * @param lastHolderId This is StringBuilder so as to make pass by reference work, the new lastHolderId is saved here if the value changes
      * @return returns true if a new messageHeaderParent is created for this message so as to increment the count by where this function is being called.
      */
     public boolean addOldMessage(Message message, int messageAndHeadersCount, StringBuilder lastHolderId) {
