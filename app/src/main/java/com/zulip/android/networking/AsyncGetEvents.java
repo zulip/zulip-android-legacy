@@ -89,21 +89,23 @@ public class AsyncGetEvents extends Thread {
         StopWatch watch = new StopWatch();
         watch.start();
         request.setMethodAndUrl("POST", "v1/register");
-        String responseData = request.execute().body().string();
+        Response responseData = request.execute();
         watch.stop();
         Log.i("perf", "net: v1/register: " + watch.toString());
 
         watch.reset();
         watch.start();
-        JSONObject response = new JSONObject(responseData);
+        JSONObject response = new JSONObject(responseData.body().toString());
         watch.stop();
         Log.i("perf", "json: v1/register: " + watch.toString());
 
-        registeredOrGotEventsThisRun = true;
-        app.setEventQueueId(response.getString("queue_id"));
-        app.setLastEventId(response.getInt("last_event_id"));
+        if(responseData.isSuccessful()) {
+            registeredOrGotEventsThisRun = true;
+            app.setEventQueueId(response.getString("queue_id"));
+            app.setLastEventId(response.getInt("last_event_id"));
 
-        processRegister(response);
+            processRegister(response);
+        }
     }
 
     public void run() {
