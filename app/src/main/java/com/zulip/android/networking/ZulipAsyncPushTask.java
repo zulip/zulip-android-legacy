@@ -106,7 +106,7 @@ public abstract class ZulipAsyncPushTask extends AsyncTask<String, String, Strin
             ZLog.logException(e);
             this.cancel(true);
         }
-        return "";
+        return null;
     }
 
     @Override
