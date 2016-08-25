@@ -7,7 +7,6 @@ import android.content.IntentSender.SendIntentException;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.Patterns;
@@ -26,22 +25,24 @@ import com.zulip.android.BuildConfig;
 import com.zulip.android.R;
 import com.zulip.android.ZulipApp;
 import com.zulip.android.networking.AsyncDevGetEmails;
-import com.zulip.android.networking.AsyncGetBackends;
-import com.zulip.android.networking.AsyncLogin;
-import com.zulip.android.networking.ZulipAsyncPushTask.AsyncTaskCompleteListener;
+import com.zulip.android.networking.ZulipAsyncPushTask;
+import com.zulip.android.networking.response.LoginResponse;
+import com.zulip.android.networking.response.ZulipBackendResponse;
+import com.zulip.android.networking.util.DefaultCallback;
 import com.zulip.android.util.AnimationHelper;
-import com.zulip.android.util.ZLog;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Response;
 
 /**
  * Activity to Login through various backends on a specified server.
  * Currently supported LoginAuths are Emailbackend and DevAuthBackend.
  */
-public class LoginActivity extends AppCompatActivity implements View.OnClickListener,
+public class LoginActivity extends BaseActivity implements View.OnClickListener,
         GoogleApiClient.OnConnectionFailedListener {
     private static final String TAG = "LoginActivity";
     private static final int REQUEST_CODE_RESOLVE_ERR = 9000;
@@ -193,40 +194,35 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         mServerEditText.setText(serverUri.toString());
         mServerEditText.setEnabled(false);
         ((ZulipApp) getApplication()).setServerURL(serverUri.toString());
-        AsyncGetBackends asyncGetBackends = new AsyncGetBackends(ZulipApp.get());
-        asyncGetBackends.setCallback(new AsyncTaskCompleteListener() {
-            @Override
-            public void onTaskComplete(String result, JSONObject jsonObject) {
-                try {
-                    JSONObject object = new JSONObject(result);
-                    if (!object.getString("result").equals("success")) {
-                        onTaskFailure("");
-                        return;
+//        AsyncGetBackends asyncGetBackends = new AsyncGetBackends(ZulipApp.get());
+
+        getServices()
+                .getAuthBackends()
+                .enqueue(new DefaultCallback<ZulipBackendResponse>() {
+
+                    @Override
+                    public void onSuccess(Call<ZulipBackendResponse> call, Response<ZulipBackendResponse> response) {
+                        if (response.body().isPassword()) {
+                            findViewById(R.id.passwordAuthLayout).setVisibility(View.VISIBLE);
+                        }
+
+                        if (response.body().isGoogle()) {
+                            findViewById(R.id.google_sign_in_button).setVisibility(View.VISIBLE);
+                        }
+
+                        if (response.body().isDev()) {
+                            findViewById(R.id.local_server_button).setVisibility(View.VISIBLE);
+                        }
+                        showLoginFields();
                     }
 
-                    if (object.getString("password").equals("true")) {
-                        findViewById(R.id.passwordAuthLayout).setVisibility(View.VISIBLE);
+                    @Override
+                    public void onFailure(Call<ZulipBackendResponse> call, Throwable t) {
+                        super.onFailure(call, t);
+                        Toast.makeText(LoginActivity.this, R.string.toast_login_failed_fetching_backends, Toast.LENGTH_SHORT).show();
                     }
+                });
 
-                    if (object.getString("google").equals("true")) {
-                        findViewById(R.id.google_sign_in_button).setVisibility(View.VISIBLE);
-                    }
-
-                    if (object.getString("dev").equals("true")) {
-                        findViewById(R.id.local_server_button).setVisibility(View.VISIBLE);
-                    }
-                    showLoginFields();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onTaskFailure(String result) {
-                Toast.makeText(LoginActivity.this, "Failed to fetch Backends!", Toast.LENGTH_SHORT).show();
-            }
-        });
-        asyncGetBackends.execute();
     }
 
     private void showHTTPDialog(final String serverURL) {
@@ -253,7 +249,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 }).show();
     }
 
-    private void handleSignInResult(GoogleSignInResult result) {
+    private void handleSignInResult(final GoogleSignInResult result) {
         Log.d("Login", "handleSignInResult:" + result.isSuccess());
         if (result.isSuccess()) {
             GoogleSignInAccount account = result.getSignInAccount();
@@ -265,27 +261,24 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 return;
             }
 
-            final AsyncLogin loginTask = new AsyncLogin(LoginActivity.this, "google-oauth2-token", account.getIdToken(), false);
-            loginTask.setCallback(new AsyncTaskCompleteListener() {
-                @Override
-                public void onTaskComplete(String result, JSONObject object) {
-                    try {
-                        String email = object.getString("email");
-                        ((ZulipApp) getApplication()).setEmail(email);
-                    } catch (JSONException e) {
-                        ZLog.logException(e);
-                    }
-                }
+            getServices()
+                    .login("google-oauth2-token", account.getIdToken())
+                    .enqueue(new DefaultCallback<LoginResponse>() {
 
-                @Override
-                public void onTaskFailure(String result) {
-                    // Invalidate the token and try again, unless the user we
-                    // are authenticating as is not registered or is disabled.
-                    connectionProgressDialog.dismiss();
+                        @Override
+                        public void onSuccess(Call<LoginResponse> call, Response<LoginResponse> response) {
+                            connectionProgressDialog.dismiss();
+                            getApp().setEmail(response.body().getEmail());
+                            openHome();
+                        }
 
-                }
-            });
-            loginTask.execute();
+                        @Override
+                        public void onFailure(Call<LoginResponse> call, Throwable t) {
+                            super.onFailure(call, t);
+                            connectionProgressDialog.dismiss();
+                        }
+                    });
+
         } else {
             // something bad happened. whoops.
             connectionProgressDialog.dismiss();
@@ -365,23 +358,27 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     return;
                 }
                 connectionProgressDialog.show();
+                String username = mUserName.getText().toString();
+                getApp().setEmail(username);
+                getServices()
+                        .login(username, mPassword.getText().toString())
+                        .enqueue(new DefaultCallback<LoginResponse>() {
 
-                AsyncLogin alog = new AsyncLogin(LoginActivity.this,
-                        mUserName.getText().toString(), mPassword.getText().toString(), false);
-                // Remove the CPD when done
-                alog.setCallback(new AsyncTaskCompleteListener() {
-                    @Override
-                    public void onTaskComplete(String result, JSONObject object) {
-                        connectionProgressDialog.dismiss();
-                    }
+                            @Override
+                            public void onSuccess(Call<LoginResponse> call, Response<LoginResponse> response) {
+                                connectionProgressDialog.dismiss();
+                                getApp().setLoggedInApiKey(response.body().getApiKey());
+                                openHome();
+                            }
 
-                    @Override
-                    public void onTaskFailure(String result) {
-                        connectionProgressDialog.dismiss();
-                    }
+                            @Override
+                            public void onFailure(Call<LoginResponse> call, Throwable t) {
+                                super.onFailure(call, t);
+                                connectionProgressDialog.dismiss();
+                                Toast.makeText(LoginActivity.this, R.string.login_activity_toast_login_error, Toast.LENGTH_LONG).show();
+                            }
+                        });
 
-                });
-                alog.execute();
                 break;
             case R.id.legal_button:
                 openLegal();
@@ -390,7 +387,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 if (!isInputValidForDevAuth()) return;
                 connectionProgressDialog.show();
                 AsyncDevGetEmails asyncDevGetEmails = new AsyncDevGetEmails(LoginActivity.this);
-                asyncDevGetEmails.setCallback(new AsyncTaskCompleteListener() {
+                asyncDevGetEmails.setCallback(new ZulipAsyncPushTask.AsyncTaskCompleteListener() {
                     @Override
                     public void onTaskComplete(String result, JSONObject jsonObject) {
                         connectionProgressDialog.dismiss();

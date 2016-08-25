@@ -1,22 +1,21 @@
 package com.zulip.android.models;
 
-import java.sql.SQLException;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import com.google.gson.annotations.SerializedName;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.stmt.SelectArg;
 import com.j256.ormlite.table.DatabaseTable;
 import com.zulip.android.ZulipApp;
+
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
+import java.sql.SQLException;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @DatabaseTable(tableName = "people")
 public class Person {
@@ -30,17 +29,36 @@ public class Person {
 
     @DatabaseField(columnName = ID_FIELD, generatedId = true)
     protected int id;
+
+    @SerializedName("full_name")
     @DatabaseField(columnName = NAME_FIELD)
     private String name;
+
+    @SerializedName("email")
     @DatabaseField(columnName = EMAIL_FIELD, uniqueIndex = true)
     private String email;
+
     @DatabaseField(columnName = AVATARURL_FIELD)
     private String avatarURL;
+
+    @SerializedName("is_bot")
     @DatabaseField(columnName = ISBOT_FIELD)
     private boolean isBot;
+
     @DatabaseField(columnName = ISACTIVE_FIELD)
-    private
-    boolean isActive;
+    private boolean isActive;
+
+    @SerializedName("is_admin")
+    private boolean isAdmin;
+
+    @SerializedName("domain")
+    private String domain;
+
+    @SerializedName("short_name")
+    private String shortName;
+
+    @SerializedName("is_mirror_dummy")
+    private boolean isMirrorDummy;
 
     public Person(String name, String email) {
         this.setName(name);
@@ -127,6 +145,10 @@ public class Person {
                 .toHashCode();
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
     private static Person getByEmail(ZulipApp app, String email) {
         try {
             Dao<Person, Integer> dao = app.getDatabaseHelper().getDao(
@@ -182,23 +204,6 @@ public class Person {
 
     public void setActive(boolean active) {
         isActive = active;
-    }
-
-    private void updateFromJSON(JSONObject jPerson) throws JSONException {
-        name = jPerson.getString("full_name");
-        isBot = jPerson.getBoolean("is_bot");
-        // It would be nice if the server gave us avatarURL here, but it doesn't
-    }
-
-    public static Person getFromJSON(ZulipApp app, JSONObject jPerson)
-            throws JSONException {
-        String email = jPerson.getString("email");
-        Person person = getByEmail(app, email);
-        if (person == null) {
-            person = new Person(null, email);
-        }
-        person.updateFromJSON(jPerson);
-        return person;
     }
 
     public static Person getById(ZulipApp app, int id) {

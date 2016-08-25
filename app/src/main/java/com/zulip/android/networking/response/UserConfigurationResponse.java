@@ -1,11 +1,11 @@
 package com.zulip.android.networking.response;
 
 import com.google.gson.annotations.SerializedName;
+import com.zulip.android.models.Person;
+import com.zulip.android.models.Stream;
 import com.zulip.android.models.updated.ChatStatusWrapper;
 import com.zulip.android.models.updated.JenkinsType;
 import com.zulip.android.models.updated.Referrals;
-import com.zulip.android.models.updated.ZulipStream;
-import com.zulip.android.models.updated.ZulipUser;
 
 import java.util.List;
 import java.util.Map;
@@ -84,7 +84,7 @@ public class UserConfigurationResponse {
 
     //todo
     @SerializedName("muted_topics")
-    private List<?> mutedTopics;
+    private List<List<String>> mutedTopics;
 
     //todo
     @SerializedName("alert_words")
@@ -95,25 +95,25 @@ public class UserConfigurationResponse {
     private List<?> realmBots;
 
     @SerializedName("never_subscribed")
-    private List<ZulipStream> neverSubscribed;
+    private List<Stream> neverSubscribed;
 
     @SerializedName("realm_default_streams")
-    private List<ZulipStream> realmDefaultStreams;
+    private List<Stream> realmDefaultStreams;
 
     @SerializedName("unsubscribed")
     private List<?> unsubscribed;
 
     @SerializedName("subscriptions")
-    private List<ZulipStream> subscriptions;
+    private List<Stream> subscriptions;
 
     @SerializedName("streams")
-    private List<ZulipStream> streams;
+    private List<Stream> streams;
 
     @SerializedName("realm_filters")
     private List<List<String>> realmFilters;
 
     @SerializedName("realm_users")
-    private List<ZulipUser> realmUsers;
+    private List<Person> realmUsers;
 
 
     public int getLastEventId() {
@@ -200,7 +200,7 @@ public class UserConfigurationResponse {
         return leftSideUserlist;
     }
 
-    public List<?> getMutedTopics() {
+    public List<List<String>> getMutedTopics() {
         return mutedTopics;
     }
 
@@ -212,11 +212,11 @@ public class UserConfigurationResponse {
         return realmBots;
     }
 
-    public List<ZulipStream> getNeverSubscribed() {
+    public List<Stream> getNeverSubscribed() {
         return neverSubscribed;
     }
 
-    public List<ZulipStream> getRealmDefaultStreams() {
+    public List<Stream> getRealmDefaultStreams() {
         return realmDefaultStreams;
     }
 
@@ -224,11 +224,11 @@ public class UserConfigurationResponse {
         return unsubscribed;
     }
 
-    public List<ZulipStream> getSubscriptions() {
+    public List<Stream> getSubscriptions() {
         return subscriptions;
     }
 
-    public List<ZulipStream> getStreams() {
+    public List<Stream> getStreams() {
         return streams;
     }
 
@@ -236,7 +236,7 @@ public class UserConfigurationResponse {
         return realmFilters;
     }
 
-    public List<ZulipUser> getRealmUsers() {
+    public List<Person> getRealmUsers() {
         return realmUsers;
     }
 

@@ -246,7 +246,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             if (message.getType() == MessageType.STREAM_MESSAGE) {
                 messageHeaderParent.setMute(zulipApp.isTopicMute(message));
             }
-            messageHeaderParent.setColor((message.getStream() == null) ? mDefaultStreamHeaderColor : message.getStream().getColor());
+            messageHeaderParent.setColor((message.getStream() == null) ? mDefaultStreamHeaderColor : message.getStream().getParsedColor());
             items.add(messageAndHeadersCount + 1, messageHeaderParent); //1 for LoadingHeader
             notifyItemInserted(messageAndHeadersCount + 1);
             items.add(messageAndHeadersCount + 2, message);
@@ -285,7 +285,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             item.setDisplayRecipent(message.getDisplayRecipient(zulipApp));
             if (message.getType() == MessageType.STREAM_MESSAGE)
                 item.setMute(zulipApp.isTopicMute(message));
-            item.setColor((message.getStream() == null) ? mDefaultStreamHeaderColor : message.getStream().getColor());
+            item.setColor((message.getStream() == null) ? mDefaultStreamHeaderColor : message.getStream().getParsedColor());
             items.add(getItemCount(true) - 1, item);
             notifyItemInserted(getItemCount(true) - 1);
         }
@@ -360,7 +360,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 if (message.getType() == MessageType.STREAM_MESSAGE) {
                     messageHolder.senderName.setText(message.getSender().getName());
                     if (!isCurrentThemeNight)
-                        messageHolder.leftBar.setBackgroundColor(message.getStream().getColor());
+                        messageHolder.leftBar.setBackgroundColor(message.getStream().getParsedColor());
                     messageHolder.messageTile.setBackgroundColor(streamMessageBackground);
                 } else {
                     messageHolder.senderName.setText(message.getSender().getName());
