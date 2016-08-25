@@ -33,7 +33,6 @@ public class ZulipInterceptor implements Interceptor {
         }
 
         Request request = requestBuilder.build();
-        ZulipApp.get().badRequest = request;
         return chain.proceed(request);
     }
 }
