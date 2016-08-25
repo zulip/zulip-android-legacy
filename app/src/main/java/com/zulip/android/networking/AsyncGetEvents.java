@@ -1,29 +1,29 @@
 package com.zulip.android.networking;
 
-import java.io.IOException;
-import java.net.SocketTimeoutException;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.concurrent.Callable;
+import android.os.SystemClock;
+import android.util.Log;
+
+import com.j256.ormlite.dao.RuntimeExceptionDao;
+import com.j256.ormlite.misc.TransactionManager;
+import com.zulip.android.ZulipApp;
+import com.zulip.android.activities.ZulipActivity;
+import com.zulip.android.models.Message;
+import com.zulip.android.models.MessageRange;
+import com.zulip.android.models.Person;
+import com.zulip.android.models.Stream;
+import com.zulip.android.util.ZLog;
 
 import org.apache.commons.lang.time.StopWatch;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.os.SystemClock;
-import android.util.Log;
-
-import com.j256.ormlite.dao.RuntimeExceptionDao;
-import com.j256.ormlite.misc.TransactionManager;
-import com.zulip.android.models.Message;
-import com.zulip.android.models.MessageRange;
-import com.zulip.android.models.Person;
-import com.zulip.android.models.Stream;
-import com.zulip.android.util.ZLog;
-import com.zulip.android.activities.ZulipActivity;
-import com.zulip.android.ZulipApp;
+import java.io.IOException;
+import java.net.SocketTimeoutException;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.concurrent.Callable;
 
 import okhttp3.Response;
 
@@ -49,10 +49,10 @@ public class AsyncGetEvents extends Thread {
     private int failures = 0;
     private boolean registeredOrGotEventsThisRun;
 
-    public AsyncGetEvents(ZulipActivity humbugActivity) {
+    public AsyncGetEvents(ZulipActivity zulipActivity) {
         super();
-        app = (ZulipApp) humbugActivity.getApplication();
-        activity = humbugActivity;
+        app = (ZulipApp) zulipActivity.getApplication();
+        activity = zulipActivity;
         request = new HTTPRequest(app);
     }
 
