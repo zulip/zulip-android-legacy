@@ -24,12 +24,15 @@ import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.database.MergeCursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -1155,6 +1158,27 @@ public class ZulipActivity extends AppCompatActivity implements
             if (title != null) getSupportActionBar().setTitle(title);
             getSupportActionBar().setSubtitle(subtitle);
         }
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (requestCode == 1 && resultCode == RESULT_OK) {
+            Uri selectedImageUri = data.getData();
+            imagepath = getPath(selectedImageUri);
+            Bitmap bitmap= BitmapFactory.decodeFile(imagepath);
+            imageview.setImageBitmap(bitmap);
+            messageText.setText("Uploading file path:" +imagepath);
+
+
+
+        }
+    }
+    public String getPath(Uri uri) {
+        String[] projection = { MediaStore.Images.Media.DATA };
+        Cursor cursor = managedQuery(uri, projection, null, null, null);
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        return cursor.getString(column_index);
     }
 
     /**
