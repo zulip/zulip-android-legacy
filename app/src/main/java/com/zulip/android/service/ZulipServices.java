@@ -3,6 +3,7 @@ package com.zulip.android.service;
 import com.zulip.android.networking.response.LoginResponse;
 import com.zulip.android.networking.response.UserConfigurationResponse;
 import com.zulip.android.networking.response.ZulipBackendResponse;
+import com.zulip.android.networking.response.events.GetEventResponse;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -34,7 +35,7 @@ public interface ZulipServices {
 //    request.setMethodAndUrl("GET", "v1/events");
 
     @GET("v1/events")
-    Call<String> getEvents(@Query("dont_block") Boolean dontLongPoll, @Query("last_event_id") int id, @Query("queue_id") String queueId);
+    Call<GetEventResponse> getEvents(@Query("dont_block") Boolean dontLongPoll, @Query("last_event_id") int id, @Query("queue_id") String queueId);
 
     @FormUrlEncoded
     @POST("v1/register")
@@ -86,9 +87,9 @@ public interface ZulipServices {
         }
 
 
-        //        @Override public Converter<?, RequestBody> toRequestBody(Type type, Annotation[] annotations) {
+        //        @Override public TypeSwapper<?, RequestBody> toRequestBody(Type type, Annotation[] annotations) {
 //            if (String.class.equals(type)) {
-//                return new Converter<String, RequestBody>() {
+//                return new TypeSwapper<String, RequestBody>() {
 //                    @Override public RequestBody convert(String value) throws IOException {
 //                        return RequestBody.create(MEDIA_TYPE, value);
 //                    }

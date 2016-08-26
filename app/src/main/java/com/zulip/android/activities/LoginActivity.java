@@ -148,7 +148,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     }
 
     private void checkForError() {
-        String serverURL = serverIn.getText().toString();
+        String serverURL = "https://zulip.tabbott.net";//serverIn.getText().toString();
         int errorMessage = R.string.invalid_server_domain;
         String httpScheme = (BuildConfig.DEBUG) ? "http" : "https";
 
@@ -354,14 +354,15 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                 setupGoogleSignIn();
                 break;
             case R.id.zulip_login:
-                if (!isInputValid()) {
-                    return;
-                }
+//                if (!isInputValid()) {
+//                    return;
+//                }
                 connectionProgressDialog.show();
-                String username = mUserName.getText().toString();
+                String username = "@gmail.com ";//mUserName.getText().toString();
+                String password = ""; //mPassword.getText().toString()
                 getApp().setEmail(username);
                 getServices()
-                        .login(username, mPassword.getText().toString())
+                        .login(username, password)
                         .enqueue(new DefaultCallback<LoginResponse>() {
 
                             @Override

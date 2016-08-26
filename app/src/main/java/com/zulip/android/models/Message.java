@@ -1,22 +1,5 @@
 package com.zulip.android.models;
 
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
-
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.ccil.cowan.tagsoup.HTMLSchema;
-import org.ccil.cowan.tagsoup.Parser;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Rect;
@@ -27,14 +10,32 @@ import android.text.Spanned;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.google.gson.annotations.SerializedName;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.misc.TransactionManager;
 import com.j256.ormlite.stmt.DeleteBuilder;
 import com.j256.ormlite.table.DatabaseTable;
+import com.zulip.android.ZulipApp;
 import com.zulip.android.util.CustomHtmlToSpannedConverter;
 import com.zulip.android.util.ZLog;
-import com.zulip.android.ZulipApp;
+
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.ccil.cowan.tagsoup.HTMLSchema;
+import org.ccil.cowan.tagsoup.Parser;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
 
 @DatabaseTable(tableName = "messages")
 public class Message {
@@ -50,27 +51,79 @@ public class Message {
     public static final String STREAM_FIELD = "stream";
     public static final String MESSAGE_READ_FIELD = "read";
 
+
+    //region fields
+    @SerializedName("recipient_id")
+    private int recipientId;
+
+    @SerializedName("sender_email")
+    private String senderEmail;
+
+    @SerializedName("sender_id")
+    private int senderId;
+
+    @SerializedName("sender_full_name")
+    private String senderFullName;
+
+    @SerializedName("sender_domain")
+    private String senderDomain;
+
+    @SerializedName("gravatar_hash")
+    private String gravatarHash;
+
+    @SerializedName("avatar_url")
+    private String avatarUrl;
+
+    @SerializedName("client")
+    private String client;
+
+    @SerializedName("content_type")
+    private String contentType;
+
+    @SerializedName("sender_short_name")
+    private String senderShortName;
+
+    @SerializedName("type")
+    private String _internal_type;
+
+    @SerializedName("subject_links")
+    private List<?> subjectLinks;
+
     @DatabaseField(foreign = true, columnName = SENDER_FIELD, foreignAutoRefresh = true)
     private Person sender;
+
     @DatabaseField(columnName = TYPE_FIELD)
     private MessageType type;
+
+    @SerializedName("content")
     @DatabaseField(columnName = CONTENT_FIELD)
     private String content;
+
     @DatabaseField(columnName = FORMATTED_CONTENT_FIELD)
     private String formattedContent;
+
+    @SerializedName("subject")
     @DatabaseField(columnName = SUBJECT_FIELD)
     private String subject;
+
+    @SerializedName("timestamp")
     @DatabaseField(columnName = TIMESTAMP_FIELD)
     private Date timestamp;
+
     @DatabaseField(columnName = RECIPIENTS_FIELD, index = true)
     private String recipients;
+
     private Person[] recipientsCache;
+
+    @SerializedName("id")
     @DatabaseField(id = true, columnName = ID_FIELD)
     private int id;
+
     @DatabaseField(foreign = true, columnName = STREAM_FIELD, foreignAutoRefresh = true)
     private Stream stream;
     @DatabaseField(columnName = MESSAGE_READ_FIELD)
     private Boolean messageRead;
+    //endregion
 
     /**
      * Construct an empty Message object.
@@ -82,6 +135,7 @@ public class Message {
     public Message(ZulipApp app) {
     }
 
+    //region helpers
     /**
      * Populate a Message object based off a parsed JSON hash.
      *
@@ -93,10 +147,10 @@ public class Message {
                    Map<String, Person> personCache,
                    Map<String, Stream> streamCache) throws JSONException {
         this.setID(message.getInt("id"));
-        this.setSender(Person.getOrUpdate(app,
-                message.getString("sender_email"),
-                message.getString("sender_full_name"),
-                message.getString("avatar_url"), personCache));
+//        this.setSender(Person.getOrUpdate(app,
+//                message.getString("sender_email"),
+//                message.getString("sender_full_name"),
+//                message.getString("avatar_url"), personCache));
 
         if (message.getString("type").equals("stream")) {
             this.setType(MessageType.STREAM_MESSAGE);
@@ -313,68 +367,6 @@ public class Message {
         return people;
     }
 
-    public String getSubject() {
-        return subject;
-    }
-
-    public void setSubject(String subject) {
-        if (subject != null && subject.equals("")) {
-            // The empty string should be interpreted as "no topic"
-            // i18n here will be sad
-            this.subject = "(no topic)";
-        } else {
-            this.subject = subject;
-        }
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    private String getFormattedContent() {
-        return formattedContent;
-    }
-
-    private void setFormattedContent(String formattedContent) {
-        this.formattedContent = formattedContent;
-    }
-
-    public Person getSender() {
-        return sender;
-    }
-
-    public void setSender(Person sender) {
-        this.sender = sender;
-    }
-
-    public Date getTimestamp() {
-        return timestamp;
-    }
-
-    private void setTimestamp(Date curDateTime) {
-        this.timestamp = curDateTime;
-    }
-
-    public int getID() {
-        return id;
-    }
-
-    public void setID(int id) {
-        this.id = id;
-    }
-
-    public Stream getStream() {
-        return stream;
-    }
-
-    public void setStream(Stream stream) {
-        this.stream = stream;
-    }
-
     public static void createMessages(final ZulipApp app,
                                       final List<Message> messages) {
         try {
@@ -532,6 +524,163 @@ public class Message {
         CustomHtmlToSpannedConverter converter = new CustomHtmlToSpannedConverter(
                 source, null, null, parser, emojiGetter, app.getServerURI());
         return converter.convert();
+    }
+    //endregion
+
+    //region model-getter-setters
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        if (subject != null && subject.equals("")) {
+            // The empty string should be interpreted as "no topic"
+            // i18n here will be sad
+            this.subject = "(no topic)";
+        } else {
+            this.subject = subject;
+        }
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    private String getFormattedContent() {
+        return formattedContent;
+    }
+
+    private void setFormattedContent(String formattedContent) {
+        this.formattedContent = formattedContent;
+    }
+
+    public Person getSender() {
+        if(sender == null) {
+            RuntimeExceptionDao<Person, Object> dao = ZulipApp.get().getDao(Person.class, true);
+            sender = dao.queryForId(senderId);
+            if(sender == null) {
+                sender = new Person(senderFullName, senderEmail, avatarUrl);
+                dao.createOrUpdate(sender);
+            }
+        }
+        return sender;
+    }
+
+    public void setSender(Person sender) {
+        this.sender = sender;
+    }
+
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
+    private void setTimestamp(Date curDateTime) {
+        this.timestamp = curDateTime;
+    }
+
+    public int getID() {
+        return id;
+    }
+
+    public void setID(int id) {
+        this.id = id;
+    }
+
+    public Stream getStream() {
+        return stream;
+    }
+
+    public void setStream(Stream stream) {
+        this.stream = stream;
+    }
+
+    public int getRecipientId() {
+        return recipientId;
+    }
+
+    public String getSenderEmail() {
+        return senderEmail;
+    }
+
+    public int getSenderId() {
+        return senderId;
+    }
+
+    public String getSenderFullName() {
+        return senderFullName;
+    }
+
+    public String getSenderDomain() {
+        return senderDomain;
+    }
+
+    public String getGravatarHash() {
+        return gravatarHash;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public String getClient() {
+        return client;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public String getSenderShortName() {
+        return senderShortName;
+    }
+
+    public String get_internal_type() {
+        return _internal_type;
+    }
+
+    public List<?> getSubjectLinks() {
+        return subjectLinks;
+    }
+
+    public String getRecipients() {
+        return recipients;
+    }
+
+    public Person[] getRecipientsCache() {
+        return recipientsCache;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public static HTMLSchema getSchema() {
+        return schema;
+    }
+
+    //endregion
+
+
+    public static class ZulipDirectMessage extends Message {
+        @SerializedName("display_recipient")
+        private List<Person> displayRecipient;
+
+        public List<Person> getDisplayRecipient() {
+            return displayRecipient;
+        }
+    }
+
+    public static class ZulipStreamMessage extends Message {
+        @SerializedName("display_recipient")
+        private String displayRecipient;
+
+        public String getDisplayRecipient() {
+            return displayRecipient;
+        }
     }
 
 }

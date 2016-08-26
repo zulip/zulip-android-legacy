@@ -13,29 +13,20 @@ import com.zulip.android.models.MessageRange;
 import com.zulip.android.models.Person;
 import com.zulip.android.models.Stream;
 import com.zulip.android.networking.response.UserConfigurationResponse;
-import com.zulip.android.service.ZulipServices;
+import com.zulip.android.networking.response.events.EventsBranch;
+import com.zulip.android.networking.response.events.GetEventResponse;
+import com.zulip.android.networking.response.events.MessageWrapper;
+import com.zulip.android.util.TypeSwapper;
 import com.zulip.android.util.ZLog;
 import com.zulip.android.widget.ZulipWidget;
 
-import org.apache.commons.lang.time.StopWatch;
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
-
-import okhttp3.OkHttpClient;
-import okhttp3.Response;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Retrofit;
 
 /**
  * A background task which asynchronously fetches the updates from the server.
@@ -133,9 +124,6 @@ public class AsyncGetEvents extends Thread {
                     // Get subscriptions
                     List<Stream> subscriptions = response.getSubscriptions();
 
-                    //todo
-                    app.addToMutedTopics(response.getMutedTopics());
-
                     RuntimeExceptionDao<Stream, Object> streamDao = app
                             .getDao(Stream.class);
                     Log.i("stream", "" + subscriptions.size() + " streams");
@@ -148,8 +136,15 @@ public class AsyncGetEvents extends Thread {
                         Stream stream = subscriptions.get(i);
                         stream.getParsedColor();
                         stream.setSubscribed(true);
-                        streamDao.createOrUpdate(stream);
+                        try {
+                            streamDao.createOrUpdate(stream);
+                        }
+                        catch(Exception e) {
+                            ZLog.logException(e);
+                        }
                     }
+                    //MUST UPDATE AFTER SUBSCRIPTIONS ARE STORED IN DB
+                    app.addToMutedTopics(response.getMutedTopics());
 
                     // Get people
                     List<Person> people = response.getRealmUsers();
@@ -166,7 +161,12 @@ public class AsyncGetEvents extends Thread {
 
                         Person person = people.get(i);
                         person.setActive(true);
-                        personDao.createOrUpdate(person);
+                        try {
+                            personDao.createOrUpdate(person);
+                        }
+                        catch(Exception e) {
+                            ZLog.logException(e);
+                        }
                     }
                     return null;
                 }
@@ -198,63 +198,26 @@ public class AsyncGetEvents extends Thread {
                         register();
                     }
 
-                    new Retrofit.Builder()
-                            .client(new OkHttpClient.Builder().readTimeout(60, TimeUnit.SECONDS)
-                                    .addInterceptor(new ZulipInterceptor())
-                                    .build())
-                            .addConverterFactory(new ZulipServices.ToStringConverterFactory())
-                            .baseUrl(app.getServerURI())
-                            .build()
-                            .create(ZulipServices.class)
-                            .getEvents(null, app.getLastEventId(), app.getEventQueueId())
-                            .enqueue(new Callback<String>() {
-                                @Override
-                                public void onResponse(Call<String> call, retrofit2.Response<String> response) {
-                                    String k = "";
-                                    String kz = "";
-                                }
+                    retrofit2.Response<GetEventResponse> eventResponse = app.getZulipServices()
+                            .getEvents(registeredOrGotEventsThisRun ? null : true, app.getLastEventId(), app.getEventQueueId())
+                            .execute();
 
-                                @Override
-                                public void onFailure(Call<String> call, Throwable t) {
-                                    String k  = "";
-                                    String kz  = "";
-                                }
-                            });
-
-
-                    request.setProperty("queue_id", app.getEventQueueId());
-                    request.setProperty("last_event_id", "" + app.getLastEventId());
-                    if (!registeredOrGotEventsThisRun) {
-                        request.setProperty("dont_block", "true");
-                    }
-                    request.setMethodAndUrl("GET", "v1/events");
-                    Response httpResponse = request.execute();
-
-                    String json = httpResponse.body().string();
-                    if (!httpResponse.isSuccessful()) {
-                        String msg = httpResponse.message();
-                        if (httpResponse.code() == 400 && (json.contains("Bad event queue id")
-                                || msg.contains("too old"))) {
+                    GetEventResponse body = eventResponse.body();
+                    if (!eventResponse.isSuccessful()) {
+                        if (eventResponse.code() == 400 && ((body != null && body.getMsg().contains("Bad event queue id"))
+                                || eventResponse.message().contains("too old"))) {
                             // Queue dead. Register again.
                             Log.w(ASYNC_GET_EVENTS, "Queue dead");
                             app.setEventQueueId(null);
-                            Log.i("WRONG", "run: " + json);
                             continue;
                         }
-                        Log.i("WRONG", "run: " + json);
+
                         backoff(null);
                     } else {
-                        Log.i("OkHttp200GE", json);
-                        JSONObject response = new JSONObject(json);
 
-                        JSONArray events = response.getJSONArray("events");
-                        if (events.length() > 0) {
-                            this.processEvents(events);
-
-                            JSONObject lastEvent = events.getJSONObject(events
-                                    .length() - 1);
-                            app.setLastEventId(lastEvent.getInt("id"));
-
+                        if (body.getEvents().size() > 0) {
+                            this.processEvents(body);
+                            app.setLastEventId(body.getEvents().get(body.getEvents().size() - 1).getId());
                             failures = 0;
                         }
 
@@ -291,58 +254,30 @@ public class AsyncGetEvents extends Thread {
 
     /**
      * Handles any event returned by the server that we care about.
+     * @param events
      */
-    private void processEvents(JSONArray events) {
+    private void processEvents(GetEventResponse events) {
         // In task thread
-        try {
-            StopWatch watch = new StopWatch();
-            watch.start();
-
-            ArrayList<Message> messages = new ArrayList<>();
-            HashMap<String, Person> personCache = new HashMap<>();
-            HashMap<String, Stream> streamCache = new HashMap<>();
-
-            for (int i = 0; i < events.length(); i++) {
-                JSONObject event = events.getJSONObject(i);
-                String type = event.getString("type");
-
-                if (type.equals("message")) {
-                    Message message = new Message(this.app,
-                            event.getJSONObject("message"), personCache,
-                            streamCache);
-                    messages.add(message);
-                } else if (type.equals(POINTER)) {
-                    // Keep our pointer synced with global pointer
-                    app.setPointer(event.getInt(POINTER));
-                }
+        List<Message> messages = events.getEventsOf(EventsBranch.BranchType.MESSAGE, new TypeSwapper<MessageWrapper, Message>() {
+            @Override
+            public Message convert(MessageWrapper messageWrapper) {
+                return messageWrapper.getMessage();
             }
-
-            watch.stop();
-            Log.i("perf", "Processing events: " + watch.toString());
-
-            watch.reset();
-            watch.start();
-
-            if (!messages.isEmpty()) {
-                Log.i("AsyncGetEvents", "Received " + messages.size()
-                        + " messages");
-                Message.createMessages(app, messages);
-                processMessages(messages);
-            }
-
-            watch.stop();
-            Log.i("perf", "Inserting event messages: " + watch.toString());
-
-        } catch (JSONException e) {
-            ZLog.logException(e);
+        });
+        if (!messages.isEmpty()) {
+            Log.i("AsyncGetEvents", "Received " + messages.size()
+                    + " messages");
+            Message.createMessages(app, messages);
+            processMessages(messages);
         }
+
     }
 
     /**
      * Add messages to the list {@link com.zulip.android.activities.MessageListFragment} which are already added to the database
      * @param messages List of messages to be added
      */
-    private void processMessages(final ArrayList<Message> messages) {
+    private void processMessages(final List<Message> messages) {
         // In task thread
         int lastMessageId = messages.get(messages.size() - 1).getID();
         MessageRange.updateNewMessagesRange(app, lastMessageId);
