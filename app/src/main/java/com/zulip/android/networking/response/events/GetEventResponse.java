@@ -3,6 +3,7 @@ package com.zulip.android.networking.response.events;
 import android.support.annotation.Nullable;
 
 import com.google.gson.annotations.SerializedName;
+import com.zulip.android.util.TypeSwapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,16 +27,26 @@ public class GetEventResponse {
     private List<EventsBranch> events;
 
     @Nullable
-    public <T extends EventsBranch>List<T> getEventsOf(EventsBranch.BranchType branchType) {
+    public <T>List<T> getEventsOf(EventsBranch.BranchType branchType) {
+        return getEventsOf(branchType, null);
+    }
+
+    @Nullable
+    public <T extends EventsBranch, R>List<R> getEventsOf(EventsBranch.BranchType branchType, TypeSwapper<T, R> converter) {
         if(events == null) {
             return null;
         }
-
         try {
-            List<T> types = new ArrayList<>(events.size());
+            List<R> types = new ArrayList<>(events.size());
             for (int i = 0; i < events.size(); i++) {
                 if (events.getClass().equals(branchType.getKlazz())) {
-                    types.add((T) events.get(i));
+                    EventsBranch orig = events.get(i);
+                    if(converter != null) {
+                        types.add(converter.convert((T) orig));
+                    }
+                    else {
+                        types.add((R) orig);
+                    }
                 }
             }
             return types;
