@@ -68,7 +68,7 @@ public class ZulipApp extends Application {
     private String eventQueueId;
     private int lastEventId;
 
-    private int pointer;
+    private  int pointer;
 
     // This object's intrinsic lock is used to prevent multiple threads from
     // making conflicting updates to ranges

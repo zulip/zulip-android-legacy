@@ -26,6 +26,7 @@ import android.database.MergeCursor;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -43,6 +44,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
@@ -65,6 +67,9 @@ import android.widget.SimpleCursorTreeAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.j256.ormlite.android.AndroidDatabaseResults;
 import com.zulip.android.BuildConfig;
 import com.zulip.android.database.DatabaseHelper;
@@ -99,7 +104,7 @@ import org.json.JSONObject;
 /**
  * The main Activity responsible for holding the {@link MessageListFragment} which has the list to the
  * messages
- * */
+ */
 public class ZulipActivity extends AppCompatActivity implements
         MessageListFragment.Listener, NarrowListener, SwipeRemoveLinearLayout.leftToRightSwipeListener {
 
@@ -162,10 +167,55 @@ public class ZulipActivity extends AppCompatActivity implements
         }
     };
     private ExpandableStreamDrawerAdapter streamsDrawerAdapter;
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
     @Override
     public void removeChatBox(boolean animToRight) {
         AnimationHelper.hideViewX(chatBox, animToRight);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Zulip Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app URL is correct.
+                Uri.parse("android-app://com.zulip.android.activities/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(client, viewAction);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Zulip Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app URL is correct.
+                Uri.parse("android-app://com.zulip.android.activities/http/host/path")
+        );
+        AppIndex.AppIndexApi.end(client, viewAction);
+        client.disconnect();
     }
 
     // Intent Extra constants
@@ -296,12 +346,16 @@ public class ZulipActivity extends AppCompatActivity implements
                 R.drawable.ic_drawer, R.string.streams_open,
                 R.string.streams_close) {
 
-            /** Called when a drawer has settled in a completely closed state. */
+            /**
+             * Called when a drawer has settled in a completely closed state.
+             */
             public void onDrawerClosed(View view) {
                 // pass
             }
 
-            /** Called when a drawer has settled in a completely open state. */
+            /**
+             * Called when a drawer has settled in a completely open state.
+             */
             public void onDrawerOpened(View drawerView) {
                 // pass
                 try {
@@ -507,10 +561,14 @@ public class ZulipActivity extends AppCompatActivity implements
             }
         });
         messageEt.setAdapter(combinedAdapter);
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     /**
      * Returns a cursor for the combinedAdapter used to suggest Emoji when ':' is typed in the {@link #messageEt}
+     *
      * @param emoji A string to search in the existing database
      */
     private Cursor makeEmojiCursor(CharSequence emoji)
@@ -868,9 +926,9 @@ public class ZulipActivity extends AppCompatActivity implements
 
     /**
      * Setup adapter's for the {@link AutoCompleteTextView}
-     *
+     * <p/>
      * These adapters are being intialized -
-     *
+     * <p/>
      * {@link #streamActvAdapter} Adapter for suggesting all the stream names in this AutoCompleteTextView
      * {@link #emailActvAdapter} Adapter for suggesting all the person email's in this AutoCompleteTextView
      * {@link #subjectActvAdapter} Adapter for suggesting all the topic for the stream specified in the {@link #streamActv} in this AutoCompleteTextView
@@ -958,6 +1016,7 @@ public class ZulipActivity extends AppCompatActivity implements
 
     /**
      * Creates a cursor to get the streams saved in the database
+     *
      * @param streamName Filter out streams name containing this string
      */
     private Cursor makeStreamCursor(CharSequence streamName)
@@ -980,8 +1039,9 @@ public class ZulipActivity extends AppCompatActivity implements
 
     /**
      * Creates a cursor to get the topics in the stream in
+     *
      * @param stream
-     * @param  subject Filter out subject containing this string
+     * @param subject Filter out subject containing this string
      */
     private Cursor makeSubjectCursor(CharSequence stream, CharSequence subject)
             throws SQLException {
@@ -1011,6 +1071,7 @@ public class ZulipActivity extends AppCompatActivity implements
 
     /**
      * Creates a cursor to get the E-Mails stored in the database
+     *
      * @param email Filter out emails containing this string
      */
     private Cursor makePeopleCursor(CharSequence email) throws SQLException {
@@ -1178,7 +1239,7 @@ public class ZulipActivity extends AppCompatActivity implements
     }
 
     private void setupTitleBar(String title, String subtitle) {
-        if (android.os.Build.VERSION.SDK_INT >= 11 && getSupportActionBar() != null) {
+        if (Build.VERSION.SDK_INT >= 11 && getSupportActionBar() != null) {
             if (title != null) getSupportActionBar().setTitle(title);
             getSupportActionBar().setSubtitle(subtitle);
         }
@@ -1214,6 +1275,7 @@ public class ZulipActivity extends AppCompatActivity implements
 
     /**
      * Fills the chatBox according to the {@link MessageType}
+     *
      * @param openSoftKeyboard If true open's up the SoftKeyboard else not.
      */
     @Override
@@ -1239,8 +1301,9 @@ public class ZulipActivity extends AppCompatActivity implements
 
     /**
      * Fills the chatBox with the stream name and the topic
-     * @param stream Stream name to be filled
-     * @param subject Subject to be filled
+     *
+     * @param stream           Stream name to be filled
+     * @param subject          Subject to be filled
      * @param openSoftKeyboard If true open's the softKeyboard else not
      */
     public void onNarrowFillSendBoxStream(String stream, String subject, boolean openSoftKeyboard) {
@@ -1288,11 +1351,11 @@ public class ZulipActivity extends AppCompatActivity implements
             final SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
             // Assumes current activity is the searchable activity
             final MenuItem mSearchMenuItem = menu.findItem(R.id.search);
-            final android.support.v7.widget.SearchView searchView = (android.support.v7.widget.SearchView) MenuItemCompat.getActionView(mSearchMenuItem);
+            final SearchView searchView = (SearchView) MenuItemCompat.getActionView(mSearchMenuItem);
             searchView.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(getApplicationContext(), ZulipActivity.class)));
             searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
             ((EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text)).setHintTextColor(ContextCompat.getColor(this, R.color.colorTextPrimary));
-            searchView.setOnQueryTextListener(new android.support.v7.widget.SearchView.OnQueryTextListener() {
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                 @Override
                 public boolean onQueryTextSubmit(String s) {
                     doNarrow(new NarrowFilterSearch(s));
@@ -1382,7 +1445,8 @@ public class ZulipActivity extends AppCompatActivity implements
 
     /**
      * Switches the current Day/Night mode to Night/Day mode
-     * @param nightMode which Mode {@link android.support.v7.app.AppCompatDelegate.NightMode}
+     *
+     * @param nightMode which Mode {@link AppCompatDelegate.NightMode}
      */
     private void setNightMode(@AppCompatDelegate.NightMode int nightMode) {
         AppCompatDelegate.setDefaultNightMode(nightMode);

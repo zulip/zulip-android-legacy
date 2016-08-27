@@ -36,8 +36,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center|center_horizontal"
-            android:padding="10dp"
+            android:padding="17dp"
             android:text="@string/enter_server"
+
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <EditText
@@ -45,6 +46,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
+            android:layout_marginTop="25dp"
             android:hint="@string/server_url"
             android:inputType="textUri"
             android:selectAllOnFocus="true" />
@@ -54,7 +56,9 @@
             style="android:buttonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="35dp"
+            android:padding="22dp"
+            android:textSize="18dp"
             android:text="@string/enter" />
 
     </LinearLayout>
@@ -153,7 +157,8 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="29dp"
         android:onClick="onClick"
-        android:paddingTop="8dp"
+        android:textSize="20dp"
+        android:paddingTop="18dp"
         android:text="@string/legal"
         android:textColor="#ff0099cc" />
 </LinearLayout>

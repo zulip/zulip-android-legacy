@@ -301,7 +301,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     public void openHome() {
         // Cancel before leaving activity to avoid leaking windows
         connectionProgressDialog.dismiss();
-        Intent i = new Intent(this, ZulipActivity.class);
+        Intent i = new Intent(getBaseContext(), ZulipActivity.class);
         startActivity(i);
         finish();
     }

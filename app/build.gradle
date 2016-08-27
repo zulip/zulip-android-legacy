@@ -20,7 +20,7 @@ android {
     buildToolsVersion "23.0.2"
     defaultConfig {
         applicationId "com.zulip.android"
-        minSdkVersion 13
+        minSdkVersion 11
         targetSdkVersion 23
 
         versionCode 19
@@ -45,12 +45,13 @@ android {
             ext.enableCrashlytics = false
             buildConfigField "String", "GOOGLE_CLIENT_ID", "\"659545034376-78hg5hmrvqr50nn53t0nme97ndhqjmvs.apps.googleusercontent.com\""
         }
-        release {
+        final def type = release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
-            manifestPlaceholders = [ fabricKey : project.property("fabricKey")]
+//            manifestPlaceholders = [ fabricKey : project.property("fabricKey")]
             buildConfigField "String", "GOOGLE_CLIENT_ID", "TODO: FILL THIS IN"
         }
+        type
     }
     compileOptions {
         targetCompatibility JavaVersion.VERSION_1_7
@@ -90,6 +91,7 @@ dependencies {
     compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
         transitive = true;
     }
+    compile 'com.google.android.gms:play-services-appindexing:8.4.0'
 }
 
 apply plugin: 'com.google.gms.google-services'
