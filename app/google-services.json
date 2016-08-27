@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "926684821250",
+    "project_id": "zulip-3a81a"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:926684821250:android:6ae61ae43a7c3410",
+        "android_client_info": {
+          "package_name": "com.zulip.android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "926684821250-ascvgpqf74qprbhe130dn9mv66hm49h9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCk_7tINT-meF18WlS5mZSL7YzLpz3Ywf4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
