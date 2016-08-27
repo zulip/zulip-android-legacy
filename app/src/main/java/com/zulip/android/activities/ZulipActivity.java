@@ -1,5 +1,6 @@
 package com.zulip.android.activities;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -131,6 +132,7 @@ public class ZulipActivity extends AppCompatActivity implements
     private CountDownTimer fabHidder;
     private boolean isTextFieldFocused = false;
     private static final int HIDE_FAB_AFTER_SEC = 5;
+    private int PICK_IMAGE_REQUEST = 1;
 
     private HashMap<String, Bitmap> gravatars = new HashMap<>();
 
@@ -149,6 +151,7 @@ public class ZulipActivity extends AppCompatActivity implements
     private AutoCompleteTextView messageEt;
     private TextView textView;
     private ImageView sendBtn;
+    private ImageView attachBtn;
     private ImageView togglePrivateStreamBtn;
     private Notifications notifications;
     private SimpleCursorAdapter streamActvAdapter;
@@ -267,6 +270,18 @@ public class ZulipActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+            Intent intent = getIntent();
+            String action = intent.getAction();
+            String type = intent.getType();
+        if(action == Intent.ACTION_SEND){
+            if (type.startsWith("image/")) {
+                try {
+                    handleSendImage(intent); // Handle single image being sent
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
         app = (ZulipApp) getApplicationContext();
         settings = app.getSettings();
 
@@ -291,6 +306,7 @@ public class ZulipActivity extends AppCompatActivity implements
         messageEt = (AutoCompleteTextView) findViewById(R.id.message_et);
         textView = (TextView) findViewById(R.id.textView);
         sendBtn = (ImageView) findViewById(R.id.send_btn);
+        attachBtn = (ImageView) findViewById(R.id.attach_btn); 
         togglePrivateStreamBtn = (ImageView) findViewById(R.id.togglePrivateStream_btn);
         mutedTopics = new ArrayList<>();
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -417,6 +433,12 @@ public class ZulipActivity extends AppCompatActivity implements
                 sendMessage();
             }
         });
+        attachBtn.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                attach();
+            }
+        });
         composeStatus = (LinearLayout) findViewById(R.id.composeStatus);
         setUpAdapter();
         streamActv.setAdapter(streamActvAdapter);
@@ -503,6 +525,50 @@ public class ZulipActivity extends AppCompatActivity implements
             }
         });
         messageEt.setAdapter(combinedAdapter);
+    }
+
+    private void handleSendImage(Intent intent) throws IOException {
+        Uri imageUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
+        if (imageUri != null) {
+            ImageView imagePreview = (ImageView) findViewById(R.id.attach_preview);
+            Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+            imagePreview.setImageBitmap(bitmap);
+            imagePreview.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void attach() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+
+            Uri uri = data.getData();
+
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                ImageView imageView = (ImageView) findViewById(R.id.attach_preview);
+                imageView.setImageBitmap(bitmap);
+                imageView.setVisibility(View.VISIBLE);
+                imageView.setOnClickListener(new View.OnClickListener(){
+
+                    @Override
+                    public void onClick(View v){
+                        ((ImageView) v).setImageBitmap(null);
+                        v.setVisibility(View.GONE);
+                    }
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
@@ -757,7 +823,9 @@ public class ZulipActivity extends AppCompatActivity implements
     }
 
     private void sendMessage() {
-
+        if(findViewById(R.id.attach_preview).isShown()){
+            //TODO: add post request to https://zulip.tabbott.net/json/upload_file using new retrofit API
+        }
         if (isCurrentModeStream()) {
             if (TextUtils.isEmpty(streamActv.getText().toString())) {
                 streamActv.setError(getString(R.string.stream_error));
@@ -1160,26 +1228,6 @@ public class ZulipActivity extends AppCompatActivity implements
         }
     }
 
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-        if (requestCode == 1 && resultCode == RESULT_OK) {
-            Uri selectedImageUri = data.getData();
-            imagepath = getPath(selectedImageUri);
-            Bitmap bitmap= BitmapFactory.decodeFile(imagepath);
-            imageview.setImageBitmap(bitmap);
-            messageText.setText("Uploading file path:" +imagepath);
-
-
-
-        }
-    }
-    public String getPath(Uri uri) {
-        String[] projection = { MediaStore.Images.Media.DATA };
-        Cursor cursor = managedQuery(uri, projection, null, null, null);
-        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-        cursor.moveToFirst();
-        return cursor.getString(column_index);
-    }
 
     /**
      * This method creates a new Instance of the MessageListFragment and displays it with the filter.
