@@ -18,8 +18,6 @@ or by using Android Studio.
 
 Index
 
-Index
-
 -  `Getting Started`_
 -  `Build instructions (Android Studio)`_)
 -  `Build instructions (without Android Studio)`_)
