@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import android.text.Html;
 import android.text.Spanned;
 import android.text.TextUtils;
@@ -27,6 +28,8 @@ import org.ccil.cowan.tagsoup.Parser;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.xml.sax.SAXNotRecognizedException;
+import org.xml.sax.SAXNotSupportedException;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -50,6 +53,8 @@ public class Message {
     public static final String RECIPIENTS_FIELD = "recipients";
     public static final String STREAM_FIELD = "stream";
     public static final String MESSAGE_READ_FIELD = "read";
+    private static final String MESSAGE_EDITED = "MESSAGE_EDITED";
+    private static final String MESSAGE_EDIT_DATE = "MESSAGE_EDIT_DATE";
 
 
     //region fields
@@ -83,8 +88,8 @@ public class Message {
     @SerializedName("sender_short_name")
     private String senderShortName;
 
-    @SerializedName("type")
-    private String _internal_type;
+//    @SerializedName("type")
+//    private String _internal_type;
 
     @SerializedName("subject_links")
     private List<?> subjectLinks;
@@ -92,13 +97,15 @@ public class Message {
     @DatabaseField(foreign = true, columnName = SENDER_FIELD, foreignAutoRefresh = true)
     private Person sender;
 
+    @SerializedName("type")
     @DatabaseField(columnName = TYPE_FIELD)
     private MessageType type;
 
-    @SerializedName("content")
+    @SerializedName("IGNORE_MASK_CONTENT")
     @DatabaseField(columnName = CONTENT_FIELD)
     private String content;
 
+    @SerializedName("content")
     @DatabaseField(columnName = FORMATTED_CONTENT_FIELD)
     private String formattedContent;
 
@@ -123,7 +130,20 @@ public class Message {
     private Stream stream;
     @DatabaseField(columnName = MESSAGE_READ_FIELD)
     private Boolean messageRead;
+
+    @DatabaseField(columnDefinition = MESSAGE_EDITED)
+    private Boolean hasBeenEdited;
+
+    @DatabaseField(columnDefinition = MESSAGE_EDIT_DATE)
+    private Date editDate;
+
+    //IGNORE - This will always be empty due to persistence
+    @SerializedName("edit_history")
+    public List<MessageHistory> _history;
+
     //endregion
+
+
 
     /**
      * Construct an empty Message object.
@@ -183,7 +203,7 @@ public class Message {
                         obj.getString("full_name"), null, personCache);
                 r[i] = person;
             }
-            recipients = recipientList(r);
+            setRecipients(recipientList(r));
         }
 
         String html = message.getString("content");
@@ -272,9 +292,31 @@ public class Message {
         return recipientsCache;
     }
 
-    private void setRecipients(Person[] list) {
+    public void setRecipients(Person[] list) {
         this.recipientsCache = list;
-        this.recipients = recipientList(list);
+
+        try {
+            Person to = ZulipApp.get().getDao(Person.class, true).queryBuilder().where().eq(Person.EMAIL_FIELD, list[0].getEmail()).queryForFirst();;
+            if(list.length == 1) {
+                setRecipients(to.getId() + "");
+                return;
+            }
+            Person from = ZulipApp.get().getDao(Person.class, true).queryBuilder().where().eq(Person.EMAIL_FIELD, list[1].getEmail()).queryForFirst();
+
+            if(to == null && from != null) {
+                setRecipients(""+ from.getId());
+            }
+            if(to != null && from == null) {
+                setRecipients(to.getId() + "");
+            }
+
+            setRecipients(to.getId() + "," + from.getId());
+            return;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        this.recipients = (recipientId == 0 && senderId == 0) ? recipientList(list) : recipientId + "," + senderId;
     }
 
     /**
@@ -375,6 +417,7 @@ public class Message {
                 public Void call() throws Exception {
                     RuntimeExceptionDao<Message, Object> messageDao = app
                             .getDao(Message.class);
+                    RuntimeExceptionDao<Person, Object> personDao = app.getDao(Person.class, true);
 
                     for (Message m : messages) {
                         messageDao.createOrUpdate(m);
@@ -475,13 +518,13 @@ public class Message {
      * @param app
      * @return Span
      */
-    private static Spanned formatContent(String source, ZulipApp app) {
+    public static Spanned formatContent(String source, ZulipApp app) {
         final Context context = app.getApplicationContext();
         final float density = context.getResources().getDisplayMetrics().density;
         Parser parser = new Parser();
         try {
             parser.setProperty(Parser.schemaProperty, schema);
-        } catch (org.xml.sax.SAXNotRecognizedException | org.xml.sax.SAXNotSupportedException e) {
+        } catch (SAXNotRecognizedException | SAXNotSupportedException e) {
             // Should not happen.
             throw new RuntimeException(e);
         }
@@ -543,6 +586,9 @@ public class Message {
     }
 
     public String getContent() {
+        if(content == null) {
+            content = formatContent(getFormattedContent(), ZulipApp.get()).toString();
+        }
         return content;
     }
 
@@ -550,7 +596,7 @@ public class Message {
         this.content = content;
     }
 
-    private String getFormattedContent() {
+    public String getFormattedContent() {
         return formattedContent;
     }
 
@@ -561,10 +607,19 @@ public class Message {
     public Person getSender() {
         if(sender == null) {
             RuntimeExceptionDao<Person, Object> dao = ZulipApp.get().getDao(Person.class, true);
-            sender = dao.queryForId(senderId);
+            try {
+                sender = dao.queryBuilder().where().eq(Person.EMAIL_FIELD, senderEmail).queryForFirst();
+            } catch (SQLException e) {
+                ZLog.logException(e);
+            }
             if(sender == null) {
                 sender = new Person(senderFullName, senderEmail, avatarUrl);
-                dao.createOrUpdate(sender);
+                try {
+                    dao.createOrUpdate(sender);
+                }
+                catch (Exception e) {
+                    ZLog.logException(e);
+                }
             }
         }
         return sender;
@@ -591,6 +646,9 @@ public class Message {
     }
 
     public Stream getStream() {
+        if(stream == null && getType() == MessageType.STREAM_MESSAGE) {
+            stream = Stream.getByName(ZulipApp.get(), getRawRecipients());
+        }
         return stream;
     }
 
@@ -638,12 +696,12 @@ public class Message {
         return senderShortName;
     }
 
-    public String get_internal_type() {
-        return _internal_type;
-    }
-
     public List<?> getSubjectLinks() {
         return subjectLinks;
+    }
+
+    public void setRecipients(String recipients) {
+        this.recipients = recipients;
     }
 
     public String getRecipients() {
@@ -662,12 +720,33 @@ public class Message {
         return schema;
     }
 
+    public void updateFromHistory(@NonNull MessageHistory history) {
+        hasBeenEdited = true;
+        editDate = history.date;
+    }
+
+    public boolean isHasBeenEdited() {
+        return hasBeenEdited;
+    }
+
+
+
     //endregion
 
 
     public static class ZulipDirectMessage extends Message {
         @SerializedName("display_recipient")
         private List<Person> displayRecipient;
+
+        @Override
+        public MessageType getType() {
+            return super.getType() == null ? MessageType.PRIVATE_MESSAGE : super.getType();
+        }
+
+        @Override
+        public Person[] getRecipients(ZulipApp app) {
+            return getDisplayRecipient().toArray(new Person[getDisplayRecipient().size()]);
+        }
 
         public List<Person> getDisplayRecipient() {
             return displayRecipient;
@@ -677,6 +756,11 @@ public class Message {
     public static class ZulipStreamMessage extends Message {
         @SerializedName("display_recipient")
         private String displayRecipient;
+
+        @Override
+        public MessageType getType() {
+            return super.getType() == null ? MessageType.STREAM_MESSAGE : super.getType();
+        }
 
         public String getDisplayRecipient() {
             return displayRecipient;

@@ -1,29 +1,26 @@
 package com.zulip.android.networking;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-
-import org.apache.commons.lang.time.StopWatch;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.util.Log;
 
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.stmt.Where;
+import com.zulip.android.ZulipApp;
+import com.zulip.android.filters.NarrowFilter;
 import com.zulip.android.models.Message;
+import com.zulip.android.models.MessageRange;
+import com.zulip.android.networking.response.GetMessagesResponse;
 import com.zulip.android.util.MessageListener;
 import com.zulip.android.util.MessageListener.LoadPosition;
-import com.zulip.android.models.MessageRange;
-import com.zulip.android.filters.NarrowFilter;
-import com.zulip.android.models.Person;
-import com.zulip.android.models.Stream;
-import com.zulip.android.util.ZLog;
-import com.zulip.android.ZulipApp;
+
+import org.apache.commons.lang.time.StopWatch;
+
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import retrofit2.Response;
 
 public class AsyncGetOldMessages extends ZulipAsyncPushTask {
     private MessageListener listener;
@@ -203,82 +200,39 @@ public class AsyncGetOldMessages extends ZulipAsyncPushTask {
 
     protected boolean fetchMessages(int anchor, int numBefore, int numAfter,
                                     String[] params) {
-        this.setProperty("anchor", Integer.toString(anchor));
-        this.setProperty("num_before", Integer.toString(numBefore));
-        this.setProperty("num_after", Integer.toString(numAfter));
-        this.setProperty("apply_markdown", "true");
 
-        if (filter != null) {
-            try {
-                this.setProperty("narrow", filter.getJsonFilter());
-            } catch (JSONException e) {
-                Log.wtf("fm", e);
+        Response<GetMessagesResponse> result;
+        try{
+             result = app.getZulipServices()
+                    .getMessages(
+                            Integer.toString(anchor),
+                            Integer.toString(numBefore),
+                            Integer.toString(numAfter),
+                            filter)
+                    .execute();
+            if(!result.isSuccessful()) {
+                return false;
             }
-        } else {
-            this.setProperty("narrow", "{}");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
         }
 
-        StopWatch watch = new StopWatch();
+        List<Message> fetchedMessages = result.body().getMessages();
+        Message.createMessages(app, fetchedMessages);
 
-        watch.start();
-        String result = super.doInBackground(params);
-        watch.stop();
-        Log.i("perf", "net: v1/messages: " + watch.toString());
-
-        if (result != null) {
-            try {
-                watch.reset();
-                watch.start();
-                JSONObject response = new JSONObject(result);
-                watch.stop();
-                Log.i("perf", "json: v1/messages: " + watch.toString());
-
-                watch.reset();
-                watch.start();
-                JSONArray objects = response.getJSONArray("messages");
-                ArrayList<Message> fetchedMessages = new ArrayList<>(
-                        objects.length());
-
-                HashMap<String, Person> personCache = new HashMap<>();
-                HashMap<String, Stream> streamCache = new HashMap<>();
-
-                for (int i = 0; i < objects.length(); i++) {
-                    Message message = new Message(this.app,
-                            objects.getJSONObject(i), personCache, streamCache);
-                    fetchedMessages.add(message);
-                }
-                watch.stop();
-                Log.i("perf", "creating messages " + watch.toString());
-
-                watch.reset();
-                watch.start();
-                Message.createMessages(app, fetchedMessages);
-                watch.stop();
-                Log.i("perf", "sqlite: messages " + watch.toString());
-
-                if (numAfter == 0) {
-                    receivedMessages.addAll(0, fetchedMessages);
-                } else {
-                    receivedMessages.addAll(fetchedMessages);
-                }
-
-                if ((position == LoadPosition.ABOVE || position == LoadPosition.BELOW)
-                        && receivedMessages.size() < numBefore + numAfter) {
-                    noFurtherMessages = true;
-                }
-
-                return !receivedMessages.isEmpty();
-            } catch (JSONException e) {
-                Log.e("json", "parsing error");
-                ZLog.logException(e);
-            } catch (NullPointerException e) {
-                Log.e("poll", "No data returned?");
-                ZLog.logException(e);
-            }
+        if (numAfter == 0) {
+            receivedMessages.addAll(0, fetchedMessages);
         } else {
-            Log.i("poll", "got nothing from the server");
+            receivedMessages.addAll(fetchedMessages);
         }
-        return false;
+
+        if ((position == LoadPosition.ABOVE || position == LoadPosition.BELOW)
+                && receivedMessages.size() < numBefore + numAfter) {
+            noFurtherMessages = true;
+        }
+
+        return !receivedMessages.isEmpty();
     }
 
     @Override

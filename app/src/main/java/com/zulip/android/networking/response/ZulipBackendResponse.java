@@ -2,9 +2,6 @@ package com.zulip.android.networking.response;
 
 import com.google.gson.annotations.SerializedName;
 
-/**
- * Created by patrykpoborca on 8/25/16.
- */
 
 public class ZulipBackendResponse {
 

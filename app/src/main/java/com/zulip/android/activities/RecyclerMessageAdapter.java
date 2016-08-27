@@ -240,7 +240,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
      */
     public boolean addOldMessage(Message message, int messageAndHeadersCount, StringBuilder lastHolderId) {
         if (!lastHolderId.toString().equals(message.getIdForHolder()) || lastHolderId.toString().equals("")) {
-            MessageHeaderParent messageHeaderParent = new MessageHeaderParent((message.getStream() == null) ? null : message.getStream().getName(), message.getSubject(), message.getIdForHolder());
+            MessageHeaderParent messageHeaderParent = new MessageHeaderParent((message.getStream() == null) ? null : message.getStream().getName(), message.getSubject(), message.getIdForHolder(), message);
             messageHeaderParent.setMessageType(message.getType());
             messageHeaderParent.setDisplayRecipent(message.getDisplayRecipient(zulipApp));
             if (message.getType() == MessageType.STREAM_MESSAGE) {
@@ -280,7 +280,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         }
         if (item == null) {
             item = new MessageHeaderParent((message.getStream() == null) ? null :
-                    message.getStream().getName(), message.getSubject(), message.getIdForHolder());
+                    message.getStream().getName(), message.getSubject(), message.getIdForHolder(), message);
             item.setMessageType(message.getType());
             item.setDisplayRecipent(message.getDisplayRecipient(zulipApp));
             if (message.getType() == MessageType.STREAM_MESSAGE)

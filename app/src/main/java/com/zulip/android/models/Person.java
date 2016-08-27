@@ -27,6 +27,7 @@ public class Person {
     public static final String ISBOT_FIELD = "isBot";
     public static final String ISACTIVE_FIELD = "isActive";
 
+    @SerializedName("IGNORE_MASK")
     @DatabaseField(columnName = ID_FIELD, generatedId = true)
     protected int id;
 
@@ -159,7 +160,7 @@ public class Person {
         return null;
     }
 
-    private static Person getByEmail(Dao<Person, ?> dao, String email) {
+    public static Person getByEmail(Dao<Person, ?> dao, String email) {
         try {
             return dao.queryBuilder().where()
                     .eq(Person.EMAIL_FIELD, new SelectArg(email.toLowerCase()))

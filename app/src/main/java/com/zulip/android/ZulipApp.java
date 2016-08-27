@@ -27,6 +27,7 @@ import com.j256.ormlite.misc.TransactionManager;
 import com.zulip.android.database.DatabaseHelper;
 import com.zulip.android.models.Emoji;
 import com.zulip.android.models.Message;
+import com.zulip.android.models.MessageType;
 import com.zulip.android.models.Person;
 import com.zulip.android.models.Presence;
 import com.zulip.android.models.Stream;
@@ -200,29 +201,49 @@ public class ZulipApp extends Application {
     }
 
     public Gson buildGson() {
-        final Gson naiveGson = new Gson();
+        final Gson naiveGson = new GsonBuilder()
+                .registerTypeAdapter(Date.class, new JsonDeserializer<Date>() {
+                    public Date deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+                        return new Date(json.getAsJsonPrimitive().getAsLong() * 1000);
+                    }
+                })
+                .registerTypeAdapter(MessageType.class, new JsonDeserializer<MessageType>() {
+                    @Override
+                    public MessageType deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+                        return json.getAsString().equalsIgnoreCase("stream") ? MessageType.STREAM_MESSAGE : MessageType.PRIVATE_MESSAGE;
+                    }
+                })
+                .create();
         final Gson nestedGson = new GsonBuilder()
                 .registerTypeAdapter(Message.class, new JsonDeserializer<Message>() {
                     @Override
                     public Message deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-                        Message msg;
-                        if("stream".equalsIgnoreCase(json.getAsJsonObject().get("type").getAsString())) {
-                            msg = naiveGson.fromJson(json, Message.ZulipStreamMessage.class);
+
+                        if(BuildConfig.DEBUG) {
+                            Log.d("RAW MESSAGES", json.toString());
                         }
-                        msg = naiveGson.fromJson(json, Message.ZulipDirectMessage.class);
+                        Message genMess;
+                        if("stream".equalsIgnoreCase(json.getAsJsonObject().get("type").getAsString())) {
+                            Message.ZulipStreamMessage msg = naiveGson.fromJson(json, Message.ZulipStreamMessage.class);
+                            msg.setRecipients(msg.getDisplayRecipient());
+                            genMess = msg;
+                        } else {
+                            Message.ZulipDirectMessage msg = naiveGson.fromJson(json, Message.ZulipDirectMessage.class);
+                            if(msg.getDisplayRecipient() != null) {
+                                msg.setRecipients(msg.getDisplayRecipient().toArray(new Person[msg.getDisplayRecipient().size()]));
+                            }
 
-
-                        return msg;
+                            msg.setContent(Message.formatContent(msg.getFormattedContent(), ZulipApp.get()).toString());
+                            genMess = msg;
+                        }
+                        if(genMess._history != null && genMess._history.size() != 0) {
+                            genMess.updateFromHistory(genMess._history.get(0));
+                        }
+                        return genMess;
                     }
                 }).create();
 
-
         return new GsonBuilder()
-                .registerTypeAdapter(Date.class, new JsonDeserializer<Date>() {
-                    public Date deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-                        return new Date(json.getAsJsonPrimitive().getAsLong());
-                    }
-                })
                 .registerTypeAdapter(UserConfigurationResponse.class, new TypeAdapter<UserConfigurationResponse>() {
 
                     @Override
@@ -256,6 +277,9 @@ public class ZulipApp extends Application {
                     @Override
                     public EventsBranch deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
                         EventsBranch invalid = nestedGson.fromJson(json, EventsBranch.class);
+                        if(BuildConfig.DEBUG) {
+                            Log.d("RAW EVENTS", json.toString());
+                        }
                         Class<? extends EventsBranch> t = EventsBranch.BranchType.fromRawType(invalid);
                         if(t != null) {
                             return nestedGson.fromJson(json, t);
@@ -264,6 +288,7 @@ public class ZulipApp extends Application {
                         return invalid;
                     }
                 })
+                .registerTypeAdapter(Message.class, nestedGson.getAdapter(Message.class))
                 .create();
     }
 
@@ -505,7 +530,6 @@ public class ZulipApp extends Application {
     }
 
     public void syncPointer(final int mID) {
-
         getZulipServices().updatePointer(Integer.toString(mID))
         .enqueue(new Callback<ResponseBody>() {
             @Override

@@ -5,9 +5,6 @@ import android.support.annotation.Nullable;
 
 import com.google.gson.annotations.SerializedName;
 
-/**
- * Created by patrykpoborca on 8/26/16.
- */
 
 public class EventsBranch {
     @SerializedName("id")

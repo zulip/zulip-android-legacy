@@ -1,14 +1,14 @@
 package com.zulip.android.filters;
 
-import java.sql.SQLException;
-
-import org.json.JSONException;
-
 import android.os.Parcelable;
 
 import com.j256.ormlite.stmt.Where;
 import com.zulip.android.models.Message;
 import com.zulip.android.models.Stream;
+
+import org.json.JSONException;
+
+import java.sql.SQLException;
 
 /**
  * A narrow that can fetch results from the local cache or server.

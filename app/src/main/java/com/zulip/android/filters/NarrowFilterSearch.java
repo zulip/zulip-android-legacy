@@ -48,7 +48,8 @@ public class NarrowFilterSearch implements NarrowFilter {
 
     @Override
     public boolean matches(Message msg) {
-        return msg.getContent().toLowerCase().contains(query.toLowerCase());
+        //api matching for us
+        return true;
     }
 
     @Override
@@ -76,6 +77,15 @@ public class NarrowFilterSearch implements NarrowFilter {
         JSONArray filter = new JSONArray();
         filter.put(new JSONArray(Arrays.asList("search", query)));
         return filter.toString();
+    }
+
+    @Override
+    public String toString() {
+        try {
+            return getJsonFilter();
+        } catch (JSONException e) {
+            return null;
+        }
     }
 
     @Override

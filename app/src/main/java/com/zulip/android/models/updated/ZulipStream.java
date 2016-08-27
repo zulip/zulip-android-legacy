@@ -4,9 +4,6 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-/**
- * Created by patrykpoborca on 8/25/16.
- */
 
 public class ZulipStream {
 

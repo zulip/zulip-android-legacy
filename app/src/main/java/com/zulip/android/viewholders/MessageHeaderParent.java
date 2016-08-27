@@ -19,6 +19,7 @@ import com.zulip.android.util.ZLog;
  * A wrapper class for storing the information about the MessageHeader.
  */
 public class MessageHeaderParent {
+    private final Message message;
     private String stream;
     private String subject;
     private String id;
@@ -34,8 +35,9 @@ public class MessageHeaderParent {
      * @param id Stores the {@link Message#getIdForHolder()} this functions returns a string "subjectnamestreamId" if if {@link MessageType#STREAM_MESSAGE}
      *           or all the recipients ID's of the group conversation or single recipient if {@link MessageType#PRIVATE_MESSAGE}
      */
-    public MessageHeaderParent(String stream, String subject, String id) {
+    public MessageHeaderParent(String stream, String subject, String id, Message message) {
         this.stream = stream;
+        this.message = message;
         this.subject = subject;
         this.id = id;
     }
