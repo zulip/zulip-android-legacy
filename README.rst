@@ -39,11 +39,11 @@ Index
 Getting Started
 ---------------
 
--  Firstly setup a development environment of the Zulip python Server
-   https://github.com/zulip/zulip/blob/master/README.dev.md#brief-installation-instructions-for-vagrant-development-environment
--  Now follow the build instructions to compile the project
--  And then follow `Running server on device`_ to get the server running
-   on the device.
+-  First, setup a development environment of the Zulip Server:
+   http://zulip.readthedocs.io/en/latest/dev-overview.html
+-  Then, follow the build instructions (below) to compile the project
+-  And then follow `Running server on device`_ to get the device to
+   connect to the Zulip development server.
 
 .. _Running server on device: #browsing-server-on-device
 
