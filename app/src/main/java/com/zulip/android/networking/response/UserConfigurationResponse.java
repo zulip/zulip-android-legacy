@@ -10,9 +10,6 @@ import com.zulip.android.models.updated.Referrals;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by patrykpoborca on 8/25/16.
- */
 
 public class UserConfigurationResponse {
 

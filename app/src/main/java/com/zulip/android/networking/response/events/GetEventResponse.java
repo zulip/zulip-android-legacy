@@ -8,9 +8,6 @@ import com.zulip.android.util.TypeSwapper;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by patrykpoborca on 8/26/16.
- */
 
 public class GetEventResponse {
 

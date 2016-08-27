@@ -3,9 +3,6 @@ package com.zulip.android.networking.response.events;
 import com.google.gson.annotations.SerializedName;
 import com.zulip.android.models.Presence;
 
-/**
- * Created by patrykpoborca on 8/26/16.
- */
 
 public class PresenceWrapper extends EventsBranch {
 

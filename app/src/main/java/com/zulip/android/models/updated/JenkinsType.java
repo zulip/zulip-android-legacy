@@ -1,8 +1,5 @@
 package com.zulip.android.models.updated;
 
-/**
- * Created by patrykpoborca on 8/25/16.
- */
 
 public class JenkinsType {
     private String source_url;

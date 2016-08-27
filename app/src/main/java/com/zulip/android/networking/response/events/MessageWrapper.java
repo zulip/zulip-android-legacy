@@ -5,9 +5,6 @@ import com.zulip.android.models.Message;
 
 import java.util.List;
 
-/**
- * Created by patrykpoborca on 8/26/16.
- */
 
 public class MessageWrapper extends EventsBranch {
     @SerializedName("message")

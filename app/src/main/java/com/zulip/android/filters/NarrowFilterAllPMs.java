@@ -95,4 +95,13 @@ public class NarrowFilterAllPMs implements NarrowFilter {
         ret.put(new JSONArray(Arrays.asList("is", "private")));
         return ret.toString();
     }
+
+    @Override
+    public String toString() {
+        try {
+            return getJsonFilter();
+        } catch (JSONException e) {
+            return null;
+        }
+    }
 }

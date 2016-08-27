@@ -10,9 +10,7 @@ import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
 
-/**
- * Created by patrykpoborca on 8/25/16.
- */
+
 public class ZulipInterceptor implements Interceptor {
 
     private final ZulipApp app;

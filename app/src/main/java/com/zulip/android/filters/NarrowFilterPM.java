@@ -1,13 +1,5 @@
 package com.zulip.android.filters;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -19,6 +11,14 @@ import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageType;
 import com.zulip.android.models.Person;
 import com.zulip.android.models.Stream;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class NarrowFilterPM implements NarrowFilter {
     private List<Person> people;
@@ -67,7 +67,7 @@ public class NarrowFilterPM implements NarrowFilter {
 
     @Override
     public boolean matches(Message msg) {
-        return msg.getType() == MessageType.PRIVATE_MESSAGE && msg.getRawRecipients().equals(recipientString);
+        return msg.getType() == MessageType.PRIVATE_MESSAGE;
     }
 
     @Override
@@ -107,5 +107,14 @@ public class NarrowFilterPM implements NarrowFilter {
         return (new JSONArray()).put(
                 new JSONArray(Arrays.asList("pm-with",
                         TextUtils.join(",", emails)))).toString();
+    }
+
+    @Override
+    public String toString() {
+        try {
+            return getJsonFilter();
+        } catch (JSONException e) {
+            return null;
+        }
     }
 }
