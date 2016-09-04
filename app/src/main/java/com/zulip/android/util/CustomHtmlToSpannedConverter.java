@@ -16,12 +16,14 @@
 
 package com.zulip.android.util;
 
+import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
 import android.text.Html;
 import android.text.Layout;
 import android.text.Spannable;
@@ -40,6 +42,9 @@ import android.text.style.TextAppearanceSpan;
 import android.text.style.TypefaceSpan;
 import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
+
+import com.zulip.android.R;
+import com.zulip.android.ZulipApp;
 
 import org.ccil.cowan.tagsoup.Parser;
 import org.xml.sax.Attributes;
@@ -67,10 +72,11 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
     private Html.TagHandler mTagHandler;
     private Html.ImageGetter mEmojiGetter;
     private String mBaseUri;
-
+    private static int userMentionColor;
+    private static int userMentionSelfColor;
     public CustomHtmlToSpannedConverter(String source,
                                         Html.ImageGetter imageGetter, Html.TagHandler tagHandler,
-                                        Parser parser, Html.ImageGetter emojiGetter, String baseUri) {
+                                        Parser parser, Html.ImageGetter emojiGetter, String baseUri, Context context) {
         mSource = source;
         mSpannableStringBuilder = new SpannableStringBuilder();
         mImageGetter = imageGetter;
@@ -78,6 +84,8 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
         mReader = parser;
         mEmojiGetter = emojiGetter;
         mBaseUri = baseUri;
+        userMentionColor = ContextCompat.getColor(context, R.color.dark_red);
+        userMentionSelfColor = ContextCompat.getColor(context, R.color.dark_blue);
     }
 
     public Spanned convert() {
@@ -150,6 +158,9 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
             start(mSpannableStringBuilder, new Monospace());
         } else if (tag.equalsIgnoreCase("a")) {
             startA(mSpannableStringBuilder, attributes, mBaseUri);
+        } else if (tag.equalsIgnoreCase("span")
+                && attributes.getValue("class").equals("user-mention")) {
+            startSpan(mSpannableStringBuilder, attributes);
         } else if (tag.equalsIgnoreCase("u")) {
             start(mSpannableStringBuilder, new Underline());
         } else if (tag.equalsIgnoreCase("sup")) {
@@ -247,6 +258,8 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
                     MONOSPACE));
         } else if (tag.equalsIgnoreCase("a")) {
             endA(mSpannableStringBuilder);
+        } else if (tag.equalsIgnoreCase("span")) {
+            endSpan(mSpannableStringBuilder);
         } else if (tag.equalsIgnoreCase("u")) {
             end(mSpannableStringBuilder, Underline.class, new UnderlineSpan());
         } else if (tag.equalsIgnoreCase("sup")) {
@@ -404,6 +417,29 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
             if (f.mFace != null) {
                 text.setSpan(new TypefaceSpan(f.mFace), where, len,
                         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+        }
+    }
+
+    private static void startSpan(SpannableStringBuilder text, Attributes attributes) {
+        String email = attributes.getValue("data-user-email");
+        int len = text.length();
+        text.setSpan(new Href(email), len, len, Spannable.SPAN_MARK_MARK);
+    }
+
+    private static void endSpan(SpannableStringBuilder text) {
+        int len = text.length();
+        Object obj = getLast(text, Href.class);
+        int where = text.getSpanStart(obj);
+        text.removeSpan(obj);
+        if (where != len) {
+            Href h = (Href) obj;
+            if (h != null && h.mHref != null) {
+                if (ZulipApp.get().getEmail().equals(h.mHref)) {
+                    text.setSpan(new ForegroundColorSpan(userMentionSelfColor), where, len, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                } else {
+                    text.setSpan(new ProfileSpan(h.mHref, userMentionColor), where, len, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
             }
         }
     }

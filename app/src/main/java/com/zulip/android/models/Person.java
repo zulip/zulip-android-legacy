@@ -127,7 +127,7 @@ public class Person {
                 .toHashCode();
     }
 
-    private static Person getByEmail(ZulipApp app, String email) {
+    public static Person getByEmail(ZulipApp app, String email) {
         try {
             Dao<Person, Integer> dao = app.getDatabaseHelper().getDao(
                     Person.class);
@@ -204,6 +204,11 @@ public class Person {
     public static Person getById(ZulipApp app, int id) {
         RuntimeExceptionDao<Person, Object> dao = app.getDao(Person.class);
         return dao.queryForId(id);
+    }
+
+    public static List<Person> getAllPeople(ZulipApp app) throws SQLException {
+        RuntimeExceptionDao<Person, Object> dao = app.getDao(Person.class);
+        return dao.queryBuilder().where().eq(Person.ISBOT_FIELD, false).query();
     }
 
     public static void sortByPresence(ZulipApp app, List<Person> people) {

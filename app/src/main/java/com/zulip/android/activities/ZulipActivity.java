@@ -151,6 +151,7 @@ public class ZulipActivity extends AppCompatActivity implements
     private SimpleCursorAdapter streamActvAdapter;
     private SimpleCursorAdapter subjectActvAdapter;
     private SimpleCursorAdapter emailActvAdapter;
+    private AppBarLayout appBarLayout;
 
     private BroadcastReceiver onGcmMessage = new BroadcastReceiver() {
         public void onReceive(Context contenxt, Intent intent) {
@@ -289,6 +290,8 @@ public class ZulipActivity extends AppCompatActivity implements
         messageEt = (AutoCompleteTextView) findViewById(R.id.message_et);
         textView = (TextView) findViewById(R.id.textView);
         sendBtn = (ImageView) findViewById(R.id.send_btn);
+        appBarLayout = (AppBarLayout) findViewById(R.id.appBarLayout);
+        app.setZulipActivity(this);
         togglePrivateStreamBtn = (ImageView) findViewById(R.id.togglePrivateStream_btn);
         mutedTopics = new ArrayList<>();
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -1192,6 +1195,7 @@ public class ZulipActivity extends AppCompatActivity implements
         // Push to the back stack if we are not already narrowed
         pushListFragment(narrowedList, NARROW);
         narrowedList.onReadyToDisplay(true);
+        showView(appBarLayout);
     }
 
     @Override
