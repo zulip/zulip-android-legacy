@@ -1,4 +1,4 @@
-
+﻿
 
 =================
 Zulip for Android
@@ -16,9 +16,12 @@ or data loss bugs.)
 This is a Gradle project, and can be built via the provided ``gradlew``
 or by using Android Studio.
 
-Index
+**Index**
+---------------
+
 
 -  `Getting Started`_
+-  `Getting Help`_
 -  `Build instructions (Android Studio)`_)
 -  `Build instructions (without Android Studio)`_)
 -  `Running server on device`_
@@ -28,6 +31,7 @@ Index
 -  `License`_
 
 .. _Getting Started: #getting-started
+.. _Getting Help: #getting-help
 .. _Build instructions (Android Studio): #build-instructions-android-studio
 .. _Build instructions (without Android Studio): #build-instructions-without-android-studio
 .. _Running server on device: #browsing-server-on-device
@@ -41,11 +45,24 @@ Getting Started
 
 -  First, setup a development environment of the Zulip Server:
    http://zulip.readthedocs.io/en/latest/dev-overview.html
+ 
+   For first time contributors you can also authenticate from https://zulip.tabbott.net/ but      only for demo purposes and not be used for development as this is an ongoing chat server, and being heavily used! 
 -  Then, follow the build instructions (below) to compile the project
 -  And then follow `Running server on device`_ to get the device to
    connect to the Zulip development server.
 
 .. _Running server on device: #browsing-server-on-device
+
+Getting Help
+---------------
+For questions on development for the Zulip Android App you can post a topic here 
+https://groups.google.com/forum/#!forum/zulip-android
+
+For questions on development for the Zulip Server you can post a topic here 
+https://groups.google.com/forum/#!forum/zulip-devel
+
+Any issues or bugs should be posted in the Github Issue Tracker!
+
 
 Build instructions (Android Studio)
 -----------------------------------
