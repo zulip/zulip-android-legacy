@@ -79,15 +79,14 @@ public class UserConfigurationResponse {
     @SerializedName("left_side_userlist")
     private boolean leftSideUserlist;
 
-    //todo
     @SerializedName("muted_topics")
     private List<List<String>> mutedTopics;
 
-    //todo
+    //todo unkown type
     @SerializedName("alert_words")
     private List<?> alertWords;
 
-    //todo
+    //todo unknown type
     @SerializedName("realm_bots")
     private List<?> realmBots;
 

@@ -4,6 +4,7 @@ import android.support.annotation.Nullable;
 
 import com.google.gson.annotations.SerializedName;
 import com.zulip.android.util.TypeSwapper;
+import com.zulip.android.util.ZLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +51,7 @@ public class GetEventResponse {
         }
         catch(Exception e) {
             //catch misuse
+            ZLog.logException(e);
             return null;
         }
     }

@@ -1,15 +1,21 @@
 package com.zulip.android.models.updated;
 
 
-public class JenkinsType {
-    private String source_url;
-    private String display_url;
+import com.google.gson.annotations.SerializedName;
 
-    public String getSource_url() {
-        return source_url;
+public class JenkinsType {
+
+    @SerializedName("sourceUrl")
+    private String sourceUrl;
+
+    @SerializedName("displayUrl")
+    private String displayUrl;
+
+    public String getSourceUrl() {
+        return sourceUrl;
     }
 
-    public String getDisplay_url() {
-        return display_url;
+    public String getDisplayUrl() {
+        return displayUrl;
     }
 }

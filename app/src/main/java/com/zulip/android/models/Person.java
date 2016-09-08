@@ -7,6 +7,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.stmt.SelectArg;
 import com.j256.ormlite.table.DatabaseTable;
 import com.zulip.android.ZulipApp;
+import com.zulip.android.util.ZLog;
 
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
@@ -155,7 +156,7 @@ public class Person {
             return getByEmail(app.getDatabaseHelper().getDao(
                     Person.class), email);
         } catch (SQLException e) {
-            e.printStackTrace();
+            ZLog.logException(e);
         }
         return null;
     }

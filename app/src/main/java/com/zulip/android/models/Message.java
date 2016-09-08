@@ -17,6 +17,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.misc.TransactionManager;
 import com.j256.ormlite.stmt.DeleteBuilder;
 import com.j256.ormlite.table.DatabaseTable;
+import com.zulip.android.R;
 import com.zulip.android.ZulipApp;
 import com.zulip.android.util.CustomHtmlToSpannedConverter;
 import com.zulip.android.util.ZLog;
@@ -167,10 +168,6 @@ public class Message {
                    Map<String, Person> personCache,
                    Map<String, Stream> streamCache) throws JSONException {
         this.setID(message.getInt("id"));
-//        this.setSender(Person.getOrUpdate(app,
-//                message.getString("sender_email"),
-//                message.getString("sender_full_name"),
-//                message.getString("avatar_url"), personCache));
 
         if (message.getString("type").equals("stream")) {
             this.setType(MessageType.STREAM_MESSAGE);
@@ -313,7 +310,7 @@ public class Message {
             setRecipients(to.getId() + "," + from.getId());
             return;
         } catch (Exception e) {
-            e.printStackTrace();
+            ZLog.logException(e);
         }
 
         this.recipients = (recipientId == 0 && senderId == 0) ? recipientList(list) : recipientId + "," + senderId;
@@ -579,7 +576,7 @@ public class Message {
         if (subject != null && subject.equals("")) {
             // The empty string should be interpreted as "no topic"
             // i18n here will be sad
-            this.subject = "(no topic)";
+            this.subject = ZulipApp.get().getString(R.string.no_topic_in_message);
         } else {
             this.subject = subject;
         }

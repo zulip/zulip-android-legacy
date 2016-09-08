@@ -1,7 +1,8 @@
 package com.zulip.android.networking.util;
 
 import android.support.annotation.CallSuper;
-import android.util.Log;
+
+import com.zulip.android.util.ZLog;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -28,6 +29,6 @@ public class DefaultCallback<T> implements Callback<T> {
     @Override
     public void onFailure(Call<T> call, Throwable t) {
         //log error
-        Log.e("DefaultCallback", "Nework failure", t);
+        ZLog.logException(t);
     }
 }

@@ -84,4 +84,5 @@
     <string name="no_login_error_widget">First login to Zulip app.</string>
     <string name="toast_login_failed_fetching_backends">Failed to fetch Backends!</string>
     <string name="login_activity_toast_login_error">Unknown login error.</string>
+    <string name="no_topic_in_message">(no topic)</string>
 </resources>
