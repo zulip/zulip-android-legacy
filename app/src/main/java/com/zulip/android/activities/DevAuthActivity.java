@@ -69,7 +69,6 @@ public class DevAuthActivity extends BaseActivity {
                         .enqueue(new DefaultCallback<LoginResponse>() {
                             @Override
                             public void onSuccess(Call<LoginResponse> call, Response<LoginResponse> response) {
-                                super.onSuccess(call, response);
                                 getApp().setLoggedInApiKey(response.body().getApiKey());
                                 openHome();
                             }

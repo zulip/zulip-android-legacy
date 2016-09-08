@@ -267,7 +267,7 @@ public class ZulipApp extends Application {
                                     currentPerson.setId(foundPerson.getId());
                                 }
                             } catch (SQLException e) {
-                                e.printStackTrace();
+                                ZLog.logException(e);
                             }
                         }
 
@@ -412,7 +412,7 @@ public class ZulipApp extends Application {
             RuntimeExceptionDao<C, T> ret = new RuntimeExceptionDao<>(
                     (Dao<C, T>) databaseHelper.getDao(cls));
             if(useCache) {
-                ret.setObjectCache(objectCache);
+                ret.setObjectCache(getObjectCache());
             }
             return ret;
         } catch (SQLException e) {
