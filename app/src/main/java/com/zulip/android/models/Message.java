@@ -42,8 +42,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import static com.zulip.android.util.CustomHtmlToSpannedConverter.linkifySpanned;
-
 @DatabaseTable(tableName = "messages")
 public class Message {
 
