@@ -1,7 +1,5 @@
 package com.zulip.android.database;
 
-import java.sql.SQLException;
-
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
@@ -18,6 +16,8 @@ import com.zulip.android.models.Person;
 import com.zulip.android.models.Stream;
 import com.zulip.android.util.MD5Util;
 
+import java.sql.SQLException;
+
 /**
  * Database helper class used to manage the creation and upgrading of your
  * database. This class also usually provides the DAOs used by the other
@@ -30,7 +30,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
     private static final String DATABASE_NAME = "zulip-%s.db";
     // any time you make changes to your database objects, you may have to
     // increase the database version
-    private static final int DATABASE_VERSION = 5;
+    private static final int DATABASE_VERSION = 6;
 
     public DatabaseHelper(ZulipApp app, String email) {
         super(app, String.format(DATABASE_NAME, MD5Util.md5Hex(email)), null,

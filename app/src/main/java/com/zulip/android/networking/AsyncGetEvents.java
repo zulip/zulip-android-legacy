@@ -203,8 +203,14 @@ public class AsyncGetEvents extends Thread {
                             .execute();
 
                     GetEventResponse body = eventResponse.body();
+
                     if (!eventResponse.isSuccessful()) {
-                        if (eventResponse.code() == 400 && ((body != null && body.getMsg().contains("Bad event queue id"))
+
+                        NetworkError errorBody = eventResponse.errorBody() != null ?
+                                app.getGson().fromJson(eventResponse.errorBody().string(), NetworkError.class)
+                                : null;
+
+                        if (eventResponse.code() == 400 && ((errorBody != null && errorBody.getMsg().contains("Bad event queue id"))
                                 || eventResponse.message().contains("too old"))) {
                             // Queue dead. Register again.
                             Log.w(ASYNC_GET_EVENTS, "Queue dead");
