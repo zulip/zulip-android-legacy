@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import android.animation.Animator;
 import android.annotation.SuppressLint;
@@ -85,6 +86,9 @@ import com.zulip.android.models.PresenceType;
 import com.zulip.android.R;
 import com.zulip.android.models.Stream;
 import com.zulip.android.networking.AsyncSend;
+import com.zulip.android.networking.ZulipInterceptor;
+import com.zulip.android.networking.response.UserConfigurationResponse;
+import com.zulip.android.service.ZulipServices;
 import com.zulip.android.util.AnimationHelper;
 import com.zulip.android.util.SwipeRemoveLinearLayout;
 import com.zulip.android.util.ZLog;
@@ -96,11 +100,19 @@ import com.zulip.android.networking.ZulipAsyncPushTask;
 
 import org.json.JSONObject;
 
+import okhttp3.OkHttpClient;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
 /**
  * The main Activity responsible for holding the {@link MessageListFragment} which has the list to the
  * messages
  * */
-public class ZulipActivity extends AppCompatActivity implements
+public class ZulipActivity extends BaseActivity implements
         MessageListFragment.Listener, NarrowListener, SwipeRemoveLinearLayout.leftToRightSwipeListener {
 
     private static final String NARROW = "narrow";
@@ -124,7 +136,7 @@ public class ZulipActivity extends AppCompatActivity implements
     private ExpandableListView streamsDrawer;
     private static final Interpolator FAST_OUT_SLOW_IN_INTERPOLATOR = new FastOutSlowInInterpolator();
     private SwipeRemoveLinearLayout chatBox;
-    private FloatingActionButton fab;
+    FloatingActionButton fab;
     private CountDownTimer fabHidder;
     private boolean isTextFieldFocused = false;
     private static final int HIDE_FAB_AFTER_SEC = 5;
@@ -1463,7 +1475,6 @@ public class ZulipActivity extends AppCompatActivity implements
         }
         startRequests();
     }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();

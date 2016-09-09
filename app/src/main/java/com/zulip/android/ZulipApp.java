@@ -1,17 +1,5 @@
 package com.zulip.android;
 
-import com.crashlytics.android.Crashlytics;
-import io.fabric.sdk.android.Fabric;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.Map;
-import java.util.Queue;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -21,21 +9,58 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Handler;
 import android.util.Log;
 
+import com.crashlytics.android.Crashlytics;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import com.j256.ormlite.dao.Dao;
+import com.j256.ormlite.dao.ObjectCache;
+import com.j256.ormlite.dao.ReferenceObjectCache;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.misc.TransactionManager;
 import com.zulip.android.database.DatabaseHelper;
 import com.zulip.android.models.Emoji;
 import com.zulip.android.models.Message;
+import com.zulip.android.models.MessageType;
 import com.zulip.android.models.Person;
 import com.zulip.android.models.Presence;
 import com.zulip.android.models.Stream;
 import com.zulip.android.networking.AsyncUnreadMessagesUpdate;
-import com.zulip.android.util.BuildHelper;
+import com.zulip.android.networking.ZulipInterceptor;
+import com.zulip.android.networking.response.UserConfigurationResponse;
+import com.zulip.android.networking.response.events.EventsBranch;
+import com.zulip.android.service.ZulipServices;
 import com.zulip.android.util.ZLog;
 
-import org.json.JSONArray;
-import org.json.JSONException;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.sql.SQLException;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
+
+import io.fabric.sdk.android.Fabric;
+import okhttp3.OkHttpClient;
+import okhttp3.ResponseBody;
+import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Stores the global variables which are frequently used.
@@ -59,6 +84,8 @@ public class ZulipApp extends Application {
     private DatabaseHelper databaseHelper;
     private Set<String> mutedTopics;
     private static final String MUTED_TOPIC_KEY = "mutedTopics";
+    private ZulipServices zulipServices;
+    private ReferenceObjectCache objectCache;
 
     /**
      * Handler to manage batching of unread messages
@@ -85,6 +112,8 @@ public class ZulipApp extends Application {
      * every couple of seconds
      */
     public final Queue<Integer> unreadMessageQueue = new ConcurrentLinkedQueue<>();
+    public String tester;
+    private Gson gson;
 
     public static ZulipApp get() {
         return instance;
@@ -143,10 +172,132 @@ public class ZulipApp extends Application {
         }
     }
 
+    public ObjectCache getObjectCache() {
+        if(objectCache == null) {
+            objectCache = new ReferenceObjectCache(true);
+        }
+        return objectCache;
+    }
+
     private void afterLogin() {
         String email = settings.getString(EMAIL, null);
         setEmail(email);
         setupEmoji();
+    }
+
+    public ZulipServices getZulipServices() {
+        if(zulipServices == null) {
+            HttpLoggingInterceptor logging = new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY);
+            zulipServices = new Retrofit.Builder()
+                    .client(new OkHttpClient.Builder().readTimeout(60, TimeUnit.SECONDS)
+                            .addInterceptor(new ZulipInterceptor())
+                            .addInterceptor(logging)
+                            .build())
+                    .addConverterFactory(GsonConverterFactory.create(getGson()))
+                    .baseUrl(getServerURI())
+                    .build()
+                    .create(ZulipServices.class);
+        }
+        return zulipServices;
+    }
+
+    public Gson getGson() {
+        if(gson == null) {
+            gson = buildGson();
+        }
+        return gson;
+    }
+
+    private Gson buildGson() {
+        final Gson naiveGson = new GsonBuilder()
+                .registerTypeAdapter(Date.class, new JsonDeserializer<Date>() {
+                    public Date deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+                        return new Date(json.getAsJsonPrimitive().getAsLong() * 1000);
+                    }
+                })
+                .registerTypeAdapter(MessageType.class, new JsonDeserializer<MessageType>() {
+                    @Override
+                    public MessageType deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+                        return json.getAsString().equalsIgnoreCase("stream") ? MessageType.STREAM_MESSAGE : MessageType.PRIVATE_MESSAGE;
+                    }
+                })
+                .create();
+        final Gson nestedGson = new GsonBuilder()
+                .registerTypeAdapter(Message.class, new JsonDeserializer<Message>() {
+                    @Override
+                    public Message deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+
+                        if(BuildConfig.DEBUG) {
+                            Log.d("RAW MESSAGES", json.toString());
+                        }
+                        Message genMess;
+                        if("stream".equalsIgnoreCase(json.getAsJsonObject().get("type").getAsString())) {
+                            Message.ZulipStreamMessage msg = naiveGson.fromJson(json, Message.ZulipStreamMessage.class);
+                            msg.setRecipients(msg.getDisplayRecipient());
+                            genMess = msg;
+                        } else {
+                            Message.ZulipDirectMessage msg = naiveGson.fromJson(json, Message.ZulipDirectMessage.class);
+                            if(msg.getDisplayRecipient() != null) {
+                                msg.setRecipients(msg.getDisplayRecipient().toArray(new Person[msg.getDisplayRecipient().size()]));
+                            }
+
+                            msg.setContent(Message.formatContent(msg.getFormattedContent(), ZulipApp.get()).toString());
+                            genMess = msg;
+                        }
+                        if(genMess._history != null && genMess._history.size() != 0) {
+                            genMess.updateFromHistory(genMess._history.get(0));
+                        }
+                        return genMess;
+                    }
+                }).create();
+
+        return new GsonBuilder()
+                .registerTypeAdapter(UserConfigurationResponse.class, new TypeAdapter<UserConfigurationResponse>() {
+
+                    @Override
+                    public void write(JsonWriter out, UserConfigurationResponse value) throws IOException {
+                        nestedGson.toJson(nestedGson.toJsonTree(value), out);
+                    }
+
+                    @Override
+                    public UserConfigurationResponse read(JsonReader in) throws IOException {
+                        UserConfigurationResponse res = nestedGson.fromJson(in, UserConfigurationResponse.class);
+
+                        RuntimeExceptionDao<Person, Object> personDao = ZulipApp.this.getDao(Person.class);
+                        for (int i = 0; i < res.getRealmUsers().size(); i++) {
+
+                            Person currentPerson = res.getRealmUsers().get(i);
+                            Person foundPerson = null;
+                            try {
+                                foundPerson = personDao.queryBuilder().where().eq(Person.EMAIL_FIELD, currentPerson.getEmail()).queryForFirst();
+                                if(foundPerson != null) {
+                                    currentPerson.setId(foundPerson.getId());
+                                }
+                            } catch (SQLException e) {
+                                ZLog.logException(e);
+                            }
+                        }
+
+                        return res;
+                    }
+                })
+                .registerTypeAdapter(EventsBranch.class, new JsonDeserializer<EventsBranch>() {
+                    @Override
+                    public EventsBranch deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+                        EventsBranch invalid = nestedGson.fromJson(json, EventsBranch.class);
+                        if(BuildConfig.DEBUG) {
+                            Log.d("RAW EVENTS", json.toString());
+                        }
+                        Class<? extends EventsBranch> t = EventsBranch.BranchType.fromRawType(invalid);
+                        if(t != null) {
+                            return nestedGson.fromJson(json, t);
+                        }
+                        Log.w("GSON", "Attempted to deserialize and unregistered EventBranch... See EventBranch.BranchType");
+                        return invalid;
+                    }
+                })
+                .registerTypeAdapter(Message.class, nestedGson.getAdapter(Message.class))
+                .create();
     }
 
     /**
@@ -205,20 +356,18 @@ public class ZulipApp extends Application {
         }
     }
 
-    public void addToMutedTopics(JSONArray jsonArray) {
+    public void addToMutedTopics(List<List<String>> mutedTopics) {
         Stream stream;
 
-        for (int i = 0; i < jsonArray.length(); i++) {
-            try {
-                JSONArray mutedTopic = jsonArray.getJSONArray(i);
-                stream = Stream.getByName(this, mutedTopic.get(0).toString());
-                mutedTopics.add(stream.getId() + mutedTopic.get(1).toString());
-            } catch (JSONException e) {
-                Log.e("JSONException", "JSON Is not correct", e);
+        if(mutedTopics != null) {
+            for (int i = 0; i < mutedTopics.size(); i++) {
+                List<String> mutedTopic = mutedTopics.get(i);
+                stream = Stream.getByName(this, mutedTopic.get(0));
+                this.mutedTopics.add(stream.getId() + mutedTopic.get(1));
             }
         }
         SharedPreferences.Editor editor = settings.edit();
-        editor.putStringSet(MUTED_TOPIC_KEY, new HashSet<>(mutedTopics));
+        editor.putStringSet(MUTED_TOPIC_KEY, new HashSet<>(this.mutedTopics));
         editor.apply();
     }
 
@@ -265,14 +414,22 @@ public class ZulipApp extends Application {
     }
 
     @SuppressWarnings("unchecked")
-    public <C, T> RuntimeExceptionDao<C, T> getDao(Class<C> cls) {
+    public <C, T> RuntimeExceptionDao<C, T> getDao(Class<C> cls, boolean useCache) {
         try {
-            return new RuntimeExceptionDao<>(
+            RuntimeExceptionDao<C, T> ret = new RuntimeExceptionDao<>(
                     (Dao<C, T>) databaseHelper.getDao(cls));
+            if(useCache) {
+                ret.setObjectCache(getObjectCache());
+            }
+            return ret;
         } catch (SQLException e) {
             // Well that's sort of awkward.
             throw new RuntimeException(e);
         }
+    }
+
+    public <C, T> RuntimeExceptionDao<C, T> getDao(Class<C> cls) {
+        return getDao(cls, false);
     }
 
     public void setContext(Context targetContext) {
@@ -378,5 +535,20 @@ public class ZulipApp extends Application {
 
     public boolean isTopicMute(int id, String subject) {
         return mutedTopics.contains(id + subject);
+    }
+
+    public void syncPointer(final int mID) {
+        getZulipServices().updatePointer(Integer.toString(mID))
+        .enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                setPointer(mID);
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                //do nothing.. don't want to mis-update the pointer.
+            }
+        });
     }
 }

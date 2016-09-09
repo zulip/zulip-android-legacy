@@ -17,11 +17,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.zulip.android.models.Person;
 import com.j256.ormlite.stmt.UpdateBuilder;
-import com.zulip.android.models.Stream;
-import com.zulip.android.networking.AsyncPointerUpdate;
-
 import com.squareup.picasso.Picasso;
 import com.zulip.android.R;
 import com.zulip.android.ZulipApp;
@@ -32,7 +28,6 @@ import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageType;
 import com.zulip.android.models.Person;
 import com.zulip.android.models.Stream;
-import com.zulip.android.networking.AsyncPointerUpdate;
 import com.zulip.android.util.OnItemClickListener;
 import com.zulip.android.util.ZLog;
 import com.zulip.android.viewholders.LoadingHolder;
@@ -142,8 +137,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                         try {
                             int mID = msg.getID();
                             if (zulipApp.getPointer() < mID) {
-                                (new AsyncPointerUpdate(zulipApp)).execute(mID);
-                                zulipApp.setPointer(mID);
+                                zulipApp.syncPointer(mID);
                             }
                         } catch (NullPointerException e) {
                             ZLog.logException(e);
@@ -246,13 +240,13 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
      */
     public boolean addOldMessage(Message message, int messageAndHeadersCount, StringBuilder lastHolderId) {
         if (!lastHolderId.toString().equals(message.getIdForHolder()) || lastHolderId.toString().equals("")) {
-            MessageHeaderParent messageHeaderParent = new MessageHeaderParent((message.getStream() == null) ? null : message.getStream().getName(), message.getSubject(), message.getIdForHolder());
+            MessageHeaderParent messageHeaderParent = new MessageHeaderParent((message.getStream() == null) ? null : message.getStream().getName(), message.getSubject(), message.getIdForHolder(), message);
             messageHeaderParent.setMessageType(message.getType());
             messageHeaderParent.setDisplayRecipent(message.getDisplayRecipient(zulipApp));
             if (message.getType() == MessageType.STREAM_MESSAGE) {
                 messageHeaderParent.setMute(zulipApp.isTopicMute(message));
             }
-            messageHeaderParent.setColor((message.getStream() == null) ? mDefaultStreamHeaderColor : message.getStream().getColor());
+            messageHeaderParent.setColor((message.getStream() == null) ? mDefaultStreamHeaderColor : message.getStream().getParsedColor());
             items.add(messageAndHeadersCount + 1, messageHeaderParent); //1 for LoadingHeader
             notifyItemInserted(messageAndHeadersCount + 1);
             items.add(messageAndHeadersCount + 2, message);
@@ -286,12 +280,12 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         }
         if (item == null) {
             item = new MessageHeaderParent((message.getStream() == null) ? null :
-                    message.getStream().getName(), message.getSubject(), message.getIdForHolder());
+                    message.getStream().getName(), message.getSubject(), message.getIdForHolder(), message);
             item.setMessageType(message.getType());
             item.setDisplayRecipent(message.getDisplayRecipient(zulipApp));
             if (message.getType() == MessageType.STREAM_MESSAGE)
                 item.setMute(zulipApp.isTopicMute(message));
-            item.setColor((message.getStream() == null) ? mDefaultStreamHeaderColor : message.getStream().getColor());
+            item.setColor((message.getStream() == null) ? mDefaultStreamHeaderColor : message.getStream().getParsedColor());
             items.add(getItemCount(true) - 1, item);
             notifyItemInserted(getItemCount(true) - 1);
         }
@@ -366,7 +360,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 if (message.getType() == MessageType.STREAM_MESSAGE) {
                     messageHolder.senderName.setText(message.getSender().getName());
                     if (!isCurrentThemeNight)
-                        messageHolder.leftBar.setBackgroundColor(message.getStream().getColor());
+                        messageHolder.leftBar.setBackgroundColor(message.getStream().getParsedColor());
                     messageHolder.messageTile.setBackgroundColor(streamMessageBackground);
                 } else {
                     messageHolder.senderName.setText(message.getSender().getName());
@@ -396,8 +390,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         try {
             int mID = message.getID();
             if (!startedFromFilter && zulipApp.getPointer() < mID) {
-                (new AsyncPointerUpdate(zulipApp)).execute(mID);
-                zulipApp.setPointer(mID);
+                zulipApp.syncPointer(mID);
             }
             if (!message.getMessageRead()) {
                 try {

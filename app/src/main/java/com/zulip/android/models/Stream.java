@@ -1,15 +1,10 @@
 package com.zulip.android.models;
 
-import java.sql.SQLException;
-
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.graphics.Color;
+import android.text.TextUtils;
 import android.util.Log;
 
+import com.google.gson.annotations.SerializedName;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.ForeignCollection;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
@@ -18,6 +13,12 @@ import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.stmt.SelectArg;
 import com.j256.ormlite.table.DatabaseTable;
 import com.zulip.android.ZulipApp;
+
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
+import java.sql.SQLException;
+import java.util.List;
 
 @DatabaseTable(tableName = "streams")
 public class Stream {
@@ -31,21 +32,52 @@ public class Stream {
     private static final String INVITEONLY_FIELD = "inviteOnly";
     public static final String SUBSCRIBED_FIELD = "subscribed";
 
-    @DatabaseField(columnName = ID_FIELD, generatedId = true)
+
+    @SerializedName("stream_id")
+    @DatabaseField(columnName = ID_FIELD, id = true)
     private int id;
-    @DatabaseField(columnName = NAME_FIELD, uniqueIndex = true)
-    private String name;
+
+    @SerializedName("description")
+    private String description;
+
+    @SerializedName("subscribers")
+    private List<Integer> subscribers;
+
+    @SerializedName("pin_to_top")
+    private boolean pinToTop;
+
+    @SerializedName("audible_notifications")
+    private boolean audibleNotifications;
+
+    @SerializedName("email_address")
+    private String emailAddress;
+
+    @SerializedName("desktop_notifications")
+    private boolean desktopNotifications;
+
     @ForeignCollectionField(columnName = MESSAGES_FIELD)
     private ForeignCollection<Message> messages;
-    @DatabaseField(columnName = COLOR_FIELD)
-    private int color;
-    @DatabaseField(columnName = INHOMEVIEW_FIELD)
-    private Boolean inHomeView;
-    @DatabaseField(columnName = INVITEONLY_FIELD)
-    private Boolean inviteOnly;
+
     @DatabaseField(columnName = SUBSCRIBED_FIELD)
-    private
-    boolean subscribed;
+    private boolean subscribed;
+
+    @DatabaseField(columnName = NAME_FIELD, uniqueIndex = true)
+    @SerializedName("name")
+    private String name;
+
+    @DatabaseField(columnName = COLOR_FIELD)
+    private int parsedColor;
+
+    @SerializedName("color")
+    private String fetchedColor;
+
+    @DatabaseField(columnName = INVITEONLY_FIELD)
+    @SerializedName("invite_only")
+    private boolean inviteOnly;
+
+    @DatabaseField(columnName = INHOMEVIEW_FIELD)
+    @SerializedName("in_home_view")
+    private boolean inHomeView;
 
     /**
      * Construct an empty Stream object.
@@ -63,7 +95,7 @@ public class Stream {
      */
     public Stream(String name) {
         this.name = name;
-        color = DEFAULT_COLOR;
+        parsedColor = DEFAULT_COLOR;
         inHomeView = true; // Sure, why not
         inviteOnly = false; // Most probably
     }
@@ -72,8 +104,11 @@ public class Stream {
         return name;
     }
 
-    public int getColor() {
-        return color;
+    public int getParsedColor() {
+        if(!TextUtils.isEmpty(fetchedColor)) {
+            parsedColor = parseColor(fetchedColor);
+        }
+        return parsedColor;
     }
 
     public Boolean getInHomeView() {
@@ -155,22 +190,8 @@ public class Stream {
         }
     }
 
-    private void updateFromJSON(JSONObject message) throws JSONException {
-        color = parseColor(message.getString("color"));
-        inHomeView = message.getBoolean("in_home_view");
-        inviteOnly = message.getBoolean("invite_only");
-    }
-
-    public static Stream getFromJSON(ZulipApp app, JSONObject message)
-            throws JSONException {
-        String name = message.getString("name");
-        Stream stream = getByName(app, name);
-        stream.updateFromJSON(message);
-        app.getDao(Stream.class).update(stream);
-        return stream;
-    }
-
     public int getId() {
         return id;
     }
+
 }

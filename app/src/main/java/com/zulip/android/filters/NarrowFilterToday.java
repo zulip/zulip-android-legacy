@@ -74,4 +74,8 @@ public class NarrowFilterToday implements NarrowFilter {
         return "{}";
     }
 
+    @Override
+    public String toString() {
+        return "{}";
+    }
 }

@@ -1,11 +1,5 @@
 package com.zulip.android.filters;
 
-import java.sql.SQLException;
-import java.util.Arrays;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -15,6 +9,12 @@ import com.zulip.android.ZulipApp;
 import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageType;
 import com.zulip.android.models.Stream;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import java.sql.SQLException;
+import java.util.Arrays;
 
 public class NarrowFilterStream implements NarrowFilter {
     private Stream stream;
@@ -59,6 +59,15 @@ public class NarrowFilterStream implements NarrowFilter {
             where.and().eq(Message.SUBJECT_FIELD, new SelectArg(subject));
         }
         return where;
+    }
+
+    @Override
+    public String toString() {
+        try {
+            return getJsonFilter();
+        } catch (JSONException e) {
+            return null;
+        }
     }
 
     @Override
