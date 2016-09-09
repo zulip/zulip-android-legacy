@@ -1,13 +1,24 @@
 package com.zulip.android.models;
 
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
+import android.content.Context;
+import android.graphics.Color;
+import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.text.Html;
+import android.text.Spanned;
+import android.text.TextUtils;
+import android.text.util.Linkify;
+import android.util.Log;
+
+import com.j256.ormlite.dao.RuntimeExceptionDao;
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.misc.TransactionManager;
+import com.j256.ormlite.stmt.DeleteBuilder;
+import com.j256.ormlite.table.DatabaseTable;
+import com.zulip.android.ZulipApp;
+import com.zulip.android.util.CustomHtmlToSpannedConverter;
+import com.zulip.android.util.ZLog;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -17,24 +28,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.content.Context;
-import android.graphics.Color;
-import android.graphics.Rect;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.text.Html;
-import android.text.Spanned;
-import android.text.TextUtils;
-import android.util.Log;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
 
-import com.j256.ormlite.dao.RuntimeExceptionDao;
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.misc.TransactionManager;
-import com.j256.ormlite.stmt.DeleteBuilder;
-import com.j256.ormlite.table.DatabaseTable;
-import com.zulip.android.util.CustomHtmlToSpannedConverter;
-import com.zulip.android.util.ZLog;
-import com.zulip.android.ZulipApp;
+import static com.zulip.android.util.CustomHtmlToSpannedConverter.linkifySpanned;
 
 @DatabaseTable(tableName = "messages")
 public class Message {
@@ -531,7 +534,8 @@ public class Message {
 
         CustomHtmlToSpannedConverter converter = new CustomHtmlToSpannedConverter(
                 source, null, null, parser, emojiGetter, app.getServerURI());
-        return converter.convert();
+
+        return linkifySpanned(converter.convert(), Linkify.ALL);
     }
 
 }
