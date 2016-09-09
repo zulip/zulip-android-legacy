@@ -37,8 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import static com.zulip.android.util.CustomHtmlToSpannedConverter.linkifySpanned;
-
 @DatabaseTable(tableName = "messages")
 public class Message {
 
@@ -535,7 +533,7 @@ public class Message {
         CustomHtmlToSpannedConverter converter = new CustomHtmlToSpannedConverter(
                 source, null, null, parser, emojiGetter, app.getServerURI());
 
-        return linkifySpanned(converter.convert(), Linkify.ALL);
+        return CustomHtmlToSpannedConverter.linkifySpanned(converter.convert(), Linkify.ALL);
     }
 
 }
