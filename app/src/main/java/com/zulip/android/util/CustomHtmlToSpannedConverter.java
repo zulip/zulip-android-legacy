@@ -24,7 +24,10 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
+<<<<<<< e370c9bc00e8f6b33b1d12a44b4c70a7f063c8b9
 import android.support.v4.content.ContextCompat;
+=======
+>>>>>>> Issue #168 bugfix for links not being clickable, adds autoLink feature including web, phone, map and email
 import android.text.Html;
 import android.text.Layout;
 import android.text.Spannable;
@@ -730,7 +733,11 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
     }
 
     /**
+<<<<<<< e370c9bc00e8f6b33b1d12a44b4c70a7f063c8b9
      * Parses Spanned text for existing html links and reapplies them after the text has been Linkified
+=======
+     * Parses Spanned text for existing html links and reapplies them.
+>>>>>>> Issue #168 bugfix for links not being clickable, adds autoLink feature including web, phone, map and email
      * @see <a href="https://developer.android.com/reference/android/text/util/Linkify.html">Linkify</a>
      *
      * @param spann
