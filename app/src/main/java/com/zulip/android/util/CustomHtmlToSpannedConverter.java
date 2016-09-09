@@ -22,6 +22,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import android.text.Html;
 import android.text.Layout;
 import android.text.Spannable;
@@ -40,6 +41,8 @@ import android.text.style.TextAppearanceSpan;
 import android.text.style.TypefaceSpan;
 import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
+import android.text.util.Linkify;
+import android.util.Pair;
 
 import org.ccil.cowan.tagsoup.Parser;
 import org.xml.sax.Attributes;
@@ -51,7 +54,9 @@ import org.xml.sax.XMLReader;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class CustomHtmlToSpannedConverter implements ContentHandler {
 
@@ -687,4 +692,31 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
 
         return Integer.parseInt(nm.substring(index), base) * sign;
     }
+
+    /**
+     * Parses Spanned text for existing html links and reapplies them.
+     * @see <a href="https://developer.android.com/reference/android/text/util/Linkify.html">Linkify</a>
+     *
+     * @param spann
+     * @param mask bitmask to define which kinds of links will be searched and applied (e.g. <a href="https://developer.android.com/reference/android/text/util/Linkify.html#ALL">Linkify.ALL</a>)
+     * @return
+     */
+    public static Spanned linkifySpanned(@NonNull final Spanned spann, final int mask) {
+        URLSpan[] existingSpans = spann.getSpans(0, spann.length(), URLSpan.class);
+        List<Pair<Integer, Integer>> links = new ArrayList<>();
+
+        for (URLSpan urlSpan : existingSpans) {
+            links.add(new Pair<>(spann.getSpanStart(urlSpan), spann.getSpanEnd(urlSpan)));
+        }
+
+        Linkify.addLinks((Spannable) spann, mask);
+
+        // add the links back in
+        for (int i = 0; i < existingSpans.length; i++) {
+            ((Spannable) spann).setSpan(existingSpans[i], links.get(i).first, links.get(i).second, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+
+        return spann;
+    }
+
 }

@@ -11,17 +11,14 @@ import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.zulip.android.models.Person;
 import com.j256.ormlite.stmt.UpdateBuilder;
-import com.zulip.android.models.Stream;
-import com.zulip.android.networking.AsyncPointerUpdate;
-
 import com.squareup.picasso.Picasso;
 import com.zulip.android.R;
 import com.zulip.android.ZulipApp;
@@ -362,6 +359,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 MessageHolder messageHolder = ((MessageHolder) holder);
                 final Message message = ((Message) items.get(position));
                 messageHolder.contentView.setText(message.getFormattedContent(zulipApp));
+                messageHolder.contentView.setMovementMethod(LinkMovementMethod.getInstance());
 
                 if (message.getType() == MessageType.STREAM_MESSAGE) {
                     messageHolder.senderName.setText(message.getSender().getName());
