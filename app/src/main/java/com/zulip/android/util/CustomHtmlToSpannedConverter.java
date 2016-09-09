@@ -694,7 +694,7 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
     }
 
     /**
-     * Parses Spanned text for existing html links and reapplies them.
+     * Parses Spanned text for existing html links and reapplies them after the text has been Linkified
      * @see <a href="https://developer.android.com/reference/android/text/util/Linkify.html">Linkify</a>
      *
      * @param spann
