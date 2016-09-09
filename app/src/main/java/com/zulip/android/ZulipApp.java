@@ -114,6 +114,7 @@ public class ZulipApp extends Application {
      */
     public final Queue<Integer> unreadMessageQueue = new ConcurrentLinkedQueue<>();
     public String tester;
+    private Gson gson;
 
     public static ZulipApp get() {
         return instance;
@@ -193,7 +194,7 @@ public class ZulipApp extends Application {
                             .addInterceptor(new ZulipInterceptor())
                             .addInterceptor(logging)
                             .build())
-                    .addConverterFactory(GsonConverterFactory.create(buildGson()))
+                    .addConverterFactory(GsonConverterFactory.create(getGson()))
                     .baseUrl(getServerURI())
                     .build()
                     .create(ZulipServices.class);
@@ -201,7 +202,14 @@ public class ZulipApp extends Application {
         return zulipServices;
     }
 
-    public Gson buildGson() {
+    public Gson getGson() {
+        if(gson == null) {
+            gson = buildGson();
+        }
+        return gson;
+    }
+
+    private Gson buildGson() {
         final Gson naiveGson = new GsonBuilder()
                 .registerTypeAdapter(Date.class, new JsonDeserializer<Date>() {
                     public Date deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
