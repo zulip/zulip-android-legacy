@@ -112,7 +112,7 @@ public class AsyncGetEvents extends Thread {
 
         watch.reset();
         watch.start();
-        JSONObject response = new JSONObject(responseData.body().toString());
+        JSONObject response = new JSONObject(responseData.body().string());
         watch.stop();
         Log.i("perf", "json: v1/register: " + watch.toString());
 
