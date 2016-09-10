@@ -164,7 +164,7 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
         } else if (tag.equalsIgnoreCase("a")) {
             startA(mSpannableStringBuilder, attributes, mBaseUri);
         } else if (tag.equalsIgnoreCase("span")
-                && attributes.getValue("class").equals("user-mention")) {
+                && "user-mention".equals(attributes.getValue("class"))) {
             startSpan(mSpannableStringBuilder, attributes);
         } else if (tag.equalsIgnoreCase("u")) {
             start(mSpannableStringBuilder, new Underline());
