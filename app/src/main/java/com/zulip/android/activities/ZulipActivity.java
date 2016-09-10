@@ -750,12 +750,12 @@ public class ZulipActivity extends BaseActivity implements
                     case R.id.unread_group:
                         TextView unreadGroupTextView = (TextView) view;
                         final String unreadGroupCount = cursor.getString(columnIndex);
-                        if (unreadGroupCount.equals("0")) {
-                            unreadGroupTextView.setVisibility(View.GONE);
-                        } else {
-                            unreadGroupTextView.setText(unreadGroupCount);
-                            unreadGroupTextView.setVisibility(View.VISIBLE);
-                        }
+//                        if (unreadGroupCount.equals("0")) {
+//                            unreadGroupTextView.setVisibility(View.GONE);
+//                        } else {
+//                            unreadGroupTextView.setText(unreadGroupCount);
+//                            unreadGroupTextView.setVisibility(View.VISIBLE);
+//                        }
                         return true;
                     case R.id.unread_child:
                         TextView unreadChildTextView = (TextView) view;
