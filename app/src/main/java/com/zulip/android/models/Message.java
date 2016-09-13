@@ -38,7 +38,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -58,7 +57,6 @@ public class Message {
     public static final String MESSAGE_READ_FIELD = "read";
     private static final String MESSAGE_EDITED = "MESSAGE_EDITED";
     private static final String MESSAGE_EDIT_DATE = "MESSAGE_EDIT_DATE";
-    private Map<String, Drawable> cachedImages = new HashMap<>(1);
 
     //region fields
     @SerializedName("recipient_id")
@@ -143,9 +141,6 @@ public class Message {
     //IGNORE - This will always be empty due to persistence
     @SerializedName("edit_history")
     public List<MessageHistory> _history;
-
-    //endregion
-
     //endregion
 
     /**
@@ -484,14 +479,6 @@ public class Message {
 
     }
 
-    /**
-     * Used to notify an outside observer if the state of a message has changed... e.g. offthread loaded images.
-     * @param runnable
-     */
-    public void setValueChangedPromise(Runnable runnable){
-        this.promise = runnable;
-    }
-
     public String concatStreamAndTopic() {
         return getStream().getId() + getSubject();
     }
@@ -506,8 +493,6 @@ public class Message {
     private static final HTMLSchema schema = new HTMLSchema();
 
     public Spanned getFormattedContent(ZulipApp app) {
-//        if(getContent() != null && getContent().contains("<img"))
-
         Spanned formattedMessage = formatContent(getFormattedContent(),
                 app);
 
