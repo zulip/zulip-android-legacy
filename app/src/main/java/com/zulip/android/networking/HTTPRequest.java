@@ -57,14 +57,22 @@ public class HTTPRequest {
 
     void abort() {
         aborting = true;
-        if (response != null) {
-            (new AsyncTask<Void, Void, Void>() {
-                @Override
-                protected Void doInBackground(Void... voids) {
-                    response.body().close();
-                    return null;
-                }
-            }).execute();
+        synchronized (synchronization) {
+            if (response != null) {
+                final Response finalResponse = response;
+                response = null;
+                (new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(Void... voids) {
+                        try {
+                            finalResponse.body().close();
+                        } catch (IllegalStateException e) {
+                            //fail silently
+                        }
+                        return null;
+                    }
+                }).execute();
+            }
         }
     }
 
