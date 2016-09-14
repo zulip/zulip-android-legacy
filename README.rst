@@ -43,22 +43,34 @@ or by using Android Studio.
 Getting Started
 ---------------
 
--  First, setup a development environment of the Zulip Server:
-   http://zulip.readthedocs.io/en/latest/dev-overview.html
- 
-   For first time contributors you can also authenticate from https://zulip.tabbott.net/ but      only for demo purposes and not be used for development as this is an ongoing chat server, and being heavily used! 
--  Then, follow the build instructions (below) to compile the project
--  And then follow `Running server on device`_ to get the device to
-   connect to the Zulip development server.
+- First, clone this repository and follow the Android Studio build
+  instructions (below) to compile the project.  If you don't have an
+  existing Zulip account to login with, you can create one on the
+  Zulip development community server at https://zulip.tabbott.net/.
+  Note that this server is used for development discussions, so don't
+  use it for sending lots of test messages!
 
-.. _Running server on device: #browsing-server-on-device
+- For testing, it can be helpful to have your own Zulip development
+  server that the app can connect to.  Instructions for setting up a
+  Zulip development server are here:
+  http://zulip.readthedocs.io/en/latest/dev-overview.html
+
+- And then follow the `Connecting to a development server`_ guide to get the
+  Android app to connect to the Zulip development server.
+
+.. _Connecting to a development server: #connecting-to-a-development-server
 
 Getting Help
 ---------------
-For questions on development for the Zulip Android App you can post a topic here 
+
+- For real-time help, you can join the Zulip development community's
+  Zulip server at https://zulip.tabbott.net and post on the `android`
+  stream.
+
+- For questions on development for the Zulip Android App you can post here:
 https://groups.google.com/forum/#!forum/zulip-android
 
-For questions on development for the Zulip Server you can post a topic here 
+- For questions on development for the Zulip Server you can post here:
 https://groups.google.com/forum/#!forum/zulip-devel
 
 Any issues or bugs should be posted in the Github Issue Tracker!
@@ -66,6 +78,8 @@ Any issues or bugs should be posted in the Github Issue Tracker!
 
 Build instructions (Android Studio)
 -----------------------------------
+
+0. Fork the zulip-android repository from GitHub and clone your fork.
 
 1. Open the project in the IDE.
     a) From the "Welcome to Android Studio" menu, select "Open an
@@ -150,29 +164,35 @@ Build instructions (without Android Studio)
    default because it is unsigned. You will be told the APK cannot be
    parsed.
 
-Browsing server on device
--------------------------
+Connecting to a development server
+----------------------------------
 
-| For a Vagrant server
+Once you are running a Zulip development server on your laptop, you
+will need to do some additional configuration of the Android
+development environment to connect to your development server.
+
 | If you are using a Genymotion Emulator you can access the server by
   browsing to http://10.0.3.2:9991 or http://10.0.3.1:9991 (one of these
   two URL’s)
 
-To access the vagrant server on a physical device connect computer and
-mobile to the same network (router) modify ``VagrantFile`` `here`_ in
-the server change the host\_ip ‘127.0.0.1’ to ‘0.0.0.0’ Like this-
+To access the vagrant server on a physical device:
+
+* connect the computer and Android device to the same network (router)
+
+* modify ``VagrantFile`` `here`_ in the server change the host\_ip
+  ‘127.0.0.1’ to ‘0.0.0.0’ Like this-
 
     config.vm.network “forwarded\_port”, guest: 9991, host: host\_port,
     host\_ip: “0.0.0.0”
 
-Now find the IP address of the computer use this IP address and port
-number and browse the Zulip Server on the mobile device. For example -
+* Now find the IP address of the computer, and start the Android app.
+  For the server, specify the computer's IP address and port number as
+  the Zulip Server. For example:
 
     192.168.0.1:9991
 
-|
 | You can also route the IP address to a domain name like
-  www.local.test.com (this routing is useful when tesing Google OAuth
+  www.local.test.com (this routing is useful when testing the Google OAuth
   Backend)
 | No need to modify the ``VagrantFile`` to achieve this
 
