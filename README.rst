@@ -89,10 +89,17 @@ Build instructions (Android Studio)
 2. If you want to test Google sign in, add the required metadata:
     1. Go to https://developers.google.com/mobile/add?platform=android
     2. Type in "Zulip" as "App name" and "com.zulip.android" as
-       "Android package name".)
-    3. Put the generated file in the "app/" directory of the project.
-    4. Google app id. You will also get it from the above given link.
-       This id should be written as the following string resource in
+       "Android package name" and continue to Choose and configure services.
+    3. Select the "Google Sign-In" service, you'll need to provide the
+       SHA-1 of your signing certificate. For that, first follow the manual instructions
+       to Sign Your Release Build and generate a new Key Store
+       if you haven't already:
+       https://developer.android.com/studio/publish/app-signing.html#release-mode
+    4. Use keytool to get the SHA-1 fingerprint of the certificate:
+       ``keytool -exportcert -list -v \    -alias <your-key-name> -keystore <path-to-production-keystore>``
+    5. Put the generated file in the "app/" directory of the project.
+    6. Get your Google app id from the Google Developer console, and
+       add it as the following string resource in
        ``app/src/main/res/values/strings.xml``::
             <string name="google_app_id">GOOGLE_APP_ID</string>
 
