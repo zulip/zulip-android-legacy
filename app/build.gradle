@@ -51,6 +51,7 @@ android {
             manifestPlaceholders = [ fabricKey : project.property("fabricKey")]
             buildConfigField "String", "GOOGLE_CLIENT_ID", "\"835904834568-77mtr5mtmpgspj9b051del9i9r5t4g4n.apps.googleusercontent.com\""
         }
+
     }
     compileOptions {
         targetCompatibility JavaVersion.VERSION_1_7
@@ -73,6 +74,11 @@ dependencies {
     compile 'com.j256.ormlite:ormlite-android:5.0'
     compile 'commons-lang:commons-lang:2.6'
     compile 'org.ccil.cowan.tagsoup:tagsoup:1.2.1'
+    compile 'com.squareup.picasso:picasso:2.5.2'
+    compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
+        transitive = true;
+    }
+
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2') {
         exclude group: 'com.android.support'
     }
@@ -88,11 +94,9 @@ dependencies {
     androidTestCompile('com.android.support:support-annotations:24.1.1') {
         exclude group: 'com.android.support'
     }
-    compile 'com.squareup.picasso:picasso:2.5.2'
+
     testCompile 'junit:junit:4.12'
-    compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
-        transitive = true;
-    }
+
 }
 
 apply plugin: 'com.google.gms.google-services'
