@@ -158,8 +158,7 @@ public class ZulipApp extends Application {
             @Override
             public boolean handleMessage(android.os.Message message) {
                 if (message.what == 0) {
-                    AsyncUnreadMessagesUpdate task = new AsyncUnreadMessagesUpdate(
-                            ZulipApp.this);
+                    AsyncUnreadMessagesUpdate task = new AsyncUnreadMessagesUpdate(ZulipApp.this);
                     task.execute();
                 }
 

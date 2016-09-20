@@ -162,8 +162,7 @@ public class Stream {
     public static Stream getByName(ZulipApp app, String name) {
         Stream stream = null;
         try {
-            RuntimeExceptionDao<Stream, Object> streams = app
-                    .getDao(Stream.class);
+            RuntimeExceptionDao<Stream, Object> streams = app.getDao(Stream.class);
             stream = streams.queryBuilder().where()
                     .eq(Stream.NAME_FIELD, new SelectArg(name)).queryForFirst();
 
