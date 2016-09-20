@@ -31,7 +31,6 @@ import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageType;
 import com.zulip.android.models.Person;
 import com.zulip.android.models.Presence;
-import com.zulip.android.models.Stream;
 import com.zulip.android.networking.AsyncUnreadMessagesUpdate;
 import com.zulip.android.networking.ZulipInterceptor;
 import com.zulip.android.networking.response.UserConfigurationResponse;
@@ -43,11 +42,8 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.sql.SQLException;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -69,7 +65,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * {@link #max_message_id} This is the last Message ID stored in our database.
  * {@link #you} A reference to the user currently logged in.
  * {@link #api_key} Stores the API_KEY which was obtained from the server on successful authentication.
- * {@link #mutedTopics} Stores the concatenated ID for the stream and topic (Same strings as {@link Message#getIdForHolder()}
  * {@link #setupEmoji()} This is called to initialize and add records the existing emoticons in the assets folder.
  */
 public class ZulipApp extends Application {
@@ -83,8 +78,6 @@ public class ZulipApp extends Application {
     private String api_key;
     private int max_message_id;
     private DatabaseHelper databaseHelper;
-    private Set<String> mutedTopics;
-    private static final String MUTED_TOPIC_KEY = "mutedTopics";
     private ZulipServices zulipServices;
     private ReferenceObjectCache objectCache;
     private ZulipActivity zulipActivity;
@@ -137,8 +130,7 @@ public class ZulipApp extends Application {
 
         // This used to be from HumbugActivity.getPreferences, so we keep that
         // file name.
-        this.settings = getSharedPreferences("HumbugActivity",
-                Context.MODE_PRIVATE);
+        this.settings = getSharedPreferences("HumbugActivity", Context.MODE_PRIVATE);
 
         max_message_id = settings.getInt("max_message_id", -1);
         eventQueueId = settings.getString("eventQueueId", null);
@@ -152,7 +144,6 @@ public class ZulipApp extends Application {
             afterLogin();
         }
 
-        mutedTopics = new HashSet<>(settings.getStringSet(MUTED_TOPIC_KEY, new HashSet<String>()));
         // create unread message queue
         unreadMessageHandler = new Handler(new Handler.Callback() {
             @Override
@@ -365,21 +356,6 @@ public class ZulipApp extends Application {
         }
     }
 
-    public void addToMutedTopics(List<List<String>> mutedTopics) {
-        Stream stream;
-
-        if(mutedTopics != null) {
-            for (int i = 0; i < mutedTopics.size(); i++) {
-                List<String> mutedTopic = mutedTopics.get(i);
-                stream = Stream.getByName(this, mutedTopic.get(0));
-                this.mutedTopics.add(stream.getId() + mutedTopic.get(1));
-            }
-        }
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putStringSet(MUTED_TOPIC_KEY, new HashSet<>(this.mutedTopics));
-        editor.apply();
-    }
-
     public void setEmail(String email) {
         databaseHelper = new DatabaseHelper(this, email);
         this.you = Person.getOrUpdate(this, email, null, null);
@@ -515,17 +491,6 @@ public class ZulipApp extends Application {
         }
     }
 
-    public void muteTopic(Message message) {
-        mutedTopics.add(message.concatStreamAndTopic());
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putStringSet(MUTED_TOPIC_KEY, new HashSet<>(mutedTopics));
-        editor.apply();
-    }
-
-    public boolean isTopicMute(Message message) {
-        return mutedTopics.contains(message.concatStreamAndTopic());
-    }
-
     public SharedPreferences getSettings() {
         return settings;
     }
@@ -534,16 +499,8 @@ public class ZulipApp extends Application {
         return you;
     }
 
-    public static ZulipApp getInstance() {
-        return instance;
-    }
-
     private static void setInstance(ZulipApp instance) {
         ZulipApp.instance = instance;
-    }
-
-    public boolean isTopicMute(int id, String subject) {
-        return mutedTopics.contains(id + subject);
     }
 
     public void syncPointer(final int mID) {
