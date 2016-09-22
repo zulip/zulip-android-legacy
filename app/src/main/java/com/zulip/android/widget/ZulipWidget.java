@@ -76,7 +76,7 @@ public class ZulipWidget extends AppWidgetProvider {
     }
 
     private static void setupGetEvents() {
-        asyncGetEvents = new AsyncGetEvents(ZulipApp.get(), intervalMilliseconds);
+        asyncGetEvents = new AsyncGetEvents(intervalMilliseconds);
         asyncGetEvents.start();
     }
 
