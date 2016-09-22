@@ -32,6 +32,7 @@ import com.zulip.android.models.Stream;
 import com.zulip.android.networking.AsyncGetOldMessages;
 import com.zulip.android.networking.ZulipAsyncPushTask;
 import com.zulip.android.util.MessageListener;
+import com.zulip.android.util.MutedTopics;
 import com.zulip.android.viewholders.HeaderSpaceItemDecoration;
 
 import org.json.JSONObject;
@@ -48,6 +49,7 @@ import java.util.List;
 public class MessageListFragment extends Fragment implements MessageListener {
     private static final int PIXEL_OFFSET_MESSAGE_HEADERS = 24;
     private LinearLayoutManager linearLayoutManager;
+    private MutedTopics mMutedTopics;
 
     /**
      * This interface must be implemented by activities that contain this
@@ -62,8 +64,6 @@ public class MessageListFragment extends Fragment implements MessageListener {
         void onListResume(MessageListFragment f);
 
         void addToList(Message message);
-
-        void muteTopic(Message message);
 
         void recyclerViewScrolled();
 
@@ -97,6 +97,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
     public MessageListFragment() {
         app = ZulipApp.get();
+        mMutedTopics = MutedTopics.get();
         // Required empty public constructor
     }
 
@@ -370,7 +371,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
             Stream stream = message.getStream();
 
             if (stream != null && filter == null) { //Filter muted messages only in homescreen.
-                if (app.isTopicMute(message)) {
+                if (mMutedTopics.isTopicMute(message)) {
                     mListener.addToList(message);
                     continue;
                 }
