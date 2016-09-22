@@ -40,40 +40,38 @@ import java.util.concurrent.Callable;
 public class AsyncGetEvents extends Thread {
     private static final String TAG = "AsyncGetEvents";
     private static final String ASYNC_GET_EVENTS = "asyncGetEvents";
-    private static final String POINTER = "pointer";
-    private ZulipActivity activity;
-    private ZulipApp app;
-    private static int interval = 1000;
-    private boolean calledFromWidget = false;
-    private MutedTopics mMutedTopics;
 
     private boolean keepThisRunning = true;
     private HTTPRequest request;
 
-    private AsyncGetEvents that = this;
     private int failures = 0;
     private boolean registeredOrGotEventsThisRun;
+    private MutedTopics mMutedTopics;
+    private ZulipApp app;
+    private ZulipActivity mActivity;
+    private int mInterval = 1000;
 
-    public AsyncGetEvents(ZulipActivity zulipActivity) {
+    public AsyncGetEvents(ZulipActivity activity) {
         super();
-        app = (ZulipApp) zulipActivity.getApplication();
-        activity = zulipActivity;
-        request = new HTTPRequest(app);
+        mActivity = activity;
+        init();
     }
 
-    public AsyncGetEvents(ZulipApp zulipApp, int interval) {
+    public AsyncGetEvents(int interval) {
         super();
-        app = zulipApp;
-        activity = null;
-        request = new HTTPRequest(app);
-        calledFromWidget = true;
-        this.interval = interval;
+        mInterval = interval;
+        init();
+    }
+
+    private void init() {
+        app = ZulipApp.get();
         mMutedTopics = MutedTopics.get();
+        request = new HTTPRequest(app);
     }
 
     public void start() {
         registeredOrGotEventsThisRun = false;
-        if (!calledFromWidget) {
+        if (mActivity != null) {
             super.start();
         }
     }
@@ -175,13 +173,13 @@ public class AsyncGetEvents extends Thread {
                 }
             });
 
-            if (!calledFromWidget) {
-                activity.runOnUiThread(new Runnable() {
+            if (mActivity != null) {
+                mActivity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        that.activity.getPeopleAdapter().refresh();
-                        activity.onReadyToDisplay(true);
-                        activity.checkAndSetupStreamsDrawer();
+                        mActivity.getPeopleAdapter().refresh();
+                        mActivity.onReadyToDisplay(true);
+                        mActivity.checkAndSetupStreamsDrawer();
                     }
                 });
             }
@@ -230,12 +228,12 @@ public class AsyncGetEvents extends Thread {
                             failures = 0;
                         }
 
-                        if (!registeredOrGotEventsThisRun) {
+                        if (!registeredOrGotEventsThisRun && mActivity != null) {
                             registeredOrGotEventsThisRun = true;
-                            activity.runOnUiThread(new Runnable() {
+                            mActivity.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    activity.onReadyToDisplay(false);
+                                    mActivity.onReadyToDisplay(false);
                                 }
                             });
                         }
@@ -254,7 +252,7 @@ public class AsyncGetEvents extends Thread {
                 } catch (JSONException e) {
                     backoff(e);
                 }
-                Thread.sleep(interval);
+                Thread.sleep(mInterval);
             }
         } catch (Exception e) {
             ZLog.logException(e);
@@ -291,11 +289,11 @@ public class AsyncGetEvents extends Thread {
         int lastMessageId = messages.get(messages.size() - 1).getID();
         MessageRange.updateNewMessagesRange(app, lastMessageId);
 
-        if (!calledFromWidget) {
-            activity.runOnUiThread(new Runnable() {
+        if (mActivity != null) {
+            mActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    activity.onNewMessages(messages.toArray(new Message[messages.size()]));
+                    mActivity.onNewMessages(messages.toArray(new Message[messages.size()]));
                 }
             });
         } else {
