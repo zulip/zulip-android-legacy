@@ -90,6 +90,7 @@ import com.zulip.android.networking.ZulipInterceptor;
 import com.zulip.android.networking.response.UserConfigurationResponse;
 import com.zulip.android.service.ZulipServices;
 import com.zulip.android.util.AnimationHelper;
+import com.zulip.android.util.MutedTopics;
 import com.zulip.android.util.SwipeRemoveLinearLayout;
 import com.zulip.android.util.ZLog;
 import com.zulip.android.ZulipApp;
@@ -164,6 +165,8 @@ public class ZulipActivity extends BaseActivity implements
     private SimpleCursorAdapter subjectActvAdapter;
     private SimpleCursorAdapter emailActvAdapter;
     private AppBarLayout appBarLayout;
+
+    private MutedTopics mMutedTopics;
 
     private BroadcastReceiver onGcmMessage = new BroadcastReceiver() {
         public void onReceive(Context contenxt, Intent intent) {
@@ -240,24 +243,6 @@ public class ZulipActivity extends BaseActivity implements
     }
 
     @Override
-    public void muteTopic(Message message) {
-        app.muteTopic(message);
-        for (int i = homeList.adapter.getItemCount() - 1; i >= 0; i--) {
-            Object object = homeList.adapter.getItem(i);
-            if (object instanceof Message) {
-                Message msg = (Message) object;
-                if (msg.getStream() != null
-                        && msg.getStream().getId() == message.getStream().getId()
-                        && msg.getSubject().equals(message.getSubject())) {
-                    mutedTopics.add(msg);
-                    homeList.adapter.remove(msg);
-                }
-            }
-        }
-        homeList.adapter.notifyDataSetChanged();
-    }
-
-    @Override
     public void recyclerViewScrolled() {
         if (chatBox.getVisibility() == View.VISIBLE && !isTextFieldFocused) {
             displayChatBox(false);
@@ -280,6 +265,9 @@ public class ZulipActivity extends BaseActivity implements
 
         app = (ZulipApp) getApplicationContext();
         settings = app.getSettings();
+        if (mMutedTopics == null) {
+            mMutedTopics = MutedTopics.get();
+        }
 
         processParams();
 
@@ -770,7 +758,7 @@ public class ZulipActivity extends BaseActivity implements
                     case R.id.name_child:
                         TextView name_child = (TextView) view;
                         name_child.setText(cursor.getString(columnIndex));
-                        if (app.isTopicMute(cursor.getInt(1), cursor.getString(columnIndex))) {
+                        if (mMutedTopics.isTopicMute(cursor.getInt(1), cursor.getString(columnIndex))) {
                             name_child.setTextColor(ContextCompat.getColor(ZulipActivity.this, R.color.colorTextSecondary));
                         }
                         return true;

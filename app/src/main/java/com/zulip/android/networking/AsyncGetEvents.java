@@ -16,6 +16,7 @@ import com.zulip.android.networking.response.UserConfigurationResponse;
 import com.zulip.android.networking.response.events.EventsBranch;
 import com.zulip.android.networking.response.events.GetEventResponse;
 import com.zulip.android.networking.response.events.MessageWrapper;
+import com.zulip.android.util.MutedTopics;
 import com.zulip.android.util.TypeSwapper;
 import com.zulip.android.util.ZLog;
 import com.zulip.android.widget.ZulipWidget;
@@ -44,6 +45,7 @@ public class AsyncGetEvents extends Thread {
     private ZulipApp app;
     private static int interval = 1000;
     private boolean calledFromWidget = false;
+    private MutedTopics mMutedTopics;
 
     private boolean keepThisRunning = true;
     private HTTPRequest request;
@@ -66,6 +68,7 @@ public class AsyncGetEvents extends Thread {
         request = new HTTPRequest(app);
         calledFromWidget = true;
         this.interval = interval;
+        mMutedTopics = MutedTopics.get();
     }
 
     public void start() {
@@ -144,7 +147,7 @@ public class AsyncGetEvents extends Thread {
                         }
                     }
                     //MUST UPDATE AFTER SUBSCRIPTIONS ARE STORED IN DB
-                    app.addToMutedTopics(response.getMutedTopics());
+                    mMutedTopics.addToMutedTopics(response.getMutedTopics());
 
                     // Get people
                     List<Person> people = response.getRealmUsers();
