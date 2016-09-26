@@ -89,9 +89,16 @@ Build instructions (Android Studio)
 2. If you want to test Google sign in, add the required metadata:
     1. Go to https://developers.google.com/mobile/add?platform=android
     2. Type in "Zulip" as "App name" and "com.zulip.android" as
-       "Android package name".)
-    3. Put the generated file in the "app/" directory of the project.
-    4. Google app id. You will also get it from the above given link.
+       "Android package name" and continue to Choose and configure services.
+    3. Select the "Google Sign-In" service, you'll need to provide the
+       SHA-1 of your signing certificate. For that first follow the manual instructions
+       to Sign Your Release Build and generate a new Key Store
+       if you haven't already :
+       https://developer.android.com/studio/publish/app-signing.html#release-mode
+    4. Now to get the SHA-1 fingerprint of the certificate open a terminal and run the keytool utility:
+       ``keytool -exportcert -list -v \    -alias <your-key-name> -keystore <path-to-production-keystore>``
+    5. Put the generated file in the "app/" directory of the project.
+    6. Google app id. You will also get it from the above given link.
        This id should be written as the following string resource in
        ``app/src/main/res/values/strings.xml``::
             <string name="google_app_id">GOOGLE_APP_ID</string>
@@ -190,6 +197,10 @@ To access the vagrant server on a physical device:
   the Zulip Server. For example:
 
     192.168.0.1:9991
+    
+  Note that if you have internet access on your android device through a proxy server than you 
+  might have to use a VPN application like `this one`_ to connect to the server (VPN service allows you 
+  to login to a server located in a place from where the content is available and you can access previously blocked application).
 
 | You can also route the IP address to a domain name like
   www.local.test.com (this routing is useful when testing the Google OAuth
@@ -206,6 +217,7 @@ If unclear you can follow tutorial here `Host Remapping`_
 
 .. _here: https://github.com/zulip/zulip/blob/1c40df9363b70af0e275c44a03f9627808852616/Vagrantfile#L37
 .. _Host Remapping: http://docs.telerik.com/fiddler/KnowledgeBase/HOSTS
+.. _this one: https://play.google.com/store/apps/details?id=com.psiphon3&hl=en
 .. _this: http://docs.telerik.com/fiddler/Configure-Fiddler/Tasks/ConfigureForAndroid
 
 
