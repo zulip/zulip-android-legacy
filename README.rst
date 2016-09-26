@@ -197,6 +197,10 @@ To access the vagrant server on a physical device:
   the Zulip Server. For example:
 
     192.168.0.1:9991
+    
+  Note that if you have internet access on your android device through a proxy server than you 
+  might have to use a VPN application like `this one`_ to connect to the server (VPN service allows you 
+  to login to a server located in a place from where the content is available and you can access previously blocked application).
 
 | You can also route the IP address to a domain name like
   www.local.test.com (this routing is useful when testing the Google OAuth
@@ -213,6 +217,7 @@ If unclear you can follow tutorial here `Host Remapping`_
 
 .. _here: https://github.com/zulip/zulip/blob/1c40df9363b70af0e275c44a03f9627808852616/Vagrantfile#L37
 .. _Host Remapping: http://docs.telerik.com/fiddler/KnowledgeBase/HOSTS
+.. _this one: https://play.google.com/store/apps/details?id=com.psiphon3&hl=en
 .. _this: http://docs.telerik.com/fiddler/Configure-Fiddler/Tasks/ConfigureForAndroid
 
 
