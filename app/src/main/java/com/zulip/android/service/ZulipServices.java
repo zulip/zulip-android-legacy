@@ -48,6 +48,7 @@ public interface ZulipServices {
     @POST("v1/fetch_api_key")
     Call<LoginResponse> login(@Field("username") String username, @Field("password") String password);
 
+    @FormUrlEncoded
     @POST("v1/dev_fetch_api_key")
     Call<LoginResponse> loginDEV(@Field("username") String username);
 
