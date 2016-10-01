@@ -138,6 +138,8 @@ public class Person {
             return false;
         }
         Person per = (Person) obj;
+        if(this.name == null || this.email == null)
+            return false;
         return this.name.equals(per.getName()) && this.email.equals(per
                 .getEmail());
     }
