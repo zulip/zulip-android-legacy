@@ -130,6 +130,7 @@ public class ZulipActivity extends BaseActivity implements
     private ZulipActivity that = this; // self-ref
     private SharedPreferences settings;
     String client_id;
+    private String view= null;
 
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
@@ -259,7 +260,26 @@ public class ZulipActivity extends BaseActivity implements
 
     @Override
     public void recyclerViewScrolled() {
-        if (chatBox.getVisibility() == View.VISIBLE && !isTextFieldFocused) {
+        if(chatBox.getVisibility()== View.VISIBLE && view=="Person"){
+            //check if messageEt is empty or not
+            if(messageEt.getText().toString().equals(""))
+            {
+                displayChatBox(false);
+                displayFAB(true);
+
+            }
+        }
+
+        else if(chatBox.getVisibility()==View.VISIBLE && view=="Stream"){
+            //check if messageEt is empty or not
+            if(messageEt.getText().toString().equals("") && topicActv.getText().toString().equals(""))
+            {
+                displayChatBox(false);
+                displayFAB(true);
+
+            }
+        }
+       else if (chatBox.getVisibility() == View.VISIBLE && view==null && streamActv.getText().toString().equals("") && topicActv.getText().toString().equals("") && messageEt.getText().toString().equals("")) {
             displayChatBox(false);
             displayFAB(true);
         }
@@ -1082,6 +1102,7 @@ public class ZulipActivity extends BaseActivity implements
      */
     private void switchView() {
         if (isCurrentModeStream()) { //Person
+
             togglePrivateStreamBtn.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_action_bullhorn));
             tempStreamSave = topicActv.getText().toString();
             topicActv.setText(null);
@@ -1089,6 +1110,7 @@ public class ZulipActivity extends BaseActivity implements
             topicActv.setAdapter(emailActvAdapter);
             streamActv.setVisibility(View.GONE);
             textView.setVisibility(View.GONE);
+            view="Person";
         } else { //Stream
             topicActv.setText(tempStreamSave);
             togglePrivateStreamBtn.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_action_person));
@@ -1100,6 +1122,7 @@ public class ZulipActivity extends BaseActivity implements
             topicActv.setVisibility(View.VISIBLE);
             streamActv.setAdapter(streamActvAdapter);
             topicActv.setAdapter(subjectActvAdapter);
+            view="Stream";
         }
     }
 
@@ -1212,7 +1235,7 @@ public class ZulipActivity extends BaseActivity implements
 
     @Override
     public void onNarrowFillSendBoxPrivate(Person peopleList[], boolean openSoftKeyboard) {
-        displayChatBox(true);
+        displayChatBox(true);     //this one
         displayFAB(false);
         switchToPrivate();
         ArrayList<String> names = new ArrayList<String>();
@@ -1234,7 +1257,7 @@ public class ZulipActivity extends BaseActivity implements
      */
     @Override
     public void onNarrowFillSendBox(Message message, boolean openSoftKeyboard) {
-        displayChatBox(true);
+        displayChatBox(true); //this one
         displayFAB(false);
         if (message.getType() == MessageType.PRIVATE_MESSAGE) {
             switchToPrivate();
@@ -1251,6 +1274,7 @@ public class ZulipActivity extends BaseActivity implements
         if (openSoftKeyboard) {
             ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE)).toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
         }
+
     }
 
     /**

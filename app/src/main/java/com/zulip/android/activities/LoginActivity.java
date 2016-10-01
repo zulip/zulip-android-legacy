@@ -160,7 +160,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         // add http or https if scheme is not included
         if (!serverURL.contains("://")) {
             serverURL = httpScheme + "://" + serverURL;
-            showBackends(httpScheme, serverURL);
+            if (BuildConfig.DEBUG) showHTTPDialog(serverURL); //Ask for http or https if in non-prod builds otherwise if in prod then use https
+            else showBackends(httpScheme, serverURL);
         } else {
             Uri serverUri = Uri.parse(serverURL);
 
@@ -227,7 +228,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     private void showHTTPDialog(final String serverURL) {
         new AlertDialog.Builder(this)
                 .setTitle(R.string.http_or_https)
-                .setMessage(R.string.http_message)
+                .setMessage(((BuildConfig.DEBUG) ? R.string.http_message_debug : R.string.http_message))
                 .setPositiveButton(R.string.use_https, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();

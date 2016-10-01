@@ -85,4 +85,5 @@
     <string name="toast_login_failed_fetching_backends">Failed to fetch Backends!</string>
     <string name="login_activity_toast_login_error">Unknown login error.</string>
     <string name="no_topic_in_message">(no topic)</string>
+    <string name="http_message_debug">Which scheme you would like to use HTTP or HTTPS?</string>
 </resources>
