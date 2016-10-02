@@ -53,7 +53,8 @@
             android:layout_weight="1"
             android:hint="@string/tap_message"
             android:inputType="textCapSentences|textMultiLine"
-            android:maxLines="4" />
+            android:maxLines="4"
+            android:textSize="15sp" />
 
         <ImageView
             android:id="@+id/send_btn"
