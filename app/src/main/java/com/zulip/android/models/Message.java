@@ -58,7 +58,6 @@ public class Message {
     private static final String MESSAGE_EDITED = "MESSAGE_EDITED";
     private static final String MESSAGE_EDIT_DATE = "MESSAGE_EDIT_DATE";
 
-
     //region fields
     @SerializedName("recipient_id")
     private int recipientId;
@@ -142,10 +141,7 @@ public class Message {
     //IGNORE - This will always be empty due to persistence
     @SerializedName("edit_history")
     public List<MessageHistory> _history;
-
     //endregion
-
-
 
     /**
      * Construct an empty Message object.
@@ -496,11 +492,10 @@ public class Message {
 
     private static final HTMLSchema schema = new HTMLSchema();
 
-
     public Spanned getFormattedContent(ZulipApp app) {
-
         Spanned formattedMessage = formatContent(getFormattedContent(),
                 app);
+
         while (formattedMessage.length() != 0
                 && formattedMessage.charAt(formattedMessage.length() - 1) == '\n') {
             formattedMessage = (Spanned) formattedMessage.subSequence(0,
@@ -516,7 +511,7 @@ public class Message {
      * @param app
      * @return Span
      */
-    public static Spanned formatContent(String source, ZulipApp app) {
+    public static Spanned formatContent(String source, final ZulipApp app) {
         final Context context = app.getApplicationContext();
         final float density = context.getResources().getDisplayMetrics().density;
         Parser parser = new Parser();
@@ -766,4 +761,23 @@ public class Message {
         }
     }
 
+    public String extractImageUrl(ZulipApp zulipApp) {
+        String match = "<img src=\"";
+        int start = getFormattedContent().indexOf(match);
+
+        if(start == -1){
+            return null;
+        }
+        start += match.length();
+        match = getFormattedContent().substring(start);
+        if(match.indexOf("\"") == -1) {
+            return null;
+        }
+        match = match.substring(0, match.indexOf("\""));
+
+        if(match.indexOf("/") == 0) {
+            return zulipApp.getServerURI().substring(0, zulipApp.getServerURI().indexOf("/api")) + match;
+        }
+        return match;
+    }
 }

@@ -24,6 +24,8 @@ public class MessageHolder extends RecyclerView.ViewHolder implements View.OnCli
     public TextView contentView;
     public View leftBar;
     public RelativeLayout messageTile;
+    public ImageView contentImage;
+    public View contentImageContainer;
     public OnItemClickListener onItemClickListener;
 
     public MessageHolder(final View itemView) {
@@ -35,6 +37,8 @@ public class MessageHolder extends RecyclerView.ViewHolder implements View.OnCli
         contentView.setMovementMethod(LinkMovementMethod.getInstance());
         leftBar = itemView.findViewById(R.id.leftBar);
         messageTile = (RelativeLayout) itemView.findViewById(R.id.messageTile);
+        contentImage = (ImageView) itemView.findViewById(R.id.load_image);
+        contentImageContainer = itemView.findViewById(R.id.load_image_container);
         contentView.setOnClickListener(this);
         contentView.setLongClickable(true);
         itemView.setOnCreateContextMenuListener(this);
