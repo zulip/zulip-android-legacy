@@ -111,7 +111,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 /**
  * The main Activity responsible for holding the {@link MessageListFragment} which has the list to the
  * messages
- * */
+ */
 public class ZulipActivity extends BaseActivity implements
         MessageListFragment.Listener, NarrowListener, SwipeRemoveLinearLayout.leftToRightSwipeListener {
 
@@ -130,6 +130,7 @@ public class ZulipActivity extends BaseActivity implements
     private ZulipActivity that = this; // self-ref
     private SharedPreferences settings;
     String client_id;
+
 
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
@@ -259,7 +260,21 @@ public class ZulipActivity extends BaseActivity implements
 
     @Override
     public void recyclerViewScrolled() {
-        if (chatBox.getVisibility() == View.VISIBLE && !isTextFieldFocused) {
+        if (chatBox.getVisibility() == View.VISIBLE && !isCurrentModeStream()) {
+            //check if messageEt is empty or not
+            if (messageEt.getText().toString().equals("")) {
+                displayChatBox(false);
+                displayFAB(true);
+
+            }
+        } else if (chatBox.getVisibility() == View.VISIBLE && isCurrentModeStream()) {
+            //check if messageEt is empty or not
+            if (messageEt.getText().toString().equals("") && topicActv.getText().toString().equals("")) {
+                displayChatBox(false);
+                displayFAB(true);
+
+            }
+        } else if (chatBox.getVisibility() == View.VISIBLE && streamActv.getText().toString().equals("") && topicActv.getText().toString().equals("") && messageEt.getText().toString().equals("")) {
             displayChatBox(false);
             displayFAB(true);
         }
@@ -526,6 +541,7 @@ public class ZulipActivity extends BaseActivity implements
 
     /**
      * Returns a cursor for the combinedAdapter used to suggest Emoji when ':' is typed in the {@link #messageEt}
+     *
      * @param emoji A string to search in the existing database
      */
     private Cursor makeEmojiCursor(CharSequence emoji)
@@ -883,9 +899,9 @@ public class ZulipActivity extends BaseActivity implements
 
     /**
      * Setup adapter's for the {@link AutoCompleteTextView}
-     *
+     * <p>
      * These adapters are being intialized -
-     *
+     * <p>
      * {@link #streamActvAdapter} Adapter for suggesting all the stream names in this AutoCompleteTextView
      * {@link #emailActvAdapter} Adapter for suggesting all the person email's in this AutoCompleteTextView
      * {@link #subjectActvAdapter} Adapter for suggesting all the topic for the stream specified in the {@link #streamActv} in this AutoCompleteTextView
@@ -973,6 +989,7 @@ public class ZulipActivity extends BaseActivity implements
 
     /**
      * Creates a cursor to get the streams saved in the database
+     *
      * @param streamName Filter out streams name containing this string
      */
     private Cursor makeStreamCursor(CharSequence streamName)
@@ -995,8 +1012,9 @@ public class ZulipActivity extends BaseActivity implements
 
     /**
      * Creates a cursor to get the topics in the stream in
+     *
      * @param stream
-     * @param  subject Filter out subject containing this string
+     * @param subject Filter out subject containing this string
      */
     private Cursor makeSubjectCursor(CharSequence stream, CharSequence subject)
             throws SQLException {
@@ -1026,6 +1044,7 @@ public class ZulipActivity extends BaseActivity implements
 
     /**
      * Creates a cursor to get the E-Mails stored in the database
+     *
      * @param email Filter out emails containing this string
      */
     private Cursor makePeopleCursor(CharSequence email) throws SQLException {
@@ -1082,6 +1101,7 @@ public class ZulipActivity extends BaseActivity implements
      */
     private void switchView() {
         if (isCurrentModeStream()) { //Person
+
             togglePrivateStreamBtn.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_action_bullhorn));
             tempStreamSave = topicActv.getText().toString();
             topicActv.setText(null);
@@ -1089,6 +1109,7 @@ public class ZulipActivity extends BaseActivity implements
             topicActv.setAdapter(emailActvAdapter);
             streamActv.setVisibility(View.GONE);
             textView.setVisibility(View.GONE);
+
         } else { //Stream
             topicActv.setText(tempStreamSave);
             togglePrivateStreamBtn.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_action_person));
@@ -1100,6 +1121,7 @@ public class ZulipActivity extends BaseActivity implements
             topicActv.setVisibility(View.VISIBLE);
             streamActv.setAdapter(streamActvAdapter);
             topicActv.setAdapter(subjectActvAdapter);
+
         }
     }
 
@@ -1212,7 +1234,7 @@ public class ZulipActivity extends BaseActivity implements
 
     @Override
     public void onNarrowFillSendBoxPrivate(Person peopleList[], boolean openSoftKeyboard) {
-        displayChatBox(true);
+        displayChatBox(true);     //this one
         displayFAB(false);
         switchToPrivate();
         ArrayList<String> names = new ArrayList<String>();
@@ -1230,11 +1252,12 @@ public class ZulipActivity extends BaseActivity implements
 
     /**
      * Fills the chatBox according to the {@link MessageType}
+     *
      * @param openSoftKeyboard If true open's up the SoftKeyboard else not.
      */
     @Override
     public void onNarrowFillSendBox(Message message, boolean openSoftKeyboard) {
-        displayChatBox(true);
+        displayChatBox(true); //this one
         displayFAB(false);
         if (message.getType() == MessageType.PRIVATE_MESSAGE) {
             switchToPrivate();
@@ -1251,12 +1274,14 @@ public class ZulipActivity extends BaseActivity implements
         if (openSoftKeyboard) {
             ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE)).toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
         }
+
     }
 
     /**
      * Fills the chatBox with the stream name and the topic
-     * @param stream Stream name to be filled
-     * @param subject Subject to be filled
+     *
+     * @param stream           Stream name to be filled
+     * @param subject          Subject to be filled
      * @param openSoftKeyboard If true open's the softKeyboard else not
      */
     public void onNarrowFillSendBoxStream(String stream, String subject, boolean openSoftKeyboard) {
@@ -1398,6 +1423,7 @@ public class ZulipActivity extends BaseActivity implements
 
     /**
      * Switches the current Day/Night mode to Night/Day mode
+     *
      * @param nightMode which Mode {@link android.support.v7.app.AppCompatDelegate.NightMode}
      */
     private void setNightMode(@AppCompatDelegate.NightMode int nightMode) {
@@ -1479,6 +1505,7 @@ public class ZulipActivity extends BaseActivity implements
         }
         startRequests();
     }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
