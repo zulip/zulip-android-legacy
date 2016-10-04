@@ -37,12 +37,7 @@ android {
             storeFile file("zulip_debug.keystore")
             storePassword "zulip123#"
         }
-        config {
-            keyAlias 'MyAndroidKey'
-            keyPassword 'Landmark1'
-            storeFile file('C:/Users/Ankita/keystore/android.jks')
-            storePassword 'Landmark1'
-        }
+
     }
     buildTypes {
         debug {
