@@ -259,10 +259,31 @@ public class ZulipActivity extends BaseActivity implements
 
     @Override
     public void recyclerViewScrolled() {
-        if (chatBox.getVisibility() == View.VISIBLE && !isTextFieldFocused) {
+
+        if(chatBox.getVisibility()== View.VISIBLE && !isCurrentModeStream()){
+            //check if messageEt is empty or not
+            if(messageEt.getText().toString().equals(""))
+            {
+                displayChatBox(false);
+                displayFAB(true);
+
+            }
+        }
+
+        else if(chatBox.getVisibility()==View.VISIBLE && isCurrentModeStream()){
+            //check if messageEt is empty or not
+            if(messageEt.getText().toString().equals("") && topicActv.getText().toString().equals(""))
+            {
+                displayChatBox(false);
+                displayFAB(true);
+
+            }
+        }
+        else if (chatBox.getVisibility() == View.VISIBLE && streamActv.getText().toString().equals("") && topicActv.getText().toString().equals("") && messageEt.getText().toString().equals("")) {
             displayChatBox(false);
             displayFAB(true);
         }
+
     }
 
     public RefreshableCursorAdapter getPeopleAdapter() {
