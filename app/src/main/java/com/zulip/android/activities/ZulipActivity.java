@@ -259,9 +259,11 @@ public class ZulipActivity extends BaseActivity implements
 
     @Override
     public void recyclerViewScrolled() {
-
+            /* in this method we check if the messageEt is empty or not
+            if messageEt is not empty, it means that the user has typed something in the chatBox and that the chatBox should be open
+            in spite of scrolling */
         if(chatBox.getVisibility()== View.VISIBLE && !isCurrentModeStream()){
-            //check if messageEt is empty or not
+            //if messageEt is empty in private msg mode, then the chatBox can disappear on scrolling else it will stay
             if(messageEt.getText().toString().equals(""))
             {
                 displayChatBox(false);
@@ -271,7 +273,7 @@ public class ZulipActivity extends BaseActivity implements
         }
 
         else if(chatBox.getVisibility()==View.VISIBLE && isCurrentModeStream()){
-            //check if messageEt is empty or not
+            //check if messageEt is empty in stream msg mode, then the chatBox can disappear on scrolling else it will disappear
             if(messageEt.getText().toString().equals("") && topicActv.getText().toString().equals(""))
             {
                 displayChatBox(false);
@@ -279,6 +281,8 @@ public class ZulipActivity extends BaseActivity implements
 
             }
         }
+        /*check if stream edittext, topic edittext and messageEt edittext is empty in a general msg mode(i.e. when the floating
+        button is pressed by user). If all fields are empty, then on scrolling the chatBox will disappear else not  */
         else if (chatBox.getVisibility() == View.VISIBLE && streamActv.getText().toString().equals("") && topicActv.getText().toString().equals("") && messageEt.getText().toString().equals("")) {
             displayChatBox(false);
             displayFAB(true);
