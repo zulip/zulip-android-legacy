@@ -5,6 +5,7 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.support.annotation.ColorInt;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
@@ -19,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.j256.ormlite.stmt.UpdateBuilder;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import com.zulip.android.R;
 import com.zulip.android.ZulipApp;
@@ -39,7 +41,9 @@ import com.zulip.android.viewholders.MessageHolder;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 /**
  * An adapter to bind the messages to a RecyclerView.
@@ -84,6 +88,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     private UpdateBuilder<Message, Object> updateBuilder;
 
     private boolean isCurrentThemeNight;
+    private HashMap<Integer, Integer> defaultAvatarColorHMap;
 
     int getContextMenuItemSelectedPosition() {
         return contextMenuItemSelectedPosition;
@@ -102,6 +107,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         privateMessageBackground = ContextCompat.getColor(context, R.color.private_background);
         streamMessageBackground = ContextCompat.getColor(context, R.color.stream_background);
 
+        defaultAvatarColorHMap = new HashMap<>();
         privateHuddleText = context.getResources().getString(R.string.huddle_text);
         setupHeaderAndFooterViews();
         onItemClickListener = new OnItemClickListener() {
@@ -425,7 +431,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     }
 
 
-    private void setUpGravatar(Message message, MessageHolder messageHolder) {
+    private void setUpGravatar(final Message message, final MessageHolder messageHolder) {
         //Setup Gravatar
         Bitmap gravatarImg = ((ZulipActivity) context).getGravatars().get(message.getSender().getEmail());
         if (gravatarImg != null) {
@@ -437,12 +443,59 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                     35, resources.getDisplayMetrics());
             String url = message.getSender().getAvatarURL() + "&s=" + px;
+
             Picasso.with(context)
                     .load(url)
                     .placeholder(android.R.drawable.stat_notify_error)
                     .error(android.R.drawable.presence_online)
-                    .into(messageHolder.gravatar);
+                    .into(messageHolder.gravatar, new Callback() {
+                        @Override
+                        public void onSuccess() {
+
+                        }
+
+                        @Override
+                        public void onError() {
+                            int hMapKey = message.getSender().getId();
+                            int avatarColor;
+
+                            // check if current sender has already been allotted a randomly generated color
+                            if (defaultAvatarColorHMap.containsKey(hMapKey)) {
+                                avatarColor = defaultAvatarColorHMap.get(hMapKey);
+                            } else {
+                                // generate a random color for current sender id
+                                avatarColor = getRandomColor(Color.rgb(255, 255, 255));
+
+                                // add sender id and randomly generated color to hashmap
+                                defaultAvatarColorHMap.put(hMapKey, avatarColor);
+                            }
+                            // square default avatar drawable
+                            final GradientDrawable defaultAvatar = (GradientDrawable) ContextCompat.getDrawable(context, R.drawable.default_avatar);
+                            defaultAvatar.setColor(avatarColor);
+                            messageHolder.gravatar.setImageDrawable(defaultAvatar);
+                        }
+                    });
         }
+    }
+
+    /**
+     * Method to generate random saturated colors for default avatar {@link R.drawable#default_avatar}
+     * @param mix integer color is mixed with randomly generated red, blue, green colors
+     * @return a randomly generated color
+     */
+    private int getRandomColor(int mix) {
+        Random random = new Random();
+        int red = random.nextInt(256);
+        int green = random.nextInt(256);
+        int blue = random.nextInt(256);
+
+        // mix the color
+        red = (red + Color.red(mix)) / 2;
+        green = (green + Color.green(mix)) / 2;
+        blue = (blue + Color.blue(mix)) / 2;
+
+        int color = Color.rgb(red, green, blue);
+        return color;
     }
 
     @Override
