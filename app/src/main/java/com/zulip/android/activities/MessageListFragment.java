@@ -231,6 +231,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
                 return true;
             case R.id.copy_message:
                 copyMessage(message);
+                Toast.makeText(getContext(),R.string.message_copied, Toast.LENGTH_SHORT).show();
                 return true;
             default:
                 return super.onContextItemSelected(item);
