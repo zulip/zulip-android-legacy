@@ -31,8 +31,10 @@ import com.zulip.android.networking.response.ZulipBackendResponse;
 import com.zulip.android.networking.util.DefaultCallback;
 import com.zulip.android.util.AnimationHelper;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.List;
 
 import retrofit2.Call;
@@ -370,6 +372,23 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                                 connectionProgressDialog.dismiss();
                                 getApp().setLoggedInApiKey(response.body().getApiKey());
                                 openHome();
+                            }
+
+
+                            @Override
+                            public void onError(Call<LoginResponse> call, Response<LoginResponse> response) {
+                                connectionProgressDialog.dismiss();
+                                if (response != null && response.errorBody() != null) {
+                                    try {
+                                        JSONObject message = new JSONObject(response.errorBody().string());
+                                        Toast.makeText(LoginActivity.this, message.getString("msg"), Toast.LENGTH_LONG).show();
+                                    } catch (JSONException | IOException e) {
+                                        // oops
+                                        Toast.makeText(LoginActivity.this, R.string.login_activity_toast_login_error, Toast.LENGTH_LONG).show();
+                                    }
+                                } else {
+                                    Toast.makeText(LoginActivity.this, R.string.login_activity_toast_login_error, Toast.LENGTH_LONG).show();
+                                }
                             }
 
                             @Override

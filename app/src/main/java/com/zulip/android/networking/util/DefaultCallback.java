@@ -18,13 +18,16 @@ public class DefaultCallback<T> implements Callback<T> {
             onSuccess(call, response);
         }
         else {
-            onFailure(call, null);
+            onError(call, response);
         }
     }
 
     public void onSuccess(Call<T> call, Response<T> response) {
-
     }
+
+    public void onError(Call<T> call, Response<T> response) {
+    }
+
 
     @Override
     public void onFailure(Call<T> call, Throwable t) {
