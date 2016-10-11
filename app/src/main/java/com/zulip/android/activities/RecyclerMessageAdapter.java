@@ -389,7 +389,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     @Override
     public void onViewAttachedToWindow(RecyclerView.ViewHolder holder) {
         super.onViewRecycled(holder);
-        if (holder.getItemViewType() == VIEWTYPE_MESSAGE)
+        if (holder.getItemViewType() == VIEWTYPE_MESSAGE && !startedFromFilter)
             markThisMessageAsRead((Message) getItem(holder.getAdapterPosition()));
     }
 
@@ -400,10 +400,15 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     private void markThisMessageAsRead(Message message) {
         try {
             int mID = message.getID();
-            if (!startedFromFilter && zulipApp.getPointer() < mID) {
+            if (zulipApp.getPointer() < mID) {
                 zulipApp.syncPointer(mID);
             }
-            if (!message.getMessageRead()) {
+
+            boolean isMessageRead = false;
+            if (message.getMessageRead() != null) {
+                isMessageRead = message.getMessageRead();
+            }
+            if (!isMessageRead) {
                 try {
                     updateBuilder.where().eq(Message.ID_FIELD, message.getID());
                     updateBuilder.updateColumnValue(Message.MESSAGE_READ_FIELD, true);
