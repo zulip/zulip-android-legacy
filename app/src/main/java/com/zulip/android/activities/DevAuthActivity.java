@@ -72,6 +72,12 @@ public class DevAuthActivity extends BaseActivity {
                                 getApp().setLoggedInApiKey(response.body().getApiKey());
                                 openHome();
                             }
+
+                            @Override
+                            public void onError(Call<LoginResponse> call, Response<LoginResponse> response) {
+                                // do nothing
+                            }
+
                         });
             }
         });

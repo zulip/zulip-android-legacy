@@ -219,6 +219,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                     }
 
                     @Override
+                    public void onError(Call<ZulipBackendResponse> call, Response<ZulipBackendResponse> response) {
+                        Toast.makeText(LoginActivity.this, R.string.toast_login_failed_fetching_backends, Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
                     public void onFailure(Call<ZulipBackendResponse> call, Throwable t) {
                         super.onFailure(call, t);
                         Toast.makeText(LoginActivity.this, R.string.toast_login_failed_fetching_backends, Toast.LENGTH_SHORT).show();
@@ -272,6 +277,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                             connectionProgressDialog.dismiss();
                             getApp().setEmail(response.body().getEmail());
                             openHome();
+                        }
+
+                        @Override
+                        public void onError(Call<LoginResponse> call, Response<LoginResponse> response) {
+                            connectionProgressDialog.dismiss();
                         }
 
                         @Override
