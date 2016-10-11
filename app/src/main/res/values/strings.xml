@@ -10,6 +10,7 @@
     <string name="server_domain">Server domain</string>
     <string name="legal">Legal information</string>
     <string name="logout">Log out</string>
+    <string name="force_logged_out">You\'ve been logged out</string>
     <string name="huddle_text">You</string>
     <string name="topic">Topic</string>
     <string name="close">Close</string>

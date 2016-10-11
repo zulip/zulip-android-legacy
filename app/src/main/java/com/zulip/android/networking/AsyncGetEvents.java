@@ -222,6 +222,19 @@ public class AsyncGetEvents extends Thread {
                             Log.w(ASYNC_GET_EVENTS, "Queue dead");
                             app.setEventQueueId(null);
                             continue;
+                        } else if (eventResponse.code() == 401) {
+                            Handler handler = new Handler(Looper.getMainLooper());
+                            handler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(app.getBaseContext(), R.string.force_logged_out, Toast.LENGTH_LONG).show();
+                                    app.logOut();
+                                    Intent i = new Intent(app, LoginActivity.class);
+                                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    app.startActivity(i);
+                                }
+                            });
+                            break;
                         }
 
                         backoff(null);
