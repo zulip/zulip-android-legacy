@@ -29,6 +29,7 @@ import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageType;
 import com.zulip.android.models.Person;
 import com.zulip.android.models.Stream;
+import com.zulip.android.util.MutedTopics;
 import com.zulip.android.util.OnItemClickListener;
 import com.zulip.android.util.ZLog;
 import com.zulip.android.viewholders.LoadingHolder;
@@ -63,6 +64,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     private static String privateHuddleText;
     private List<Object> items;
     private ZulipApp zulipApp;
+    private MutedTopics mMutedTopics;
     private Context context;
     private NarrowListener narrowListener;
     private static final float HEIGHT_IN_DP = 48;
@@ -91,6 +93,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         super();
         items = new ArrayList<>();
         zulipApp = ZulipApp.get();
+        mMutedTopics = MutedTopics.get();
         this.context = context;
         narrowListener = (NarrowListener) context;
         this.startedFromFilter = startedFromFilter;
@@ -245,7 +248,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             messageHeaderParent.setMessageType(message.getType());
             messageHeaderParent.setDisplayRecipent(message.getDisplayRecipient(zulipApp));
             if (message.getType() == MessageType.STREAM_MESSAGE) {
-                messageHeaderParent.setMute(zulipApp.isTopicMute(message));
+                messageHeaderParent.setMute(mMutedTopics.isTopicMute(message));
             }
             messageHeaderParent.setColor((message.getStream() == null) ? mDefaultStreamHeaderColor : message.getStream().getParsedColor());
             items.add(messageAndHeadersCount + 1, messageHeaderParent); //1 for LoadingHeader
@@ -285,7 +288,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             item.setMessageType(message.getType());
             item.setDisplayRecipent(message.getDisplayRecipient(zulipApp));
             if (message.getType() == MessageType.STREAM_MESSAGE)
-                item.setMute(zulipApp.isTopicMute(message));
+                item.setMute(mMutedTopics.isTopicMute(message));
             item.setColor((message.getStream() == null) ? mDefaultStreamHeaderColor : message.getStream().getParsedColor());
             items.add(getItemCount(true) - 1, item);
             notifyItemInserted(getItemCount(true) - 1);
