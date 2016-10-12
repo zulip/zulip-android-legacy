@@ -69,16 +69,13 @@ public class AsyncGetOldMessages extends ZulipAsyncPushTask {
     @Override
     protected String doInBackground(String... params) {
         // Lets see whether we have this cached already
-        final RuntimeExceptionDao<MessageRange, Integer> messageRangeDao = app
-                .getDao(MessageRange.class);
-        RuntimeExceptionDao<Message, Object> messageDao = app
-                .getDao(Message.class);
+        final RuntimeExceptionDao<MessageRange, Integer> messageRangeDao = app.getDao(MessageRange.class);
+        RuntimeExceptionDao<Message, Object> messageDao = app.getDao(Message.class);
         messageDao.setObjectCache(true);
         try {
             if (rng == null) {
                 // We haven't been passed a range, see if we have a range cached
-                MessageRange protoRng = MessageRange.getRangeContaining(
-                        mainAnchor, messageRangeDao);
+                MessageRange protoRng = MessageRange.getRangeContaining(mainAnchor, messageRangeDao);
                 Log.i("AGOM", "rng retreived");
                 if (protoRng != null) {
 

@@ -169,6 +169,10 @@ public class Message {
                    Map<String, Person> personCache,
                    Map<String, Stream> streamCache) throws JSONException {
         this.setID(message.getInt("id"));
+        this.setSender(Person.getOrUpdate(app,
+                message.getString("sender_email"),
+                message.getString("sender_full_name"),
+                message.getString("avatar_url"), personCache));
 
         if (message.getString("type").equals("stream")) {
             this.setType(MessageType.STREAM_MESSAGE);
@@ -413,11 +417,11 @@ public class Message {
             TransactionManager.callInTransaction(app.getDatabaseHelper()
                     .getConnectionSource(), new Callable<Void>() {
                 public Void call() throws Exception {
-                    RuntimeExceptionDao<Message, Object> messageDao = app
-                            .getDao(Message.class);
-                    RuntimeExceptionDao<Person, Object> personDao = app.getDao(Person.class, true);
+                    RuntimeExceptionDao<Message, Object> messageDao = app.getDao(Message.class);
 
                     for (Message m : messages) {
+                        Person person = Person.getOrUpdate(app, m.getSenderEmail(), m.getSenderFullName(), m.getAvatarUrl());
+                        m.setSender(person);
                         messageDao.createOrUpdate(m);
                     }
                     return null;
@@ -604,23 +608,6 @@ public class Message {
     }
 
     public Person getSender() {
-        if(sender == null) {
-            RuntimeExceptionDao<Person, Object> dao = ZulipApp.get().getDao(Person.class, true);
-            try {
-                sender = dao.queryBuilder().where().eq(Person.EMAIL_FIELD, senderEmail).queryForFirst();
-            } catch (SQLException e) {
-                ZLog.logException(e);
-            }
-            if(sender == null) {
-                sender = new Person(senderFullName, senderEmail, avatarUrl);
-                try {
-                    dao.createOrUpdate(sender);
-                }
-                catch (Exception e) {
-                    ZLog.logException(e);
-                }
-            }
-        }
         return sender;
     }
 
