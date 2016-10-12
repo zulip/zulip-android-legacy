@@ -37,8 +37,8 @@ public class GetEventResponse {
         try {
             List<R> types = new ArrayList<>(events.size());
             for (int i = 0; i < events.size(); i++) {
-                if (events.getClass().equals(branchType.getKlazz())) {
-                    EventsBranch orig = events.get(i);
+                EventsBranch orig = events.get(i);
+                if (orig.getClass().equals(branchType.getKlazz())) {
                     if(converter != null) {
                         types.add(converter.convert((T) orig));
                     }
