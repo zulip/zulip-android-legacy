@@ -340,6 +340,16 @@ public class ZulipApp extends Application {
         return settings.getString("server_url", DEFAULT_SERVER_URL);
     }
 
+    public String getServerHostUri() {
+        String uri = settings.getString("server_url", DEFAULT_SERVER_URL);
+        if (uri.contains("/api/")) {
+            uri = uri.replace("/api/", "/");
+        } else if (uri.contains("/api.")) {
+            uri = uri.replace("/api.", "/");
+        }
+        return uri;
+    }
+
     public String getApiKey() {
         return api_key;
     }
