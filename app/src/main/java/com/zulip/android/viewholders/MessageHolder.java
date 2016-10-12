@@ -38,6 +38,10 @@ public class MessageHolder extends RecyclerView.ViewHolder implements View.OnCli
         contentView.setOnClickListener(this);
         contentView.setLongClickable(true);
         itemView.setOnCreateContextMenuListener(this);
+
+        // Add click listener to sender view
+        View senderView = itemView.findViewById(R.id.senderTile);
+        if (senderView != null) senderView.setOnClickListener(this);
     }
 
     @Override

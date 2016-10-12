@@ -126,7 +126,6 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                             narrowListener.onNarrowFillSendBoxStream(messageHeaderParent.getStream(), "", false);
                         }
                         break;
-
                     case R.id.instance: //Topic
                         MessageHeaderParent messageParent = (MessageHeaderParent) getItem(position);
                         if (messageParent.getMessageType() == MessageType.STREAM_MESSAGE) {
@@ -138,11 +137,11 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                             narrowListener.onNarrowFillSendBoxPrivate(recipentArray, false);
                         }
                         break;
+                    case R.id.senderTile: // Sender Tile
                     case R.id.contentView: //Main message
                         Message message = (Message) getItem(position);
                         narrowListener.onNarrowFillSendBox(message, false);
                         break;
-
                     case R.id.messageTile:
                         Message msg = (Message) getItem(position);
                         try {
