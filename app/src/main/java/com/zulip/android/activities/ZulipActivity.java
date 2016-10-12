@@ -1229,9 +1229,13 @@ public class ZulipActivity extends BaseActivity implements
         displayFAB(false);
         switchToPrivate();
         ArrayList<String> names = new ArrayList<String>();
-        for (Person person : peopleList) {
-            if (person.getId() != app.getYou().getId()) {
-                names.add(person.getEmail());
+        if (peopleList.length == 1) {
+            names.add(peopleList[0].getEmail());
+        } else {
+            for (Person person : peopleList) {
+                if (person.getId() != app.getYou().getId()) {
+                    names.add(person.getEmail());
+                }
             }
         }
         topicActv.setText(TextUtils.join(", ", names));
