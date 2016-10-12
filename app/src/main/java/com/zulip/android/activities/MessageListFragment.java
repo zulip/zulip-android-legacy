@@ -28,6 +28,7 @@ import com.zulip.android.filters.NarrowFilterPM;
 import com.zulip.android.filters.NarrowFilterStream;
 import com.zulip.android.filters.NarrowListener;
 import com.zulip.android.models.Message;
+import com.zulip.android.models.Person;
 import com.zulip.android.models.Stream;
 import com.zulip.android.networking.AsyncGetOldMessages;
 import com.zulip.android.networking.ZulipAsyncPushTask;
@@ -209,7 +210,8 @@ public class MessageListFragment extends Fragment implements MessageListener {
                 ((NarrowListener) getActivity()).onNarrowFillSendBox(message, true);
                 return true;
             case R.id.reply_to_sender:
-                ((NarrowListener) getActivity()).onNarrowFillSendBox(message, true);
+                Person[] senderList = {message.getSender()};
+                ((NarrowListener) getActivity()).onNarrowFillSendBoxPrivate(senderList, true);
                 return true;
             case R.id.narrow_to_private:
                 if (getActivity() instanceof NarrowListener) {
