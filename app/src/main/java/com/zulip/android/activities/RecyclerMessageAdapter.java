@@ -33,6 +33,7 @@ import com.zulip.android.models.Person;
 import com.zulip.android.models.Stream;
 import com.zulip.android.util.MutedTopics;
 import com.zulip.android.util.OnItemClickListener;
+import com.zulip.android.util.UrlHelper;
 import com.zulip.android.util.ZLog;
 import com.zulip.android.viewholders.LoadingHolder;
 import com.zulip.android.viewholders.MessageHeaderParent;
@@ -442,7 +443,10 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             Resources resources = context.getResources();
             float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                     35, resources.getDisplayMetrics());
+
+
             String url = message.getSender().getAvatarURL() + "&s=" + px;
+            url = UrlHelper.addHost(url);
 
             Picasso.with(context)
                     .load(url)
