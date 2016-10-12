@@ -33,6 +33,9 @@
         android:id="@+id/logout"
         android:title="@string/logout" />
     <item
+        android:id="@+id/help"
+        android:title="Help" />
+    <item
         android:id="@+id/legal"
         android:title="@string/legal" />
 </menu>
