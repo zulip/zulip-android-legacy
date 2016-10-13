@@ -36,6 +36,7 @@ import com.zulip.android.networking.ZulipInterceptor;
 import com.zulip.android.networking.response.UserConfigurationResponse;
 import com.zulip.android.networking.response.events.EventsBranch;
 import com.zulip.android.service.ZulipServices;
+import com.zulip.android.util.GoogleAuthHelper;
 import com.zulip.android.util.ZLog;
 
 import java.io.IOException;
@@ -398,6 +399,8 @@ public class ZulipApp extends Application {
         ed.apply();
         this.api_key = null;
         setEventQueueId(null);
+
+        new GoogleAuthHelper().logOutGoogleAuth();
     }
 
     public String getEmail() {
@@ -527,4 +530,5 @@ public class ZulipApp extends Application {
             }
         });
     }
+
 }

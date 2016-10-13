@@ -346,6 +346,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                     .build();
 
             mGoogleApiClient.connect();
+
             allowUserToPickAccount();
         } else {
             allowUserToPickAccount();
