@@ -9,7 +9,10 @@
         android:layout_height="fill_parent"
         android:background="@color/listBackground"
         android:fadeScrollbars="false"
-        android:scrollbars="vertical" />
+        android:scrollbars="vertical"
+        android:paddingBottom="120dp"
+        android:clipToPadding="false"
+        />
 
     <TextView
         android:id="@+id/emptyList"
