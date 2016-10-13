@@ -289,17 +289,17 @@ public class ZulipActivity extends BaseActivity implements
         super.onCreate(savedInstanceState);
 
         app = (ZulipApp) getApplicationContext();
-        settings = app.getSettings();
-        if (mMutedTopics == null) {
-            mMutedTopics = MutedTopics.get();
-        }
-
         processParams();
 
         if (!app.isLoggedIn()) {
             openLogin();
             return;
         }
+
+        if (mMutedTopics == null) {
+            mMutedTopics = MutedTopics.get();
+        }
+
         this.logged_in = true;
         notifications = new Notifications(this);
         notifications.register();
