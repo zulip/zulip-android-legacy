@@ -381,11 +381,11 @@ public class ZulipApp extends Application {
         setServerURL(DEFAULT_SERVER_URL);
     }
 
-    public void setLoggedInApiKey(String apiKey) {
+    public void setLoggedInApiKey(String apiKey, String email) {
         this.api_key = apiKey;
         Editor ed = this.settings.edit();
-        ed.putString(EMAIL, this.getEmail());
-        ed.putString(API_KEY, api_key);
+        ed.putString(EMAIL, email);
+        ed.putString(API_KEY, apiKey);
         ed.apply();
         afterLogin();
     }

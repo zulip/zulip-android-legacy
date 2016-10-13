@@ -275,7 +275,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                         @Override
                         public void onSuccess(Call<LoginResponse> call, Response<LoginResponse> response) {
                             connectionProgressDialog.dismiss();
-                            getApp().setEmail(response.body().getEmail());
+                            getApp().setLoggedInApiKey(response.body().getApiKey(), response.body().getEmail());
                             openHome();
                         }
 
@@ -372,7 +372,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                 connectionProgressDialog.show();
                 String username = mUserName.getText().toString();
                 String password = mPassword.getText().toString();
-                getApp().setEmail(username);
                 getServices()
                         .login(username, password)
                         .enqueue(new DefaultCallback<LoginResponse>() {
@@ -380,7 +379,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                             @Override
                             public void onSuccess(Call<LoginResponse> call, Response<LoginResponse> response) {
                                 connectionProgressDialog.dismiss();
-                                getApp().setLoggedInApiKey(response.body().getApiKey());
+                                getApp().setLoggedInApiKey(response.body().getApiKey(), response.body().getEmail());
                                 openHome();
                             }
 

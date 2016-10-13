@@ -61,15 +61,12 @@ public class DevAuthActivity extends BaseActivity {
         authEmailAdapter.setOnItemClickListener(new AuthClickListener() {
             @Override
             public void onItemClick(String email) {
-                if(email.contains("@")) {
-                    getApp().setEmail(email);
-                }
                 getServices()
                         .loginDEV(email)
                         .enqueue(new DefaultCallback<LoginResponse>() {
                             @Override
                             public void onSuccess(Call<LoginResponse> call, Response<LoginResponse> response) {
-                                getApp().setLoggedInApiKey(response.body().getApiKey());
+                                getApp().setLoggedInApiKey(response.body().getApiKey(), response.body().getEmail());
                                 openHome();
                             }
 
