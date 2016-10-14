@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="40dp"
+        android:src="@drawable/privatechat"
+        android:layout_alignParentBottom="true" />
+
+    <TextView
+        android:layout_width="50dp"
+        android:layout_height="20dp"
+        android:id="@+id/private_chat"
+        android:layout_marginTop="60dp"
+        android:layout_marginLeft="80dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+
+        android:layout_marginTop="60dp"
+        android:layout_marginLeft="120dp"
+        android:id="@+id/press_button"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/search_view"
+        android:layout_toEndOf="@+id/search_view" />
+
+    <TextView
+        android:layout_width="150dp"
+        android:layout_height="100dp"
+        android:id="@+id/results"
+        android:layout_marginLeft="80dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="200dp" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Continue"
+        android:id="@+id/button"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
+
+</RelativeLayout>

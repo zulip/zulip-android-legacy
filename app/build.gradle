@@ -75,6 +75,7 @@ dependencies {
     compile 'commons-lang:commons-lang:2.6'
     compile 'org.ccil.cowan.tagsoup:tagsoup:1.2.1'
     compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'com.github.amlcurran.showcaseview:library:5.4.3'
     compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
         transitive = true;
     }

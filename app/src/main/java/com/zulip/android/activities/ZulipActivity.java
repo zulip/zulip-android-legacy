@@ -1404,6 +1404,9 @@ public class ZulipActivity extends BaseActivity implements
             case R.id.logout:
                 logout();
                 break;
+            case R.id.help:
+                openHelp();
+                break;
             case R.id.legal:
                 openLegal();
                 break;
@@ -1453,7 +1456,10 @@ public class ZulipActivity extends BaseActivity implements
         startActivityForResult(i, 0);
     }
 
-    public void onConfigurationChanged(Configuration newConfig) {
+    private void openHelp() {
+        Intent i = new Intent(this,MessageExplain.class);
+        startActivity(i);
+}   public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
         // our display has changed, lets recalculate the spacer
