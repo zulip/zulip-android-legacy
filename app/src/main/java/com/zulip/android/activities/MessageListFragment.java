@@ -68,6 +68,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
     private boolean paused = false;
     private boolean initialized = false;
     private List<Message> messageList;
+
     public MessageListFragment() {
         app = ZulipApp.get();
         mMutedTopics = MutedTopics.get();
@@ -475,6 +476,35 @@ public class MessageListFragment extends Fragment implements MessageListener {
         });
     }
 
+    private void loadMessageId(int id) {
+        if (lastMessageId > id) {
+            int index = adapter.getItemIndex(id);
+            if (index != -1) {
+                recyclerView.scrollToPosition(adapter.getItemIndex(id));
+                return;
+            }
+        }
+        AsyncGetOldMessages oldMessagesReq = new AsyncGetOldMessages(this);
+        oldMessagesReq.setCallback(new ZulipAsyncPushTask.AsyncTaskCompleteListener() {
+            @Override
+            public void onTaskComplete(String result, JSONObject jsonObject) {
+                adapter.setFooterShowing(false);
+                loadingMessages = false;
+            }
+
+            @Override
+            public void onTaskFailure(String result) {
+                Toast.makeText(getActivity(), R.string.no_message, Toast.LENGTH_SHORT).show();
+                adapter.setFooterShowing(false);
+                loadingMessages = false;
+            }
+        });
+        adapter.clear();
+        adapter.setFooterShowing(true);
+        loadingMessages = true;
+        oldMessagesReq.execute(id, LoadPosition.BELOW, 0, 100, filter);
+    }
+
     private Boolean listHasMostRecent() {
         return lastMessageId == app.getMaxMessageId();
     }
@@ -503,4 +533,13 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
         void clearChatBox();
     }
+
+    public void showLatestMessages() {
+        if (listHasMostRecent()) {
+            recyclerView.scrollToPosition(adapter.getItemCount() - 1);
+        } else {
+            loadMessageId(app.getMaxMessageId());
+        }
+    }
+
 }
