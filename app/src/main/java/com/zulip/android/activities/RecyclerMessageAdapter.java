@@ -549,6 +549,15 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         return items.indexOf(message);
     }
 
+    public int getItemIndex(int id) {
+        for (int i = 0; i < items.size(); i++) {
+            if (items.get(i) instanceof Message && ((Message) items.get(i)).getId() == id) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     public Object getItem(int position) {
         return items.get(position);
     }
