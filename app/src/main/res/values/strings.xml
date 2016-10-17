@@ -118,4 +118,15 @@
     <string name="enter_date">Enter Date</string>
     <string name="message_not_subscribed">Not subscribed to</string>
     <string name="keyword_stream">stream</string>
+    <plurals name="new_message" formatted="false">
+        <item quantity="one">%1$d new message %2$s</item>
+        <item quantity="other">%1$d new messages %2$s</item>
+    </plurals>
+    <string name="SHOW">SHOW</string>
+    <string name="notify_stream" formatted="false">" in %1$s/%2$s"</string>
+    <string name="notify_private" formatted="false">from %1$s</string>
+    <plurals name="new_message_mul_sender">
+        <item quantity="one">%d new message</item>
+        <item quantity="other">%d new messages</item>
+    </plurals>
 </resources>

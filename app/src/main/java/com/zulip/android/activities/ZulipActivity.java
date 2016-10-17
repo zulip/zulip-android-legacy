@@ -1,6 +1,15 @@
 package com.zulip.android.activities;
 
 import android.Manifest;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.Callable;
+import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
+
 import android.animation.Animator;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -29,7 +38,9 @@ import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
@@ -47,6 +58,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -539,6 +551,7 @@ public class ZulipActivity extends BaseActivity implements
         }
         handleOnFragmentChange();
         calendar = Calendar.getInstance();
+        setupSnackBar();
     }
 
     /**
@@ -2040,6 +2053,66 @@ public class ZulipActivity extends BaseActivity implements
         if (narrowedList != null) {
             narrowedList.onNewMessages(messages);
         }
+        showSnackbarNotification(messages); //Show notification
+    }
+
+    Snackbar snackbar;
+
+    private void setupSnackBar() {
+        final CoordinatorLayout coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout);
+        snackbar = Snackbar.make(coordinatorLayout, "", Snackbar.LENGTH_LONG);
+        View v = snackbar.getView();
+        CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) v.getLayoutParams();
+        params.gravity = Gravity.TOP;
+        v.setLayoutParams(params);
+    }
+
+    NarrowFilter narrowFilter;
+
+    private void showSnackbarNotification(Message[] messages) {
+        MutedTopics mutedTopics = MutedTopics.get();
+        String prevId = null;
+        int nonMutedMessagesCount = 0;
+        Message tempMessage = null; //Stores a temporary message which is non-muted, later used for retrieving Stream/Topic
+        for (Message message : messages) { //Check if all messages from same topic/private and remove all the muted messages
+            if (message.getType() == MessageType.STREAM_MESSAGE && mutedTopics.isTopicMute(message))
+                continue;
+            nonMutedMessagesCount++;
+            if (prevId != null && !prevId.equals(message.getIdForHolder())) {
+                prevId = null;
+                tempMessage = null;
+                break;
+            }
+            prevId = message.getIdForHolder();
+            if (tempMessage == null) tempMessage = message;
+        }
+        if (nonMutedMessagesCount == 0) return;
+        if (prevId == null) {
+            snackbar.setText(getResources().getQuantityString(R.plurals.new_message_mul_sender, nonMutedMessagesCount, nonMutedMessagesCount));
+            narrowFilter = null;
+            if (narrowedList != null) {
+                narrowedList = null;
+                getSupportFragmentManager().popBackStack(NARROW,
+                        FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            }
+            snackbar.setAction(R.string.SHOW, new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    homeList.showLatestMessages();
+                }
+            });
+        } else {
+            String name = (tempMessage.getType() == MessageType.PRIVATE_MESSAGE) ? getString(R.string.notify_private, tempMessage.getSenderFullName()) : getString(R.string.notify_stream, tempMessage.getStream().getName() , tempMessage.getSubject());
+            snackbar.setText(getResources().getQuantityString(R.plurals.new_message, nonMutedMessagesCount, nonMutedMessagesCount, name));
+            narrowFilter = (tempMessage.getType() == MessageType.PRIVATE_MESSAGE) ? new NarrowFilterPM(Arrays.asList(tempMessage.getRecipients(app))) : new NarrowFilterStream(tempMessage.getStream(), tempMessage.getSubject());
+            snackbar.setAction(R.string.SHOW, new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    doNarrow(narrowFilter);
+                }
+            });
+        }
+        snackbar.show();
     }
 
     // Intent Extra constants
