@@ -5,10 +5,8 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.Callable;
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
 
 import android.animation.Animator;
 import android.annotation.SuppressLint;
@@ -58,6 +56,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -168,6 +167,8 @@ public class ZulipActivity extends BaseActivity implements
     private AsyncGetEvents event_poll;
     private Handler statusUpdateHandler;
     private Runnable statusUpdateRunnable;
+
+    private int mToolbarHeightInPx;
     private MessageListFragment narrowedList;
     private MessageListFragment homeList;
     private AutoCompleteTextView streamActv;
@@ -2057,14 +2058,17 @@ public class ZulipActivity extends BaseActivity implements
     }
 
     Snackbar snackbar;
-
+    CoordinatorLayout.LayoutParams snackBarParams;
     private void setupSnackBar() {
         final CoordinatorLayout coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout);
         snackbar = Snackbar.make(coordinatorLayout, "", Snackbar.LENGTH_LONG);
         View v = snackbar.getView();
-        CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) v.getLayoutParams();
-        params.gravity = Gravity.TOP;
-        v.setLayoutParams(params);
+        snackBarParams = (CoordinatorLayout.LayoutParams) v.getLayoutParams();
+        snackBarParams.gravity = Gravity.TOP;
+        v.setLayoutParams(snackBarParams);
+        TypedValue tv = new TypedValue();
+        if (getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true))
+            mToolbarHeightInPx = TypedValue.complexToDimensionPixelSize(tv.data, getResources().getDisplayMetrics());
     }
 
     NarrowFilter narrowFilter;
@@ -2111,6 +2115,11 @@ public class ZulipActivity extends BaseActivity implements
                     doNarrow(narrowFilter);
                 }
             });
+        }
+        if (appBarLayout.getVisibility() == View.GONE) {
+            snackBarParams.setMargins(0, 0, 0, 0);
+        } else {
+            snackBarParams.setMargins(0, mToolbarHeightInPx, 0, 0);
         }
         snackbar.show();
     }
