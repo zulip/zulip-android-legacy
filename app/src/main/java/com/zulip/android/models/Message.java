@@ -21,6 +21,7 @@ import com.j256.ormlite.table.DatabaseTable;
 import com.zulip.android.R;
 import com.zulip.android.ZulipApp;
 import com.zulip.android.util.CustomHtmlToSpannedConverter;
+import com.zulip.android.util.UrlHelper;
 import com.zulip.android.util.ZLog;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -763,7 +764,7 @@ public class Message {
         match = match.substring(0, match.indexOf("\""));
 
         if(match.indexOf("/") == 0) {
-            return zulipApp.getServerURI().substring(0, zulipApp.getServerURI().indexOf("/api")) + match;
+            return UrlHelper.addHost(match);
         }
         return match;
     }
