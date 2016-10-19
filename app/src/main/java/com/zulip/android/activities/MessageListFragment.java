@@ -48,7 +48,6 @@ import java.util.List;
  * initiated and called by {@link ZulipActivity}
  */
 public class MessageListFragment extends Fragment implements MessageListener {
-    private static final int PIXEL_OFFSET_MESSAGE_HEADERS = 24;
     private LinearLayoutManager linearLayoutManager;
     private MutedTopics mMutedTopics;
 
@@ -154,7 +153,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
         linearLayoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(linearLayoutManager);
         adapter = new RecyclerMessageAdapter(messageList, getActivity(), (filter != null));
-        recyclerView.addItemDecoration(new HeaderSpaceItemDecoration(PIXEL_OFFSET_MESSAGE_HEADERS, getContext()));
+        recyclerView.addItemDecoration(new HeaderSpaceItemDecoration(getContext()));
         recyclerView.setAdapter(adapter);
         registerForContextMenu(recyclerView);
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
