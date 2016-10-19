@@ -8,82 +8,78 @@
                 android:paddingEnd="8dp"
                 android:paddingRight="8dp">
 
-    <View
-        android:id="@+id/leftBar"
-        android:layout_width="8dp"
-        android:layout_height="match_parent"
-        android:layout_alignBottom="@+id/contentView"
-        android:layout_alignParentTop="true"
-        android:background="@android:color/holo_blue_dark" />
 
     <LinearLayout
-        android:id="@+id/senderTile"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:layout_toEndOf="@+id/gravatar"
         android:layout_toRightOf="@+id/gravatar"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingLeft="8dp"
-        android:paddingStart="8dp"
-        tools:background="#FFF">
+        android:id="@+id/contentBox"
+        >
+
+        <LinearLayout
+            android:id="@+id/senderTile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingLeft="8dp"
+            android:paddingStart="8dp"
+            tools:background="#FFF">
+
+            <TextView
+                android:paddingTop="10dp"
+                android:id="@+id/senderName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="@color/colorTextPrimary"
+                android:textStyle="bold"
+                tools:text="Sender &lt;alice@example.com&gt;" />
+
+            <TextView
+                android:id="@+id/timestamp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorTextTertiary"
+                tools:text="17:45" />
+
+
+        </LinearLayout>
 
         <TextView
-            android:paddingTop="10dp"
-            android:id="@+id/senderName"
-            android:layout_width="0dp"
+            android:id="@+id/contentView"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textColor="@color/colorTextPrimary"
-            android:textStyle="bold"
-            tools:text="Sender &lt;alice@example.com&gt;" />
+            android:layout_marginTop="4dp"
+            android:paddingEnd="16dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="16dp"
+            android:paddingStart="8dp"
+            tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam mollis pretium purus, faucibus accumsan enim placerat non. " />
 
-        <TextView
-            android:id="@+id/timestamp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/colorTextTertiary"
-            tools:text="17:45" />
+        <FrameLayout
+            android:id="@+id/load_image_container"
+            android:layout_width="match_parent"
+            android:layout_height="175dp"
+            android:layout_marginTop="20dp"
+            android:maxHeight="200dp"
+            android:visibility="gone"
+            tools:visibility="visible">
 
+            <ImageView
+                android:id="@+id/load_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@color/colorAccent"
+                android:scaleType="centerInside"
+                tools:src="@drawable/ic_arrow_back_24dp"/>
+
+        </FrameLayout>
 
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/contentView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/senderTile"
-        android:layout_marginTop="4dp"
-        android:layout_toEndOf="@+id/gravatar"
-        android:layout_toRightOf="@+id/gravatar"
-        android:paddingEnd="16dp"
-        android:paddingLeft="8dp"
-        android:paddingRight="16dp"
-        android:paddingStart="8dp"
-        tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam mollis pretium purus, faucibus accumsan enim placerat non. " />
-
-    <FrameLayout
-        android:id="@+id/load_image_container"
-        android:layout_width="match_parent"
-        android:layout_height="175dp"
-        android:layout_below="@id/contentView"
-        android:layout_centerHorizontal="true"
-        android:layout_marginLeft="16dp"
-        android:layout_marginTop="20dp"
-        android:maxHeight="200dp"
-        android:visibility="gone"
-        tools:visibility="visible">
-
-        <ImageView
-            android:id="@+id/load_image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:background="@color/colorAccent"
-            android:scaleType="centerInside"
-            tools:src="@drawable/ic_arrow_back_24dp"/>
-
-    </FrameLayout>
 
     <ImageView
         android:paddingTop="10dp"
@@ -97,4 +93,11 @@
         android:scaleType="centerInside"
         android:src="@android:drawable/presence_online" />
 
+    <View
+        android:id="@+id/leftBar"
+        android:layout_width="8dp"
+        android:layout_height="match_parent"
+        android:layout_alignBottom="@id/contentBox"
+        android:layout_alignParentTop="true"
+        android:background="@android:color/holo_blue_dark" />
 </RelativeLayout>
