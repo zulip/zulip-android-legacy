@@ -542,11 +542,6 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         notifyDataSetChanged();
     }
 
-    public void remove(Message msg) {
-        items.remove(msg);
-        notifyDataSetChanged();
-    }
-
     public int getItemIndex(Message message) {
         return items.indexOf(message);
     }
