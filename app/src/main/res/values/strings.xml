@@ -89,4 +89,8 @@
     <string name="no_topic_in_message">(no topic)</string>
     <string name="message_copied">Message Copied</string>
     <string name="login_failed">Unable to login</string>
+    <string name="uploading_message">Uploading</string>
+    <string name="cannot_upload_image">Cannot Upload Image</string>
+    <string name="cannot_find_image">Could not find the image</string>
+    <string name="failed_to_upload">Failed to upload</string>
 </resources>

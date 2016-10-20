@@ -1,13 +1,6 @@
 package com.zulip.android.activities;
 
-import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
-
+import android.Manifest;
 import android.animation.Animator;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -20,6 +13,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.MatrixCursor;
@@ -27,6 +21,7 @@ import android.database.MergeCursor;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -34,6 +29,7 @@ import android.os.Handler;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
@@ -42,7 +38,6 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
@@ -68,46 +63,53 @@ import android.widget.Toast;
 
 import com.j256.ormlite.android.AndroidDatabaseResults;
 import com.zulip.android.BuildConfig;
+import com.zulip.android.R;
+import com.zulip.android.ZulipApp;
 import com.zulip.android.database.DatabaseHelper;
-import com.zulip.android.models.Emoji;
-import com.zulip.android.filters.NarrowFilterToday;
-import com.zulip.android.models.Message;
-import com.zulip.android.models.MessageType;
 import com.zulip.android.filters.NarrowFilter;
 import com.zulip.android.filters.NarrowFilterAllPMs;
 import com.zulip.android.filters.NarrowFilterPM;
 import com.zulip.android.filters.NarrowFilterSearch;
 import com.zulip.android.filters.NarrowFilterStream;
+import com.zulip.android.filters.NarrowFilterToday;
 import com.zulip.android.filters.NarrowListener;
+import com.zulip.android.gcm.GcmBroadcastReceiver;
 import com.zulip.android.gcm.Notifications;
+import com.zulip.android.models.Emoji;
+import com.zulip.android.models.Message;
+import com.zulip.android.models.MessageType;
 import com.zulip.android.models.Person;
 import com.zulip.android.models.Presence;
 import com.zulip.android.models.PresenceType;
-import com.zulip.android.R;
 import com.zulip.android.models.Stream;
-import com.zulip.android.networking.AsyncSend;
-import com.zulip.android.networking.ZulipInterceptor;
-import com.zulip.android.networking.response.UserConfigurationResponse;
-import com.zulip.android.service.ZulipServices;
-import com.zulip.android.util.AnimationHelper;
-import com.zulip.android.util.MutedTopics;
-import com.zulip.android.util.SwipeRemoveLinearLayout;
-import com.zulip.android.util.ZLog;
-import com.zulip.android.ZulipApp;
-import com.zulip.android.gcm.GcmBroadcastReceiver;
 import com.zulip.android.networking.AsyncGetEvents;
+import com.zulip.android.networking.AsyncSend;
 import com.zulip.android.networking.AsyncStatusUpdate;
 import com.zulip.android.networking.ZulipAsyncPushTask;
+import com.zulip.android.networking.response.UploadResponse;
+import com.zulip.android.util.AnimationHelper;
+import com.zulip.android.util.FilePathHelper;
+import com.zulip.android.util.MutedTopics;
+import com.zulip.android.util.SwipeRemoveLinearLayout;
+import com.zulip.android.util.UrlHelper;
+import com.zulip.android.util.ZLog;
 
 import org.json.JSONObject;
 
-import okhttp3.OkHttpClient;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
+import java.io.File;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.Callable;
+
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.Response;
 
 /**
  * The main Activity responsible for holding the {@link MessageListFragment} which has the list to the
@@ -122,6 +124,7 @@ public class ZulipActivity extends BaseActivity implements
     private static final int MAX_THRESOLD_EMOJI_HINT = 5;
     //At these many letters the emoji/person hint starts to show up
     private static final int MIN_THRESOLD_EMOJI_HINT = 1;
+    private static final int PERMISSION_REQUEST_READ_CONTACTS = 1;
     private ZulipApp app;
     private List<Message> mutedTopics;
 
@@ -178,6 +181,8 @@ public class ZulipActivity extends BaseActivity implements
         }
     };
     private ExpandableStreamDrawerAdapter streamsDrawerAdapter;
+    private boolean mReadExternalStorage;
+    private Uri mImageUri;
 
     @Override
     public void removeChatBox(boolean animToRight) {
@@ -535,6 +540,158 @@ public class ZulipActivity extends BaseActivity implements
             }
         });
         messageEt.setAdapter(combinedAdapter);
+
+        // Get intent, action and MIME type
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        String type = intent.getType();
+
+        if (Intent.ACTION_SEND.equals(action) && type != null) {
+            if (type.startsWith("image/")) {
+                // Handle single image being sent
+                handleSentImage(intent);
+            }
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        // Get action and MIME type of intent
+        String action = intent.getAction();
+        String type = intent.getType();
+
+        if (Intent.ACTION_SEND.equals(action) && type != null) {
+            if (type.startsWith("image/")) {
+                // Handle single image being sent
+                handleSentImage(intent);
+            }
+        }
+    }
+
+    /**
+     * Function invoked when a user shares an image with the zulip app
+     * @param intent passed to the activity with action SEND
+     */
+    private void handleSentImage(Intent intent) {
+        mImageUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
+        if (mImageUri != null) {
+            // check if user has granted read external storage permission
+            // for Android 6.0 or higher
+            if (ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.READ_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                // we need to request the permission.
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        PERMISSION_REQUEST_READ_CONTACTS);
+            } else {
+                // permission already granted
+                // start with file upload
+                startFileUpload();
+            }
+        } else {
+            Toast.makeText(this, R.string.cannot_find_image, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+
+        switch (requestCode) {
+            case PERMISSION_REQUEST_READ_CONTACTS: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission granted
+                    // start with file upload
+                    startFileUpload();
+                } else {
+                    // permission denied
+                    Toast.makeText(this, R.string.cannot_upload_image, Toast.LENGTH_SHORT).show();
+                }
+            }
+            break;
+        }
+    }
+
+    /**
+     * Helper function to update UI to indicate image is being uploaded and call
+     * {@link ZulipActivity#uploadFile(String)} to upload the image.
+     */
+    private void startFileUpload() {
+        // Update UI to indicate image is being loaded
+        // hide fab and display chatbox
+        displayFAB(false);
+        displayChatBox(true);
+        String loadingMsg = getResources().getString(R.string.uploading_message);
+        sendingMessage(true, loadingMsg);
+
+        // get actual file path
+        String imageFilePath = FilePathHelper.getPath(this, mImageUri);
+
+        // upload the file asynchronously to the server
+        uploadFile(imageFilePath);
+    }
+
+    /**
+     * Function to upload file asynchronously to the server using retrofit callback
+     * upload {@link com.zulip.android.service.ZulipServices#upload(MultipartBody.Part)}
+     * @param filePath on local storage
+     */
+    private void uploadFile(String filePath) {
+        File file = new File(filePath);
+
+        // create RequestBody instance from file
+        RequestBody requestFile =
+                RequestBody.create(MediaType.parse("multipart/form-data"), file);
+
+        // MultipartBody.Part is used to send also the actual file name
+        MultipartBody.Part body =
+                MultipartBody.Part.createFormData("picture", file.getName(), requestFile);
+
+        final String loadingMsg = getResources().getString(R.string.uploading_message);
+
+        // finally, execute the request
+        // create upload service client
+        Call<UploadResponse> call = ((ZulipApp) getApplicationContext()).getZulipServices().upload(body);
+        call.enqueue(new Callback<UploadResponse>() {
+            @Override
+            public void onResponse(Call<UploadResponse> call,
+                                   Response<UploadResponse> response) {
+                if (response.isSuccessful()) {
+                    String filePathOnServer = "";
+                        UploadResponse uploadResponse = response.body();
+                        filePathOnServer = uploadResponse.getUri();
+                    if (!filePathOnServer.equals("")) {
+                        // remove loading message from the screen
+                        sendingMessage(false, loadingMsg);
+
+                        // print message to compose box
+                        messageEt.append(" " + UrlHelper.addHost(filePathOnServer));
+                    } else {
+                        // remove loading message from the screen
+                        sendingMessage(false, loadingMsg);
+                        Toast.makeText(ZulipActivity.this, R.string.failed_to_upload, Toast.LENGTH_SHORT).show();
+                    }
+                }
+                else {
+                    // remove loading message from the screen
+                    sendingMessage(false, loadingMsg);
+                    Toast.makeText(ZulipActivity.this, R.string.failed_to_upload, Toast.LENGTH_SHORT).show();
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<UploadResponse> call, Throwable t) {
+                // remove loading message from the screen
+                sendingMessage(false, loadingMsg);
+                ZLog.logException(t);
+            }
+        });
     }
 
     /**
@@ -845,7 +1002,8 @@ public class ZulipActivity extends BaseActivity implements
             messageEt.requestFocus();
             return;
         }
-        sendingMessage(true);
+        final String sendingMsg = getResources().getString(R.string.sending_message);
+        sendingMessage(true, sendingMsg);
         MessageType messageType = isCurrentModeStream() ? MessageType.STREAM_MESSAGE : MessageType.PRIVATE_MESSAGE;
         Message msg = new Message(app);
         msg.setSender(app.getYou());
@@ -864,13 +1022,13 @@ public class ZulipActivity extends BaseActivity implements
             public void onTaskComplete(String result, JSONObject jsonObject) {
                 Toast.makeText(ZulipActivity.this, R.string.message_sent, Toast.LENGTH_SHORT).show();
                 messageEt.setText("");
-                sendingMessage(false);
+                sendingMessage(false, sendingMsg);
             }
 
             public void onTaskFailure(String result) {
                 Log.d("onTaskFailure", "Result: " + result);
                 Toast.makeText(ZulipActivity.this, R.string.message_error, Toast.LENGTH_SHORT).show();
-                sendingMessage(false);
+                sendingMessage(false, sendingMsg);
             }
         });
         sender.execute();
@@ -879,15 +1037,18 @@ public class ZulipActivity extends BaseActivity implements
     /**
      * Disable chatBox and show a loading footer while sending the message.
      */
-    private void sendingMessage(boolean isSending) {
+    private void sendingMessage(boolean isSending, String message) {
         streamActv.setEnabled(!isSending);
         textView.setEnabled(!isSending);
         messageEt.setEnabled(!isSending);
         topicActv.setEnabled(!isSending);
         sendBtn.setEnabled(!isSending);
         togglePrivateStreamBtn.setEnabled(!isSending);
-        if (isSending)
+        if (isSending) {
+            TextView msg = (TextView) composeStatus.findViewById(R.id.sending_message);
+            msg.setText(message);
             composeStatus.setVisibility(View.VISIBLE);
+        }
         else
             composeStatus.setVisibility(View.GONE);
     }
@@ -981,7 +1142,7 @@ public class ZulipActivity extends BaseActivity implements
             }
         });
 
-        sendingMessage(false);
+        sendingMessage(false, getResources().getString(R.string.sending_message));
     }
 
     /**
