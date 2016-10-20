@@ -63,8 +63,6 @@ public class MessageListFragment extends Fragment implements MessageListener {
     public interface Listener {
         void onListResume(MessageListFragment f);
 
-        void addToList(Message message);
-
         void recyclerViewScrolled();
 
         void clearChatBox();
@@ -374,7 +372,6 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
             if (stream != null && filter == null) { //Filter muted messages only in homescreen.
                 if (mMutedTopics.isTopicMute(message)) {
-                    mListener.addToList(message);
                     continue;
                 }
             }

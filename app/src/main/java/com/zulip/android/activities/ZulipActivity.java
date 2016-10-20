@@ -12,7 +12,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
@@ -126,14 +125,11 @@ public class ZulipActivity extends BaseActivity implements
     private static final int MIN_THRESOLD_EMOJI_HINT = 1;
     private static final int PERMISSION_REQUEST_READ_CONTACTS = 1;
     private ZulipApp app;
-    private List<Message> mutedTopics;
 
     private boolean suspended = false;
     private boolean logged_in = false;
 
     private ZulipActivity that = this; // self-ref
-    private SharedPreferences settings;
-    String client_id;
 
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
@@ -150,8 +146,6 @@ public class ZulipActivity extends BaseActivity implements
     private AsyncGetEvents event_poll;
 
     private Handler statusUpdateHandler;
-
-    private Toolbar toolbar;
 
     public MessageListFragment currentList;
     private MessageListFragment narrowedList;
@@ -243,11 +237,6 @@ public class ZulipActivity extends BaseActivity implements
     private RefreshableCursorAdapter peopleAdapter;
 
     @Override
-    public void addToList(Message message) {
-        mutedTopics.add(message);
-    }
-
-    @Override
     public void recyclerViewScrolled() {
             /* in this method we check if the messageEt is empty or not
             if messageEt is not empty, it means that the user has typed something in the chatBox and that the chatBox should be open
@@ -309,7 +298,7 @@ public class ZulipActivity extends BaseActivity implements
         notifications = new Notifications(this);
         notifications.register();
         setContentView(R.layout.main);
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
@@ -323,7 +312,6 @@ public class ZulipActivity extends BaseActivity implements
         appBarLayout = (AppBarLayout) findViewById(R.id.appBarLayout);
         app.setZulipActivity(this);
         togglePrivateStreamBtn = (ImageView) findViewById(R.id.togglePrivateStream_btn);
-        mutedTopics = new ArrayList<>();
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
                 R.drawable.ic_drawer, R.string.streams_open,
