@@ -163,7 +163,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
                             Log.i("scroll", "Starting request below");
                             loadMoreMessages(LoadPosition.BELOW);
                         }
-                        if (linearLayoutManager.findFirstCompletelyVisibleItemPosition() < near && !loadedToTop) {
+                        if (linearLayoutManager.findFirstVisibleItemPosition() < near && !loadedToTop) {
                             // At the top of the list
                             Log.i("scroll", "Starting request above");
                             loadMoreMessages(LoadPosition.ABOVE);
