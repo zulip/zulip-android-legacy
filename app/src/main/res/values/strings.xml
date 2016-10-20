@@ -93,4 +93,5 @@
     <string name="cannot_upload_image">Cannot Upload Image</string>
     <string name="cannot_find_image">Could not find the image</string>
     <string name="failed_to_upload">Failed to upload</string>
+    <string name="invalid_image">Unable to load that image</string>
 </resources>

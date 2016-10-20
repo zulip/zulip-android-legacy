@@ -619,7 +619,7 @@ public class ZulipActivity extends BaseActivity implements
 
     /**
      * Helper function to update UI to indicate image is being uploaded and call
-     * {@link ZulipActivity#uploadFile(String)} to upload the image.
+     * {@link ZulipActivity#uploadFile(File)} to upload the image.
      */
     private void startFileUpload() {
         // Update UI to indicate image is being loaded
@@ -629,20 +629,33 @@ public class ZulipActivity extends BaseActivity implements
         String loadingMsg = getResources().getString(R.string.uploading_message);
         sendingMessage(true, loadingMsg);
 
-        // get actual file path
-        String imageFilePath = FilePathHelper.getPath(this, mImageUri);
+        File file = null;
+        if (FilePathHelper.isLegacy(mImageUri)) {
+            file = FilePathHelper.getTempFileFromContentUri(this, mImageUri);
+        } else {
+            // get actual file path
+            String imageFilePath = FilePathHelper.getPath(this, mImageUri);
+            if (imageFilePath != null) {
+                file = new File(imageFilePath);
+            } else if ("content".equalsIgnoreCase(mImageUri.getScheme())) {
+                file = FilePathHelper.getTempFileFromContentUri(this, mImageUri);
+            }
+        }
 
+        if (file == null) {
+            Toast.makeText(this, R.string.invalid_image, Toast.LENGTH_SHORT).show();
+            return;
+        }
         // upload the file asynchronously to the server
-        uploadFile(imageFilePath);
+        uploadFile(file);
     }
 
     /**
      * Function to upload file asynchronously to the server using retrofit callback
      * upload {@link com.zulip.android.service.ZulipServices#upload(MultipartBody.Part)}
-     * @param filePath on local storage
+     * @param file on local storage
      */
-    private void uploadFile(String filePath) {
-        File file = new File(filePath);
+    private void uploadFile(File file) {
 
         // create RequestBody instance from file
         RequestBody requestFile =

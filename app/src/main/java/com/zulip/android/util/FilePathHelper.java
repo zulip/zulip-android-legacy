@@ -8,6 +8,14 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.widget.Toast;
+
+import com.zulip.android.R;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * This class helps to find the actual file path from a given content Uri
@@ -63,6 +71,9 @@ public class FilePathHelper {
                 return getDataColumn(context, contentUri, selection, selectionArgs);
             }
         }
+        else if (isLegacy(uri)) {
+            return null;
+        }
         // MediaStore (and general)
         else if ("content".equalsIgnoreCase(uri.getScheme())) {
             return getDataColumn(context, uri, null, null);
@@ -101,6 +112,9 @@ public class FilePathHelper {
                 final int column_index = cursor.getColumnIndexOrThrow(column);
                 return cursor.getString(column_index);
             }
+        } catch (IllegalArgumentException ex) {
+            // there was no _data column for this content thing a ma bob
+            return null;
         } finally {
             if (cursor != null)
                 cursor.close();
@@ -131,5 +145,49 @@ public class FilePathHelper {
      */
     private static boolean isMediaDocument(Uri uri) {
         return "com.android.providers.media.documents".equals(uri.getAuthority());
+    }
+
+    /**
+     * @param uri The Uri to check.
+     * @return Whether the Uri authority is a legacy uri
+     */
+    public static boolean isLegacy(Uri uri) {
+        return "com.google.android.apps.docs.storage.legacy".equals(uri.getAuthority());
+    }
+
+    public static File getTempFileFromContentUri(Context context, Uri uri) {
+        InputStream is = null;
+        File tempFile = null;
+        try {
+            is = context.getContentResolver().openInputStream(uri);
+            tempFile = File.createTempFile("imgUpload", ".jpg");
+            tempFile.deleteOnExit();
+            FileOutputStream out = new FileOutputStream(tempFile);
+            try {
+                byte[] buffer = new byte[4 * 1024];
+                int read;
+                while ((read = is.read(buffer)) != -1) {
+                    out.write(buffer, 0, read);
+                }
+                out.flush();
+            } finally {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    // ignore
+                }
+            }
+        } catch (IOException e) {
+            return null;
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    // ignored
+                }
+            }
+        }
+        return tempFile;
     }
 }
