@@ -541,5 +541,8 @@ public class MessageListFragment extends Fragment implements MessageListener {
             loadMessageId(app.getMaxMessageId());
         }
     }
-
+    public boolean scrolledToLastMessage() {
+        Object object = adapter.getItem(linearLayoutManager.findLastVisibleItemPosition());
+        return object instanceof Message && (((Message) object).getId() >= app.getMaxMessageId() - 2);
+    }
 }

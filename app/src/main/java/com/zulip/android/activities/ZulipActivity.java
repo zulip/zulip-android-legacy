@@ -2054,7 +2054,8 @@ public class ZulipActivity extends BaseActivity implements
         if (narrowedList != null) {
             narrowedList.onNewMessages(messages);
         }
-        showSnackbarNotification(messages); //Show notification
+        if (!currentList.scrolledToLastMessage())
+            showSnackbarNotification(messages); //Show notification
     }
 
     Snackbar snackbar;
