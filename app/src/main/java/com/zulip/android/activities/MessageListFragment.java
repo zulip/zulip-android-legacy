@@ -73,7 +73,6 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
     private Listener mListener;
     private RecyclerView recyclerView;
-    private View bottom_list_spacer;
 
     public ZulipApp app;
 
@@ -84,7 +83,6 @@ public class MessageListFragment extends Fragment implements MessageListener {
     private boolean loadedToTop = false;
     private boolean loadedToBottom = false;
 
-    private List<Message> mutedMessages;
     private int firstMessageId = -1;
     private int lastMessageId = -1;
 
@@ -113,7 +111,6 @@ public class MessageListFragment extends Fragment implements MessageListener {
         if (getArguments() != null) {
             filter = getArguments().getParcelable(PARAM_FILTER);
         }
-        mutedMessages = new ArrayList<>();
         messageIndex = new SparseArray<>();
         messageList = new ArrayList<>();
     }

@@ -126,14 +126,12 @@ public class ZulipActivity extends BaseActivity implements
     private static final int PERMISSION_REQUEST_READ_CONTACTS = 1;
     private ZulipApp app;
 
-    private boolean suspended = false;
     private boolean logged_in = false;
 
     private ZulipActivity that = this; // self-ref
 
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
-    private ExpandableListView streamsDrawer;
     private static final Interpolator FAST_OUT_SLOW_IN_INTERPOLATOR = new FastOutSlowInInterpolator();
     private SwipeRemoveLinearLayout chatBox;
     FloatingActionButton fab;
@@ -175,7 +173,6 @@ public class ZulipActivity extends BaseActivity implements
         }
     };
     private ExpandableStreamDrawerAdapter streamsDrawerAdapter;
-    private boolean mReadExternalStorage;
     private Uri mImageUri;
 
     @Override
@@ -956,14 +953,7 @@ public class ZulipActivity extends BaseActivity implements
      * Initiates the streams Drawer if the streams in the drawer is 0.
      */
     public void checkAndSetupStreamsDrawer() {
-        try {
-            if (streamsDrawer.getAdapter().getCount() != 0) {
-                return;
-            }
-            setupListViewAdapter();
-        } catch (NullPointerException npe) {
-            setupListViewAdapter();
-        }
+        setupListViewAdapter();
     }
 
     private void sendMessage() {
@@ -1627,7 +1617,6 @@ public class ZulipActivity extends BaseActivity implements
     protected void onPause() {
         super.onPause();
         Log.i("status", "suspend");
-        this.suspended = true;
 
         unregisterReceiver(onGcmMessage);
 
@@ -1644,7 +1633,6 @@ public class ZulipActivity extends BaseActivity implements
     protected void onResume() {
         super.onResume();
         Log.i("status", "resume");
-        this.suspended = false;
 
         // Set up the BroadcastReceiver to trap GCM messages so notifications
         // don't show while in the app
