@@ -187,7 +187,7 @@ public class ZulipApp extends Application {
     }
 
     public ZulipServices getZulipServices() {
-        if(zulipServices == null) {
+        if (zulipServices == null) {
             HttpLoggingInterceptor logging = new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY);
             zulipServices = new Retrofit.Builder()
                     .client(new OkHttpClient.Builder().readTimeout(60, TimeUnit.SECONDS)
@@ -200,6 +200,10 @@ public class ZulipApp extends Application {
                     .create(ZulipServices.class);
         }
         return zulipServices;
+    }
+
+    public void setZulipServices(ZulipServices zulipServices) {
+        this.zulipServices = zulipServices;
     }
 
     public Gson getGson() {
