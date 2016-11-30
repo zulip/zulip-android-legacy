@@ -151,6 +151,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
 
     private void checkForError() {
         String serverURL = serverIn.getText().toString();
+
+        // trim leading or trailing white spaces in Url
+        serverURL = serverURL.trim();
+
         int errorMessage = R.string.invalid_server_domain;
         String httpScheme = (BuildConfig.DEBUG) ? "http" : "https";
 
@@ -184,6 +188,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     }
 
     private void showBackends(String httpScheme, String serverURL) {
+        // if server url does not end with "/", then append it
+        if (!serverURL.endsWith("/")) {
+            serverURL = serverURL + "/";
+        }
+
         Uri serverUri = Uri.parse(serverURL);
 
         serverUri = serverUri.buildUpon().scheme(httpScheme).build();
@@ -197,6 +206,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         mServerEditText.setText(serverUri.toString());
         mServerEditText.setEnabled(false);
         ((ZulipApp) getApplication()).setServerURL(serverUri.toString());
+
+        // create new zulipServices object every time by setting it to null
+        getApp().setZulipServices(null);
 
         getServices()
                 .getAuthBackends()
