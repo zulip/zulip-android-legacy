@@ -197,14 +197,17 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
 
         serverUri = serverUri.buildUpon().scheme(httpScheme).build();
 
-        // if does not begin with "api.zulip.com" and if the path is empty, use "/api" as first segment in the path
-        List<String> paths = serverUri.getPathSegments();
-        if (!serverUri.getHost().startsWith("api.") && paths.isEmpty()) {
-            serverUri = serverUri.buildUpon().appendEncodedPath("api/").build();
-        }
+        // display server url with http scheme used
         serverIn.setText(serverUri.toString());
         mServerEditText.setText(serverUri.toString());
         mServerEditText.setEnabled(false);
+
+        // if server url does not end with "api/" or if the path is empty, use "/api" as last segment in the path
+        List<String> paths = serverUri.getPathSegments();
+        if (paths.isEmpty() || !paths.get(paths.size() - 1).equals("api")) {
+            serverUri = serverUri.buildUpon().appendEncodedPath("api/").build();
+        }
+
         ((ZulipApp) getApplication()).setServerURL(serverUri.toString());
 
         // create new zulipServices object every time by setting it to null
