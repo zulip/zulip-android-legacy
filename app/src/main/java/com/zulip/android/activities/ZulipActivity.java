@@ -497,8 +497,9 @@ public class ZulipActivity extends BaseActivity implements
                 int index = cursor.getColumnIndex(Emoji.NAME_FIELD);
                 String name = cursor.getString(index);
                 String currText = messageEt.getText().toString();
-                int last = (cursor.getColumnIndex(Emoji.NAME_FIELD) == 6) ? currText.lastIndexOf("@") : currText.lastIndexOf(":");
-                return TextUtils.substring(currText, 0, last) + ((cursor.getColumnIndex(Emoji.NAME_FIELD) == 6) ? "@**" + name + "**" : ":" + name.replace(".png", "") + ":");
+                int numberOfColumns = cursor.getColumnCount();
+                int last = (numberOfColumns > 2) ? currText.lastIndexOf("@") : currText.lastIndexOf(":");
+                return TextUtils.substring(currText, 0, last) + ((numberOfColumns > 2) ? "@**" + name + "**" : ":" + name.replace(".png", "") + ":");
             }
         });
         combinedAdapter.setFilterQueryProvider(new FilterQueryProvider() {
