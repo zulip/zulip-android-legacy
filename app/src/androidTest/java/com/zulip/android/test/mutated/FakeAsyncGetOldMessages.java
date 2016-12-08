@@ -19,7 +19,7 @@ public class FakeAsyncGetOldMessages extends
     private boolean fmCalled;
     public List<Message> appendTheseMessages;
     public List<FakeAsyncGetOldMessages> recurseRequestsReceived;
-    private MessageListFragment myfragment;
+    public MessageListFragment myfragment;
 
     public FakeAsyncGetOldMessages(MessageListFragment fragment) {
         super(fragment);
