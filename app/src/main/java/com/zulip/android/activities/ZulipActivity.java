@@ -327,9 +327,11 @@ public class ZulipActivity extends BaseActivity implements
             @Override
             public void onClick(View v) {
                 //set default people list
-                setUpPeopleList(true);
-                //set visibility of this image false
-                ivSearchPeopleCancel.setVisibility(View.GONE);
+                try {
+                    peopleAdapter.changeCursor(getPeopleCursorGenerator().call());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 //set search editText text empty
                 etSearchPeople.setText("");
             }
@@ -379,7 +381,7 @@ public class ZulipActivity extends BaseActivity implements
          peopleDrawer = (ListView) findViewById(R.id.people_drawer);
 
         //set up people list
-        setUpPeopleList(true);
+        setUpPeopleList();
 
         peopleDrawer.setOnItemClickListener(new OnItemClickListener() {
             @Override
@@ -563,23 +565,67 @@ public class ZulipActivity extends BaseActivity implements
         });
     }
 
-    private void setUpPeopleList(final boolean isDefault, final String... filterKeyWord) {
+    private void setUpPeopleList() {
+        try {
+            this.peopleAdapter = new RefreshableCursorAdapter(
+                    this.getApplicationContext(), R.layout.stream_tile,
+                    getPeopleCursorGenerator().call(), getPeopleCursorGenerator(), new String[]{
+                    Person.NAME_FIELD, Person.EMAIL_FIELD}, new int[]{
+                    R.id.name, R.id.stream_dot}, 0);
+            peopleAdapter.setViewBinder(peopleBinder);
+
+            peopleDrawer.setAdapter(peopleAdapter);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } catch (Exception e) {
+            ZLog.logException(e);
+        }
+    }
+
+    private void onTextChangeOfPeopleSearchEditText() {
+        etSearchPeople.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                try {
+                    peopleAdapter.changeCursor(getPeopleCursorGenerator().call());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+    }
+
+    private Callable<Cursor> getPeopleCursorGenerator() {
         Callable<Cursor> peopleGenerator = new Callable<Cursor>() {
 
             @Override
             public Cursor call() throws Exception {
                 // TODO Auto-generated method stub
                 List<Person> people;
-                if (isDefault) {
+                if (etSearchPeople.getText().toString().equals("") || etSearchPeople.getText().toString().isEmpty()) {
                     people = app.getDao(Person.class).queryBuilder()
                             .where().eq(Person.ISBOT_FIELD, false).and()
                             .eq(Person.ISACTIVE_FIELD, true).query();
+                    //set visibility of this image false
+                    ivSearchPeopleCancel.setVisibility(View.GONE);
                 }else
                 {
                     people = app.getDao(Person.class).queryBuilder()
                             .where().eq(Person.ISBOT_FIELD, false).and()
-                            .like(Person.NAME_FIELD,"%"+filterKeyWord[0]+"%").and()
+                            .like(Person.NAME_FIELD,"%"+etSearchPeople.getText().toString()+"%").and()
                             .eq(Person.ISACTIVE_FIELD, true).query();
+                    //set visibility of this image false
+                    ivSearchPeopleCancel.setVisibility(View.VISIBLE);
                 }
 
                 Person.sortByPresence(app, people);
@@ -609,51 +655,7 @@ public class ZulipActivity extends BaseActivity implements
             }
 
         };
-        try {
-            this.peopleAdapter = new RefreshableCursorAdapter(
-                    this.getApplicationContext(), R.layout.stream_tile,
-                    peopleGenerator.call(), peopleGenerator, new String[]{
-                    Person.NAME_FIELD, Person.EMAIL_FIELD}, new int[]{
-                    R.id.name, R.id.stream_dot}, 0);
-            peopleAdapter.setViewBinder(peopleBinder);
-
-            peopleDrawer.setAdapter(peopleAdapter);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (Exception e) {
-            ZLog.logException(e);
-        }
-    }
-
-    private void onTextChangeOfPeopleSearchEditText() {
-        etSearchPeople.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (etSearchPeople.getText().toString().equals("") || etSearchPeople.getText().toString().isEmpty())
-                {
-                    //set default people list
-                    setUpPeopleList(true);
-                    //set visibility of this image false
-                    ivSearchPeopleCancel.setVisibility(View.GONE);
-                }else
-                {
-                    //filter people list
-                    setUpPeopleList(false,etSearchPeople.getText().toString());
-                    //set visibility of this image false
-                    ivSearchPeopleCancel.setVisibility(View.VISIBLE);
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
+        return peopleGenerator;
     }
 
     @Override
