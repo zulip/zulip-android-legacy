@@ -69,11 +69,11 @@
                 android:layout_marginLeft="2dp"
                 android:layout_marginRight="2dp"
                 android:layout_marginTop="28dp"
-                android:background="@drawable/search_edittext_border"
                 android:paddingBottom="12dp"
                 android:paddingLeft="4dp"
                 android:paddingRight="4dp"
-                android:paddingTop="12dp">
+                android:paddingTop="12dp"
+                android:background="@android:color/white">
 
                 <EditText
                     android:id="@+id/stream_drawer_search"
@@ -137,11 +137,11 @@
                 android:layout_marginLeft="2dp"
                 android:layout_marginRight="2dp"
                 android:layout_marginTop="28dp"
-                android:background="@drawable/search_edittext_border"
                 android:paddingBottom="12dp"
                 android:paddingLeft="4dp"
                 android:paddingRight="4dp"
-                android:paddingTop="12dp">
+                android:paddingTop="12dp"
+                android:background="@android:color/white">
 
                 <EditText
                     android:id="@+id/people_drawer_search"
