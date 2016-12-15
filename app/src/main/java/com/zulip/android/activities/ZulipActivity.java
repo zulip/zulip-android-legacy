@@ -343,10 +343,11 @@ public class ZulipActivity extends BaseActivity implements
             @Override
             public void onClick(View v) {
                 //set default stream list
-                setupListViewAdapter(true);
-                //set visibility of this image false
-                ivSearchStreamCancel.setVisibility(View.GONE);
-                //set search editText text empty
+                try {
+                    streamsDrawerAdapter.changeCursor(getSteamCursorGenerator().call());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 etSearchStream.setText("");
             }
         });
@@ -366,7 +367,7 @@ public class ZulipActivity extends BaseActivity implements
             public void onDrawerOpened(View drawerView) {
                 // pass
                 try {
-                    streamsDrawerAdapter.changeCursor(streamsGenerator.call());
+                    streamsDrawerAdapter.changeCursor(getSteamCursorGenerator().call());
                 } catch (Exception e) {
                     ZLog.logException(e);
                 }
@@ -542,19 +543,10 @@ public class ZulipActivity extends BaseActivity implements
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (etSearchStream.getText().toString().equals("") || etSearchStream.getText().toString().isEmpty())
-                {
-                    //set default stream list
-                    setupListViewAdapter(true);
-                    //set visibility of this image false
-                    ivSearchStreamCancel.setVisibility(View.GONE);
-                }else
-                {
-                    //filter stream list
-                    streamSearchFilterKeyword = etSearchStream.getText().toString();
-                    setupListViewAdapter(false);
-                    //set visibility of this image false
-                    ivSearchStreamCancel.setVisibility(View.VISIBLE);
+                try {
+                    streamsDrawerAdapter.changeCursor(getSteamCursorGenerator().call());
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
 
@@ -563,6 +555,35 @@ public class ZulipActivity extends BaseActivity implements
 
             }
         });
+    }
+
+    private Callable<Cursor> getSteamCursorGenerator() {
+
+        Callable<Cursor> steamCursorGenerator =  new Callable<Cursor>() {
+            @Override
+            public Cursor call() throws Exception {
+                int pointer = app.getPointer();
+                String query="SELECT s.id as _id,  s.name, s.color, count(case when m.id > " + pointer + " or m." + Message.MESSAGE_READ_FIELD
+                        + " = 0 then 1 end) as " + ExpandableStreamDrawerAdapter.UNREAD_TABLE_NAME
+                        + " FROM streams as s LEFT JOIN messages as m ON s.id=m.stream ";
+                if (!etSearchStream.getText().toString().equals("") && !etSearchStream.getText().toString().isEmpty())
+                {
+                    //append where clause
+                    query+=" WHERE s.name LIKE '%"+ etSearchStream.getText().toString()  + "%'";
+                    //set visibility of this image false
+                    ivSearchStreamCancel.setVisibility(View.VISIBLE);
+                }else
+                {
+                    //set visibility of this image false
+                    ivSearchStreamCancel.setVisibility(View.GONE);
+                }
+                //append group by
+                query+= " group by s.name order by s.name COLLATE NOCASE";
+
+                return ((AndroidDatabaseResults) app.getDao(Stream.class).queryRaw(query).closeableIterator().getRawResults()).getRawCursor();
+            }
+        };
+        return steamCursorGenerator;
     }
 
     private void setUpPeopleList() {
@@ -943,30 +964,10 @@ public class ZulipActivity extends BaseActivity implements
         animator.start();
     }
 
-    Callable<Cursor> streamsGenerator = new Callable<Cursor>() {
-        @Override
-        public Cursor call() throws Exception {
-            int pointer = app.getPointer();
-            return ((AndroidDatabaseResults) app.getDao(Stream.class).queryRaw("SELECT s.id as _id,  s.name, s.color," +
-                    " count(case when m.id > " + pointer + " or m." + Message.MESSAGE_READ_FIELD + " = 0 then 1 end) as " + ExpandableStreamDrawerAdapter.UNREAD_TABLE_NAME
-                    + " FROM streams as s LEFT JOIN messages as m ON s.id=m.stream group by s.name order by s.name COLLATE NOCASE").closeableIterator().getRawResults()).getRawCursor();
-        }
-    };
-
-    Callable<Cursor> streamsGeneratorWithFilter = new Callable<Cursor>() {
-        @Override
-        public Cursor call() throws Exception {
-            int pointer = app.getPointer();
-            return ((AndroidDatabaseResults) app.getDao(Stream.class).queryRaw("SELECT s.id as _id,  s.name, s.color," +
-                    " count(case when m.id > " + pointer + " or m." + Message.MESSAGE_READ_FIELD + " = 0 then 1 end) as " + ExpandableStreamDrawerAdapter.UNREAD_TABLE_NAME
-                    + " FROM streams as s LEFT JOIN messages as m ON s.id=m.stream"+" WHERE s.name LIKE '%"+ streamSearchFilterKeyword  +"%' group by s.name order by s.name COLLATE NOCASE").closeableIterator().getRawResults()).getRawCursor();
-        }
-    };
-
     /**
      * Setup the streams Drawer which has a {@link ExpandableListView} categorizes the stream and subject
      */
-    private void setupListViewAdapter(boolean isDefault) {
+    private void setupListViewAdapter() {
         streamsDrawerAdapter = null;
         String[] groupFrom = {Stream.NAME_FIELD, Stream.COLOR_FIELD, ExpandableStreamDrawerAdapter.UNREAD_TABLE_NAME};
         int[] groupTo = {R.id.name, R.id.stream_dot, R.id.unread_group};
@@ -976,18 +977,10 @@ public class ZulipActivity extends BaseActivity implements
         final ExpandableListView streamsDrawer = (ExpandableListView) findViewById(R.id.streams_drawer);
         streamsDrawer.setGroupIndicator(null);
         try {
-            if (isDefault) {
-                streamsDrawerAdapter = new ExpandableStreamDrawerAdapter(this, streamsGenerator.call(),
+                streamsDrawerAdapter = new ExpandableStreamDrawerAdapter(this, getSteamCursorGenerator().call(),
                         R.layout.stream_tile_new, groupFrom,
                         groupTo, R.layout.stream_tile_child, childFrom,
                         childTo);
-            }else
-            {
-                streamsDrawerAdapter = new ExpandableStreamDrawerAdapter(this, streamsGeneratorWithFilter.call(),
-                        R.layout.stream_tile_new, groupFrom,
-                        groupTo, R.layout.stream_tile_child, childFrom,
-                        childTo);
-            }
         } catch (Exception e) {
             ZLog.logException(e);
         }
@@ -1090,7 +1083,7 @@ public class ZulipActivity extends BaseActivity implements
      * Initiates the streams Drawer if the streams in the drawer is 0.
      */
     public void checkAndSetupStreamsDrawer() {
-        setupListViewAdapter(true);
+        setupListViewAdapter();
     }
 
     private void sendMessage() {
