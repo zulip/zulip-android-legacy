@@ -48,7 +48,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
-//            manifestPlaceholders = [ fabricKey : project.property("fabricKey")]
+            manifestPlaceholders = [ fabricKey : project.property("fabricKey")]
             buildConfigField "String", "GOOGLE_CLIENT_ID", "\"835904834568-77mtr5mtmpgspj9b051del9i9r5t4g4n.apps.googleusercontent.com\""
         }
 
