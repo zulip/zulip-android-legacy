@@ -330,7 +330,7 @@ public class ZulipActivity extends BaseActivity implements
                 try {
                     peopleAdapter.changeCursor(getPeopleCursorGenerator().call());
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    ZLog.logException(e);
                 }
                 //set search editText text empty
                 etSearchPeople.setText("");
@@ -346,7 +346,7 @@ public class ZulipActivity extends BaseActivity implements
                 try {
                     streamsDrawerAdapter.changeCursor(getSteamCursorGenerator().call());
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    ZLog.logException(e);
                 }
                 etSearchStream.setText("");
             }
@@ -597,6 +597,7 @@ public class ZulipActivity extends BaseActivity implements
 
             peopleDrawer.setAdapter(peopleAdapter);
         } catch (SQLException e) {
+            ZLog.logException(e);
             throw new RuntimeException(e);
         } catch (Exception e) {
             ZLog.logException(e);
@@ -615,7 +616,7 @@ public class ZulipActivity extends BaseActivity implements
                 try {
                     peopleAdapter.changeCursor(getPeopleCursorGenerator().call());
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    ZLog.logException(e);
                 }
             }
 
@@ -1102,6 +1103,7 @@ public class ZulipActivity extends BaseActivity implements
                         return;
                     }
                 } catch (SQLException e) {
+                    ZLog.logException(e);
                     Log.e("SQLException", "SQL not correct", e);
                 }
             }
@@ -1203,6 +1205,7 @@ public class ZulipActivity extends BaseActivity implements
                 try {
                     return makeStreamCursor(charSequence);
                 } catch (SQLException e) {
+                    ZLog.logException(e);
                     Log.e("SQLException", "SQL not correct", e);
                     return null;
                 }
@@ -1225,6 +1228,7 @@ public class ZulipActivity extends BaseActivity implements
                 try {
                     return makeSubjectCursor(streamActv.getText().toString(), charSequence);
                 } catch (SQLException e) {
+                    ZLog.logException(e);
                     Log.e("SQLException", "SQL not correct", e);
                     return null;
                 }
@@ -1257,6 +1261,7 @@ public class ZulipActivity extends BaseActivity implements
                 try {
                     return makePeopleCursor(charSequence);
                 } catch (SQLException e) {
+                    ZLog.logException(e);
                     Log.e("SQLException", "SQL not correct", e);
                     return null;
                 }
@@ -1444,6 +1449,7 @@ public class ZulipActivity extends BaseActivity implements
                             .substring(getBaseContext().getPackageName()
                                     .length() + 1));
                 } catch (IllegalArgumentException e) {
+                    ZLog.logException(e);
                     Log.e(PARAMS, "Invalid app-specific intent specified.", e);
                     continue;
                 }
