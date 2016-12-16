@@ -105,6 +105,12 @@
 
             </RelativeLayout>
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/black"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="2dp"/>
 
             <ExpandableListView
                 android:id="@+id/streams_drawer"
@@ -173,6 +179,12 @@
 
             </RelativeLayout>
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/black"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="2dp"/>
 
             <ListView
                 android:id="@+id/people_drawer"
