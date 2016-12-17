@@ -334,6 +334,10 @@ public class ZulipActivity extends BaseActivity implements
                 }
                 //set search editText text empty
                 etSearchPeople.setText("");
+                //hide soft keyboard
+                hideSoftKeyBoard();
+                //remove focus
+                etSearchPeople.clearFocus();
             }
         });
         etSearchStream = (EditText)findViewById(R.id.stream_drawer_search);
@@ -349,6 +353,10 @@ public class ZulipActivity extends BaseActivity implements
                     ZLog.logException(e);
                 }
                 etSearchStream.setText("");
+                //hide soft keyboard
+                hideSoftKeyBoard();
+                //remove focus
+                etSearchStream.clearFocus();
             }
         });
         app.setZulipActivity(this);
@@ -531,6 +539,15 @@ public class ZulipActivity extends BaseActivity implements
                 // Handle single image being sent
                 handleSentImage(intent);
             }
+        }
+    }
+
+    private void hideSoftKeyBoard() {
+        // Check if no view has focus:
+        View view = this.getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
     }
 
