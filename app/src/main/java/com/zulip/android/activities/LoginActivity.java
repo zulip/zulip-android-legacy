@@ -444,6 +444,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                     }
                 });
                 asyncDevGetEmails.execute();
+                break;
+            case R.id.register:
+                Intent intent = new Intent(Intent.ACTION_VIEW,Uri.parse(serverIn.getText().toString()+"register"));
+                startActivity(intent);
+                break;
             default:
                 break;
         }
