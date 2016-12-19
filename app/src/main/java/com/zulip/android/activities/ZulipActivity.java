@@ -831,7 +831,7 @@ public class ZulipActivity extends BaseActivity implements
             int pointer = app.getPointer();
             return ((AndroidDatabaseResults) app.getDao(Stream.class).queryRaw("SELECT s.id as _id,  s.name, s.color," +
                     " count(case when m.id > " + pointer + " or m." + Message.MESSAGE_READ_FIELD + " = 0 then 1 end) as " + ExpandableStreamDrawerAdapter.UNREAD_TABLE_NAME
-                    + " FROM streams as s LEFT JOIN messages as m ON s.id=m.stream group by s.name order by s.name COLLATE NOCASE").closeableIterator().getRawResults()).getRawCursor();
+                    + " FROM streams as s LEFT JOIN messages as m ON s.name=m.recipients group by s.name order by s.name COLLATE NOCASE").closeableIterator().getRawResults()).getRawCursor();
         }
     };
 
@@ -919,12 +919,12 @@ public class ZulipActivity extends BaseActivity implements
                     case R.id.unread_group:
                         TextView unreadGroupTextView = (TextView) view;
                         final String unreadGroupCount = cursor.getString(columnIndex);
-//                        if (unreadGroupCount.equals("0")) {
-//                            unreadGroupTextView.setVisibility(View.GONE);
-//                        } else {
-//                            unreadGroupTextView.setText(unreadGroupCount);
-//                            unreadGroupTextView.setVisibility(View.VISIBLE);
-//                        }
+                        if (unreadGroupCount.equals("0")) {
+                            unreadGroupTextView.setVisibility(View.GONE);
+                        } else {
+                            unreadGroupTextView.setText(unreadGroupCount);
+                            unreadGroupTextView.setVisibility(View.VISIBLE);
+                        }
                         return true;
                     case R.id.unread_child:
                         TextView unreadChildTextView = (TextView) view;
