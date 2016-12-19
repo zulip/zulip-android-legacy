@@ -131,6 +131,18 @@
             android:visibility="gone" />
 
         <TextView
+            android:id="@+id/register"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="@string/register_button"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp"
+            android:onClick="onClick"
+            android:textColor="#ff0099cc"
+            />
+
+        <TextView
             android:id="@+id/local_server_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
