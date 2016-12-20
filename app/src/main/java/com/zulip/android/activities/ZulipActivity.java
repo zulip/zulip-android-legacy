@@ -127,6 +127,7 @@ public class ZulipActivity extends BaseActivity implements
     private ZulipApp app;
 
     private boolean logged_in = false;
+    private boolean backPressedOnce = false;
 
     private ZulipActivity that = this; // self-ref
 
@@ -144,6 +145,7 @@ public class ZulipActivity extends BaseActivity implements
     private AsyncGetEvents event_poll;
 
     private Handler statusUpdateHandler;
+    private Runnable statusUpdateRunnable;
 
     public MessageListFragment currentList;
     private MessageListFragment narrowedList;
@@ -404,7 +406,7 @@ public class ZulipActivity extends BaseActivity implements
 
         // send status update and check again every couple minutes
         statusUpdateHandler = new Handler();
-        Runnable statusUpdateRunnable = new Runnable() {
+        statusUpdateRunnable = new Runnable() {
             @Override
             public void run() {
                 AsyncStatusUpdate task = new AsyncStatusUpdate(
@@ -1282,12 +1284,28 @@ public class ZulipActivity extends BaseActivity implements
     }
 
     public void onBackPressed() {
-        if (narrowedList != null) {
-            narrowedList = null;
-            getSupportFragmentManager().popBackStack(NARROW,
+        if (narrowedList == null) {
+
+            if (backPressedOnce) {
+                finish();
+            }
+
+            backPressedOnce = true;
+            Toast.makeText(this, R.string.press_again_to_exit, Toast.LENGTH_SHORT).show();
+            statusUpdateRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    backPressedOnce = false;
+                }
+            };
+
+            statusUpdateHandler.postDelayed(statusUpdateRunnable, 2000);
+
+
+        }   else {
+              narrowedList = null;
+              getSupportFragmentManager().popBackStack(NARROW,
                     FragmentManager.POP_BACK_STACK_INCLUSIVE);
-        } else {
-            super.onBackPressed();
         }
     }
 
@@ -1652,6 +1670,7 @@ public class ZulipActivity extends BaseActivity implements
         super.onDestroy();
         if (statusUpdateHandler != null) {
             statusUpdateHandler.removeMessages(0);
+            statusUpdateHandler.removeCallbacks(statusUpdateRunnable);
         }
     }
 

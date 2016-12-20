@@ -18,6 +18,7 @@
     <string name="title_activity_legal">Legal</string>
     <string name="streams_open">Open stream sidebar</string>
     <string name="streams_close">Close stream sidebar</string>
+    <string name="press_again_to_exit">Press again to exit</string>
 
     <!-- Used on the indicator when loading messages -->
     <string name="loading_messages">Loading messages</string>
