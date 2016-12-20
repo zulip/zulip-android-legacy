@@ -78,7 +78,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="vertical"
-        android:padding="16dp"
+        android:padding="8dp"
         android:visibility="gone">
 
         <TextView
@@ -141,44 +141,24 @@
 
         <TextView
             android:id="@+id/register"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
+            style="@style/links"
             android:text="@string/register_button"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="16dp"
-            android:onClick="onClick"
-            android:textColor="#ff0099cc"
             />
 
         <TextView
             android:id="@+id/local_server_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="onClick"
-            android:paddingTop="16dp"
-            android:text="@string/local_server"
-            android:textColor="#ff0099cc"
-            android:visibility="gone" />
+            style="@style/links.gone"
+            android:text="@string/local_server" />
 
         <TextView
             android:id="@+id/input_another_server"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="onClick"
-            android:paddingTop="16dp"
-            android:text="@string/another_server"
-            android:textColor="#ff0099cc" />
+            style="@style/links"
+            android:text="@string/another_server" />
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/legal_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="29dp"
-        android:onClick="onClick"
-        android:paddingTop="8dp"
-        android:text="@string/legal"
-        android:textColor="#ff0099cc" />
+        <TextView
+            android:id="@+id/legal_button"
+            style="@style/links"
+            android:text="@string/legal" />
     </LinearLayout>
 </ScrollView>
