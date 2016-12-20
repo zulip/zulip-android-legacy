@@ -5,7 +5,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.customtabs.CustomTabsIntent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -446,12 +448,31 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                 asyncDevGetEmails.execute();
                 break;
             case R.id.register:
-                Intent intent = new Intent(Intent.ACTION_VIEW,Uri.parse(serverIn.getText().toString()+"register"));
-                startActivity(intent);
+                openRegister();
                 break;
             default:
                 break;
         }
+    }
+
+    private void openRegister() {
+        Uri uri;
+        if (serverIn==null || serverIn.getText().toString().isEmpty() || serverIn.getText().toString().equals(""))
+        {
+            return;
+        }else
+        {
+            uri = Uri.parse(serverIn.getText().toString()+"register");
+        }
+        if (Build.VERSION.SDK_INT < 15)
+        {
+            Intent intent = new Intent(Intent.ACTION_VIEW,uri);
+            startActivity(intent);
+            return;
+        }
+        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+        CustomTabsIntent intent = builder.build();
+        intent.launchUrl(LoginActivity.this,uri);
     }
 
     private boolean isInputValidForDevAuth() {
