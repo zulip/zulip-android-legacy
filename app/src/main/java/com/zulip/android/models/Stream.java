@@ -13,6 +13,7 @@ import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.stmt.SelectArg;
 import com.j256.ormlite.table.DatabaseTable;
 import com.zulip.android.ZulipApp;
+import com.zulip.android.util.ZLog;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -188,6 +189,26 @@ public class Stream {
 
     public int getId() {
         return id;
+    }
+
+    /**
+     * Checks stream name is valid or not
+     * @param app ZulipApp
+     * @param streamName Checks this stream name is valid or not
+     * @return null if stream does not exist else cursor
+     */
+    public static Stream streamCheckBeforeMessageSend(ZulipApp app, CharSequence streamName) {
+        if (streamName == null) {
+            return null;
+        }
+        try {
+            return app.getDao(Stream.class)
+                    .queryBuilder().where()
+                    .eq(Stream.NAME_FIELD, new SelectArg(Stream.NAME_FIELD, streamName)).queryForFirst();
+        } catch (SQLException e) {
+            ZLog.logException(e);
+        }
+        return null;
     }
 
 }

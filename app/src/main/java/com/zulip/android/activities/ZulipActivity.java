@@ -1255,16 +1255,17 @@ public class ZulipActivity extends BaseActivity implements
                 streamActv.requestFocus();
                 return;
             } else {
-                try {
-                    Cursor streamCursor = makeStreamCursor(streamActv.getText().toString());
-                    if (streamCursor.getCount() == 0) {
-                        streamActv.setError(getString(R.string.stream_not_exists));
-                        streamActv.requestFocus();
-                        return;
-                    }
-                } catch (SQLException e) {
-                    ZLog.logException(e);
-                    Log.e("SQLException", "SQL not correct", e);
+                Stream stream = Stream.streamCheckBeforeMessageSend(app, streamActv.getText().toString());
+                //check whether stream exists or not
+                if (stream == null) {
+                    streamActv.setError(getString(R.string.stream_not_exists));
+                    streamActv.requestFocus();
+                    return;
+                }// check whether user is subscribed or not
+                else if (!stream.isSubscribed()) {
+                    Toast.makeText(ZulipActivity.this, getString(R.string.message_not_subscribed)
+                            + " " + streamActv.getText().toString() + " " + getString(R.string.keyword_stream), Toast.LENGTH_SHORT).show();
+                    return;
                 }
             }
             if (TextUtils.isEmpty(topicActv.getText().toString())) {
