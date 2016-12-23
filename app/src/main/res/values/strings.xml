@@ -116,4 +116,6 @@
     <string name="camera_content_desp">take photo</string>
     <string name="menu_one_day_before">One Day Before</string>
     <string name="enter_date">Enter Date</string>
+    <string name="message_not_subscribed">Not subscribed to</string>
+    <string name="keyword_stream">stream</string>
 </resources>
