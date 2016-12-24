@@ -6,8 +6,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
 import com.zulip.android.R;
-import com.zulip.android.util.PhotoHelper;
 
 public class PhotoSendActivity extends AppCompatActivity {
 
@@ -32,6 +32,8 @@ public class PhotoSendActivity extends AppCompatActivity {
 
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-        PhotoHelper.setPic(mImageView, mPhotoPath, true);
+
+        // use glide to take care of high performance bitmap decoding
+        Glide.with(this).load(mPhotoPath).crossFade().into(mImageView);
     }
 }

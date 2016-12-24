@@ -187,6 +187,7 @@ public class ZulipActivity extends BaseActivity implements
     private Uri mImageUri;
     private ImageView cameraBtn;
     private String mCurrentPhotoPath;
+    private Uri mPhotoURI;
 
     @Override
     public void removeChatBox(boolean animToRight) {
@@ -823,10 +824,10 @@ public class ZulipActivity extends BaseActivity implements
 
             // Continue only if the File was successfully created
             if (photoFile != null) {
-                Uri photoURI = FileProvider.getUriForFile(this,
+                mPhotoURI = FileProvider.getUriForFile(this,
                         "com.zulip.fileprovider",
                         photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mPhotoURI);
                 startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
             }
         }
