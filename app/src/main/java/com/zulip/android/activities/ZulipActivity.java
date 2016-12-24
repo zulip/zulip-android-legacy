@@ -20,10 +20,12 @@ import android.database.MergeCursor;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.design.widget.AppBarLayout;
@@ -33,6 +35,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
@@ -99,7 +102,9 @@ import com.zulip.android.util.ZLog;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -181,6 +186,7 @@ public class ZulipActivity extends BaseActivity implements
     private ExpandableStreamDrawerAdapter streamsDrawerAdapter;
     private Uri mImageUri;
     private ImageView cameraBtn;
+    private String mCurrentPhotoPath;
 
     @Override
     public void removeChatBox(boolean animToRight) {
@@ -324,6 +330,7 @@ public class ZulipActivity extends BaseActivity implements
         messageEt = (AutoCompleteTextView) findViewById(R.id.message_et);
         textView = (TextView) findViewById(R.id.textView);
         sendBtn = (ImageView) findViewById(R.id.send_btn);
+        cameraBtn = (ImageView) findViewById(R.id.camera_btn);
         appBarLayout = (AppBarLayout) findViewById(R.id.appBarLayout);
         etSearchPeople = (EditText)findViewById(R.id.people_drawer_search);
         ivSearchPeopleCancel = (ImageView)findViewById(R.id.iv_people__search_cancel_button);
@@ -736,6 +743,13 @@ public class ZulipActivity extends BaseActivity implements
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
+            Log.i("photo captured", mCurrentPhotoPath);
+        }
+    }
+
     /**
      * Function invoked when a user shares an image with the zulip app
      * @param intent passed to the activity with action SEND
@@ -784,11 +798,54 @@ public class ZulipActivity extends BaseActivity implements
         }
     }
 
+    /**
+     * This function is called when camera icon is clicked. It send out a
+     * MediaStore.ACTION_IMAGE_CAPTURE action intent {@link Intent}.
+     */
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+            // Create the File where the photo should go
+            File photoFile = null;
+            try {
+                photoFile = createPhotoFile();
+            } catch (IOException ex) {
+                // Error occurred while creating the File
+                ZLog.logException(ex);
+            }
+
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(this,
+                        "com.zulip.fileprovider",
+                        photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+            }
         }
+    }
+
+    /**
+     * This function creates a file for the photo to be captured
+     * @return new {@link File} object where photo will be stored
+     * @throws IOException
+     */
+    private File createPhotoFile() throws IOException {
+        // Create an image file name using timestamp
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save image path to send to PhotoSendActivity
+        mCurrentPhotoPath = image.getAbsolutePath();
+        return image;
     }
 
     /**
