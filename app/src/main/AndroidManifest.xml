@@ -7,26 +7,28 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-            android:maxSdkVersion="18" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="18" />
+
     <uses-feature
-            android:name="android.hardware.camera"
-            android:required="false" />
+        android:name="android.hardware.camera"
+        android:required="false" />
 
     <permission
         android:name="${applicationId}.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
 
     <uses-permission android:name="${applicationId}.permission.C2D_MESSAGE" />
-    <uses-permission android:name="android.permission.USE_CREDENTIALS"/>
-    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.USE_CREDENTIALS" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <uses-sdk android:targetSdkVersion="23" android:minSdkVersion="13"
         tools:overrideLibrary="com.android.support:customtabs:23.3.0,android.support.customtabs"/>
 
     <application
-        android:name="com.zulip.android.ZulipApp"
+        android:name=".ZulipApp"
         android:allowBackup="false"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
@@ -42,11 +44,12 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+
         <activity
             android:name=".activities.ZulipActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
             android:label="@string/app_name"
-            android:launchMode="singleTask" >
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -54,7 +57,9 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="image/*" />
             </intent-filter>
         </activity>
@@ -64,12 +69,11 @@
         </activity>
         <activity
             android:name=".activities.LegalActivity"
-            android:label="@string/title_activity_legal" >
-        </activity>
+            android:label="@string/title_activity_legal"></activity>
 
         <receiver
             android:name=".gcm.GcmBroadcastReceiver"
-            android:permission="com.google.android.c2dm.permission.SEND" >
+            android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
 
@@ -78,7 +82,7 @@
         </receiver>
         <receiver
             android:name=".gcm.GcmShowNotificationReceiver"
-            android:exported="false" >
+            android:exported="false">
             <intent-filter>
                 <action android:name="${applicationId}.PushMessage.BROADCAST" />
             </intent-filter>
@@ -91,9 +95,11 @@
             android:value="@integer/google_play_services_version" />
 
         <activity android:name=".activities.DevAuthActivity" />
+
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="${fabricKey}" />
+
         <receiver android:name=".widget.ZulipWidget">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -113,7 +119,7 @@
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
         </activity>
-
+        <activity android:name=".activities.PhotoSendActivity"/>
     </application>
 
 </manifest>

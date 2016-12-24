@@ -747,6 +747,11 @@ public class ZulipActivity extends BaseActivity implements
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
             Log.i("photo captured", mCurrentPhotoPath);
+
+            // send file path to PhotoSendActivity
+            Intent photoSendIntent = new Intent(this, PhotoSendActivity.class);
+            photoSendIntent.putExtra(Intent.EXTRA_TEXT, mCurrentPhotoPath);
+            startActivity(photoSendIntent);
         }
     }
 

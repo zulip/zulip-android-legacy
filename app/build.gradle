@@ -83,6 +83,7 @@ dependencies {
     compile 'com.squareup.picasso:picasso:2.5.2'
     //noinspection GradleCompatible
     compile 'com.android.support:customtabs:23.3.0'
+    compile 'com.theartofdev.edmodo:android-image-cropper:2.3.+'
     compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
         transitive = true;
     }
