@@ -18,6 +18,15 @@
     <string name="title_activity_legal">Legal</string>
     <string name="streams_open">Open stream sidebar</string>
     <string name="streams_close">Close stream sidebar</string>
+    <string name="social">Social</string>
+    <string name="sender_name">Sender name</string>
+    <string name="message_here">Message Here</string>
+    <string name="_placeholder">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam mollis pretium purus, faucibus accumsan enim placerat non. </string>
+    <string name="my_stream">MyStream</string>
+    <string name="cancel">Cancel</string>
+    <string name="sorry_no_message_to_display">Sorry, no messages to display!</string>
+    <string name="today_message">Today's Messages</string>
+    <string name="short_stream">Short Stream</string>
 
     <!-- Used on the indicator when loading messages -->
     <string name="loading_messages">Loading messages</string>
