@@ -1293,6 +1293,7 @@ public class ZulipActivity extends BaseActivity implements
         messageEt.setEnabled(!isSending);
         topicActv.setEnabled(!isSending);
         sendBtn.setEnabled(!isSending);
+        cameraBtn.setEnabled(!isSending);
         togglePrivateStreamBtn.setEnabled(!isSending);
         if (isSending) {
             TextView msg = (TextView) composeStatus.findViewById(R.id.sending_message);
