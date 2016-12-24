@@ -47,6 +47,17 @@
 
         android:orientation="horizontal">
 
+        <ImageView
+            android:id="@+id/camera_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:paddingRight="4dp"
+            android:paddingLeft="8dp"
+            android:src="@drawable/ic_photo_camera_black_24dp"
+            android:tint="#757575" />
+
         <AutoCompleteTextView
             android:id="@+id/message_et"
             android:layout_width="0dp"

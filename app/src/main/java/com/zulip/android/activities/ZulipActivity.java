@@ -25,6 +25,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -126,6 +127,7 @@ public class ZulipActivity extends BaseActivity implements
     //At these many letters the emoji/person hint starts to show up
     private static final int MIN_THRESOLD_EMOJI_HINT = 1;
     private static final int PERMISSION_REQUEST_READ_CONTACTS = 1;
+    private static final int REQUEST_TAKE_PHOTO = 2;
     private ZulipApp app;
 
     private boolean logged_in = false;
@@ -178,6 +180,7 @@ public class ZulipActivity extends BaseActivity implements
     };
     private ExpandableStreamDrawerAdapter streamsDrawerAdapter;
     private Uri mImageUri;
+    private ImageView cameraBtn;
 
     @Override
     public void removeChatBox(boolean animToRight) {
@@ -425,6 +428,15 @@ public class ZulipActivity extends BaseActivity implements
                 sendMessage();
             }
         });
+
+        // set onClick listener on camera button to dispatch camera intent when clicked
+        cameraBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dispatchTakePictureIntent();
+            }
+        });
+
         composeStatus = (LinearLayout) findViewById(R.id.composeStatus);
         setUpAdapter();
         streamActv.setAdapter(streamActvAdapter);
@@ -523,6 +535,11 @@ public class ZulipActivity extends BaseActivity implements
                 // Handle single image being sent
                 handleSentImage(intent);
             }
+        }
+
+        // if device doesn't have camera, disable camera button
+        if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
+            cameraBtn.setEnabled(false);
         }
     }
 
@@ -764,6 +781,13 @@ public class ZulipActivity extends BaseActivity implements
                 }
             }
             break;
+        }
+    }
+
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
         }
     }
 
