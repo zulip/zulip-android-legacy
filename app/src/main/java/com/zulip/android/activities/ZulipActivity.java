@@ -742,6 +742,27 @@ public class ZulipActivity extends BaseActivity implements
                 handleSentImage(intent);
             }
         }
+
+        // extract file path of edited image
+        String filePath = intent.getStringExtra(Intent.EXTRA_TEXT);
+
+        if (action == null) {
+            if (!TextUtils.isEmpty(filePath)) {
+                // Update UI to indicate image is being loaded
+                // hide fab and display chatbox
+                displayFAB(false);
+                displayChatBox(true);
+                String loadingMsg = getResources().getString(R.string.uploading_message);
+                sendingMessage(true, loadingMsg);
+
+                // start upload of photo
+                File photoFile = new File(filePath);
+                uploadFile(photoFile);
+            } else {
+                // photo was deleted and camera is launched again to capture a new photo
+                dispatchTakePictureIntent();
+            }
+        }
     }
 
     @Override
