@@ -7,4 +7,11 @@
         <item name="android:scaleType">center</item>
         <item name="android:tint">@color/photo_buttons</item>
     </style>
+    <style name="marker_color_style">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:src">@drawable/marker_color_circle</item>
+    </style>
 </resources>
