@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -27,7 +28,6 @@ public class PhotoSendActivity extends AppCompatActivity {
     private CropImageView mCropImageView;
     private boolean mIsCropFinished;
     private boolean mIsCropped;
-    private static final String IS_CROPPED_KEY = "photo cropped";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,17 +70,19 @@ public class PhotoSendActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (!mIsCropFinished) {
-                    // if image is to be cropped, make CropImageView visible
                     Bitmap bitmap;
-                    if (mIsCropped) {
-                        // if imageView stores cropped image it is of type bitmap
-                        bitmap = ((BitmapDrawable) mImageView.getDrawable()).getBitmap();
-                    } else {
-                        // else it is of type glide bitmap
+                    Drawable drawable = mImageView.getDrawable();
+                    if (drawable instanceof GlideBitmapDrawable) {
+                        // if imageview has drawable of type GlideBitmapDrawable
                         bitmap = ((GlideBitmapDrawable)mImageView.getDrawable().getCurrent())
                                 .getBitmap();
+
+                    } else {
+                        // if imageView stores cropped image drawable which is of type drawable
+                        bitmap = ((BitmapDrawable) mImageView.getDrawable()).getBitmap();
                     }
 
+                    // if image is to be cropped, make CropImageView visible
                     mCropImageView.setImageBitmap(bitmap);
                     mCropImageView.setVisibility(View.VISIBLE);
 
@@ -124,10 +126,21 @@ public class PhotoSendActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (mIsCropped) {
+                    Bitmap bitmap;
+                    Drawable drawable = mImageView.getDrawable();
+                    if (drawable instanceof GlideBitmapDrawable) {
+                        // if imageview has drawable of type GlideBitmapDrawable
+                        bitmap = ((GlideBitmapDrawable)mImageView.getDrawable().getCurrent())
+                                .getBitmap();
+
+                    } else {
+                        // if imageView stores cropped image drawable which is of type drawable
+                        bitmap = ((BitmapDrawable) mImageView.getDrawable()).getBitmap();
+                    }
+
                     // if image was cropped, delete old file
                     // and store new bitmap on that location
-                    Bitmap bitmap = ((BitmapDrawable) mImageView.getDrawable()).getBitmap();
-                    PhotoHelper.saveBitmapAsFile(mPhotoPath, bitmap);
+                    mPhotoPath = PhotoHelper.saveBitmapAsFile(mPhotoPath, bitmap);
                 }
 
                 // start PhotoEditActivity, passing it the file path for cropped photo

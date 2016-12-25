@@ -7,12 +7,22 @@
     android:background="@android:color/black"
     tools:context="com.zulip.android.activities.PhotoEditActivity">
 
-    <ImageView
-        android:id="@+id/photoImageView"
+    <FrameLayout
+        android:id="@+id/frame_layout_picture"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="fitCenter" />
+        android:layout_height="match_parent">
 
+        <ImageView
+            android:id="@+id/photoImageView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitCenter" />
+
+        <com.zulip.android.util.DrawCustomView
+            android:id="@+id/draw_custom_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </FrameLayout>
 
     <ImageView
         android:id="@+id/back_btn"
