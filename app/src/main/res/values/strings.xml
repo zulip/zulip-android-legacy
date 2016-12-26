@@ -28,6 +28,9 @@
     <string name="copy_message">Copy message</string>
     <string name="stream_txt">Stream</string>
     <string name="arrow">❯</string>
+    <string name="toast_no_internet_connection">No internet connection</string>
+    <string name="toast_could_not_connect_to_server">Couldn\'t connect to this server</string>
+    <string name="invalid_url">Invalid URL</string>
     <string name="subject">Topic</string>
     <string name="reply_to_sender">Reply to sender</string>
     <string name="google_app_login_failed">Google Apps login failed for unknown reasons, please contact your distributor.</string>
