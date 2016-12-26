@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,6 +17,7 @@ import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.URLUtil;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -197,6 +200,13 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
             serverURL = serverURL + "/";
         }
 
+        boolean isValid = URLUtil.isValidUrl(String.valueOf(serverURL));
+
+        if (!isValid){
+            Toast.makeText(LoginActivity.this, R.string.invalid_url , Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         Uri serverUri = Uri.parse(serverURL);
 
         serverUri = serverUri.buildUpon().scheme(httpScheme).build();
@@ -251,11 +261,27 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                     @Override
                     public void onFailure(Call<ZulipBackendResponse> call, Throwable t) {
                         super.onFailure(call, t);
-                        Toast.makeText(LoginActivity.this, R.string.toast_login_failed_fetching_backends, Toast.LENGTH_SHORT).show();
+                        if (!isNetworkAvailable())
+                        {
+                            Toast.makeText(LoginActivity.this, R.string.toast_no_internet_connection, Toast.LENGTH_SHORT).show();
+                        }
+                        else
+                        {
+                            Toast.makeText(LoginActivity.this, R.string.invalid_url, Toast.LENGTH_SHORT).show();
+                        }
                     }
                 });
 
     }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
+
 
     private void showHTTPDialog(final String serverURL) {
         new AlertDialog.Builder(this)
@@ -353,7 +379,15 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                 }
             } else {
                 connectionProgressDialog.dismiss();
-                Toast.makeText(LoginActivity.this, R.string.google_app_login_failed, Toast.LENGTH_SHORT).show();
+                if (!isNetworkAvailable())
+                {
+                    Toast.makeText(LoginActivity.this,R.string.toast_no_internet_connection, Toast.LENGTH_SHORT).show();
+                }
+                else
+                {
+                    Toast.makeText(LoginActivity.this, R.string.google_app_login_failed, Toast.LENGTH_SHORT).show();
+                }
+
             }
         }
     }
@@ -422,7 +456,15 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                                         Toast.makeText(LoginActivity.this, R.string.login_activity_toast_login_error, Toast.LENGTH_LONG).show();
                                     }
                                 } else {
-                                    Toast.makeText(LoginActivity.this, R.string.login_activity_toast_login_error, Toast.LENGTH_LONG).show();
+                                    if (!isNetworkAvailable())
+                                    {
+                                        Toast.makeText(LoginActivity.this, R.string.toast_no_internet_connection, Toast.LENGTH_LONG).show();
+                                    }
+                                    else
+                                    {
+                                        Toast.makeText(LoginActivity.this, R.string.login_activity_toast_login_error, Toast.LENGTH_LONG).show();
+                                    }
+
                                 }
                             }
 
@@ -430,7 +472,14 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                             public void onFailure(Call<LoginResponse> call, Throwable t) {
                                 super.onFailure(call, t);
                                 connectionProgressDialog.dismiss();
-                                Toast.makeText(LoginActivity.this, R.string.login_activity_toast_login_error, Toast.LENGTH_LONG).show();
+                                if (!isNetworkAvailable())
+                                {
+                                    Toast.makeText(LoginActivity.this, R.string.toast_no_internet_connection, Toast.LENGTH_LONG).show();
+                                }
+                                else
+                                {
+                                    Toast.makeText(LoginActivity.this, R.string.login_activity_toast_login_error, Toast.LENGTH_LONG).show();
+                                }
                             }
                         });
 
