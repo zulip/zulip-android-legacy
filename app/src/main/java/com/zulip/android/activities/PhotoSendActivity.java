@@ -112,7 +112,7 @@ public class PhotoSendActivity extends AppCompatActivity {
                     // if image was cropped, delete old file
                     // and store new bitmap on that location
                     Bitmap bitmap = ((BitmapDrawable) mImageView.getDrawable()).getBitmap();
-                    PhotoHelper.saveBitmapAsFile(mPhotoPath, bitmap);
+                    mPhotoPath = PhotoHelper.saveBitmapAsFile(mPhotoPath, bitmap);
                 }
 
                 // add the file path of cropped image

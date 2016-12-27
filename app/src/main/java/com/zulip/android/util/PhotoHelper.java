@@ -32,7 +32,10 @@ public class PhotoHelper {
         FileOutputStream out = null;
         try {
             // change file name to avoid catching issues with Glide
-            photoPath += Math.round(Math.random() * 10);
+            int position =  photoPath.lastIndexOf(".");
+            photoPath = photoPath.substring(0, position) + Math.round(Math.random() * 10)
+                    + photoPath.substring(position);
+
             out = new FileOutputStream(photoPath);
 
             // bmp is your Bitmap instance
