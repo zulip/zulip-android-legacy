@@ -13,5 +13,6 @@
         <item name="android:layout_gravity">center_horizontal</item>
         <item name="android:layout_marginTop">8dp</item>
         <item name="android:src">@drawable/marker_color_circle</item>
+        <item name="android:onClick">handleMarkerColorChange</item>
     </style>
 </resources>
