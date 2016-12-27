@@ -17,7 +17,7 @@
         android:text="@string/stream_txt"
         android:textColor="@color/colorTextPrimary"
         android:textStyle="bold"
-        tools:text="Short Stream"
+        tools:text="@string/short_stream"
         tools:background="@color/colorAccent"
         />
 
