@@ -1296,20 +1296,7 @@ public class ZulipActivity extends BaseActivity implements
         }
     }
 
-//    public void onBackPressed() {
-//        if (narrowedList != null) {
-//            narrowedList = null;
-//            getSupportFragmentManager().popBackStack(NARROW,
-//                    FragmentManager.POP_BACK_STACK_INCLUSIVE);
-//        }else {
-//            super.onBackPressed();
-//        }
-//
-////        else if (!(searchView.isIconified()))
-////        {
-////            searchView.setIconified(false);
-////        }
-//    }
+
 
     private void pushListFragment(MessageListFragment list, String back) {
         currentList = list;
