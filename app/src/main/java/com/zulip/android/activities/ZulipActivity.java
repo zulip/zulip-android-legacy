@@ -1288,7 +1288,6 @@ public class ZulipActivity extends BaseActivity implements
             getSupportFragmentManager().popBackStack(NARROW,
                     FragmentManager.POP_BACK_STACK_INCLUSIVE);
         } else  if (!searchView.isIconified()) {
-            Log.d("Searchview","Entered if");
             searchView.setIconified(true);
             searchView.setIconified(true);
         } else {
