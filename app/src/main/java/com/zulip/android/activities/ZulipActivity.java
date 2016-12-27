@@ -37,6 +37,7 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
@@ -160,6 +161,7 @@ public class ZulipActivity extends BaseActivity implements
     private SimpleCursorAdapter subjectActvAdapter;
     private SimpleCursorAdapter emailActvAdapter;
     private AppBarLayout appBarLayout;
+    private android.support.v7.widget.SearchView searchView;
 
     private MutedTopics mMutedTopics;
 
@@ -1285,10 +1287,29 @@ public class ZulipActivity extends BaseActivity implements
             narrowedList = null;
             getSupportFragmentManager().popBackStack(NARROW,
                     FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        } else  if (!searchView.isIconified()) {
+            Log.d("Searchview","Entered if");
+            searchView.setIconified(true);
+            searchView.setIconified(true);
         } else {
             super.onBackPressed();
         }
     }
+
+//    public void onBackPressed() {
+//        if (narrowedList != null) {
+//            narrowedList = null;
+//            getSupportFragmentManager().popBackStack(NARROW,
+//                    FragmentManager.POP_BACK_STACK_INCLUSIVE);
+//        }else {
+//            super.onBackPressed();
+//        }
+//
+////        else if (!(searchView.isIconified()))
+////        {
+////            searchView.setIconified(false);
+////        }
+//    }
 
     private void pushListFragment(MessageListFragment list, String back) {
         currentList = list;
@@ -1473,7 +1494,7 @@ public class ZulipActivity extends BaseActivity implements
             final SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
             // Assumes current activity is the searchable activity
             final MenuItem mSearchMenuItem = menu.findItem(R.id.search);
-            final android.support.v7.widget.SearchView searchView = (android.support.v7.widget.SearchView) MenuItemCompat.getActionView(mSearchMenuItem);
+            searchView = (android.support.v7.widget.SearchView) MenuItemCompat.getActionView(mSearchMenuItem);
             searchView.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(getApplicationContext(), ZulipActivity.class)));
             searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
             ((EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text)).setHintTextColor(ContextCompat.getColor(this, R.color.colorTextPrimary));
