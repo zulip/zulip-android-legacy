@@ -329,17 +329,7 @@ public class ZulipActivity extends BaseActivity implements
             @Override
             public void onClick(View v) {
                 //set default people list
-                try {
-                    peopleAdapter.changeCursor(getPeopleCursorGenerator().call());
-                } catch (Exception e) {
-                    ZLog.logException(e);
-                }
-                //set search editText text empty
-                etSearchPeople.setText("");
-                //hide soft keyboard
-                hideSoftKeyBoard();
-                //remove focus
-                etSearchPeople.clearFocus();
+               resetPeopleSearch();
             }
         });
         etSearchStream = (EditText)findViewById(R.id.stream_drawer_search);
@@ -349,16 +339,7 @@ public class ZulipActivity extends BaseActivity implements
             @Override
             public void onClick(View v) {
                 //set default stream list
-                try {
-                    streamsDrawerAdapter.changeCursor(getSteamCursorGenerator().call());
-                } catch (Exception e) {
-                    ZLog.logException(e);
-                }
-                etSearchStream.setText("");
-                //hide soft keyboard
-                hideSoftKeyBoard();
-                //remove focus
-                etSearchStream.clearFocus();
+               resetStreamSearch();
             }
         });
         app.setZulipActivity(this);
@@ -398,6 +379,7 @@ public class ZulipActivity extends BaseActivity implements
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
+                resetPeopleSearch();
                 if (id == allPeopleId) {
                     doNarrow(new NarrowFilterAllPMs(app.getYou()));
                 } else {
@@ -544,6 +526,28 @@ public class ZulipActivity extends BaseActivity implements
         }
     }
 
+    /**
+     * Change peopleAdapter cursor to default
+     * Clear text of etSearchPeople
+     * Remove focus of etSearchPeople
+     */
+    private void resetPeopleSearch() {
+        try {
+            peopleAdapter.changeCursor(getPeopleCursorGenerator().call());
+        } catch (Exception e) {
+            ZLog.logException(e);
+        }
+        //set search editText text empty
+        etSearchPeople.setText("");
+        //hide soft keyboard
+        hideSoftKeyBoard();
+        //remove focus
+        etSearchPeople.clearFocus();
+    }
+
+    /**
+     * Hide soft keyboard
+     */
     private void hideSoftKeyBoard() {
         // Check if no view has focus:
         View view = this.getCurrentFocus();
@@ -1026,6 +1030,7 @@ public class ZulipActivity extends BaseActivity implements
 
             @Override
             public boolean onGroupClick(ExpandableListView expandableListView, View view, int position, long l) {
+                resetStreamSearch();
                 String streamName = ((TextView) view.findViewById(R.id.name)).getText().toString();
                 doNarrow(new NarrowFilterStream(streamName, null));
                 drawerLayout.openDrawer(GravityCompat.START);
@@ -1054,6 +1059,7 @@ public class ZulipActivity extends BaseActivity implements
                         view.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
+                                resetStreamSearch();
                                 onNarrow(new NarrowFilterStream(streamName, null));
                                 onNarrowFillSendBoxStream(streamName, "", false);
                             }
@@ -1097,6 +1103,24 @@ public class ZulipActivity extends BaseActivity implements
             }
         });
         streamsDrawer.setAdapter(streamsDrawerAdapter);
+    }
+
+    /**
+     * Change streamsDrawerAdapter cursor to default
+     * Clear text of etSearchStream
+     * Remove focus of etSearchStream
+     */
+    private void resetStreamSearch() {
+        try {
+            streamsDrawerAdapter.changeCursor(getSteamCursorGenerator().call());
+        } catch (Exception e) {
+            ZLog.logException(e);
+        }
+        etSearchStream.setText("");
+        //hide soft keyboard
+        hideSoftKeyBoard();
+        //remove focus
+        etSearchStream.clearFocus();
     }
 
     /**
