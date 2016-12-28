@@ -41,16 +41,16 @@
         </activity>
         <activity
             android:name=".activities.LoginActivity"
-            android:label="@string/app_name">
+            android:label="@string/app_name" >
         </activity>
         <activity
             android:name=".activities.LegalActivity"
-            android:label="@string/title_activity_legal">
+            android:label="@string/title_activity_legal" >
         </activity>
 
         <receiver
             android:name=".gcm.GcmBroadcastReceiver"
-            android:permission="com.google.android.c2dm.permission.SEND">
+            android:permission="com.google.android.c2dm.permission.SEND" >
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
 
