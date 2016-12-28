@@ -37,7 +37,6 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
@@ -1294,8 +1293,6 @@ public class ZulipActivity extends BaseActivity implements
             super.onBackPressed();
         }
     }
-
-
 
     private void pushListFragment(MessageListFragment list, String back) {
         currentList = list;
