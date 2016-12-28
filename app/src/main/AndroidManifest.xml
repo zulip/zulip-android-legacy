@@ -21,6 +21,9 @@
         tools:overrideLibrary="com.android.support:customtabs:23.3.0,android.support.customtabs"/>
 
 
+    <uses-sdk android:targetSdkVersion="23" android:minSdkVersion="13"
+        tools:overrideLibrary="com.android.support:customtabs:23.3.0,android.support.customtabs"/>
+
     <application
         android:name="com.zulip.android.ZulipApp"
         android:allowBackup="false"
