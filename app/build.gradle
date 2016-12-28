@@ -43,12 +43,14 @@ android {
             applicationIdSuffix '.dev'
             manifestPlaceholders = [ fabricKey : ""]
             ext.enableCrashlytics = false
-            buildConfigField "String", "GOOGLE_CLIENT_ID", "\"659545034376-78hg5hmrvqr50nn53t0nme97ndhqjmvs.apps.googleusercontent.com\""
+            buildConfigField "String", "GOOGLE_CLIENT_ID", "\"835904834568-77mtr5mtmpgspj9b051del9i9r5t4g4n.apps.googleusercontent.com\""
         }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
-//            manifestPlaceholders = [ fabricKey : project.property("fabricKey")]
+
+            manifestPlaceholders = [fabricKey: (project.findProperty("fabricKey") == null) ? "" : project.property("fabricKey")]
+
             buildConfigField "String", "GOOGLE_CLIENT_ID", "\"835904834568-77mtr5mtmpgspj9b051del9i9r5t4g4n.apps.googleusercontent.com\""
         }
 
@@ -75,6 +77,7 @@ dependencies {
     compile 'commons-lang:commons-lang:2.6'
     compile 'org.ccil.cowan.tagsoup:tagsoup:1.2.1'
     compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'com.android.support:customtabs:23.3.0'
     compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
         transitive = true;
     }

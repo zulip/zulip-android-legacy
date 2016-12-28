@@ -94,4 +94,9 @@
     <string name="cannot_find_image">Could not find the image</string>
     <string name="failed_to_upload">Failed to upload</string>
     <string name="invalid_image">Unable to load that image</string>
+    <string name="content_description_cancel_icon">cancel icon</string>
+    <string name="content_description_search_icon">search icon</string>
+    <string name="hint_search_people">Search People</string>
+    <string name="hint_search_stream">Search Stream</string>
+    <string name="register_button">Register</string>
 </resources>

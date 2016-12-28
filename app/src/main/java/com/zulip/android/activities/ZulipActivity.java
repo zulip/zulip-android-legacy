@@ -39,7 +39,9 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -185,6 +187,17 @@ public class ZulipActivity extends BaseActivity implements
         RESET_DATABASE,
     }
 
+    private EditText etSearchPeople;
+    private ImageView ivSearchPeopleCancel;
+    private EditText etSearchStream;
+    private ImageView ivSearchStreamCancel;
+    private ListView peopleDrawer;
+    // row number which is used to differentiate the 'All private messages'
+    // row from the people
+    final int allPeopleId = -1;
+
+    //
+    private String streamSearchFilterKeyword="";
 
     public HashMap<String, Bitmap> getGravatars() {
         return gravatars;
@@ -307,6 +320,45 @@ public class ZulipActivity extends BaseActivity implements
         textView = (TextView) findViewById(R.id.textView);
         sendBtn = (ImageView) findViewById(R.id.send_btn);
         appBarLayout = (AppBarLayout) findViewById(R.id.appBarLayout);
+        etSearchPeople = (EditText)findViewById(R.id.people_drawer_search);
+        ivSearchPeopleCancel = (ImageView)findViewById(R.id.iv_people__search_cancel_button);
+        onTextChangeOfPeopleSearchEditText();
+        ivSearchPeopleCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //set default people list
+                try {
+                    peopleAdapter.changeCursor(getPeopleCursorGenerator().call());
+                } catch (Exception e) {
+                    ZLog.logException(e);
+                }
+                //set search editText text empty
+                etSearchPeople.setText("");
+                //hide soft keyboard
+                hideSoftKeyBoard();
+                //remove focus
+                etSearchPeople.clearFocus();
+            }
+        });
+        etSearchStream = (EditText)findViewById(R.id.stream_drawer_search);
+        ivSearchStreamCancel = (ImageView)findViewById(R.id.iv_stream_search_cancel_button);
+        onTextChangeOfStreamSearchEditText();
+        ivSearchStreamCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //set default stream list
+                try {
+                    streamsDrawerAdapter.changeCursor(getSteamCursorGenerator().call());
+                } catch (Exception e) {
+                    ZLog.logException(e);
+                }
+                etSearchStream.setText("");
+                //hide soft keyboard
+                hideSoftKeyBoard();
+                //remove focus
+                etSearchStream.clearFocus();
+            }
+        });
         app.setZulipActivity(this);
         togglePrivateStreamBtn = (ImageView) findViewById(R.id.togglePrivateStream_btn);
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -323,7 +375,7 @@ public class ZulipActivity extends BaseActivity implements
             public void onDrawerOpened(View drawerView) {
                 // pass
                 try {
-                    streamsDrawerAdapter.changeCursor(streamsGenerator.call());
+                    streamsDrawerAdapter.changeCursor(getSteamCursorGenerator().call());
                 } catch (Exception e) {
                     ZLog.logException(e);
                 }
@@ -334,61 +386,11 @@ public class ZulipActivity extends BaseActivity implements
         // Set the drawer toggle as the DrawerListener
         drawerLayout.setDrawerListener(drawerToggle);
 
-        ListView peopleDrawer = (ListView) findViewById(R.id.people_drawer);
 
-        // row number which is used to differentiate the 'All private messages'
-        // row from the people
-        final int allPeopleId = -1;
-        Callable<Cursor> peopleGenerator = new Callable<Cursor>() {
+         peopleDrawer = (ListView) findViewById(R.id.people_drawer);
 
-            @Override
-            public Cursor call() throws Exception {
-                // TODO Auto-generated method stub
-                List<Person> people = app.getDao(Person.class).queryBuilder()
-                        .where().eq(Person.ISBOT_FIELD, false).and()
-                        .eq(Person.ISACTIVE_FIELD, true).query();
-
-                Person.sortByPresence(app, people);
-
-                String[] columnsWithPresence = new String[]{"_id",
-                        Person.EMAIL_FIELD, Person.NAME_FIELD};
-
-                MatrixCursor sortedPeopleCursor = new MatrixCursor(
-                        columnsWithPresence);
-                for (Person person : people) {
-                    Object[] row = new Object[]{person.getId(), person.getEmail(),
-                            person.getName()};
-                    sortedPeopleCursor.addRow(row);
-                }
-
-                // add private messages row
-                MatrixCursor allPrivateMessages = new MatrixCursor(
-                        sortedPeopleCursor.getColumnNames());
-                Object[] row = new Object[]{allPeopleId, "",
-                        "All private messages"};
-
-                allPrivateMessages.addRow(row);
-
-                return new MergeCursor(new Cursor[]{
-                        allPrivateMessages, sortedPeopleCursor});
-
-            }
-
-        };
-        try {
-            this.peopleAdapter = new RefreshableCursorAdapter(
-                    this.getApplicationContext(), R.layout.stream_tile,
-                    peopleGenerator.call(), peopleGenerator, new String[]{
-                    Person.NAME_FIELD, Person.EMAIL_FIELD}, new int[]{
-                    R.id.name, R.id.stream_dot}, 0);
-            peopleAdapter.setViewBinder(peopleBinder);
-
-            peopleDrawer.setAdapter(peopleAdapter);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (Exception e) {
-            ZLog.logException(e);
-        }
+        //set up people list
+        setUpPeopleList();
 
         peopleDrawer.setOnItemClickListener(new OnItemClickListener() {
             @Override
@@ -538,6 +540,161 @@ public class ZulipActivity extends BaseActivity implements
                 handleSentImage(intent);
             }
         }
+    }
+
+    private void hideSoftKeyBoard() {
+        // Check if no view has focus:
+        View view = this.getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
+
+    private void onTextChangeOfStreamSearchEditText() {
+        etSearchStream.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                try {
+                    streamsDrawerAdapter.changeCursor(getSteamCursorGenerator().call());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+    }
+
+    private Callable<Cursor> getSteamCursorGenerator() {
+
+        Callable<Cursor> steamCursorGenerator =  new Callable<Cursor>() {
+            @Override
+            public Cursor call() throws Exception {
+                int pointer = app.getPointer();
+                String query="SELECT s.id as _id,  s.name, s.color, count(case when m.id > " + pointer + " or m." + Message.MESSAGE_READ_FIELD
+                        + " = 0 then 1 end) as " + ExpandableStreamDrawerAdapter.UNREAD_TABLE_NAME
+                        + " FROM streams as s LEFT JOIN messages as m ON s.id=m.stream ";
+                if (!etSearchStream.getText().toString().equals("") && !etSearchStream.getText().toString().isEmpty())
+                {
+                    //append where clause
+                    query+=" WHERE s.name LIKE '%"+ etSearchStream.getText().toString()  + "%'";
+                    //set visibility of this image false
+                    ivSearchStreamCancel.setVisibility(View.VISIBLE);
+                }else
+                {
+                    //set visibility of this image false
+                    ivSearchStreamCancel.setVisibility(View.GONE);
+                }
+                //append group by
+                query+= " group by s.name order by s.name COLLATE NOCASE";
+
+                return ((AndroidDatabaseResults) app.getDao(Stream.class).queryRaw(query).closeableIterator().getRawResults()).getRawCursor();
+            }
+        };
+        return steamCursorGenerator;
+    }
+
+    private void setUpPeopleList() {
+        try {
+            this.peopleAdapter = new RefreshableCursorAdapter(
+                    this.getApplicationContext(), R.layout.stream_tile,
+                    getPeopleCursorGenerator().call(), getPeopleCursorGenerator(), new String[]{
+                    Person.NAME_FIELD, Person.EMAIL_FIELD}, new int[]{
+                    R.id.name, R.id.stream_dot}, 0);
+            peopleAdapter.setViewBinder(peopleBinder);
+
+            peopleDrawer.setAdapter(peopleAdapter);
+        } catch (SQLException e) {
+            ZLog.logException(e);
+            throw new RuntimeException(e);
+        } catch (Exception e) {
+            ZLog.logException(e);
+        }
+    }
+
+    private void onTextChangeOfPeopleSearchEditText() {
+        etSearchPeople.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                try {
+                    peopleAdapter.changeCursor(getPeopleCursorGenerator().call());
+                } catch (Exception e) {
+                    ZLog.logException(e);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+    }
+
+    private Callable<Cursor> getPeopleCursorGenerator() {
+        Callable<Cursor> peopleGenerator = new Callable<Cursor>() {
+
+            @Override
+            public Cursor call() throws Exception {
+                // TODO Auto-generated method stub
+                List<Person> people;
+                if (etSearchPeople.getText().toString().equals("") || etSearchPeople.getText().toString().isEmpty()) {
+                    people = app.getDao(Person.class).queryBuilder()
+                            .where().eq(Person.ISBOT_FIELD, false).and()
+                            .eq(Person.ISACTIVE_FIELD, true).query();
+                    //set visibility of this image false
+                    ivSearchPeopleCancel.setVisibility(View.GONE);
+                }else
+                {
+                    people = app.getDao(Person.class).queryBuilder()
+                            .where().eq(Person.ISBOT_FIELD, false).and()
+                            .like(Person.NAME_FIELD,"%"+etSearchPeople.getText().toString()+"%").and()
+                            .eq(Person.ISACTIVE_FIELD, true).query();
+                    //set visibility of this image false
+                    ivSearchPeopleCancel.setVisibility(View.VISIBLE);
+                }
+
+                Person.sortByPresence(app, people);
+
+                String[] columnsWithPresence = new String[]{"_id",
+                        Person.EMAIL_FIELD, Person.NAME_FIELD};
+
+                MatrixCursor sortedPeopleCursor = new MatrixCursor(
+                        columnsWithPresence);
+                for (Person person : people) {
+                    Object[] row = new Object[]{person.getId(), person.getEmail(),
+                            person.getName()};
+                    sortedPeopleCursor.addRow(row);
+                }
+
+                // add private messages row
+                MatrixCursor allPrivateMessages = new MatrixCursor(
+                        sortedPeopleCursor.getColumnNames());
+                Object[] row = new Object[]{allPeopleId, "",
+                        "All private messages"};
+
+                allPrivateMessages.addRow(row);
+
+                return new MergeCursor(new Cursor[]{
+                        allPrivateMessages, sortedPeopleCursor});
+
+            }
+
+        };
+        return peopleGenerator;
     }
 
     @Override
@@ -825,16 +982,6 @@ public class ZulipActivity extends BaseActivity implements
         animator.start();
     }
 
-    Callable<Cursor> streamsGenerator = new Callable<Cursor>() {
-        @Override
-        public Cursor call() throws Exception {
-            int pointer = app.getPointer();
-            return ((AndroidDatabaseResults) app.getDao(Stream.class).queryRaw("SELECT s.id as _id,  s.name, s.color," +
-                    " count(case when m.id > " + pointer + " or m." + Message.MESSAGE_READ_FIELD + " = 0 then 1 end) as " + ExpandableStreamDrawerAdapter.UNREAD_TABLE_NAME
-                    + " FROM streams as s LEFT JOIN messages as m ON s.id=m.stream group by s.name order by s.name COLLATE NOCASE").closeableIterator().getRawResults()).getRawCursor();
-        }
-    };
-
     /**
      * Setup the streams Drawer which has a {@link ExpandableListView} categorizes the stream and subject
      */
@@ -848,10 +995,10 @@ public class ZulipActivity extends BaseActivity implements
         final ExpandableListView streamsDrawer = (ExpandableListView) findViewById(R.id.streams_drawer);
         streamsDrawer.setGroupIndicator(null);
         try {
-            streamsDrawerAdapter = new ExpandableStreamDrawerAdapter(this, streamsGenerator.call(),
-                    R.layout.stream_tile_new, groupFrom,
-                    groupTo, R.layout.stream_tile_child, childFrom,
-                    childTo);
+                streamsDrawerAdapter = new ExpandableStreamDrawerAdapter(this, getSteamCursorGenerator().call(),
+                        R.layout.stream_tile_new, groupFrom,
+                        groupTo, R.layout.stream_tile_child, childFrom,
+                        childTo);
         } catch (Exception e) {
             ZLog.logException(e);
         }
@@ -973,6 +1120,7 @@ public class ZulipActivity extends BaseActivity implements
                         return;
                     }
                 } catch (SQLException e) {
+                    ZLog.logException(e);
                     Log.e("SQLException", "SQL not correct", e);
                 }
             }
@@ -1074,6 +1222,7 @@ public class ZulipActivity extends BaseActivity implements
                 try {
                     return makeStreamCursor(charSequence);
                 } catch (SQLException e) {
+                    ZLog.logException(e);
                     Log.e("SQLException", "SQL not correct", e);
                     return null;
                 }
@@ -1096,6 +1245,7 @@ public class ZulipActivity extends BaseActivity implements
                 try {
                     return makeSubjectCursor(streamActv.getText().toString(), charSequence);
                 } catch (SQLException e) {
+                    ZLog.logException(e);
                     Log.e("SQLException", "SQL not correct", e);
                     return null;
                 }
@@ -1128,6 +1278,7 @@ public class ZulipActivity extends BaseActivity implements
                 try {
                     return makePeopleCursor(charSequence);
                 } catch (SQLException e) {
+                    ZLog.logException(e);
                     Log.e("SQLException", "SQL not correct", e);
                     return null;
                 }
@@ -1315,6 +1466,7 @@ public class ZulipActivity extends BaseActivity implements
                             .substring(getBaseContext().getPackageName()
                                     .length() + 1));
                 } catch (IllegalArgumentException e) {
+                    ZLog.logException(e);
                     Log.e(PARAMS, "Invalid app-specific intent specified.", e);
                     continue;
                 }
