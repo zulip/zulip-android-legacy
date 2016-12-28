@@ -62,7 +62,7 @@
         </receiver>
         <receiver
             android:name=".gcm.GcmShowNotificationReceiver"
-            android:exported="false">
+            android:exported="false" >
             <intent-filter>
                 <action android:name="${applicationId}.PushMessage.BROADCAST" />
             </intent-filter>
