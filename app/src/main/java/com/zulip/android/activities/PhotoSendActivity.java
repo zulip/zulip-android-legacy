@@ -156,7 +156,7 @@ public class PhotoSendActivity extends AppCompatActivity {
         super.onWindowFocusChanged(hasFocus);
 
         // use glide to take care of high performance bitmap decoding
-        if (!mIsCropped) {
+        if (!mIsCropped && hasFocus) {
             Glide.with(this).load(mPhotoPath).crossFade().into(mImageView);
         }
     }
