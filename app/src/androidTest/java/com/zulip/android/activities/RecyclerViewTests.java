@@ -9,7 +9,7 @@ import android.support.test.runner.AndroidJUnit4;
 
 import com.zulip.android.R;
 import com.zulip.android.ZulipApp;
-import com.zulip.android.filters.NarrowFilterToday;
+import com.zulip.android.filters.NarrowFilterByDate;
 import com.zulip.android.helper.ViewAssertions;
 import com.zulip.android.models.MessageType;
 import com.zulip.android.util.ZLog;
@@ -193,7 +193,7 @@ public class RecyclerViewTests {
             mActivityTestRule.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    mActivityTestRule.getActivity().doNarrow(new NarrowFilterToday());
+                    mActivityTestRule.getActivity().doNarrow(new NarrowFilterByDate());
                 }
             });
         } catch (Throwable throwable) {

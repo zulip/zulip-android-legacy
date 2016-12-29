@@ -75,7 +75,7 @@ import com.zulip.android.filters.NarrowFilterAllPMs;
 import com.zulip.android.filters.NarrowFilterPM;
 import com.zulip.android.filters.NarrowFilterSearch;
 import com.zulip.android.filters.NarrowFilterStream;
-import com.zulip.android.filters.NarrowFilterToday;
+import com.zulip.android.filters.NarrowFilterByDate;
 import com.zulip.android.filters.NarrowListener;
 import com.zulip.android.gcm.GcmBroadcastReceiver;
 import com.zulip.android.gcm.Notifications;
@@ -106,6 +106,7 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -187,6 +188,8 @@ public class ZulipActivity extends BaseActivity implements
     private ImageView cameraBtn;
     private String mCurrentPhotoPath;
     private Uri mPhotoURI;
+    private Menu menu;
+    private Calendar calendar;
 
     @Override
     public void removeChatBox(boolean animToRight) {
@@ -543,11 +546,28 @@ public class ZulipActivity extends BaseActivity implements
                 handleSentImage(intent);
             }
         }
-
         // if device doesn't have camera, disable camera button
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
             cameraBtn.setEnabled(false);
         }
+        handleOnFragmentChange();
+        calendar = Calendar.getInstance();
+    }
+
+    private void handleOnFragmentChange() {
+        getSupportFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+            @Override
+            public void onBackStackChanged() {
+                if (menu == null)
+                    return;
+                if (narrowedList==null) {
+                    calendar = Calendar.getInstance();
+                    menu.getItem(2).getSubMenu().getItem(0).setTitle(R.string.menu_today);
+                } else if (narrowedList.filter instanceof NarrowFilterByDate) {
+                    menu.getItem(2).getSubMenu().getItem(0).setTitle(R.string.menu_one_day_before);
+                }
+            }
+        });
     }
 
     /**
@@ -1767,6 +1787,7 @@ public class ZulipActivity extends BaseActivity implements
         if (this.logged_in) {
             getMenuInflater().inflate(R.menu.options, menu);
             prepareSearchView(menu);
+            this.menu = menu;
             return true;
         }
 
@@ -1857,7 +1878,12 @@ public class ZulipActivity extends BaseActivity implements
                 onRefresh();
                 break;
             case R.id.today:
-                doNarrow(new NarrowFilterToday());
+                if (menu != null && menu.getItem(2).getSubMenu().getItem(0).getTitle().equals(getString(R.string.menu_one_day_before))) {
+                    calendar.add(Calendar.DATE, -1);
+                    doNarrow(new NarrowFilterByDate(calendar.getTime()));
+                    break;
+                }
+                doNarrow(new NarrowFilterByDate());
                 break;
             case R.id.logout:
                 logout();
