@@ -2,6 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
 <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -68,8 +69,8 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="vertical"
-        android:visibility="gone"
-        android:padding="8dp">
+        android:padding="16dp"
+        android:visibility="gone">
 
         <TextView
             android:layout_width="wrap_content"
@@ -86,11 +87,13 @@
             android:inputType="textUri"
             android:selectAllOnFocus="true" />
 
-        <LinearLayout
+
+        <RelativeLayout
             android:id="@+id/passwordAuthLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
+            android:paddingBottom="8dp"
             android:paddingTop="8dp"
             android:visibility="gone">
 
@@ -111,16 +114,30 @@
                 android:ems="10"
                 android:hint="@string/password"
                 android:inputType="textPassword"
+                android:layout_below="@+id/username"
                 android:selectAllOnFocus="true" />
 
-            <Button
-                android:id="@+id/zulip_login"
-                style="android:buttonStyle"
-                android:layout_width="match_parent"
+            <ImageView
+                android:src="@drawable/ic_visibility_black_24dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/login_button" />
+                android:id="@+id/showPassword"
+                android:layout_marginRight="11dp"
+                android:tag="visible"
+                android:layout_marginEnd="11dp"
+                android:layout_below="@+id/username"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true" />
 
-        </LinearLayout>
+
+        </RelativeLayout>
+
+        <Button
+            android:id="@+id/zulip_login"
+            style="android:buttonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/login_button" />
 
 
         <com.google.android.gms.common.SignInButton
@@ -144,13 +161,14 @@
             android:id="@+id/input_another_server"
             style="@style/links"
             android:text="@string/another_server" />
-    </LinearLayout>
 
-    <TextView
-        android:id="@+id/legal_button"
-        style="@style/links"
-        android:text="@string/legal" />
+        <TextView
+            android:id="@+id/legal_button"
+            style="@style/links"
+            android:text="@string/legal" />
+
     </LinearLayout>
+</LinearLayout>
 </ScrollView>
 
 
