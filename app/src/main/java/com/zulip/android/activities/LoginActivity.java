@@ -13,6 +13,9 @@ import android.os.Bundle;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
@@ -20,6 +23,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.webkit.URLUtil;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
@@ -62,6 +66,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     private EditText mServerEditText;
     private EditText mUserName;
     private EditText mPassword;
+    private ImageView mShowPassword;
     private EditText serverIn;
     //region state-restoration
     static final String USERNAME = "username";
@@ -92,6 +97,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         findViewById(R.id.zulip_login).setOnClickListener(this);
         mUserName = (EditText) findViewById(R.id.username);
         mPassword = (EditText) findViewById(R.id.password);
+        mShowPassword = (ImageView) findViewById(R.id.showPassword);
         serverIn = (EditText) findViewById(R.id.server_url_in);
         findViewById(R.id.server_btn).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -120,6 +126,56 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
             mUserName.setText(savedInstanceState.getString(USERNAME));
             mPassword.setText(savedInstanceState.getString(PASSWORD));
         }
+
+        mShowPassword.setVisibility(View.GONE);
+        mPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        mPassword.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                if (mPassword.getText().length() > 0)
+                {
+                    mShowPassword.setVisibility(View.VISIBLE);
+                }
+                else
+                {
+                    mShowPassword.setVisibility(View.GONE);
+                }
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+
+        mShowPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (mShowPassword.getTag().toString().equals("visible"))
+                {
+                    mShowPassword.setTag("hide");
+                    mShowPassword.setImageResource(R.drawable.ic_visibility_off_black_24dp);
+                    mPassword.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                    mPassword.setSelection(mPassword.length());
+                }
+                else
+                {
+                    mShowPassword.setTag("visible");
+                    mShowPassword.setImageResource(R.drawable.ic_visibility_black_24dp);
+                    mPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                    mPassword.setSelection(mPassword.length());
+                }
+            }
+        });
     }
 
     private void showLoginFields() {
