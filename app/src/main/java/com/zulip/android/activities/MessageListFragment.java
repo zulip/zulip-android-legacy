@@ -420,6 +420,20 @@ public class MessageListFragment extends Fragment implements MessageListener {
         }
 
         loadingMessages = false;
+        //check size of messageList
+        if (messageList.size()==0)
+            showEmptyView();
+        else
+            showRecyclerView();
+    }
+
+    /**
+     * hides TextView with no message
+     * show recyclerView
+     */
+    private void showRecyclerView() {
+        recyclerView.setVisibility(View.VISIBLE);
+        emptyTextView.setVisibility(View.GONE);
     }
 
     public void onMessageError(LoadPosition pos) {
