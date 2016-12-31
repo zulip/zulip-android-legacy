@@ -20,12 +20,20 @@
         android:visibility="gone" />
 
     <ImageView
-            android:id="@+id/delete_photo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:scaleType="center"
-            android:layout_margin="16dp"
-            android:src="@drawable/ic_delete_white_24dp"/>
+        android:id="@+id/cancel_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_clear_white_24dp"/>
+    <ImageView
+        android:id="@+id/delete_photo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleType="center"
+        android:layout_marginTop="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_toLeftOf="@+id/crop_btn"
+        android:src="@drawable/ic_delete_white_24dp"/>
 
         <ImageView
             android:id="@+id/crop_btn"
@@ -45,14 +53,14 @@
 
             <ImageView
                 android:id="@+id/edit_photo"
-                style="@style/photo_buttons"
+                style="@style/photo_buttons_style"
                 android:src="@drawable/ic_mode_edit_24dp" />
 
 
             <ImageView
                 android:id="@+id/send_photo"
                 android:layout_marginLeft="8dp"
-                style="@style/photo_buttons"
+                style="@style/photo_buttons_style"
                 android:src="@drawable/ic_send_24dp" />
 
     </LinearLayout>

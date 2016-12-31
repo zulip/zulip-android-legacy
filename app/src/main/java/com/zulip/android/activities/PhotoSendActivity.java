@@ -150,6 +150,14 @@ public class PhotoSendActivity extends AppCompatActivity {
             }
         });
 
+        // set up cancel button to take user back to where it came from
+        ImageView cancelBtn = (ImageView) findViewById(R.id.cancel_btn);
+        cancelBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PhotoSendActivity.super.onBackPressed();
+            }
+        });
     }
 
     public void onWindowFocusChanged(boolean hasFocus) {
@@ -158,6 +166,19 @@ public class PhotoSendActivity extends AppCompatActivity {
         // use glide to take care of high performance bitmap decoding
         if (!mIsCropped && hasFocus) {
             Glide.with(this).load(mPhotoPath).crossFade().into(mImageView);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        // on pressing back, if image has been cropped
+        // its undone
+        if (mIsCropped) {
+            Glide.with(this).load(mPhotoPath).crossFade().into(mImageView);
+            mIsCropped = false;
+        } else {
+            // otherwise user goes back to where it came from
+            super.onBackPressed();
         }
     }
 }
