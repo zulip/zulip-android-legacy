@@ -5,7 +5,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.customtabs.CustomTabsIntent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -151,6 +153,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
 
     private void checkForError() {
         String serverURL = serverIn.getText().toString();
+
+        // trim leading or trailing white spaces in Url
+        serverURL = serverURL.trim();
+
         int errorMessage = R.string.invalid_server_domain;
         String httpScheme = (BuildConfig.DEBUG) ? "http" : "https";
 
@@ -184,19 +190,30 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     }
 
     private void showBackends(String httpScheme, String serverURL) {
+        // if server url does not end with "/", then append it
+        if (!serverURL.endsWith("/")) {
+            serverURL = serverURL + "/";
+        }
+
         Uri serverUri = Uri.parse(serverURL);
 
         serverUri = serverUri.buildUpon().scheme(httpScheme).build();
 
-        // if does not begin with "api.zulip.com" and if the path is empty, use "/api" as first segment in the path
-        List<String> paths = serverUri.getPathSegments();
-        if (!serverUri.getHost().startsWith("api.") && paths.isEmpty()) {
-            serverUri = serverUri.buildUpon().appendEncodedPath("api/").build();
-        }
+        // display server url with http scheme used
         serverIn.setText(serverUri.toString());
         mServerEditText.setText(serverUri.toString());
         mServerEditText.setEnabled(false);
+
+        // if server url does not end with "api/" or if the path is empty, use "/api" as last segment in the path
+        List<String> paths = serverUri.getPathSegments();
+        if (paths.isEmpty() || !paths.get(paths.size() - 1).equals("api")) {
+            serverUri = serverUri.buildUpon().appendEncodedPath("api/").build();
+        }
+
         ((ZulipApp) getApplication()).setServerURL(serverUri.toString());
+
+        // create new zulipServices object every time by setting it to null
+        getApp().setZulipServices(null);
 
         getServices()
                 .getAuthBackends()
@@ -429,9 +446,33 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                     }
                 });
                 asyncDevGetEmails.execute();
+                break;
+            case R.id.register:
+                openRegister();
+                break;
             default:
                 break;
         }
+    }
+
+    private void openRegister() {
+        Uri uri;
+        if (serverIn==null || serverIn.getText().toString().isEmpty() || serverIn.getText().toString().equals(""))
+        {
+            return;
+        }else
+        {
+            uri = Uri.parse(serverIn.getText().toString()+"register");
+        }
+        if (Build.VERSION.SDK_INT < 15)
+        {
+            Intent intent = new Intent(Intent.ACTION_VIEW,uri);
+            startActivity(intent);
+            return;
+        }
+        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+        CustomTabsIntent intent = builder.build();
+        intent.launchUrl(LoginActivity.this,uri);
     }
 
     private boolean isInputValidForDevAuth() {
