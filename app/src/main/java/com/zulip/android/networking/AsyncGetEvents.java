@@ -279,7 +279,7 @@ public class AsyncGetEvents extends Thread {
 
     /**
      * Handles any event returned by the server that we care about.
-     * @param events
+     * @param events sent by server
      */
     private void processEvents(GetEventResponse events) {
         // In task thread

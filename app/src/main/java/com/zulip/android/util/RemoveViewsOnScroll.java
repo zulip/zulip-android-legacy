@@ -1,6 +1,7 @@
 package com.zulip.android.util;
 
 import android.animation.Animator;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
@@ -38,6 +39,7 @@ public class RemoveViewsOnScroll extends CoordinatorLayout.Behavior<View> {
         return (nestedScrollAxes & ViewCompat.SCROLL_AXIS_VERTICAL) != 0;
     }
 
+    @SuppressLint("NewApi")
     @Override
     public void onNestedPreScroll(CoordinatorLayout coordinatorLayout, View child, View target, int dx, int dy, int[] consumed) {
         if (dy > 0 && changeInYDir < 0 || dy < 0 && changeInYDir > 0) {
@@ -61,6 +63,7 @@ public class RemoveViewsOnScroll extends CoordinatorLayout.Behavior<View> {
 
     }
 
+    @SuppressLint("NewApi")
     private void hideView(final View view) {
         isViewHidden = true;
         ViewPropertyAnimator animator = view.animate()
@@ -93,6 +96,7 @@ public class RemoveViewsOnScroll extends CoordinatorLayout.Behavior<View> {
         animator.start();
     }
 
+    @SuppressLint("NewApi")
     private void showView(final View view) {
         mIsShowing = true;
         ViewPropertyAnimator animator = view.animate()

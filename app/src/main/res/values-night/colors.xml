@@ -7,7 +7,6 @@
     <color name="dev_auth_user">#1e88e5</color>
     <color name="stream_header">#212121</color>
     <color name="messageHeaderBackground">#616161</color>
-    <color name="huddle_header">#333333</color>
     <color name="private_background">#303030</color>
     <color name="stream_background">#424242</color>
     <color name="colorTextPrimary">@android:color/primary_text_dark</color>

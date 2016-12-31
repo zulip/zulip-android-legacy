@@ -1,5 +1,6 @@
 package com.zulip.android.util;
 
+import android.annotation.SuppressLint;
 import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
@@ -8,9 +9,6 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
-import android.widget.Toast;
-
-import com.zulip.android.R;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -21,6 +19,7 @@ import java.io.InputStream;
  * This class helps to find the actual file path from a given content Uri
  */
 
+@SuppressLint("NewApi")
 public class FilePathHelper {
     public static String getPath(final Context context, final Uri uri)
     {

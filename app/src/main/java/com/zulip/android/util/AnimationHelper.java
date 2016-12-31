@@ -1,6 +1,7 @@
 package com.zulip.android.util;
 
 import android.animation.Animator;
+import android.annotation.SuppressLint;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.view.View;
@@ -11,6 +12,7 @@ public class AnimationHelper {
 
     private static final Interpolator FAST_OUT_SLOW_IN_INTERPOLATOR = new FastOutSlowInInterpolator();
 
+    @SuppressLint("NewApi")
     public static void showView(final View view, int duration) {
         ViewPropertyAnimator slideOutAnimator = view.animate()
                 .translationX(view.getWidth())
@@ -38,6 +40,7 @@ public class AnimationHelper {
         slideOutAnimator.start();
     }
 
+    @SuppressLint("NewApi")
     public static void hideView(final View view, int duration) {
         ViewPropertyAnimator slideOutAnimator = view.animate()
                 .translationX(0)
@@ -67,6 +70,7 @@ public class AnimationHelper {
         slideOutAnimator.start();
     }
 
+    @SuppressLint("NewApi")
     public static void hideViewX(final View view, boolean animToRight) {
         ViewPropertyAnimator animator = view.animate()
                 .translationX((animToRight) ? view.getWidth() : view.getWidth() * -1)

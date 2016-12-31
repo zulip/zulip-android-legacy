@@ -513,7 +513,7 @@ public class Message {
      * Copied from Html.fromHtml
      *
      * @param source HTML to be formatted
-     * @param app
+     * @param app {@link ZulipApp}
      * @return Span
      */
     public static Spanned formatContent(String source, final ZulipApp app) {

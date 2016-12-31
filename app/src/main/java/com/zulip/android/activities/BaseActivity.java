@@ -7,7 +7,7 @@ import com.zulip.android.service.ZulipServices;
 
 
 
-public class BaseActivity extends AppCompatActivity {
+public abstract class BaseActivity extends AppCompatActivity {
 
     protected ZulipApp getApp() {
         return ZulipApp.get();

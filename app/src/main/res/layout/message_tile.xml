@@ -4,6 +4,7 @@
                 android:id="@+id/messageTile"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                tools:ignore="Overdraw"
                 android:background="@color/stream_background"
                 android:paddingEnd="8dp"
                 android:paddingRight="8dp">
@@ -70,6 +71,7 @@
 
             <ImageView
                 android:id="@+id/load_image"
+                android:contentDescription="@string/image_content_desp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -84,6 +86,7 @@
     <ImageView
         android:paddingTop="10dp"
         android:id="@+id/gravatar"
+        android:contentDescription="@string/avatar_content_desp"
         android:layout_width="45dp"
         android:layout_height="37dp"
         android:layout_alignParentLeft="true"
@@ -93,11 +96,13 @@
         android:scaleType="centerInside"
         android:src="@android:drawable/presence_online" />
 
+    <!--remove supress with targetApi once #260 is merged-->
     <View
         android:id="@+id/leftBar"
         android:layout_width="8dp"
         android:layout_height="match_parent"
         android:layout_alignBottom="@id/contentBox"
         android:layout_alignParentTop="true"
-        android:background="@android:color/holo_blue_dark" />
+        android:background="@android:color/holo_blue_dark"
+        tools:targetApi="ice_cream_sandwich" />
 </RelativeLayout>

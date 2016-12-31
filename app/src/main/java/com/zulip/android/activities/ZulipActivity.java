@@ -723,6 +723,7 @@ public class ZulipActivity extends BaseActivity implements
      * Function invoked when a user shares an image with the zulip app
      * @param intent passed to the activity with action SEND
      */
+    @SuppressLint("InlinedApi")
     private void handleSentImage(Intent intent) {
         mImageUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
         if (mImageUri != null) {
@@ -932,6 +933,7 @@ public class ZulipActivity extends BaseActivity implements
         }
     }
 
+    @SuppressLint("NewApi")
     public void hideView(final View view) {
         ViewPropertyAnimator animator = view.animate()
                 .translationY((view instanceof AppBarLayout) ? -1 * view.getHeight() : view.getHeight())
@@ -959,6 +961,7 @@ public class ZulipActivity extends BaseActivity implements
         animator.start();
     }
 
+    @SuppressLint("NewApi")
     public void showView(final View view) {
         ViewPropertyAnimator animator = view.animate()
                 .translationY(0)
@@ -1338,7 +1341,7 @@ public class ZulipActivity extends BaseActivity implements
 
     /**
      * Creates a cursor to get the topics in the stream in
-     * @param stream
+     * @param stream from which topics similar to {@param subject} are selected
      * @param  subject Filter out subject containing this string
      */
     private Cursor makeSubjectCursor(CharSequence stream, CharSequence subject)

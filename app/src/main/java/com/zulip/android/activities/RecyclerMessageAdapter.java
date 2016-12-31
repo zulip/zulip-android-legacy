@@ -553,7 +553,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     /**
      * Return the size of the list with including or excluding footer
      * @param includeFooter true to return the size including footer or false to return size excluding footer.
-     * @return
+     * @return size of list
      */
     public int getItemCount(boolean includeFooter) {
         if (includeFooter) return getItemCount();

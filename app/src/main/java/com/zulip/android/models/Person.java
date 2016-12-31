@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @DatabaseTable(tableName = "people")
@@ -113,7 +114,7 @@ public class Person {
 
     private void setEmail(String email) {
         if (email != null) {
-            this.email = email.toLowerCase();
+            this.email = email.toLowerCase(Locale.US);
         }
     }
 
@@ -194,7 +195,7 @@ public class Person {
                                             Boolean.parseBoolean(resultColumns[4]),
                                             Boolean.parseBoolean(resultColumns[5]));
                                 }
-                            }, email.toLowerCase());
+                            }, email.toLowerCase(Locale.US));
 
             // we only care about the first result
             Person returnValue = rawResults.getFirstResult();
@@ -283,23 +284,23 @@ public class Person {
                 final int inactiveTimeout = 2 * 60;
 
                 if (aPresence == null && bPresence == null) {
-                    return a.getName().toLowerCase()
-                            .compareTo(b.getName().toLowerCase());
+                    return a.getName().toLowerCase(Locale.US)
+                            .compareTo(b.getName().toLowerCase(Locale.US));
                 } else if (aPresence == null) {
                     return 1;
                 } else if (bPresence == null) {
                     return -1;
                 } else if (aPresence.getAge() > inactiveTimeout
                         && bPresence.getAge() > inactiveTimeout) {
-                    return a.getName().toLowerCase()
-                            .compareTo(b.getName().toLowerCase());
+                    return a.getName().toLowerCase(Locale.US)
+                            .compareTo(b.getName().toLowerCase(Locale.US));
                 } else if (aPresence.getAge() > inactiveTimeout) {
                     return 1;
                 } else if (bPresence.getAge() > inactiveTimeout) {
                     return -1;
                 } else if (aPresence.getStatus() == bPresence.getStatus()) {
-                    return a.getName().toLowerCase()
-                            .compareTo(b.getName().toLowerCase());
+                    return a.getName().toLowerCase(Locale.US)
+                            .compareTo(b.getName().toLowerCase(Locale.US));
                 } else if (aPresence.getStatus() == PresenceType.ACTIVE) {
                     return -1;
                 } else {

@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="12dp"
+    tools:ignore="Overdraw"
     android:background="@color/messageHeaderBackground">
 
     <TextView
@@ -43,6 +44,7 @@
 
     <ImageView
         android:id="@+id/muteMessageImage"
+        android:contentDescription="@string/message_muted_content_desp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/ic_volume_off_18dp"

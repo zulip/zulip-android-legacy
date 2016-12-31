@@ -25,7 +25,9 @@
         android:allowBackup="false"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme.DayNight.NoActionBar" >
+        android:theme="@style/AppTheme.DayNight.NoActionBar"
+        android:supportsRtl="false"
+        tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name=".activities.ZulipActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"

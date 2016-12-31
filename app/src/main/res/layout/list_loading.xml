@@ -3,6 +3,7 @@ ListView headers take height into account even when visibility = GONE, so wrap i
 per http://pivotallabs.com/android-tidbits-6-22-2011-hiding-header-views/
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
@@ -12,7 +13,8 @@ per http://pivotallabs.com/android-tidbits-6-22-2011-hiding-header-views/
         android:layout_height="48dp"
         android:layout_gravity="center"
         android:background="@color/loadingBackground"
-        android:gravity="center|center_vertical">
+        android:gravity="center|center_vertical"
+        tools:ignore="UselessParent">
 
         <ProgressBar
             android:layout_width="30dp"

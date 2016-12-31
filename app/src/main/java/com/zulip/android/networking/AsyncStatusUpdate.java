@@ -29,7 +29,7 @@ public class AsyncStatusUpdate extends ZulipAsyncPushTask {
     /**
      * Declares a new HumbugAsyncPushTask, passing the activity as context.
      *
-     * @param activity
+     * @param activity {@link android.app.Activity}
      */
     public AsyncStatusUpdate(ZulipActivity activity) {
         super((ZulipApp) activity.getApplication());

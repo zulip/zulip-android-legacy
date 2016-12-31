@@ -62,6 +62,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 public class CustomHtmlToSpannedConverter implements ContentHandler {
 
@@ -671,7 +672,7 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
      * interpreted.
      */
     private static int getHtmlColor(String color) {
-        Integer i = COLORS.get(color.toLowerCase());
+        Integer i = COLORS.get(color.toLowerCase(Locale.US));
         if (i != null) {
             return i;
         } else {
@@ -737,9 +738,9 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
 >>>>>>> Issue #168 bugfix for links not being clickable, adds autoLink feature including web, phone, map and email
      * @see <a href="https://developer.android.com/reference/android/text/util/Linkify.html">Linkify</a>
      *
-     * @param spann
+     * @param spann {@link Spanned} text which has to be Linkified
      * @param mask bitmask to define which kinds of links will be searched and applied (e.g. <a href="https://developer.android.com/reference/android/text/util/Linkify.html#ALL">Linkify.ALL</a>)
-     * @return
+     * @return Linkified {@link Spanned} text
      */
     public static Spanned linkifySpanned(@NonNull final Spanned spann, final int mask) {
         URLSpan[] existingSpans = spann.getSpans(0, spann.length(), URLSpan.class);
