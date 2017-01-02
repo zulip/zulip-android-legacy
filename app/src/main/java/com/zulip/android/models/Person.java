@@ -2,15 +2,17 @@ package com.zulip.android.models;
 
 import com.google.gson.annotations.SerializedName;
 import com.j256.ormlite.dao.Dao;
+import com.j256.ormlite.dao.GenericRawResults;
+import com.j256.ormlite.dao.RawRowMapper;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.stmt.SelectArg;
 import com.j256.ormlite.table.DatabaseTable;
 import com.zulip.android.ZulipApp;
 import com.zulip.android.util.ZLog;
 
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Comparator;
@@ -71,6 +73,15 @@ public class Person {
         this(name, email);
         this.setAvatarURL(avatarURL);
         this.isActive = false;
+    }
+
+    public Person(int id, String name, String email, String avatarURL, boolean isBot, boolean isActive) {
+        this.setId(id);
+        this.setName(name);
+        this.setEmail(email);
+        this.setAvatarURL(avatarURL);
+        this.setActive(isActive);
+        this.setBot(isBot);
     }
 
     /**
@@ -163,16 +174,42 @@ public class Person {
         return null;
     }
 
+    @SuppressWarnings("WeakerAccess")
     public static Person getByEmail(Dao<Person, ?> dao, String email) {
         try {
-            return dao.queryBuilder().where()
-                    .eq(Person.EMAIL_FIELD, new SelectArg(email.toLowerCase()))
-                    .queryForFirst();
+            // Using raw query to avoid errors with queryBuilder in ormlite.
+            // Listing of column names is necessary to avoid haphazard ordering of attributes
+            // in rawResults.
+            GenericRawResults<Person> rawResults =
+                    dao.queryRaw(
+                            "select " + Person.ID_FIELD + "," + Person.NAME_FIELD + ","
+                                    + Person.EMAIL_FIELD + "," + Person.AVATARURL_FIELD + ","
+                                    + Person.ISBOT_FIELD + "," + Person.ISACTIVE_FIELD + " from " + "people"
+                                    + " where " + Person.EMAIL_FIELD + " = ? ;",
+                            new RawRowMapper<Person>() {
+                                public Person mapRow(String[] columnNames,
+                                                  String[] resultColumns) {
+                                    return new Person(Integer.parseInt(resultColumns[0]),
+                                            resultColumns[1], resultColumns[2], resultColumns[3],
+                                            Boolean.parseBoolean(resultColumns[4]),
+                                            Boolean.parseBoolean(resultColumns[5]));
+                                }
+                            }, email.toLowerCase());
+
+            // we only care about the first result
+            Person returnValue = rawResults.getFirstResult();
+            rawResults.close();
+            return  returnValue;
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } catch (IOException e) {
+            ZLog.logException(e);
         }
+
+        return null;
     }
 
+    @SuppressWarnings("WeakerAccess")
     public static Person getOrUpdate(ZulipApp app, String email, String name,
                                      String avatarURL, Map<String, Person> personCache) {
 
@@ -212,6 +249,11 @@ public class Person {
     public static Person getOrUpdate(ZulipApp app, String email, String name,
                                      String avatarURL) {
         return getOrUpdate(app, email, name, avatarURL, null);
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public void setBot(boolean isBot) {
+        this.isBot = isBot;
     }
 
     public void setActive(boolean active) {
