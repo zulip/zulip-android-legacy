@@ -24,6 +24,10 @@ public class PhotoHelper {
      * @param bitmap to be saved as file
      */
     public static String saveBitmapAsFile(String photoPath, Bitmap bitmap) {
+        if (bitmap == null) {
+            return photoPath;
+        }
+
         // delete old bitmap
         File file = new File(photoPath);
         file.delete();

@@ -125,11 +125,16 @@ public class PhotoEditActivity extends AppCompatActivity {
                 frameLayout.setVisibility(View.INVISIBLE);
 
                 // take screenshot of cropped image
-                Bitmap bitmap = screenShot(frameLayout);
-                mPhotoPath = PhotoHelper.saveBitmapAsFile(mPhotoPath, bitmap);
+                if (frameLayout.getWidth() > 0 && frameLayout.getHeight() > 0) {
+                    Bitmap bitmap = screenShot(frameLayout);
+                    mPhotoPath = PhotoHelper.saveBitmapAsFile(mPhotoPath, bitmap);
 
-                cropIntent.putExtra(Intent.EXTRA_TEXT, mPhotoPath);
-                startActivity(cropIntent);
+                    cropIntent.putExtra(Intent.EXTRA_TEXT, mPhotoPath);
+                    startActivity(cropIntent);
+                } else {
+                    // do nothing
+                    // wait for layout to be constructed
+                }
             }
         });
 
@@ -144,9 +149,11 @@ public class PhotoEditActivity extends AppCompatActivity {
                 // pass edited photo file path to ZulipActivity
                 FrameLayout frameLayout = (FrameLayout) findViewById(R.id.frame_layout_picture);
                 frameLayout.setVisibility(View.INVISIBLE);
+
                 // take screenshot of cropped image
                 Bitmap bitmap = screenShot(frameLayout);
                 mPhotoPath = PhotoHelper.saveBitmapAsFile(mPhotoPath, bitmap);
+
                 sendIntent.putExtra(Intent.EXTRA_TEXT, mPhotoPath);
                 startActivity(sendIntent);
             }
@@ -228,10 +235,12 @@ public class PhotoEditActivity extends AppCompatActivity {
         view.draw(canvas);
 
         // obtained only the visible region of edited image
-        Bitmap trimmedBitmap = Bitmap.createBitmap(returnedBitmap,
-                mImageDimensions[0], mImageDimensions[1],
-                mImageDimensions[2], mImageDimensions[3]);
-
+        Bitmap trimmedBitmap = null;
+        if (mImageDimensions != null) {
+            trimmedBitmap = Bitmap.createBitmap(returnedBitmap,
+                    mImageDimensions[0], mImageDimensions[1],
+                    mImageDimensions[2], mImageDimensions[3]);
+        }
         return trimmedBitmap;
     }
 }

@@ -109,9 +109,20 @@ public class PhotoSendActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (mIsCropped) {
+                    Bitmap bitmap;
+                    Drawable drawable = mImageView.getDrawable();
+                    if (drawable instanceof GlideBitmapDrawable) {
+                        // if imageview has drawable of type GlideBitmapDrawable
+                        bitmap = ((GlideBitmapDrawable)mImageView.getDrawable().getCurrent())
+                                .getBitmap();
+
+                    } else {
+                        // if imageView stores cropped image drawable which is of type drawable
+                        bitmap = ((BitmapDrawable) mImageView.getDrawable()).getBitmap();
+                    }
+
                     // if image was cropped, delete old file
                     // and store new bitmap on that location
-                    Bitmap bitmap = ((BitmapDrawable) mImageView.getDrawable()).getBitmap();
                     mPhotoPath = PhotoHelper.saveBitmapAsFile(mPhotoPath, bitmap);
                 }
 
