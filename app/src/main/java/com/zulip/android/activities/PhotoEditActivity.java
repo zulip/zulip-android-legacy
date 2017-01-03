@@ -129,6 +129,7 @@ public class PhotoEditActivity extends AppCompatActivity {
                     Bitmap bitmap = screenShot(frameLayout);
                     mPhotoPath = PhotoHelper.saveBitmapAsFile(mPhotoPath, bitmap);
 
+                    cropIntent.putExtra(PhotoEditActivity.class.getSimpleName(), true);
                     cropIntent.putExtra(Intent.EXTRA_TEXT, mPhotoPath);
                     startActivity(cropIntent);
                 } else {

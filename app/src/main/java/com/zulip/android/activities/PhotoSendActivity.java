@@ -3,18 +3,22 @@ package com.zulip.android.activities;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.GlideBitmapDrawable;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.theartofdev.edmodo.cropper.CropImageView;
 import com.zulip.android.R;
 import com.zulip.android.util.PhotoHelper;
@@ -28,6 +32,9 @@ public class PhotoSendActivity extends AppCompatActivity {
     private CropImageView mCropImageView;
     private boolean mIsCropFinished;
     private boolean mIsCropped;
+    private ImageView mCropBtn;
+    private SimpleTarget<Bitmap> mGlideTarget;
+    private Intent mIntentReceived;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,8 +46,8 @@ public class PhotoSendActivity extends AppCompatActivity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         // get the file path sent from ZulipActivity
-        final Intent intent = getIntent();
-        mPhotoPath = intent.getStringExtra(Intent.EXTRA_TEXT);
+        mIntentReceived = getIntent();
+        mPhotoPath = mIntentReceived.getStringExtra(Intent.EXTRA_TEXT);
 
         mImageView = (ImageView) findViewById(R.id.photoImageView);
 
@@ -65,8 +72,8 @@ public class PhotoSendActivity extends AppCompatActivity {
 
         mCropImageView = (CropImageView) findViewById(R.id.crop_image_view);
 
-        final ImageView cropBtn = (ImageView) findViewById(R.id.crop_btn);
-        cropBtn.setOnClickListener(new View.OnClickListener() {
+        mCropBtn = (ImageView) findViewById(R.id.crop_btn);
+        mCropBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (!mIsCropFinished) {
@@ -87,7 +94,7 @@ public class PhotoSendActivity extends AppCompatActivity {
                     mCropImageView.setVisibility(View.VISIBLE);
 
                     // tint the crop button blue during cropping
-                    cropBtn.setColorFilter(ContextCompat.getColor(PhotoSendActivity.this,
+                    mCropBtn.setColorFilter(ContextCompat.getColor(PhotoSendActivity.this,
                             R.color.photo_buttons));
                     mIsCropFinished = true;
                     mIsCropped = true;
@@ -98,7 +105,7 @@ public class PhotoSendActivity extends AppCompatActivity {
                     mImageView.setImageBitmap(croppedImage);
 
                     // tint the crop button white when cropping is finished
-                    cropBtn.setColorFilter(Color.WHITE);
+                    mCropBtn.setColorFilter(Color.WHITE);
                     mIsCropFinished = false;
                 }
             }
@@ -169,13 +176,42 @@ public class PhotoSendActivity extends AppCompatActivity {
                 PhotoSendActivity.super.onBackPressed();
             }
         });
+
+
+        // glide target called when intent is received from PhotoEditActivity to crop
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int width = size.x;
+        int height = size.y;
+        mGlideTarget = new SimpleTarget<Bitmap>(width, height) {
+            @Override
+            public void onResourceReady(Bitmap bitmap, GlideAnimation glideAnimation) {
+                // set bitmap on imageView
+                mImageView.setImageBitmap(bitmap);
+
+                // check if intent is sent from PhotoEditActivity
+                Intent intent = PhotoSendActivity.this.getIntent();
+                boolean fromEdit = intent.getBooleanExtra(PhotoEditActivity.class.getSimpleName(), false);
+                if (fromEdit) {
+                    // trigger crop action
+                    mCropBtn.performClick();
+                }
+            }
+        };
     }
 
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
 
         // use glide to take care of high performance bitmap decoding
-        if (!mIsCropped && hasFocus) {
+        if (mIntentReceived != null && mIntentReceived.getBooleanExtra(PhotoEditActivity.class.getSimpleName(), false)
+                && hasFocus) {
+            // use simple target to know when image is loaded
+            Glide.with(this).load(mPhotoPath).asBitmap().into(mGlideTarget);
+        }
+        else if (!mIsCropped && hasFocus) {
+            // load image specified at mPhotoPath in imageView
             Glide.with(this).load(mPhotoPath).crossFade().into(mImageView);
         }
     }
