@@ -8,13 +8,16 @@ import android.content.IntentSender.SendIntentException;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.customtabs.CustomTabsIntent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
+import android.webkit.URLUtil;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
-import android.webkit.URLUtil;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -230,6 +233,12 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
 
                     @Override
                     public void onSuccess(Call<ZulipBackendResponse> call, Response<ZulipBackendResponse> response) {
+                        View view = LoginActivity.this.getCurrentFocus();
+                        if (view != null) {
+                            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                        }
+
                         if (response.body().isPassword()) {
                             findViewById(R.id.passwordAuthLayout).setVisibility(View.VISIBLE);
                         }
@@ -494,9 +503,33 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                     }
                 });
                 asyncDevGetEmails.execute();
+                break;
+            case R.id.register:
+                openRegister();
+                break;
             default:
                 break;
         }
+    }
+
+    private void openRegister() {
+        Uri uri;
+        if (serverIn==null || serverIn.getText().toString().isEmpty() || serverIn.getText().toString().equals(""))
+        {
+            return;
+        }else
+        {
+            uri = Uri.parse(serverIn.getText().toString()+"register");
+        }
+        if (Build.VERSION.SDK_INT < 15)
+        {
+            Intent intent = new Intent(Intent.ACTION_VIEW,uri);
+            startActivity(intent);
+            return;
+        }
+        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+        CustomTabsIntent intent = builder.build();
+        intent.launchUrl(LoginActivity.this,uri);
     }
 
     private boolean isInputValidForDevAuth() {

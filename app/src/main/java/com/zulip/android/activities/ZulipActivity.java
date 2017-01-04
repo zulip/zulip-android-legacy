@@ -129,6 +129,7 @@ public class ZulipActivity extends BaseActivity implements
     private ZulipApp app;
 
     private boolean logged_in = false;
+    private boolean backPressedOnce = false;
 
     private ZulipActivity that = this; // self-ref
 
@@ -146,6 +147,7 @@ public class ZulipActivity extends BaseActivity implements
     private AsyncGetEvents event_poll;
 
     private Handler statusUpdateHandler;
+    private Runnable statusUpdateRunnable;
 
     public MessageListFragment currentList;
     private MessageListFragment narrowedList;
@@ -327,17 +329,7 @@ public class ZulipActivity extends BaseActivity implements
             @Override
             public void onClick(View v) {
                 //set default people list
-                try {
-                    peopleAdapter.changeCursor(getPeopleCursorGenerator().call());
-                } catch (Exception e) {
-                    ZLog.logException(e);
-                }
-                //set search editText text empty
-                etSearchPeople.setText("");
-                //hide soft keyboard
-                hideSoftKeyBoard();
-                //remove focus
-                etSearchPeople.clearFocus();
+               resetPeopleSearch();
             }
         });
         etSearchStream = (EditText)findViewById(R.id.stream_drawer_search);
@@ -347,16 +339,7 @@ public class ZulipActivity extends BaseActivity implements
             @Override
             public void onClick(View v) {
                 //set default stream list
-                try {
-                    streamsDrawerAdapter.changeCursor(getSteamCursorGenerator().call());
-                } catch (Exception e) {
-                    ZLog.logException(e);
-                }
-                etSearchStream.setText("");
-                //hide soft keyboard
-                hideSoftKeyBoard();
-                //remove focus
-                etSearchStream.clearFocus();
+               resetStreamSearch();
             }
         });
         app.setZulipActivity(this);
@@ -396,6 +379,7 @@ public class ZulipActivity extends BaseActivity implements
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
+                resetPeopleSearch();
                 if (id == allPeopleId) {
                     doNarrow(new NarrowFilterAllPMs(app.getYou()));
                 } else {
@@ -406,7 +390,7 @@ public class ZulipActivity extends BaseActivity implements
 
         // send status update and check again every couple minutes
         statusUpdateHandler = new Handler();
-        Runnable statusUpdateRunnable = new Runnable() {
+        statusUpdateRunnable = new Runnable() {
             @Override
             public void run() {
                 AsyncStatusUpdate task = new AsyncStatusUpdate(
@@ -542,6 +526,28 @@ public class ZulipActivity extends BaseActivity implements
         }
     }
 
+    /**
+     * Change peopleAdapter cursor to default
+     * Clear text of etSearchPeople
+     * Remove focus of etSearchPeople
+     */
+    private void resetPeopleSearch() {
+        try {
+            peopleAdapter.changeCursor(getPeopleCursorGenerator().call());
+        } catch (Exception e) {
+            ZLog.logException(e);
+        }
+        //set search editText text empty
+        etSearchPeople.setText("");
+        //hide soft keyboard
+        hideSoftKeyBoard();
+        //remove focus
+        etSearchPeople.clearFocus();
+    }
+
+    /**
+     * Hide soft keyboard
+     */
     private void hideSoftKeyBoard() {
         // Check if no view has focus:
         View view = this.getCurrentFocus();
@@ -1024,6 +1030,7 @@ public class ZulipActivity extends BaseActivity implements
 
             @Override
             public boolean onGroupClick(ExpandableListView expandableListView, View view, int position, long l) {
+                resetStreamSearch();
                 String streamName = ((TextView) view.findViewById(R.id.name)).getText().toString();
                 doNarrow(new NarrowFilterStream(streamName, null));
                 drawerLayout.openDrawer(GravityCompat.START);
@@ -1052,6 +1059,7 @@ public class ZulipActivity extends BaseActivity implements
                         view.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
+                                resetStreamSearch();
                                 onNarrow(new NarrowFilterStream(streamName, null));
                                 onNarrowFillSendBoxStream(streamName, "", false);
                             }
@@ -1095,6 +1103,24 @@ public class ZulipActivity extends BaseActivity implements
             }
         });
         streamsDrawer.setAdapter(streamsDrawerAdapter);
+    }
+
+    /**
+     * Change streamsDrawerAdapter cursor to default
+     * Clear text of etSearchStream
+     * Remove focus of etSearchStream
+     */
+    private void resetStreamSearch() {
+        try {
+            streamsDrawerAdapter.changeCursor(getSteamCursorGenerator().call());
+        } catch (Exception e) {
+            ZLog.logException(e);
+        }
+        etSearchStream.setText("");
+        //hide soft keyboard
+        hideSoftKeyBoard();
+        //remove focus
+        etSearchStream.clearFocus();
     }
 
     /**
@@ -1433,12 +1459,28 @@ public class ZulipActivity extends BaseActivity implements
     }
 
     public void onBackPressed() {
-        if (narrowedList != null) {
-            narrowedList = null;
-            getSupportFragmentManager().popBackStack(NARROW,
+        if (narrowedList == null) {
+
+            if (backPressedOnce) {
+                finish();
+            }
+
+            backPressedOnce = true;
+            Toast.makeText(this, R.string.press_again_to_exit, Toast.LENGTH_SHORT).show();
+            statusUpdateRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    backPressedOnce = false;
+                }
+            };
+
+            statusUpdateHandler.postDelayed(statusUpdateRunnable, 2000);
+
+
+        }   else {
+              narrowedList = null;
+              getSupportFragmentManager().popBackStack(NARROW,
                     FragmentManager.POP_BACK_STACK_INCLUSIVE);
-        } else {
-            super.onBackPressed();
         }
     }
 
@@ -1804,6 +1846,7 @@ public class ZulipActivity extends BaseActivity implements
         super.onDestroy();
         if (statusUpdateHandler != null) {
             statusUpdateHandler.removeMessages(0);
+            statusUpdateHandler.removeCallbacks(statusUpdateRunnable);
         }
     }
 
