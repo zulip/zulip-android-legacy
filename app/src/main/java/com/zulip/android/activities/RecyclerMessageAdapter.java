@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.support.annotation.ColorInt;
+import android.support.annotation.Keep;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatDelegate;
@@ -117,22 +118,27 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                         MessageHeaderParent messageHeaderParent = (MessageHeaderParent) getItem(position);
                         if (messageHeaderParent.getMessageType() == MessageType.PRIVATE_MESSAGE) {
                             Person[] recipientArray = messageHeaderParent.getRecipients(zulipApp);
-                            narrowListener.onNarrow(new NarrowFilterPM(Arrays.asList(recipientArray)));
+                            narrowListener.onNarrow(new NarrowFilterPM(Arrays.asList(recipientArray)),
+                                    messageHeaderParent.getMessageId());
                             narrowListener.onNarrowFillSendBoxPrivate(recipientArray,false);
                         } else {
-
-                            narrowListener.onNarrow(new NarrowFilterStream(Stream.getByName(zulipApp, messageHeaderParent.getStream()), null));
+                            narrowListener.onNarrow(new NarrowFilterStream(Stream.getByName(zulipApp,
+                                    messageHeaderParent.getStream()), null),
+                                    messageHeaderParent.getMessageId());
                             narrowListener.onNarrowFillSendBoxStream(messageHeaderParent.getStream(), "", false);
                         }
                         break;
                     case R.id.instance: //Topic
                         MessageHeaderParent messageParent = (MessageHeaderParent) getItem(position);
                         if (messageParent.getMessageType() == MessageType.STREAM_MESSAGE) {
-                            narrowListener.onNarrow(new NarrowFilterStream(Stream.getByName(zulipApp, messageParent.getStream()), messageParent.getSubject()));
+                            narrowListener.onNarrow(new NarrowFilterStream(Stream.getByName(zulipApp,
+                                    messageParent.getStream()), messageParent.getSubject()),
+                                    messageParent.getMessageId());
                             narrowListener.onNarrowFillSendBoxStream(messageParent.getStream(), messageParent.getSubject(), false);
                         } else {
                             Person[] recipentArray = messageParent.getRecipients(zulipApp);
-                            narrowListener.onNarrow(new NarrowFilterPM(Arrays.asList(recipentArray)));
+                            narrowListener.onNarrow(new NarrowFilterPM(Arrays.asList(recipentArray)),
+                                    messageParent.getMessageId());
                             narrowListener.onNarrowFillSendBoxPrivate(recipentArray, false);
                         }
                         break;
