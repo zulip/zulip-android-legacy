@@ -1794,6 +1794,20 @@ public class ZulipActivity extends BaseActivity implements
         showView(appBarLayout);
     }
 
+    /**
+     * This method creates a new Instance of the MessageListFragment and displays it with the filter
+     * whiling keeping the view anchored at {@param messageId}.
+     * @param filter NarrowFilter passed
+     * @param messageId used as anchor for fetching messages
+     */
+    public void doNarrow(NarrowFilter filter, int messageId) {
+        narrowedList = MessageListFragment.newInstance(filter);
+        // Push to the back stack if we are not already narrowed
+        pushListFragment(narrowedList, NARROW);
+        narrowedList.onReadyToDisplay(true, messageId);
+        showView(appBarLayout);
+    }
+
     @Override
     public void onNarrowFillSendBoxPrivate(Person peopleList[], boolean openSoftKeyboard) {
         displayChatBox(true);
@@ -1866,6 +1880,12 @@ public class ZulipActivity extends BaseActivity implements
     public void onNarrow(NarrowFilter narrowFilter) {
         // TODO: check if already narrowed to this particular stream/subject
         doNarrow(narrowFilter);
+    }
+
+
+    public void onNarrow(NarrowFilter narrowFilter, int messageId) {
+        // TODO: check if already narrowed to this particular stream/subject
+        doNarrow(narrowFilter, messageId);
     }
 
     @Override

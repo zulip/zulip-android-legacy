@@ -62,9 +62,10 @@ public class MessageListFragment extends Fragment implements MessageListener {
     // Whether we've loaded all available messages in that direction
     private boolean loadedToTop = false;
     private boolean loadedToBottom = false;
-
     private int firstMessageId = -1;
     private int lastMessageId = -1;
+    // anchor message id used while narrowing to a subject or stream
+    private int anchorId = -1;
     private boolean paused = false;
     private boolean initialized = false;
     private List<Message> messageList;
@@ -212,6 +213,17 @@ public class MessageListFragment extends Fragment implements MessageListener {
         }
     }
 
+    private void initializeNarrow() {
+        adapter.clear();
+        messageIndex.clear();
+
+        firstMessageId = -1;
+        lastMessageId = -1;
+
+        loadingMessages = true;
+        adapter.setFooterShowing(true);
+    }
+
     public void onReadyToDisplay(boolean registered) {
         if (initialized && !registered) {
             // Already have state, and already processed any events that came in
@@ -222,18 +234,32 @@ public class MessageListFragment extends Fragment implements MessageListener {
             return;
         }
 
-        adapter.clear();
-        messageIndex.clear();
-
-        firstMessageId = -1;
-        lastMessageId = -1;
-
-        loadingMessages = true;
-        adapter.setFooterShowing(true);
-
+        initializeNarrow();
         fetch();
         initialized = true;
     }
+
+    /**
+     * Prepare to display narrowed view with {@param messageId} as anchor
+     *
+     * @param registered is event registered
+     * @param messageId  anchor message id
+     */
+    public void onReadyToDisplay(boolean registered, int messageId) {
+        if (initialized && !registered) {
+            // Already have state, and already processed any events that came in
+            // when resuming the existing queue.
+            adapter.setFooterShowing(false);
+            loadingMessages = false;
+            Log.i("onReadyToDisplay", "just a resume");
+            return;
+        }
+
+        initializeNarrow();
+        fetch(messageId);
+        initialized = true;
+    }
+
 
     private void showEmptyView() {
         Log.d("ErrorRecieving", "No Messages found for current list" + ((filter != null) ? ":" + filter.getTitle() : ""));
@@ -263,6 +289,37 @@ public class MessageListFragment extends Fragment implements MessageListener {
                 100, filter);
     }
 
+    /**
+     * This function fetches messages using {@link MessageListFragment#filter} and anchors them
+     * around {@param messageID}.
+     *
+     * @param messageID anchor message id
+     */
+    private void fetch(int messageID) {
+        // set the achor for fetching messages as the message clicked
+        this.anchorId = messageID;
+
+        final AsyncGetOldMessages oldMessagesReq = new AsyncGetOldMessages(this);
+        oldMessagesReq.setCallback(new ZulipAsyncPushTask.AsyncTaskCompleteListener() {
+            @Override
+            public void onTaskComplete(String result, JSONObject jsonObject) {
+                loadingMessages = false;
+                adapter.setHeaderShowing(false);
+                if (result.equals("0")) {
+                    showEmptyView();
+                }
+            }
+
+            @Override
+            public void onTaskFailure(String result) {
+                loadingMessages = false;
+                adapter.setHeaderShowing(false);
+            }
+        });
+        oldMessagesReq.execute(messageID, LoadPosition.INITIAL, 100,
+                100, filter);
+    }
+
     private void selectPointer() {
         if (filter != null) {
             Where<Message, Object> filteredWhere;
@@ -277,10 +334,14 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
                 closestQuery.orderBy(Message.TIMESTAMP_FIELD, false).setWhere(
                         filteredWhere);
+                Message closestMessage = closestQuery.queryForFirst();
 
-                recyclerView.scrollToPosition(adapter.getItemIndex(closestQuery
-                        .queryForFirst()));
-
+                // use anchor message id if message was narrowed
+                if (anchorId != -1) {
+                    selectMessage(getMessageById(anchorId));
+                } else {
+                    recyclerView.scrollToPosition(adapter.getItemIndex(closestMessage));
+                }
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
