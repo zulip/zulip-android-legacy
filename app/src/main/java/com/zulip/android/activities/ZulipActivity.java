@@ -20,7 +20,6 @@ import android.database.MergeCursor;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -861,7 +860,7 @@ public class ZulipActivity extends BaseActivity implements
      */
     private File createPhotoFile() throws IOException {
         // Create an image file name using timestamp
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
+        String timeStamp = SimpleDateFormat.getDateTimeInstance().format(new java.util.Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(

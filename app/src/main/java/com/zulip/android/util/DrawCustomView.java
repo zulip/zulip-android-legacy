@@ -1,5 +1,6 @@
 package com.zulip.android.util;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -96,6 +97,7 @@ public class DrawCustomView extends View {
         drawCanvas = new Canvas(canvasBitmap);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         float touchX = event.getX();

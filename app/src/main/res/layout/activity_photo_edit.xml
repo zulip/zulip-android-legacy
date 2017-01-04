@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/black"
+    tools:ignore="Overdraw"
     tools:context="com.zulip.android.activities.PhotoEditActivity">
 
     <FrameLayout
@@ -14,6 +15,7 @@
 
         <ImageView
             android:id="@+id/photoImageView"
+            android:contentDescription="@string/image_content_desp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="fitCenter" />
@@ -31,7 +33,8 @@
         android:layout_marginLeft="16dp"
         android:layout_marginTop="24dp"
         android:background="?attr/selectableItemBackground"
-        android:src="@drawable/ic_clear_white_24dp" />
+        android:src="@drawable/ic_clear_white_24dp"
+        android:contentDescription="@string/back_btn_content_disp" />
 
 
     <ImageView
@@ -44,7 +47,8 @@
         android:layout_marginTop="16dp"
         android:background="@drawable/marker_tool_circle"
         android:scaleType="center"
-        android:src="@drawable/ic_edit_white_24dp" />
+        android:src="@drawable/ic_edit_white_24dp"
+        android:contentDescription="@string/marker_content_desp" />
 
     <LinearLayout
         android:id="@+id/linear_layout"
@@ -64,37 +68,44 @@
         <ImageView
             android:id="@+id/red_marker"
             style="@style/marker_color_style"
-            android:tint="@color/red_marker_tool" />
+            android:tint="@color/red_marker_tool"
+            tools:ignore="ContentDescription" />
 
 
         <ImageView
             android:id="@+id/yellow_marker"
             style="@style/marker_color_style"
-            android:tint="@color/yellow_marker_tool" />
+            android:tint="@color/yellow_marker_tool"
+            tools:ignore="ContentDescription" />
 
         <ImageView
             android:id="@+id/green_marker"
             style="@style/marker_color_style"
-            android:tint="@color/green_marker_tool" />
+            android:tint="@color/green_marker_tool"
+            tools:ignore="ContentDescription" />
 
         <ImageView
             android:id="@+id/white_marker"
             style="@style/marker_color_style"
-            android:tint="@color/white_marker_tool" />
+            android:tint="@color/white_marker_tool"
+            tools:ignore="ContentDescription" />
 
         <ImageView
             android:id="@+id/blue_marker"
             style="@style/marker_color_style"
-            android:tint="@color/blue_marker_tool" />
+            android:tint="@color/blue_marker_tool"
+            tools:ignore="ContentDescription" />
 
         <ImageView
             android:id="@+id/black_marker"
-            style="@style/marker_color_style" />
+            style="@style/marker_color_style"
+            tools:ignore="ContentDescription" />
 
     </LinearLayout>
 
     <ImageView
         android:id="@+id/undo_btn"
+        android:contentDescription="@string/undo_content_desp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginRight="24dp"
@@ -106,8 +117,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toLeftOf="@id/undo_btn"
-        android:text="crop"
-        android:textAllCaps="true"
+        android:text="CROP"
         android:textColor="@android:color/white"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:layout_marginRight="24dp"
@@ -130,6 +140,7 @@
             android:background="?attr/selectableItemBackground"
             android:scaleType="center"
             android:src="@drawable/ic_send_24dp"
-            android:tint="@color/photo_buttons" />
+            android:tint="@color/photo_buttons"
+            android:contentDescription="@string/send_content_desp" />
     </FrameLayout>
 </RelativeLayout>

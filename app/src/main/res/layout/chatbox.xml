@@ -56,7 +56,8 @@
             android:paddingRight="4dp"
             android:paddingLeft="8dp"
             android:src="@drawable/ic_photo_camera_black_24dp"
-            android:tint="#757575" />
+            android:tint="#757575"
+            android:contentDescription="@string/camera_content_desp" />
 
         <AutoCompleteTextView
             android:id="@+id/message_et"
