@@ -8,7 +8,9 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.support.annotation.ColorInt;
+import android.support.customtabs.CustomTabsIntent;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatDelegate;
@@ -33,6 +35,7 @@ import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageType;
 import com.zulip.android.models.Person;
 import com.zulip.android.models.Stream;
+import com.zulip.android.util.CustomHtmlToSpannedConverter;
 import com.zulip.android.util.MutedTopics;
 import com.zulip.android.util.OnItemClickListener;
 import com.zulip.android.util.UrlHelper;
@@ -381,10 +384,22 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                             .setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    Intent i = new Intent(Intent.ACTION_VIEW);
-                                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                    i.setData(Uri.parse(url));
-                                    zulipApp.startActivity(i);
+                                    if (Build.VERSION.SDK_INT < 15)
+                                    {
+                                        Intent i = new Intent(Intent.ACTION_VIEW);
+                                        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                        i.setData(Uri.parse(url));
+                                        zulipApp.startActivity(i);
+                                    }
+                                    else
+                                    {
+                                        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+                                        builder.setStartAnimations(zulipApp.getZulipActivity(), R.anim.slide_in_right, R.anim.slide_out_left);
+                                        builder.setExitAnimations(zulipApp.getZulipActivity(), R.anim.slide_in_left, R.anim.slide_out_right);
+                                        CustomTabsIntent i = builder.build();
+                                        i.launchUrl(zulipApp.getZulipActivity(), Uri.parse(url));
+                                    }
+
                                 }
                             });
                 }
