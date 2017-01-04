@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
+import android.webkit.URLUtil;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
