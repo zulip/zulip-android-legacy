@@ -1,0 +1,73 @@
+com.humbughq.mobile (0.7.2) precise; urgency=low
+
+  * Reliability improvements.
+
+ -- Luke Faraone <lfaraone@zulip.com>  Mon, 07 Oct 2013 19:33:56 -0400
+
+com.humbughq.mobile (0.7.0) stable; urgency=low
+
+  * Narrowing support.
+
+ -- Luke Faraone <lfaraone@zulip.com>  Thu, 03 Oct 2013 17:56:02 -0400
+
+com.humbughq.mobile (0.6.0) testing; urgency=low
+
+  [ Luke Faraone ]
+  * Change branding to Zulip
+
+  [ Tim Abbott ]
+  * Switch to REST API
+
+  [ Kevin Mehall ]
+  * Change stream/subject separator
+  * Implement stream coloring
+
+  [ Scott Feeney ]
+  * Add "Copy Message" to the long-press menu
+
+ -- Luke Faraone <lfaraone@zulip.com>  Sat, 27 Jul 2013 10:58:58 -0400
+
+com.humbughq.mobile (0.5.2) stable; urgency=low
+
+  * The "selected" tile is now hilighted in blue when pressed.
+  * Make the footer to the list view responsive to layout changes
+  * Resolve crasher if the user long-presses on the bottom of the list.
+  * Eliminate bug causing duplicate messages.
+
+ -- Luke Faraone <lfaraone@humbughq.com>  Tue, 05 Mar 2013 16:01:37 -0500
+
+com.humbughq.mobile (0.5.1) stable; urgency=low
+
+  * Improve parallelism in server requests.
+
+ -- Luke Faraone <lfaraone@humbughq.com>  Wed, 23 Jan 2013 16:38:13 -0500
+
+com.humbughq.mobile (0.5.0) stable; urgency=low
+
+  [ Luke Faraone ]
+  * Switch to using Android action buttons in the compose dialog.
+  * Include "Android" as the "client" parameter on all API calls.
+
+  [ Tyler Hallada ]
+  * Add gray timestamps to every message in layout
+  * Add context menu for long-pressing messages
+  * Add gravatars to each message
+
+ -- Luke Faraone <lfaraone@humbughq.com>  Wed, 23 Jan 2013 10:43:10 -0500
+
+com.humbughq.mobile (0.4.8) stable; urgency=low
+
+  * Fix crasher that occured if the main message view was scrolled too far.
+  * Temporarily disable linkifying which broke replies in some cases.
+  * Fix encoding issues in legal dialog.
+  * Display error if login information is incorrect
+  * Add button to manually refresh the feed.
+  * Various responsiveness and reliability improvements.
+
+ -- Luke Faraone <lfaraone@humbughq.com>  Tue, 25 Dec 2012 14:42:33 -0500
+
+com.humbughq.mobile (0.4.7) stable; urgency=low
+
+  * Initial release.
+
+ -- Luke Faraone <lfaraone@humbughq.com>  Fri, 21 Dec 2012 09:17:59 -0500

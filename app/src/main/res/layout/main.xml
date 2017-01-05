@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
+
+    <android.support.design.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true">
+
+        <android.support.design.widget.AppBarLayout
+            android:id="@+id/appBarLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/AppTheme.AppBarOverlay"
+            app:layout_behavior="com.zulip.android.util.RemoveViewsOnScroll">
+
+            <include
+                android:id="@+id/toolbar"
+                layout="@layout/toolbar" />
+
+        </android.support.design.widget.AppBarLayout>
+
+        <FrameLayout
+            android:id="@+id/list_fragment_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <com.zulip.android.util.SwipeRemoveLinearLayout
+            android:id="@+id/messageBoxContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="@color/colorPrimary"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <include layout="@layout/chatbox" />
+        </com.zulip.android.util.SwipeRemoveLinearLayout>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|bottom"
+            android:layout_margin="16dp"
+            android:src="@drawable/ic_mode_edit_24dp"
+            app:backgroundTint="@color/colorPrimary"
+            app:borderWidth="0dp"
+            app:layout_behavior="com.zulip.android.util.RemoveViewsOnScroll" />
+    </android.support.design.widget.CoordinatorLayout>
+
+    <android.support.design.widget.NavigationView
+        android:layout_width="320dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="2dp"
+                android:layout_marginRight="2dp"
+                android:layout_marginTop="28dp"
+                android:paddingBottom="12dp"
+                android:paddingLeft="4dp"
+                android:paddingRight="4dp"
+                android:paddingTop="12dp"
+                android:background="@android:color/white">
+
+                <EditText
+                    android:id="@+id/stream_drawer_search"
+                    android:layout_width="320dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:background="@android:color/white"
+                    android:hint="@string/hint_search_stream"
+                    android:paddingLeft="32dp"
+                    android:paddingStart="32dp" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:contentDescription="@string/content_description_search_icon"
+                    android:src="@drawable/ic_search_black_24dp" />
+
+                <ImageView
+                    android:id="@+id/iv_stream_search_cancel_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:contentDescription="@string/content_description_cancel_icon"
+                    android:src="@drawable/ic_cancel_black_24dp"
+                    android:visibility="gone" />
+
+            </RelativeLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/black"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="2dp"/>
+
+            <ExpandableListView
+                android:id="@+id/streams_drawer"
+                android:layout_width="320dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="start"
+                android:background="@color/listBackground"
+                android:choiceMode="singleChoice" />
+
+        </LinearLayout>
+
+
+    </android.support.design.widget.NavigationView>
+
+
+    <android.support.design.widget.NavigationView
+        android:id="@+id/navigation_view"
+        android:layout_width="320dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="end">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="2dp"
+                android:layout_marginRight="2dp"
+                android:layout_marginTop="28dp"
+                android:paddingBottom="12dp"
+                android:paddingLeft="4dp"
+                android:paddingRight="4dp"
+                android:paddingTop="12dp"
+                android:background="@android:color/white">
+
+                <EditText
+                    android:id="@+id/people_drawer_search"
+                    android:layout_width="320dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:background="@android:color/white"
+                    android:hint="@string/hint_search_people"
+                    android:paddingLeft="32dp"
+                    android:paddingStart="32dp" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:contentDescription="@string/content_description_search_icon"
+                    android:src="@drawable/ic_search_black_24dp" />
+
+                <ImageView
+                    android:id="@+id/iv_people__search_cancel_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:contentDescription="@string/content_description_cancel_icon"
+                    android:src="@drawable/ic_cancel_black_24dp"
+                    android:visibility="gone" />
+
+            </RelativeLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/black"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="2dp"/>
+
+            <ListView
+                android:id="@+id/people_drawer"
+                android:layout_width="320dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="end"
+                android:background="@color/listBackground"
+                android:choiceMode="singleChoice" />
+        </LinearLayout>
+
+    </android.support.design.widget.NavigationView>
+
+
+</android.support.v4.widget.DrawerLayout>

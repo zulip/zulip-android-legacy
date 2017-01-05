@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#efefef</color>
+    <color name="colorAccent">#899ab4</color>
+    <color name="colorPrimaryDark">#747474</color>
+    <color name="dev_auth_admin">#ff4136</color>
+    <color name="dev_auth_user">#428bca</color>
+    <color name="stream_header">#C0C0C0</color>
+    <color name="private_background">#FEFFE0</color>
+    <color name="huddle_header">#333333</color>
+    <color name="colorTextPrimary">@android:color/primary_text_light</color>
+    <color name="colorTextSecondary">@android:color/secondary_text_light</color>
+    <color name="colorTextTertiary">@android:color/tertiary_text_light</color>
+    <color name="windowBackground">#eeeeee</color>
+    <color name="listBackground">#FFFFFF</color>
+    <color name="messageHeaderBackground">#e5e5e5</color>
+    <color name="stream_background">#ffff</color>
+    <color name="loadingBackground">#eeeeee</color>
+    <color name="indigo_material_500">#3F51B5</color>
+    <color name="dark_red">#d14444</color>
+    <color name="dark_blue">#303F9F</color>
+</resources>
