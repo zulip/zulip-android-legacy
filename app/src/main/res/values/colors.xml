@@ -18,4 +18,12 @@
     <color name="indigo_material_500">#3F51B5</color>
     <color name="dark_red">#d14444</color>
     <color name="dark_blue">#303F9F</color>
+    <color name="photo_buttons">#ff33b5e5</color>
+    <color name="marker_palette">#212121</color>
+    <color name="red_marker_tool">#ffff5252</color>
+    <color name="yellow_marker_tool">#ffffeb3b</color>
+    <color name="green_marker_tool">#ff00e676</color>
+    <color name="blue_marker_tool">#ff03a9f4</color>
+    <color name="white_marker_tool">#ffe0e0e0</color>
+    <color name="black_marker_tool">#ff000000</color>
 </resources>

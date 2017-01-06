@@ -24,7 +24,9 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Environment;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -32,6 +34,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
@@ -98,7 +101,9 @@ import com.zulip.android.util.ZLog;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -126,6 +131,7 @@ public class ZulipActivity extends BaseActivity implements
     //At these many letters the emoji/person hint starts to show up
     private static final int MIN_THRESOLD_EMOJI_HINT = 1;
     private static final int PERMISSION_REQUEST_READ_CONTACTS = 1;
+    private static final int REQUEST_TAKE_PHOTO = 2;
     private ZulipApp app;
 
     private boolean logged_in = false;
@@ -178,6 +184,9 @@ public class ZulipActivity extends BaseActivity implements
     };
     private ExpandableStreamDrawerAdapter streamsDrawerAdapter;
     private Uri mImageUri;
+    private ImageView cameraBtn;
+    private String mCurrentPhotoPath;
+    private Uri mPhotoURI;
 
     @Override
     public void removeChatBox(boolean animToRight) {
@@ -321,6 +330,7 @@ public class ZulipActivity extends BaseActivity implements
         messageEt = (AutoCompleteTextView) findViewById(R.id.message_et);
         textView = (TextView) findViewById(R.id.textView);
         sendBtn = (ImageView) findViewById(R.id.send_btn);
+        cameraBtn = (ImageView) findViewById(R.id.camera_btn);
         appBarLayout = (AppBarLayout) findViewById(R.id.appBarLayout);
         etSearchPeople = (EditText)findViewById(R.id.people_drawer_search);
         ivSearchPeopleCancel = (ImageView)findViewById(R.id.iv_people__search_cancel_button);
@@ -425,6 +435,15 @@ public class ZulipActivity extends BaseActivity implements
                 sendMessage();
             }
         });
+
+        // set onClick listener on camera button to dispatch camera intent when clicked
+        cameraBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dispatchTakePictureIntent();
+            }
+        });
+
         composeStatus = (LinearLayout) findViewById(R.id.composeStatus);
         setUpAdapter();
         streamActv.setAdapter(streamActvAdapter);
@@ -523,6 +542,11 @@ public class ZulipActivity extends BaseActivity implements
                 // Handle single image being sent
                 handleSentImage(intent);
             }
+        }
+
+        // if device doesn't have camera, disable camera button
+        if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
+            cameraBtn.setEnabled(false);
         }
     }
 
@@ -717,6 +741,39 @@ public class ZulipActivity extends BaseActivity implements
                 handleSentImage(intent);
             }
         }
+
+        // extract file path of edited image
+        String filePath = intent.getStringExtra(Intent.EXTRA_TEXT);
+
+        if (action == null) {
+            if (!TextUtils.isEmpty(filePath)) {
+                // Update UI to indicate image is being loaded
+                // hide fab and display chatbox
+                displayFAB(false);
+                displayChatBox(true);
+                String loadingMsg = getResources().getString(R.string.uploading_message);
+                sendingMessage(true, loadingMsg);
+
+                // start upload of photo
+                File photoFile = new File(filePath);
+                uploadFile(photoFile);
+            } else {
+                // photo was deleted and camera is launched again to capture a new photo
+                dispatchTakePictureIntent();
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
+            Log.i("photo captured", mCurrentPhotoPath);
+
+            // send file path to PhotoSendActivity
+            Intent photoSendIntent = new Intent(this, PhotoSendActivity.class);
+            photoSendIntent.putExtra(Intent.EXTRA_TEXT, mCurrentPhotoPath);
+            startActivity(photoSendIntent);
+        }
     }
 
     /**
@@ -765,6 +822,56 @@ public class ZulipActivity extends BaseActivity implements
             }
             break;
         }
+    }
+
+    /**
+     * This function is called when camera icon is clicked. It send out a
+     * MediaStore.ACTION_IMAGE_CAPTURE action intent {@link Intent}.
+     */
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        // Ensure that there's a camera activity to handle the intent
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            // Create the File where the photo should go
+            File photoFile = null;
+            try {
+                photoFile = createPhotoFile();
+            } catch (IOException ex) {
+                // Error occurred while creating the File
+                ZLog.logException(ex);
+            }
+
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                mPhotoURI = FileProvider.getUriForFile(this,
+                        "com.zulip.fileprovider",
+                        photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mPhotoURI);
+                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+            }
+        }
+    }
+
+    /**
+     * This function creates a file for the photo to be captured
+     * @return new {@link File} object where photo will be stored
+     * @throws IOException
+     */
+    private File createPhotoFile() throws IOException {
+        // Create an image file name using timestamp
+        String timeStamp = SimpleDateFormat.getDateTimeInstance().format(new java.util.Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save image path to send to PhotoSendActivity
+        mCurrentPhotoPath = image.getAbsolutePath();
+        return image;
     }
 
     /**
@@ -1212,6 +1319,7 @@ public class ZulipActivity extends BaseActivity implements
         messageEt.setEnabled(!isSending);
         topicActv.setEnabled(!isSending);
         sendBtn.setEnabled(!isSending);
+        cameraBtn.setEnabled(!isSending);
         togglePrivateStreamBtn.setEnabled(!isSending);
         if (isSending) {
             TextView msg = (TextView) composeStatus.findViewById(R.id.sending_message);
