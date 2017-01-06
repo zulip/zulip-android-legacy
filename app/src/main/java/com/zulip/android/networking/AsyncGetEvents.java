@@ -167,8 +167,16 @@ public class AsyncGetEvents extends Thread {
                         Person person = people.get(i);
                         person.setActive(true);
                         try {
-                            personDao.createOrUpdate(person);
-                        } catch (Exception e) {
+                            // Ormlite uses a query-by-id to see if it needs to update
+                            // or create a new row using createOrUpdate()
+                            // Hence, the object passed should always have an id.
+                            if (Person.getByEmail(app, person.getEmail()) == null) {
+                                personDao.create(person);
+                            } else {
+                                personDao.update(person);
+                            }
+                        }
+                        catch(Exception e) {
                             ZLog.logException(e);
                         }
                     }
