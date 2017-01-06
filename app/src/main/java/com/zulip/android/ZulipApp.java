@@ -24,6 +24,7 @@ import com.j256.ormlite.dao.ObjectCache;
 import com.j256.ormlite.dao.ReferenceObjectCache;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.misc.TransactionManager;
+import com.j256.ormlite.stmt.SelectArg;
 import com.zulip.android.activities.ZulipActivity;
 import com.zulip.android.database.DatabaseHelper;
 import com.zulip.android.models.Emoji;
@@ -274,7 +275,9 @@ public class ZulipApp extends Application {
                             Person currentPerson = res.getRealmUsers().get(i);
                             Person foundPerson = null;
                             try {
-                                foundPerson = personDao.queryBuilder().where().eq(Person.EMAIL_FIELD, currentPerson.getEmail()).queryForFirst();
+                                foundPerson = personDao.queryBuilder().where().eq(Person.EMAIL_FIELD,
+                                        new SelectArg(Person.EMAIL_FIELD, currentPerson.getEmail()))
+                                        .queryForFirst();
                                 if(foundPerson != null) {
                                     currentPerson.setId(foundPerson.getId());
                                 }
