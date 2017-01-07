@@ -321,16 +321,16 @@ public class Message {
         Html.ImageGetter emojiGetter = new Html.ImageGetter() {
             @Override
             public Drawable getDrawable(String source) {
-                int lastIndex = -1;
+                int imagesIndex = -1;
                 if (source != null) {
-                    lastIndex = source.lastIndexOf('/');
+                    imagesIndex = source.indexOf("images/");
                 }
-                if (lastIndex != -1) {
-                    String filename = source.substring(lastIndex + 1);
+                if (imagesIndex != -1) {
+                    String filename = source.substring(imagesIndex + "images/".length());
+
                     try {
                         Drawable drawable = Drawable.createFromStream(context
-                                        .getAssets().open("emoji/" + filename),
-                                "emoji/" + filename);
+                                .getAssets().open(filename), filename);
                         if (drawable == null) {
                             Drawable transparentDrawable = new ColorDrawable(Color.TRANSPARENT);
                             transparentDrawable.setBounds(new Rect(0, 0, 0, 0));
