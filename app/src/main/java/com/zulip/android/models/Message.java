@@ -235,6 +235,11 @@ public class Message {
                     for (Message m : messages) {
                         Person person = Person.getOrUpdate(app, m.getSenderEmail(), m.getSenderFullName(), m.getAvatarUrl());
                         m.setSender(person);
+                        Stream stream = null;
+                        if (m.getType() == MessageType.STREAM_MESSAGE) {
+                            stream = Stream.getByName(app, m.getRecipients());
+                        }
+                        m.setStream(stream);
                         messageDao.createOrUpdate(m);
                     }
                     return null;
