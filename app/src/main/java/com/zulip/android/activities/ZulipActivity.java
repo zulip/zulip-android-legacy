@@ -5,6 +5,7 @@ import android.animation.Animator;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -55,6 +56,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AutoCompleteTextView;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.FilterQueryProvider;
@@ -107,6 +109,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -554,6 +557,11 @@ public class ZulipActivity extends BaseActivity implements
         calendar = Calendar.getInstance();
     }
 
+    /**
+     * Called when fragment is changed
+     * When narrowedList == null means home page show Today in menu
+     * When narrowedList.filter instanceof NarrowFilterByDate show One Day before in menu
+     */
     private void handleOnFragmentChange() {
         getSupportFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
             @Override
@@ -1836,6 +1844,7 @@ public class ZulipActivity extends BaseActivity implements
         // Handle item selection
         switch (item.getItemId()) {
             case android.R.id.home:
+                narrowedList=null;
                 getSupportFragmentManager().popBackStack(NARROW,
                         FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 break;
@@ -1878,12 +1887,28 @@ public class ZulipActivity extends BaseActivity implements
                 onRefresh();
                 break;
             case R.id.today:
+                //check user selected Today or One Day Before
                 if (menu != null && menu.getItem(2).getSubMenu().getItem(0).getTitle().equals(getString(R.string.menu_one_day_before))) {
+                    //user selected One Day Before
                     calendar.add(Calendar.DATE, -1);
                     doNarrow(new NarrowFilterByDate(calendar.getTime()));
                     break;
                 }
+                //else Narrow to Today
                 doNarrow(new NarrowFilterByDate());
+                break;
+            case R.id.enterDate:
+                //show Dialog with calendar date as selected to pick Date
+                DatePickerDialog datePickerDialog = new DatePickerDialog(ZulipActivity.this, new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                        calendar.set(year,month,dayOfMonth);
+                        doNarrow(new NarrowFilterByDate(calendar.getTime()));
+                    }
+                },calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH),calendar.get(Calendar.DAY_OF_MONTH));
+                //set max date to today so future dates are not selectable
+                datePickerDialog.getDatePicker().setMaxDate(new Date().getTime());
+                datePickerDialog.show();
                 break;
             case R.id.logout:
                 logout();
