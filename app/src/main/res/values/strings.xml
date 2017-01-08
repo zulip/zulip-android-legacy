@@ -115,4 +115,5 @@
     <string name="cancel_content_desp" tools:ignore="ButtonCase">cancel</string>
     <string name="camera_content_desp">take photo</string>
     <string name="menu_one_day_before">One Day Before</string>
+    <string name="enter_date">Enter Date</string>
 </resources>
