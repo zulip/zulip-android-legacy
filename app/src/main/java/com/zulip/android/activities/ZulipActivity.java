@@ -2070,13 +2070,20 @@ public class ZulipActivity extends BaseActivity implements
         TypedValue tv = new TypedValue();
         if (getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true))
             mToolbarHeightInPx = TypedValue.complexToDimensionPixelSize(tv.data, getResources().getDisplayMetrics());
+        snackbar.setCallback(new Snackbar.Callback() {
+            @Override
+            public void onDismissed(Snackbar snackbar, int event) {
+                super.onDismissed(snackbar, event);
+                if (event == Snackbar.Callback.DISMISS_EVENT_TIMEOUT) prevMessageSameCount = -1;
+            }
+        });
     }
 
     NarrowFilter narrowFilter;
-
+    String prevId = null;
+    int prevMessageSameCount = -1;
     private void showSnackbarNotification(Message[] messages) {
         MutedTopics mutedTopics = MutedTopics.get();
-        String prevId = null;
         int nonMutedMessagesCount = 0;
         Message tempMessage = null; //Stores a temporary message which is non-muted, later used for retrieving Stream/Topic
         for (Message message : messages) { //Check if all messages from same topic/private and remove all the muted messages
@@ -2086,13 +2093,16 @@ public class ZulipActivity extends BaseActivity implements
             if (prevId != null && !prevId.equals(message.getIdForHolder())) {
                 prevId = null;
                 tempMessage = null;
+                prevMessageSameCount = 0;
                 break;
+            } else {
+                prevMessageSameCount++;
             }
             prevId = message.getIdForHolder();
             if (tempMessage == null) tempMessage = message;
         }
         if (nonMutedMessagesCount == 0) return;
-        if (prevId == null) {
+        if (prevId == null && messages.length > 1) {
             snackbar.setText(getResources().getQuantityString(R.plurals.new_message_mul_sender, nonMutedMessagesCount, nonMutedMessagesCount));
             narrowFilter = null;
             if (narrowedList != null) {
@@ -2107,7 +2117,9 @@ public class ZulipActivity extends BaseActivity implements
                 }
             });
         } else {
+            if (messages.length == 1) tempMessage = messages[0];
             String name = (tempMessage.getType() == MessageType.PRIVATE_MESSAGE) ? getString(R.string.notify_private, tempMessage.getSenderFullName()) : getString(R.string.notify_stream, tempMessage.getStream().getName() , tempMessage.getSubject());
+            if (prevMessageSameCount > 0) name += " (" + prevMessageSameCount + ")";
             snackbar.setText(getResources().getQuantityString(R.plurals.new_message, nonMutedMessagesCount, nonMutedMessagesCount, name));
             narrowFilter = (tempMessage.getType() == MessageType.PRIVATE_MESSAGE) ? new NarrowFilterPM(Arrays.asList(tempMessage.getRecipients(app))) : new NarrowFilterStream(tempMessage.getStream(), tempMessage.getSubject());
             snackbar.setAction(R.string.SHOW, new View.OnClickListener() {
