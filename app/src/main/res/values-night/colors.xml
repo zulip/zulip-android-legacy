@@ -12,6 +12,7 @@
     <color name="colorTextPrimary">@android:color/primary_text_dark</color>
     <color name="colorTextSecondary">@android:color/secondary_text_dark</color>
     <color name="colorTextTertiary">@android:color/tertiary_text_dark</color>
+    <color name="color_text_black">#000000</color>
     <color name="windowBackground">#616161</color>
     <color name="listBackground">#262626</color>
     <color name="loadingBackground">#757575</color>

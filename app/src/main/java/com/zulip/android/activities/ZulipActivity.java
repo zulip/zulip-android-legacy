@@ -317,6 +317,7 @@ public class ZulipActivity extends BaseActivity implements
         sendBtn = (ImageView) findViewById(R.id.send_btn);
         cameraBtn = (ImageView) findViewById(R.id.camera_btn);
         appBarLayout = (AppBarLayout) findViewById(R.id.appBarLayout);
+        boolean isCurrentThemeNight = (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES);
         etSearchPeople = (EditText) findViewById(R.id.people_drawer_search);
         ivSearchPeopleCancel = (ImageView) findViewById(R.id.iv_people__search_cancel_button);
         onTextChangeOfPeopleSearchEditText();
@@ -328,6 +329,10 @@ public class ZulipActivity extends BaseActivity implements
             }
         });
         etSearchStream = (EditText) findViewById(R.id.stream_drawer_search);
+        if (isCurrentThemeNight) {
+            etSearchPeople.setTextColor(ContextCompat.getColor(this, R.color.color_text_black));
+            etSearchStream.setTextColor(ContextCompat.getColor(this, R.color.color_text_black));
+        }
         ivSearchStreamCancel = (ImageView) findViewById(R.id.iv_stream_search_cancel_button);
         onTextChangeOfStreamSearchEditText();
         ivSearchStreamCancel.setOnClickListener(new View.OnClickListener() {
