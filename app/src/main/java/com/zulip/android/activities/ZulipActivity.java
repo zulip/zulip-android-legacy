@@ -1884,8 +1884,9 @@ public class ZulipActivity extends BaseActivity implements
 
 
     public void onNarrow(NarrowFilter narrowFilter, int messageId) {
-        // TODO: check if already narrowed to this particular stream/subject
-        doNarrow(narrowFilter, messageId);
+        if (narrowedList == null || narrowFilter != narrowedList.filter) {
+            doNarrow(narrowFilter, messageId);
+        }
     }
 
     @Override
