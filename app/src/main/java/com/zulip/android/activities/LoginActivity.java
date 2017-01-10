@@ -250,15 +250,22 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         savedInstanceState.putString(PASSWORD,mPassword.getText().toString());
     }
 
+    private boolean isUrlValid(String url) {
+        if (BuildConfig.DEBUG) {
+            return URLUtil.isValidUrl(String.valueOf(url)) ||
+                    Patterns.IP_ADDRESS.matcher(url).matches();
+        } else {
+            return URLUtil.isValidUrl(String.valueOf(url));
+        }
+    }
+
     private void showBackends(String httpScheme, String serverURL) {
         // if server url does not end with "/", then append it
         if (!serverURL.endsWith("/")) {
             serverURL = serverURL + "/";
         }
 
-        boolean isValid = URLUtil.isValidUrl(String.valueOf(serverURL));
-
-        if (!isValid){
+        if (!isUrlValid(serverURL)){
             Toast.makeText(LoginActivity.this, R.string.invalid_url , Toast.LENGTH_SHORT).show();
             return;
         }
