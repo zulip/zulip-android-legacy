@@ -56,6 +56,7 @@ public class Message {
     public static final String RECIPIENTS_FIELD = "recipients";
     public static final String STREAM_FIELD = "stream";
     public static final String MESSAGE_READ_FIELD = "read";
+    public static final String MESSAGE_STAR_FIELD = "star";
     private static final String SENDER_FIELD = "sender";
     private static final String FORMATTED_CONTENT_FIELD = "formattedContent";
     private static final String MESSAGE_EDITED = "MESSAGE_EDITED";
@@ -117,6 +118,10 @@ public class Message {
     private Stream stream;
     @DatabaseField(columnName = MESSAGE_READ_FIELD)
     private Boolean messageRead;
+    @SerializedName("flags")
+    private List<String> flags;
+    @DatabaseField(columnName = MESSAGE_STAR_FIELD)
+    private boolean messageStar;
     @DatabaseField(columnDefinition = MESSAGE_EDITED)
     private Boolean hasBeenEdited;
     //endregion
@@ -369,6 +374,21 @@ public class Message {
 
     public static HTMLSchema getSchema() {
         return schema;
+    }
+
+    public boolean getMessageStar() {
+        return messageStar;
+    }
+
+    public void setMessageStar(boolean messageStar) {
+        this.messageStar = messageStar;
+        if (this.getFlags() != null) {
+            if (messageStar && !this.getFlags().contains("starred")) {
+                this.getFlags().add("starred");
+            } else if (!messageStar && this.getFlags().contains("starred")) {
+                this.getFlags().remove("starred");
+            }
+        }
     }
 
     public Boolean getMessageRead() {
@@ -680,6 +700,14 @@ public class Message {
 
     public void setRecipients(String recipients) {
         this.recipients = recipients;
+    }
+
+    public List<String> getFlags() {
+        return flags;
+    }
+
+    public void setFlags(List<String> flags) {
+        this.flags = flags;
     }
 
     public Person[] getRecipientsCache() {

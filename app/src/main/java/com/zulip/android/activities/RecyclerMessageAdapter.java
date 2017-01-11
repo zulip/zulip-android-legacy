@@ -426,6 +426,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
                 setUpGravatar(message, messageHolder);
                 setUpTime(message, messageHolder);
+                setUpStar(message, messageHolder);
                 break;
         }
     }
@@ -481,6 +482,21 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         }
     }
 
+    private void setUpStar(Message message, MessageHolder messageHolder) {
+        if (message.getFlags() != null) {
+            if (message.getFlags().contains("starred")) {
+                message.setMessageStar(true);
+            }
+        }
+        //Checking for a starred message
+        if (message.getMessageStar()) {
+            //Make star's imageView visibility to VISIBLE
+            messageHolder.starImage.setVisibility(View.VISIBLE);
+        } else {
+            //Make star's imageView visibility to GONE
+            messageHolder.starImage.setVisibility(View.GONE);
+        }
+    }
 
     private void setUpGravatar(final Message message, final MessageHolder messageHolder) {
         //Setup Gravatar

@@ -38,6 +38,15 @@
                 android:textStyle="bold"
                 tools:text="Sender &lt;alice@example.com&gt;" />
 
+            <ImageView
+                android:id="@+id/star_image"
+                android:src="@drawable/ic_star"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/star_image"
+                android:paddingRight="10dp"
+                android:paddingEnd="10dp" />
+
             <TextView
                 android:id="@+id/message_edit_tag"
                 android:layout_width="wrap_content"

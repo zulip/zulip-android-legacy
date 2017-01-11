@@ -44,6 +44,7 @@ import com.zulip.android.networking.response.RawMessageResponse;
 import com.zulip.android.networking.util.DefaultCallback;
 import com.zulip.android.util.CommonProgressDialog;
 import com.zulip.android.util.Constants;
+import com.zulip.android.networking.response.StarResponse;
 import com.zulip.android.util.MessageListener;
 import com.zulip.android.util.MutedTopics;
 import com.zulip.android.util.ZLog;
@@ -237,11 +238,17 @@ public class MessageListFragment extends Fragment implements MessageListener {
                 return true;
             case R.id.edit_message:
                 editMessage(message, adapter.getContextMenuItemSelectedPosition());
+            case R.id.star_message:
+                starMessage(message, adapter.getContextMenuItemSelectedPosition());
+                return true;
+            case R.id.un_star_message:
+                unStarMessage(message, adapter.getContextMenuItemSelectedPosition());
                 return true;
             default:
                 return super.onContextItemSelected(item);
         }
     }
+
 
     private void initializeNarrow() {
         adapter.clear();
@@ -252,6 +259,63 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
         loadingMessages = true;
         adapter.setFooterShowing(true);
+    }
+
+    /**
+     * Stars a message passed as parameter
+     * @param message Message to be starred
+     */
+    private void starMessage(final Message message, final int position) {
+        app.getZulipServices().
+                starMessage("starred", "add", "[" + String.valueOf(message.getID()) + "]").
+                enqueue(new Callback<StarResponse>() {
+                    @Override
+                    public void onResponse(Call<StarResponse> call, Response<StarResponse> response) {
+                        if (response.isSuccessful()) {
+                            message.setMessageStar(true);
+                            recyclerView.getAdapter().notifyItemChanged(position);
+                            Toast.makeText(getContext(), R.string.message_starred, Toast.LENGTH_SHORT).show();
+                        } else {
+                            Log.d("starMessage", "Response : " + response.body().getMessage());
+                            Toast.makeText(getContext(), R.string.network_error, Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<StarResponse> call, Throwable t) {
+                        ZLog.logException(t);
+                        Toast.makeText(getContext(), R.string.network_error, Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    /**
+     * Unstars a message passed as parameter
+     * @param message Message to be unstarred
+     */
+    private void unStarMessage(final Message message, final int position) {
+        app.getZulipServices().
+                starMessage("starred", "remove", "[" + String.valueOf(message.getID()) + "]").
+                enqueue(new Callback<StarResponse>() {
+                    @Override
+                    public void onResponse(Call<StarResponse> call, Response<StarResponse> response) {
+                        if (response.isSuccessful()) {
+                            message.setMessageStar(false);
+                            recyclerView.getAdapter().notifyItemChanged(position);
+                            Toast.makeText(getContext(), R.string.message_un_starred, Toast.LENGTH_SHORT).show();
+                        } else {
+                            Log.d("unStarMessage", "Response : " + response.body().getMessage());
+                            Toast.makeText(getContext(), R.string.network_error, Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<StarResponse> call, Throwable t) {
+                        ZLog.logException(t);
+                        Toast.makeText(getContext(), R.string.network_error, Toast.LENGTH_SHORT).show();
+                    }
+                });
+
     }
 
     public void onReadyToDisplay(boolean registered) {

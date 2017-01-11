@@ -82,6 +82,7 @@ import com.zulip.android.filters.NarrowFilterAllPMs;
 import com.zulip.android.filters.NarrowFilterByDate;
 import com.zulip.android.filters.NarrowFilterPM;
 import com.zulip.android.filters.NarrowFilterSearch;
+import com.zulip.android.filters.NarrowFilterStar;
 import com.zulip.android.filters.NarrowFilterStream;
 import com.zulip.android.filters.NarrowListener;
 import com.zulip.android.gcm.GcmBroadcastReceiver;
@@ -2085,6 +2086,9 @@ public class ZulipActivity extends BaseActivity implements
                 }
                 //else Narrow to Today
                 onNarrow(new NarrowFilterByDate());
+                break;
+            case R.id.isStarred:
+                onNarrow(new NarrowFilterStar());
                 break;
             case R.id.enterDate:
                 //show Dialog with calendar date as selected to pick Date

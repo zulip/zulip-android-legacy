@@ -26,6 +26,7 @@ public class MessageHolder extends RecyclerView.ViewHolder implements View.OnCli
     public View leftBar;
     public RelativeLayout messageTile;
     public ImageView contentImage;
+    public ImageView starImage;
     public View contentImageContainer;
     public OnItemClickListener onItemClickListener;
 
@@ -40,6 +41,7 @@ public class MessageHolder extends RecyclerView.ViewHolder implements View.OnCli
         leftBar = itemView.findViewById(R.id.leftBar);
         messageTile = (RelativeLayout) itemView.findViewById(R.id.messageTile);
         contentImage = (ImageView) itemView.findViewById(R.id.load_image);
+        starImage = (ImageView) itemView.findViewById(R.id.star_image);
         contentImageContainer = itemView.findViewById(R.id.load_image_container);
         contentView.setOnClickListener(this);
         contentView.setLongClickable(true);
@@ -60,23 +62,40 @@ public class MessageHolder extends RecyclerView.ViewHolder implements View.OnCli
         if (msg.getType().equals(MessageType.STREAM_MESSAGE)) {
             MenuInflater inflater = ((Activity) v.getContext()).getMenuInflater();
             inflater.inflate(R.menu.context_stream, menu);
-            if (msg.getSender().getId() != ZulipApp.get().getYou().getId()){
+            if (msg.getSender().getId() != ZulipApp.get().getYou().getId()) {
                 menu.findItem(R.id.edit_message).setVisible(false);
             }
+            if (msg.getMessageStar()) {
+                menu.findItem(R.id.star_message).setVisible(false);
+            } else {
+                menu.findItem(R.id.un_star_message).setVisible(false);
+            }
+
         } else if (msg.getPersonalReplyTo(ZulipApp.get()).length > 1) {
             MenuInflater inflater = ((Activity) v.getContext()).getMenuInflater();
             inflater.inflate(R.menu.context_private, menu);
-            if (msg.getSender().getId() != ZulipApp.get().getYou().getId()){
+            if (msg.getSender().getId() != ZulipApp.get().getYou().getId()) {
                 menu.findItem(R.id.edit_message).setVisible(false);
+            }
+            if (msg.getMessageStar()) {
+                menu.findItem(R.id.star_message).setVisible(false);
+            } else {
+                menu.findItem(R.id.un_star_message).setVisible(false);
             }
         } else {
             MenuInflater inflater = ((Activity) v.getContext()).getMenuInflater();
             inflater.inflate(R.menu.context_single_private, menu);
-            if (msg.getSender().getId() != ZulipApp.get().getYou().getId()){
+            if (msg.getSender().getId() != ZulipApp.get().getYou().getId()) {
                 menu.findItem(R.id.edit_message).setVisible(false);
+            }
+            if (msg.getMessageStar()) {
+                menu.findItem(R.id.star_message).setVisible(false);
+            } else {
+                menu.findItem(R.id.un_star_message).setVisible(false);
             }
         }
     }
+
 
     @Override
     public void onClick(View view) {
