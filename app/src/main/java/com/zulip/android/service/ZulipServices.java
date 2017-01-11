@@ -5,6 +5,7 @@ import com.zulip.android.networking.response.EditResponse;
 import com.zulip.android.networking.response.GetMessagesResponse;
 import com.zulip.android.networking.response.LoginResponse;
 import com.zulip.android.networking.response.RawMessageResponse;
+import com.zulip.android.networking.response.StarResponse;
 import com.zulip.android.networking.response.UploadResponse;
 import com.zulip.android.networking.response.UserConfigurationResponse;
 import com.zulip.android.networking.response.ZulipBackendResponse;
@@ -69,4 +70,10 @@ public interface ZulipServices {
 
     @GET("v1/messages/{id}")
     Call<RawMessageResponse> fetchRawMessage(@Path("id") int messageId);
+
+    @FormUrlEncoded
+    @POST("v1/messages/flags")
+    Call<StarResponse> starMessage(@Field("flag") String flag, @Field("op") String operation,
+                                   @Field("messages") String message);
+
 }
