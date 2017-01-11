@@ -47,102 +47,79 @@ import java.util.concurrent.Callable;
 public class Message {
 
     public static final String ID_FIELD = "id";
-    private static final String SENDER_FIELD = "sender";
     public static final String TYPE_FIELD = "type";
     public static final String CONTENT_FIELD = "content";
-    private static final String FORMATTED_CONTENT_FIELD = "formattedContent";
     public static final String SUBJECT_FIELD = "subject";
     public static final String TIMESTAMP_FIELD = "timestamp";
     public static final String RECIPIENTS_FIELD = "recipients";
     public static final String STREAM_FIELD = "stream";
     public static final String MESSAGE_READ_FIELD = "read";
+    private static final String SENDER_FIELD = "sender";
+    private static final String FORMATTED_CONTENT_FIELD = "formattedContent";
     private static final String MESSAGE_EDITED = "MESSAGE_EDITED";
     private static final String MESSAGE_EDIT_DATE = "MESSAGE_EDIT_DATE";
-
+    private static final HTMLSchema schema = new HTMLSchema();
+    //IGNORE - This will always be empty due to persistence
+    @SerializedName("edit_history")
+    public List<MessageHistory> _history;
     //region fields
     @SerializedName("recipient_id")
     private int recipientId;
-
     @SerializedName("sender_email")
     private String senderEmail;
-
     @SerializedName("sender_id")
     private int senderId;
-
     @SerializedName("sender_full_name")
     private String senderFullName;
-
     @SerializedName("sender_domain")
     private String senderDomain;
-
     @SerializedName("gravatar_hash")
     private String gravatarHash;
-
     @SerializedName("avatar_url")
     private String avatarUrl;
-
     @SerializedName("client")
     private String client;
 
-    @SerializedName("content_type")
-    private String contentType;
-
-    @SerializedName("sender_short_name")
-    private String senderShortName;
-
 //    @SerializedName("type")
 //    private String _internal_type;
-
+    @SerializedName("content_type")
+    private String contentType;
+    @SerializedName("sender_short_name")
+    private String senderShortName;
     @SerializedName("subject_links")
     private List<?> subjectLinks;
-
     @DatabaseField(foreign = true, columnName = SENDER_FIELD, foreignAutoRefresh = true)
     private Person sender;
-
     @SerializedName("type")
     @DatabaseField(columnName = TYPE_FIELD)
     private MessageType type;
-
     @SerializedName("IGNORE_MASK_CONTENT")
     @DatabaseField(columnName = CONTENT_FIELD)
     private String content;
-
     @SerializedName("content")
     @DatabaseField(columnName = FORMATTED_CONTENT_FIELD)
     private String formattedContent;
-
     @SerializedName("subject")
     @DatabaseField(columnName = SUBJECT_FIELD)
     private String subject;
-
     @SerializedName("timestamp")
     @DatabaseField(columnName = TIMESTAMP_FIELD)
     private Date timestamp;
-
     @DatabaseField(columnName = RECIPIENTS_FIELD, index = true)
     private String recipients;
-
     private Person[] recipientsCache;
-
     @SerializedName("id")
     @DatabaseField(id = true, columnName = ID_FIELD)
     private int id;
-
     @DatabaseField(foreign = true, columnName = STREAM_FIELD, foreignAutoRefresh = true)
     private Stream stream;
     @DatabaseField(columnName = MESSAGE_READ_FIELD)
     private Boolean messageRead;
-
     @DatabaseField(columnDefinition = MESSAGE_EDITED)
     private Boolean hasBeenEdited;
-
+    //endregion
     @DatabaseField(columnDefinition = MESSAGE_EDIT_DATE)
     private Date editDate;
-
-    //IGNORE - This will always be empty due to persistence
-    @SerializedName("edit_history")
-    public List<MessageHistory> _history;
-    //endregion
 
     /**
      * Construct an empty Message object.
@@ -151,10 +128,11 @@ public class Message {
 
     }
 
+    //region helpers
+
     public Message(ZulipApp app) {
     }
 
-    //region helpers
     /**
      * Populate a Message object based off a parsed JSON hash.
      *
@@ -222,14 +200,6 @@ public class Message {
         this.setMessageRead(false);
     }
 
-    public Boolean getMessageRead() {
-        return messageRead;
-    }
-
-    public void setMessageRead(Boolean messageRead) {
-        this.messageRead = messageRead;
-    }
-
     public Message(ZulipApp app, JSONObject message) throws JSONException {
         this(app, message, null, null);
     }
@@ -243,141 +213,6 @@ public class Message {
         return TextUtils.join(",", ids);
     }
 
-    public int hashCode() {
-        return new HashCodeBuilder(17, 31).append(sender).append(type)
-                .append(content).append(subject).append(timestamp).append(id)
-                .append(stream).toHashCode();
-    }
-
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (obj == this) {
-            return true;
-        }
-        if (!(obj instanceof Message)) {
-            return false;
-        }
-        Message msg = (Message) obj;
-
-        return new EqualsBuilder().append(sender, msg.sender)
-                .append(type, msg.type).append(content, msg.content)
-                .append(subject, msg.subject).append(timestamp, msg.timestamp)
-                .append(id, msg.id).append(stream, msg.stream).isEquals();
-    }
-
-    public MessageType getType() {
-        return type;
-    }
-
-    public void setType(MessageType streamMessage) {
-        this.type = streamMessage;
-    }
-
-    public String getRawRecipients() {
-        return recipients;
-    }
-
-    public Person[] getRecipients(ZulipApp app) {
-        if (recipientsCache == null) {
-            String[] ids = TextUtils.split(this.recipients, ",");
-            recipientsCache = new Person[ids.length];
-            for (int i = 0; i < ids.length; i++) {
-                recipientsCache[i] = Person.getById(app,
-                        Integer.parseInt(ids[i]));
-            }
-        }
-        return recipientsCache;
-    }
-
-    public void setRecipients(Person[] list) {
-        this.recipientsCache = list;
-
-        try {
-            Person to = ZulipApp.get().getDao(Person.class, true).queryBuilder().where().eq(Person.EMAIL_FIELD, list[0].getEmail()).queryForFirst();;
-            if(list.length == 1) {
-                setRecipients(to.getId() + "");
-                return;
-            }
-            Person from = ZulipApp.get().getDao(Person.class, true).queryBuilder().where().eq(Person.EMAIL_FIELD, list[1].getEmail()).queryForFirst();
-
-            if(to == null && from != null) {
-                setRecipients(""+ from.getId());
-            }
-            if(to != null && from == null) {
-                setRecipients(to.getId() + "");
-            }
-
-            setRecipients(to.getId() + "," + from.getId());
-            return;
-        } catch (Exception e) {
-            ZLog.logException(e);
-        }
-
-        this.recipients = (recipientId == 0 && senderId == 0) ? recipientList(list) : recipientId + "," + senderId;
-    }
-
-    /**
-     * Convenience function to set the recipients without requiring the caller
-     * to construct a full Person[] array.
-     * <p/>
-     * Do not call this method if you want to be able to get the recipient's
-     * names for this message later; construct a Person[] array and use
-     * setRecipient(Person[] recipients) instead.
-     *
-     * @param emails The emails of the recipients.
-     */
-    public void setRecipient(String[] emails) {
-        Person[] r = new Person[emails.length];
-        for (int i = 0; i < emails.length; i++) {
-            r[i] = new Person(null, emails[i]);
-        }
-        setRecipients(r);
-    }
-
-    /**
-     * Constructs a pretty-printable-to-the-user string consisting of the names
-     * of all of the participants in the message.
-     * <p/>
-     * For MessageType.STREAM_MESSAGE, return the stream name instead.
-     *
-     * @return A String of the names of each Person in recipients[],
-     * comma-separated, or the stream name.
-     */
-    public String getDisplayRecipient(ZulipApp app) {
-        if (this.getType() == MessageType.STREAM_MESSAGE) {
-            return this.getStream().getName();
-        } else {
-            Person[] people = this.getRecipients(app);
-            ArrayList<String> names = new ArrayList<>();
-
-            for (Person person : people) {
-                if (person.id != app.getYou().id || people.length == 1) {
-                    names.add(person.getName());
-                }
-            }
-            return TextUtils.join(", ", names);
-        }
-    }
-
-
-    /**
-     * Creates a comma-separated String of the email addressed of all the
-     * recipients of the message, as would be suitable to place in the compose
-     * box.
-     *
-     * @return the aforementioned String.
-     */
-    public String getReplyTo(ZulipApp app) {
-        if (this.getType() == MessageType.STREAM_MESSAGE) {
-            return this.getSender().getEmail();
-        } else {
-            Person[] people = this.getRecipients(app);
-            return emailsMinusYou(Arrays.asList(people), app.getYou());
-        }
-    }
-
     public static String emailsMinusYou(List<Person> people, Person you) {
         ArrayList<String> names = new ArrayList<>();
 
@@ -387,25 +222,6 @@ public class Message {
             }
         }
         return TextUtils.join(", ", names);
-    }
-
-    /**
-     * Returns a Person array of the email addresses of the parties of the
-     * message, the user excluded.
-     *
-     * @return said Person[].
-     */
-    public Person[] getPersonalReplyTo(ZulipApp app) {
-        Person[] people = this.getRecipients(app);
-        ArrayList<Person> names = new ArrayList<>();
-
-        for (Person person : people) {
-            if (person.id != app.getYou().id) {
-                names.add(person);
-            }
-        }
-
-        return people;
     }
 
     public static void createMessages(final ZulipApp app,
@@ -484,36 +300,11 @@ public class Message {
 
     }
 
-    public String concatStreamAndTopic() {
-        return getStream().getId() + getSubject();
-    }
-
-    public String getIdForHolder() {
-        if (this.getType() == MessageType.PRIVATE_MESSAGE) {
-            return getRawRecipients();
-        }
-        return getStream().getId() + getSubject();
-    }
-
-    private static final HTMLSchema schema = new HTMLSchema();
-
-    public Spanned getFormattedContent(ZulipApp app) {
-        Spanned formattedMessage = formatContent(getFormattedContent(),
-                app);
-
-        while (formattedMessage.length() != 0
-                && formattedMessage.charAt(formattedMessage.length() - 1) == '\n') {
-            formattedMessage = (Spanned) formattedMessage.subSequence(0,
-                    formattedMessage.length() - 2);
-        }
-        return formattedMessage;
-    }
-
     /**
      * Copied from Html.fromHtml
      *
      * @param source HTML to be formatted
-     * @param app {@link ZulipApp}
+     * @param app    {@link ZulipApp}
      * @return Span
      */
     public static Spanned formatContent(String source, final ZulipApp app) {
@@ -567,7 +358,196 @@ public class Message {
 
         return CustomHtmlToSpannedConverter.linkifySpanned(converter.convert(), Linkify.ALL);
     }
+
+    public static HTMLSchema getSchema() {
+        return schema;
+    }
+
+    public Boolean getMessageRead() {
+        return messageRead;
+    }
+
+    public void setMessageRead(Boolean messageRead) {
+        this.messageRead = messageRead;
+    }
+
+    public int hashCode() {
+        return new HashCodeBuilder(17, 31).append(sender).append(type)
+                .append(content).append(subject).append(timestamp).append(id)
+                .append(stream).toHashCode();
+    }
+
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof Message)) {
+            return false;
+        }
+        Message msg = (Message) obj;
+
+        return new EqualsBuilder().append(sender, msg.sender)
+                .append(type, msg.type).append(content, msg.content)
+                .append(subject, msg.subject).append(timestamp, msg.timestamp)
+                .append(id, msg.id).append(stream, msg.stream).isEquals();
+    }
+
+    public MessageType getType() {
+        return type;
+    }
+
+    public void setType(MessageType streamMessage) {
+        this.type = streamMessage;
+    }
+
+    public String getRawRecipients() {
+        return recipients;
+    }
+
+    public Person[] getRecipients(ZulipApp app) {
+        if (recipientsCache == null) {
+            String[] ids = TextUtils.split(this.recipients, ",");
+            recipientsCache = new Person[ids.length];
+            for (int i = 0; i < ids.length; i++) {
+                recipientsCache[i] = Person.getById(app,
+                        Integer.parseInt(ids[i]));
+            }
+        }
+        return recipientsCache;
+    }
+
+    public void setRecipients(Person[] list) {
+        this.recipientsCache = list;
+
+        try {
+            Person to = ZulipApp.get().getDao(Person.class, true).queryBuilder().where().eq(Person.EMAIL_FIELD, list[0].getEmail()).queryForFirst();
+            ;
+            if (list.length == 1) {
+                setRecipients(to.getId() + "");
+                return;
+            }
+            Person from = ZulipApp.get().getDao(Person.class, true).queryBuilder().where().eq(Person.EMAIL_FIELD, list[1].getEmail()).queryForFirst();
+
+            if (to == null && from != null) {
+                setRecipients("" + from.getId());
+            }
+            if (to != null && from == null) {
+                setRecipients(to.getId() + "");
+            }
+
+            setRecipients(to.getId() + "," + from.getId());
+            return;
+        } catch (Exception e) {
+            ZLog.logException(e);
+        }
+
+        this.recipients = (recipientId == 0 && senderId == 0) ? recipientList(list) : recipientId + "," + senderId;
+    }
+
+    /**
+     * Convenience function to set the recipients without requiring the caller
+     * to construct a full Person[] array.
+     * <p/>
+     * Do not call this method if you want to be able to get the recipient's
+     * names for this message later; construct a Person[] array and use
+     * setRecipient(Person[] recipients) instead.
+     *
+     * @param emails The emails of the recipients.
+     */
+    public void setRecipient(String[] emails) {
+        Person[] r = new Person[emails.length];
+        for (int i = 0; i < emails.length; i++) {
+            r[i] = new Person(null, emails[i]);
+        }
+        setRecipients(r);
+    }
+
+    /**
+     * Constructs a pretty-printable-to-the-user string consisting of the names
+     * of all of the participants in the message.
+     * <p/>
+     * For MessageType.STREAM_MESSAGE, return the stream name instead.
+     *
+     * @return A String of the names of each Person in recipients[],
+     * comma-separated, or the stream name.
+     */
+    public String getDisplayRecipient(ZulipApp app) {
+        if (this.getType() == MessageType.STREAM_MESSAGE) {
+            return this.getStream().getName();
+        } else {
+            Person[] people = this.getRecipients(app);
+            ArrayList<String> names = new ArrayList<>();
+
+            for (Person person : people) {
+                if (person.id != app.getYou().id || people.length == 1) {
+                    names.add(person.getName());
+                }
+            }
+            return TextUtils.join(", ", names);
+        }
+    }
+
+    /**
+     * Creates a comma-separated String of the email addressed of all the
+     * recipients of the message, as would be suitable to place in the compose
+     * box.
+     *
+     * @return the aforementioned String.
+     */
+    public String getReplyTo(ZulipApp app) {
+        if (this.getType() == MessageType.STREAM_MESSAGE) {
+            return this.getSender().getEmail();
+        } else {
+            Person[] people = this.getRecipients(app);
+            return emailsMinusYou(Arrays.asList(people), app.getYou());
+        }
+    }
+
+    /**
+     * Returns a Person array of the email addresses of the parties of the
+     * message, the user excluded.
+     *
+     * @return said Person[].
+     */
+    public Person[] getPersonalReplyTo(ZulipApp app) {
+        Person[] people = this.getRecipients(app);
+        ArrayList<Person> names = new ArrayList<>();
+
+        for (Person person : people) {
+            if (person.id != app.getYou().id) {
+                names.add(person);
+            }
+        }
+
+        return people;
+    }
+
+    public String concatStreamAndTopic() {
+        return getStream().getId() + getSubject();
+    }
+
+    public String getIdForHolder() {
+        if (this.getType() == MessageType.PRIVATE_MESSAGE) {
+            return getRawRecipients();
+        }
+        return getStream().getId() + getSubject();
+    }
     //endregion
+
+    public Spanned getFormattedContent(ZulipApp app) {
+        Spanned formattedMessage = formatContent(getFormattedContent(),
+                app);
+
+        while (formattedMessage.length() != 0
+                && formattedMessage.charAt(formattedMessage.length() - 1) == '\n') {
+            formattedMessage = (Spanned) formattedMessage.subSequence(0,
+                    formattedMessage.length() - 2);
+        }
+        return formattedMessage;
+    }
 
     //region model-getter-setters
     public String getSubject() {
@@ -585,7 +565,7 @@ public class Message {
     }
 
     public String getContent() {
-        if(content == null) {
+        if (content == null) {
             content = formatContent(getFormattedContent(), ZulipApp.get()).toString();
         }
         return content;
@@ -628,7 +608,7 @@ public class Message {
     }
 
     public Stream getStream() {
-        if(stream == null && getType() == MessageType.STREAM_MESSAGE) {
+        if (stream == null && getType() == MessageType.STREAM_MESSAGE) {
             stream = Stream.getByName(ZulipApp.get(), getRawRecipients());
         }
         return stream;
@@ -682,12 +662,12 @@ public class Message {
         return subjectLinks;
     }
 
-    public void setRecipients(String recipients) {
-        this.recipients = recipients;
-    }
-
     public String getRecipients() {
         return recipients;
+    }
+
+    public void setRecipients(String recipients) {
+        this.recipients = recipients;
     }
 
     public Person[] getRecipientsCache() {
@@ -696,10 +676,6 @@ public class Message {
 
     public int getId() {
         return id;
-    }
-
-    public static HTMLSchema getSchema() {
-        return schema;
     }
 
     public void updateFromHistory(@NonNull MessageHistory history) {
@@ -712,9 +688,27 @@ public class Message {
     }
 
 
-
     //endregion
 
+    public String extractImageUrl(ZulipApp zulipApp) {
+        String match = "<img src=\"";
+        int start = getFormattedContent().indexOf(match);
+
+        if (start == -1) {
+            return null;
+        }
+        start += match.length();
+        match = getFormattedContent().substring(start);
+        if (match.indexOf("\"") == -1) {
+            return null;
+        }
+        match = match.substring(0, match.indexOf("\""));
+
+        if (match.indexOf("/") == 0) {
+            return UrlHelper.addHost(match);
+        }
+        return match;
+    }
 
     public static class ZulipDirectMessage extends Message {
         @SerializedName("display_recipient")
@@ -747,25 +741,5 @@ public class Message {
         public String getDisplayRecipient() {
             return displayRecipient;
         }
-    }
-
-    public String extractImageUrl(ZulipApp zulipApp) {
-        String match = "<img src=\"";
-        int start = getFormattedContent().indexOf(match);
-
-        if(start == -1){
-            return null;
-        }
-        start += match.length();
-        match = getFormattedContent().substring(start);
-        if(match.indexOf("\"") == -1) {
-            return null;
-        }
-        match = match.substring(0, match.indexOf("\""));
-
-        if(match.indexOf("/") == 0) {
-            return UrlHelper.addHost(match);
-        }
-        return match;
     }
 }

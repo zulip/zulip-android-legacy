@@ -1,10 +1,10 @@
 package com.zulip.android.networking;
 
 import com.zulip.android.ZulipApp;
+import com.zulip.android.activities.ZulipActivity;
 import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageType;
 import com.zulip.android.models.Person;
-import com.zulip.android.activities.ZulipActivity;
 
 import org.json.JSONArray;
 
@@ -14,7 +14,7 @@ public class AsyncSend extends ZulipAsyncPushTask {
      * Initialise an AsyncSend task to send a specific message.
      *
      * @param zulipActivity The calling Activity
-     * @param msg            The message to send.
+     * @param msg           The message to send.
      */
     public AsyncSend(ZulipActivity zulipActivity, Message msg) {
         super((ZulipApp) zulipActivity.getApplication());

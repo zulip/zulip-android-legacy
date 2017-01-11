@@ -3,8 +3,7 @@
     android:shape="oval">
     <size
         android:width="40dp"
-        android:height="40dp"/>
-    <solid
-        android:color="@color/red_marker_tool"/>
+        android:height="40dp" />
+    <solid android:color="@color/red_marker_tool" />
 
 </shape>

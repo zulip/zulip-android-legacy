@@ -21,7 +21,7 @@ public class PhotoHelper {
      * at {@param photoPath}.
      *
      * @param photoPath file path
-     * @param bitmap to be saved as file
+     * @param bitmap    to be saved as file
      */
     public static String saveBitmapAsFile(String photoPath, Bitmap bitmap) {
         if (bitmap == null) {
@@ -36,7 +36,7 @@ public class PhotoHelper {
         FileOutputStream out = null;
         try {
             // change file name to avoid catching issues with Glide
-            int position =  photoPath.lastIndexOf(".");
+            int position = photoPath.lastIndexOf(".");
             photoPath = photoPath.substring(0, position) + Math.round(Math.random() * 10)
                     + photoPath.substring(position);
 

@@ -71,6 +71,8 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
     private static final String MONOSPACE = "monospace";
 
     private static HashMap<String, Integer> COLORS = buildColorMap();
+    private static int userMentionColor;
+    private static int userMentionSelfColor;
     private String mSource;
     private XMLReader mReader;
     private SpannableStringBuilder mSpannableStringBuilder;
@@ -78,8 +80,7 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
     private Html.TagHandler mTagHandler;
     private Html.ImageGetter mEmojiGetter;
     private String mBaseUri;
-    private static int userMentionColor;
-    private static int userMentionSelfColor;
+
     public CustomHtmlToSpannedConverter(String source,
                                         Html.ImageGetter imageGetter, Html.TagHandler tagHandler,
                                         Parser parser, Html.ImageGetter emojiGetter, String baseUri, Context context) {
@@ -92,202 +93,6 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
         mBaseUri = baseUri;
         userMentionColor = ContextCompat.getColor(context, R.color.dark_red);
         userMentionSelfColor = ContextCompat.getColor(context, R.color.dark_blue);
-    }
-
-    public Spanned convert() {
-
-        mReader.setContentHandler(this);
-        try {
-            mReader.parse(new InputSource(new StringReader(mSource)));
-        } catch (IOException | SAXException e) {
-            // We are reading from a string. There should not be IO problems.
-            throw new RuntimeException(e);
-        }
-
-        // Fix flags and range for paragraph-type markup.
-        Object[] obj = mSpannableStringBuilder.getSpans(0,
-                mSpannableStringBuilder.length(), ParagraphStyle.class);
-        for (int i = 0; i < obj.length; i++) {
-            int start = mSpannableStringBuilder.getSpanStart(obj[i]);
-            int end = mSpannableStringBuilder.getSpanEnd(obj[i]);
-
-            // If the last line of the range is blank, back off by one.
-            if (end - 2 >= 0
-                    && mSpannableStringBuilder.charAt(end - 1) == '\n'
-                    && mSpannableStringBuilder.charAt(end - 2) == '\n') {
-                end--;
-            }
-
-            if (end == start) {
-                mSpannableStringBuilder.removeSpan(obj[i]);
-            } else {
-                mSpannableStringBuilder.setSpan(obj[i], start, end,
-                        Spannable.SPAN_PARAGRAPH);
-            }
-        }
-
-        return mSpannableStringBuilder;
-    }
-
-    private void handleStartTag(String tag, Attributes attributes) {
-        if (tag.equalsIgnoreCase("br")) {
-            // We don't need to handle this. TagSoup will ensure that there's a
-            // </br> for each <br>
-            // so we can safely emite the linebreaks when we handle the close
-            // tag.
-        } else if (tag.equalsIgnoreCase("p")) {
-            handleP(mSpannableStringBuilder);
-        } else if (tag.equalsIgnoreCase("div")) {
-            handleP(mSpannableStringBuilder);
-        } else if (tag.equalsIgnoreCase("strong")) {
-            start(mSpannableStringBuilder, new Bold());
-        } else if (tag.equalsIgnoreCase("b")) {
-            start(mSpannableStringBuilder, new Bold());
-        } else if (tag.equalsIgnoreCase("em")) {
-            start(mSpannableStringBuilder, new Italic());
-        } else if (tag.equalsIgnoreCase("cite")) {
-            start(mSpannableStringBuilder, new Italic());
-        } else if (tag.equalsIgnoreCase("dfn")) {
-            start(mSpannableStringBuilder, new Italic());
-        } else if (tag.equalsIgnoreCase("i")) {
-            start(mSpannableStringBuilder, new Italic());
-        } else if (tag.equalsIgnoreCase("big")) {
-            start(mSpannableStringBuilder, new Big());
-        } else if (tag.equalsIgnoreCase("small")) {
-            start(mSpannableStringBuilder, new Small());
-        } else if (tag.equalsIgnoreCase("font")) {
-            startFont(mSpannableStringBuilder, attributes);
-        } else if (tag.equalsIgnoreCase("blockquote")) {
-            handleP(mSpannableStringBuilder);
-            start(mSpannableStringBuilder, new Blockquote());
-        } else if (tag.equalsIgnoreCase("tt")) {
-            start(mSpannableStringBuilder, new Monospace());
-        } else if (tag.equalsIgnoreCase("a")) {
-            startA(mSpannableStringBuilder, attributes, mBaseUri);
-        } else if (tag.equalsIgnoreCase("span")
-                && "user-mention".equals(attributes.getValue("class"))) {
-            startSpan(mSpannableStringBuilder, attributes);
-        } else if (tag.equalsIgnoreCase("u")) {
-            start(mSpannableStringBuilder, new Underline());
-        } else if (tag.equalsIgnoreCase("sup")) {
-            start(mSpannableStringBuilder, new Super());
-        } else if (tag.equalsIgnoreCase("sub")) {
-            start(mSpannableStringBuilder, new Sub());
-        } else if (tag.equalsIgnoreCase("code")) {
-            start(mSpannableStringBuilder, new InlineCode());
-        } else if (tag.equalsIgnoreCase("pre")) {
-            start(mSpannableStringBuilder, new CodeBlock());
-        } else if (tag.length() == 2
-                && Character.toLowerCase(tag.charAt(0)) == 'h'
-                && tag.charAt(1) >= '1' && tag.charAt(1) <= '6') {
-            handleP(mSpannableStringBuilder);
-            start(mSpannableStringBuilder, new Header(tag.charAt(1) - '1'));
-        } else if (tag.equalsIgnoreCase("img")) {
-            String cssClass = attributes.getValue("", "class");
-            if (cssClass != null && cssClass.equals("emoji")) {
-                startImg(mSpannableStringBuilder, attributes, mEmojiGetter);
-            } else {
-                startImg(mSpannableStringBuilder, attributes, mImageGetter);
-            }
-        } else if (mTagHandler != null) {
-            mTagHandler.handleTag(true, tag, mSpannableStringBuilder, mReader);
-        }
-    }
-
-    private class CustomQuoteSpan extends QuoteSpan {
-        private static final int STRIPE_WIDTH = 10;
-        private static final int GAP_WIDTH = 20;
-
-        public CustomQuoteSpan() {
-            super(0xffdddddd); // grey color
-        }
-
-        @Override
-        public int getLeadingMargin(boolean first) {
-            return STRIPE_WIDTH + GAP_WIDTH;
-        }
-
-        public void drawLeadingMargin(Canvas c, Paint p, int x, int dir,
-                                      int top, int baseline, int bottom, CharSequence text,
-                                      int start, int end, boolean first, Layout layout) {
-            Paint.Style style = p.getStyle();
-            int color = p.getColor();
-
-            p.setStyle(Paint.Style.FILL);
-            p.setColor(getColor());
-
-            c.drawRect(x, top, x + dir * STRIPE_WIDTH, bottom, p);
-
-            p.setStyle(style);
-            p.setColor(color);
-        }
-    }
-
-    private void handleEndTag(String tag) {
-        if (tag.equalsIgnoreCase("br")) {
-            handleBr(mSpannableStringBuilder);
-        } else if (tag.equalsIgnoreCase("p")) {
-            handleP(mSpannableStringBuilder);
-        } else if (tag.equalsIgnoreCase("div")) {
-            handleP(mSpannableStringBuilder);
-        } else if (tag.equalsIgnoreCase("strong")) {
-            end(mSpannableStringBuilder, Bold.class, new StyleSpan(
-                    Typeface.BOLD));
-        } else if (tag.equalsIgnoreCase("b")) {
-            end(mSpannableStringBuilder, Bold.class, new StyleSpan(
-                    Typeface.BOLD));
-        } else if (tag.equalsIgnoreCase("em")) {
-            end(mSpannableStringBuilder, Italic.class, new StyleSpan(
-                    Typeface.ITALIC));
-        } else if (tag.equalsIgnoreCase("cite")) {
-            end(mSpannableStringBuilder, Italic.class, new StyleSpan(
-                    Typeface.ITALIC));
-        } else if (tag.equalsIgnoreCase("dfn")) {
-            end(mSpannableStringBuilder, Italic.class, new StyleSpan(
-                    Typeface.ITALIC));
-        } else if (tag.equalsIgnoreCase("i")) {
-            end(mSpannableStringBuilder, Italic.class, new StyleSpan(
-                    Typeface.ITALIC));
-        } else if (tag.equalsIgnoreCase("big")) {
-            end(mSpannableStringBuilder, Big.class, new RelativeSizeSpan(1.25f));
-        } else if (tag.equalsIgnoreCase("small")) {
-            end(mSpannableStringBuilder, Small.class,
-                    new RelativeSizeSpan(0.8f));
-        } else if (tag.equalsIgnoreCase("font")) {
-            endFont(mSpannableStringBuilder);
-        } else if (tag.equalsIgnoreCase("blockquote")) {
-            handleP(mSpannableStringBuilder);
-            end(mSpannableStringBuilder, Blockquote.class,
-                    new CustomQuoteSpan());
-        } else if (tag.equalsIgnoreCase("tt")) {
-            end(mSpannableStringBuilder, Monospace.class, new TypefaceSpan(
-                    MONOSPACE));
-        } else if (tag.equalsIgnoreCase("a")) {
-            endA(mSpannableStringBuilder);
-        } else if (tag.equalsIgnoreCase("span")) {
-            endSpan(mSpannableStringBuilder);
-        } else if (tag.equalsIgnoreCase("u")) {
-            end(mSpannableStringBuilder, Underline.class, new UnderlineSpan());
-        } else if (tag.equalsIgnoreCase("sup")) {
-            end(mSpannableStringBuilder, Super.class, new SuperscriptSpan());
-        } else if (tag.equalsIgnoreCase("sub")) {
-            end(mSpannableStringBuilder, Sub.class, new SubscriptSpan());
-        } else if (tag.equalsIgnoreCase("code")) {
-            endMultiple(mSpannableStringBuilder, InlineCode.class,
-                    new Object[]{new TypefaceSpan(MONOSPACE),
-                            new ForegroundColorSpan(0xffdd1144) // pink
-                    });
-        } else if (tag.equalsIgnoreCase("pre")) {
-            end(mSpannableStringBuilder, CodeBlock.class, new TypefaceSpan(
-                    MONOSPACE));
-        } else if (tag.length() == 2
-                && Character.toLowerCase(tag.charAt(0)) == 'h'
-                && tag.charAt(1) >= '1' && tag.charAt(1) <= '6') {
-            handleP(mSpannableStringBuilder);
-            endHeader(mSpannableStringBuilder);
-        } else if (mTagHandler != null) {
-            mTagHandler.handleTag(false, tag, mSpannableStringBuilder, mReader);
-        }
     }
 
     private static void handleP(SpannableStringBuilder text) {
@@ -508,6 +313,290 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
         }
     }
 
+    private static HashMap<String, Integer> buildColorMap() {
+        HashMap<String, Integer> map = new HashMap<>();
+        map.put("aqua", 0x00FFFF);
+        map.put("black", 0x000000);
+        map.put("blue", 0x0000FF);
+        map.put("fuchsia", 0xFF00FF);
+        map.put("green", 0x008000);
+        map.put("grey", 0x808080);
+        map.put("lime", 0x00FF00);
+        map.put("maroon", 0x800000);
+        map.put("navy", 0x000080);
+        map.put("olive", 0x808000);
+        map.put("purple", 0x800080);
+        map.put("red", 0xFF0000);
+        map.put("silver", 0xC0C0C0);
+        map.put("teal", 0x008080);
+        map.put("white", 0xFFFFFF);
+        map.put("yellow", 0xFFFF00);
+        return map;
+    }
+
+    /**
+     * Converts an HTML color (named or numeric) to an integer RGB value.
+     *
+     * @param color Non-null color string.
+     * @return A color value, or {@code -1} if the color string could not be
+     * interpreted.
+     */
+    private static int getHtmlColor(String color) {
+        Integer i = COLORS.get(color.toLowerCase(Locale.US));
+        if (i != null) {
+            return i;
+        } else {
+            try {
+                return convertValueToInt(color, -1);
+            } catch (NumberFormatException nfe) {
+                return -1;
+            }
+        }
+    }
+
+    /**
+     * Copied from com.android.internal.util.XmlUtils from Android source
+     */
+    private static int convertValueToInt(CharSequence charSeq,
+                                         int defaultValue) {
+        if (null == charSeq)
+            return defaultValue;
+
+        String nm = charSeq.toString();
+
+        // XXX This code is copied from Integer.decode() so we don't
+        // have to instantiate an Integer!
+
+        int value;
+        int sign = 1;
+        int index = 0;
+        int len = nm.length();
+        int base = 10;
+
+        if ('-' == nm.charAt(0)) {
+            sign = -1;
+            index++;
+        }
+
+        if ('0' == nm.charAt(index)) {
+            // Quick check for a zero by itself
+            if (index == (len - 1))
+                return 0;
+
+            char c = nm.charAt(index + 1);
+
+            if ('x' == c || 'X' == c) {
+                index += 2;
+                base = 16;
+            } else {
+                index++;
+                base = 8;
+            }
+        } else if ('#' == nm.charAt(index)) {
+            index++;
+            base = 16;
+        }
+
+        return Integer.parseInt(nm.substring(index), base) * sign;
+    }
+
+    /**
+     * <<<<<<< e370c9bc00e8f6b33b1d12a44b4c70a7f063c8b9
+     * Parses Spanned text for existing html links and reapplies them after the text has been Linkified
+     * =======
+     * Parses Spanned text for existing html links and reapplies them.
+     * >>>>>>> Issue #168 bugfix for links not being clickable, adds autoLink feature including web, phone, map and email
+     *
+     * @param spann {@link Spanned} text which has to be Linkified
+     * @param mask  bitmask to define which kinds of links will be searched and applied (e.g. <a href="https://developer.android.com/reference/android/text/util/Linkify.html#ALL">Linkify.ALL</a>)
+     * @return Linkified {@link Spanned} text
+     * @see <a href="https://developer.android.com/reference/android/text/util/Linkify.html">Linkify</a>
+     */
+    public static Spanned linkifySpanned(@NonNull final Spanned spann, final int mask) {
+        URLSpan[] existingSpans = spann.getSpans(0, spann.length(), URLSpan.class);
+        List<Pair<Integer, Integer>> links = new ArrayList<>();
+
+        for (URLSpan urlSpan : existingSpans) {
+            links.add(new Pair<>(spann.getSpanStart(urlSpan), spann.getSpanEnd(urlSpan)));
+        }
+
+        Linkify.addLinks((Spannable) spann, mask);
+
+        // add the links back in
+        for (int i = 0; i < existingSpans.length; i++) {
+            ((Spannable) spann).setSpan(existingSpans[i], links.get(i).first, links.get(i).second, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+
+        return spann;
+    }
+
+    public Spanned convert() {
+
+        mReader.setContentHandler(this);
+        try {
+            mReader.parse(new InputSource(new StringReader(mSource)));
+        } catch (IOException | SAXException e) {
+            // We are reading from a string. There should not be IO problems.
+            throw new RuntimeException(e);
+        }
+
+        // Fix flags and range for paragraph-type markup.
+        Object[] obj = mSpannableStringBuilder.getSpans(0,
+                mSpannableStringBuilder.length(), ParagraphStyle.class);
+        for (int i = 0; i < obj.length; i++) {
+            int start = mSpannableStringBuilder.getSpanStart(obj[i]);
+            int end = mSpannableStringBuilder.getSpanEnd(obj[i]);
+
+            // If the last line of the range is blank, back off by one.
+            if (end - 2 >= 0
+                    && mSpannableStringBuilder.charAt(end - 1) == '\n'
+                    && mSpannableStringBuilder.charAt(end - 2) == '\n') {
+                end--;
+            }
+
+            if (end == start) {
+                mSpannableStringBuilder.removeSpan(obj[i]);
+            } else {
+                mSpannableStringBuilder.setSpan(obj[i], start, end,
+                        Spannable.SPAN_PARAGRAPH);
+            }
+        }
+
+        return mSpannableStringBuilder;
+    }
+
+    private void handleStartTag(String tag, Attributes attributes) {
+        if (tag.equalsIgnoreCase("br")) {
+            // We don't need to handle this. TagSoup will ensure that there's a
+            // </br> for each <br>
+            // so we can safely emite the linebreaks when we handle the close
+            // tag.
+        } else if (tag.equalsIgnoreCase("p")) {
+            handleP(mSpannableStringBuilder);
+        } else if (tag.equalsIgnoreCase("div")) {
+            handleP(mSpannableStringBuilder);
+        } else if (tag.equalsIgnoreCase("strong")) {
+            start(mSpannableStringBuilder, new Bold());
+        } else if (tag.equalsIgnoreCase("b")) {
+            start(mSpannableStringBuilder, new Bold());
+        } else if (tag.equalsIgnoreCase("em")) {
+            start(mSpannableStringBuilder, new Italic());
+        } else if (tag.equalsIgnoreCase("cite")) {
+            start(mSpannableStringBuilder, new Italic());
+        } else if (tag.equalsIgnoreCase("dfn")) {
+            start(mSpannableStringBuilder, new Italic());
+        } else if (tag.equalsIgnoreCase("i")) {
+            start(mSpannableStringBuilder, new Italic());
+        } else if (tag.equalsIgnoreCase("big")) {
+            start(mSpannableStringBuilder, new Big());
+        } else if (tag.equalsIgnoreCase("small")) {
+            start(mSpannableStringBuilder, new Small());
+        } else if (tag.equalsIgnoreCase("font")) {
+            startFont(mSpannableStringBuilder, attributes);
+        } else if (tag.equalsIgnoreCase("blockquote")) {
+            handleP(mSpannableStringBuilder);
+            start(mSpannableStringBuilder, new Blockquote());
+        } else if (tag.equalsIgnoreCase("tt")) {
+            start(mSpannableStringBuilder, new Monospace());
+        } else if (tag.equalsIgnoreCase("a")) {
+            startA(mSpannableStringBuilder, attributes, mBaseUri);
+        } else if (tag.equalsIgnoreCase("span")
+                && "user-mention".equals(attributes.getValue("class"))) {
+            startSpan(mSpannableStringBuilder, attributes);
+        } else if (tag.equalsIgnoreCase("u")) {
+            start(mSpannableStringBuilder, new Underline());
+        } else if (tag.equalsIgnoreCase("sup")) {
+            start(mSpannableStringBuilder, new Super());
+        } else if (tag.equalsIgnoreCase("sub")) {
+            start(mSpannableStringBuilder, new Sub());
+        } else if (tag.equalsIgnoreCase("code")) {
+            start(mSpannableStringBuilder, new InlineCode());
+        } else if (tag.equalsIgnoreCase("pre")) {
+            start(mSpannableStringBuilder, new CodeBlock());
+        } else if (tag.length() == 2
+                && Character.toLowerCase(tag.charAt(0)) == 'h'
+                && tag.charAt(1) >= '1' && tag.charAt(1) <= '6') {
+            handleP(mSpannableStringBuilder);
+            start(mSpannableStringBuilder, new Header(tag.charAt(1) - '1'));
+        } else if (tag.equalsIgnoreCase("img")) {
+            String cssClass = attributes.getValue("", "class");
+            if (cssClass != null && cssClass.equals("emoji")) {
+                startImg(mSpannableStringBuilder, attributes, mEmojiGetter);
+            } else {
+                startImg(mSpannableStringBuilder, attributes, mImageGetter);
+            }
+        } else if (mTagHandler != null) {
+            mTagHandler.handleTag(true, tag, mSpannableStringBuilder, mReader);
+        }
+    }
+
+    private void handleEndTag(String tag) {
+        if (tag.equalsIgnoreCase("br")) {
+            handleBr(mSpannableStringBuilder);
+        } else if (tag.equalsIgnoreCase("p")) {
+            handleP(mSpannableStringBuilder);
+        } else if (tag.equalsIgnoreCase("div")) {
+            handleP(mSpannableStringBuilder);
+        } else if (tag.equalsIgnoreCase("strong")) {
+            end(mSpannableStringBuilder, Bold.class, new StyleSpan(
+                    Typeface.BOLD));
+        } else if (tag.equalsIgnoreCase("b")) {
+            end(mSpannableStringBuilder, Bold.class, new StyleSpan(
+                    Typeface.BOLD));
+        } else if (tag.equalsIgnoreCase("em")) {
+            end(mSpannableStringBuilder, Italic.class, new StyleSpan(
+                    Typeface.ITALIC));
+        } else if (tag.equalsIgnoreCase("cite")) {
+            end(mSpannableStringBuilder, Italic.class, new StyleSpan(
+                    Typeface.ITALIC));
+        } else if (tag.equalsIgnoreCase("dfn")) {
+            end(mSpannableStringBuilder, Italic.class, new StyleSpan(
+                    Typeface.ITALIC));
+        } else if (tag.equalsIgnoreCase("i")) {
+            end(mSpannableStringBuilder, Italic.class, new StyleSpan(
+                    Typeface.ITALIC));
+        } else if (tag.equalsIgnoreCase("big")) {
+            end(mSpannableStringBuilder, Big.class, new RelativeSizeSpan(1.25f));
+        } else if (tag.equalsIgnoreCase("small")) {
+            end(mSpannableStringBuilder, Small.class,
+                    new RelativeSizeSpan(0.8f));
+        } else if (tag.equalsIgnoreCase("font")) {
+            endFont(mSpannableStringBuilder);
+        } else if (tag.equalsIgnoreCase("blockquote")) {
+            handleP(mSpannableStringBuilder);
+            end(mSpannableStringBuilder, Blockquote.class,
+                    new CustomQuoteSpan());
+        } else if (tag.equalsIgnoreCase("tt")) {
+            end(mSpannableStringBuilder, Monospace.class, new TypefaceSpan(
+                    MONOSPACE));
+        } else if (tag.equalsIgnoreCase("a")) {
+            endA(mSpannableStringBuilder);
+        } else if (tag.equalsIgnoreCase("span")) {
+            endSpan(mSpannableStringBuilder);
+        } else if (tag.equalsIgnoreCase("u")) {
+            end(mSpannableStringBuilder, Underline.class, new UnderlineSpan());
+        } else if (tag.equalsIgnoreCase("sup")) {
+            end(mSpannableStringBuilder, Super.class, new SuperscriptSpan());
+        } else if (tag.equalsIgnoreCase("sub")) {
+            end(mSpannableStringBuilder, Sub.class, new SubscriptSpan());
+        } else if (tag.equalsIgnoreCase("code")) {
+            endMultiple(mSpannableStringBuilder, InlineCode.class,
+                    new Object[]{new TypefaceSpan(MONOSPACE),
+                            new ForegroundColorSpan(0xffdd1144) // pink
+                    });
+        } else if (tag.equalsIgnoreCase("pre")) {
+            end(mSpannableStringBuilder, CodeBlock.class, new TypefaceSpan(
+                    MONOSPACE));
+        } else if (tag.length() == 2
+                && Character.toLowerCase(tag.charAt(0)) == 'h'
+                && tag.charAt(1) >= '1' && tag.charAt(1) <= '6') {
+            handleP(mSpannableStringBuilder);
+            endHeader(mSpannableStringBuilder);
+        } else if (mTagHandler != null) {
+            mTagHandler.handleTag(false, tag, mSpannableStringBuilder, mReader);
+        }
+    }
+
     public void setDocumentLocator(Locator locator) {
     }
 
@@ -643,121 +732,33 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
         }
     }
 
-    private static HashMap<String, Integer> buildColorMap() {
-        HashMap<String, Integer> map = new HashMap<>();
-        map.put("aqua", 0x00FFFF);
-        map.put("black", 0x000000);
-        map.put("blue", 0x0000FF);
-        map.put("fuchsia", 0xFF00FF);
-        map.put("green", 0x008000);
-        map.put("grey", 0x808080);
-        map.put("lime", 0x00FF00);
-        map.put("maroon", 0x800000);
-        map.put("navy", 0x000080);
-        map.put("olive", 0x808000);
-        map.put("purple", 0x800080);
-        map.put("red", 0xFF0000);
-        map.put("silver", 0xC0C0C0);
-        map.put("teal", 0x008080);
-        map.put("white", 0xFFFFFF);
-        map.put("yellow", 0xFFFF00);
-        return map;
-    }
+    private class CustomQuoteSpan extends QuoteSpan {
+        private static final int STRIPE_WIDTH = 10;
+        private static final int GAP_WIDTH = 20;
 
-    /**
-     * Converts an HTML color (named or numeric) to an integer RGB value.
-     *
-     * @param color Non-null color string.
-     * @return A color value, or {@code -1} if the color string could not be
-     * interpreted.
-     */
-    private static int getHtmlColor(String color) {
-        Integer i = COLORS.get(color.toLowerCase(Locale.US));
-        if (i != null) {
-            return i;
-        } else {
-            try {
-                return convertValueToInt(color, -1);
-            } catch (NumberFormatException nfe) {
-                return -1;
-            }
-        }
-    }
-
-    /**
-     * Copied from com.android.internal.util.XmlUtils from Android source
-     */
-    private static int convertValueToInt(CharSequence charSeq,
-                                         int defaultValue) {
-        if (null == charSeq)
-            return defaultValue;
-
-        String nm = charSeq.toString();
-
-        // XXX This code is copied from Integer.decode() so we don't
-        // have to instantiate an Integer!
-
-        int value;
-        int sign = 1;
-        int index = 0;
-        int len = nm.length();
-        int base = 10;
-
-        if ('-' == nm.charAt(0)) {
-            sign = -1;
-            index++;
+        public CustomQuoteSpan() {
+            super(0xffdddddd); // grey color
         }
 
-        if ('0' == nm.charAt(index)) {
-            // Quick check for a zero by itself
-            if (index == (len - 1))
-                return 0;
-
-            char c = nm.charAt(index + 1);
-
-            if ('x' == c || 'X' == c) {
-                index += 2;
-                base = 16;
-            } else {
-                index++;
-                base = 8;
-            }
-        } else if ('#' == nm.charAt(index)) {
-            index++;
-            base = 16;
+        @Override
+        public int getLeadingMargin(boolean first) {
+            return STRIPE_WIDTH + GAP_WIDTH;
         }
 
-        return Integer.parseInt(nm.substring(index), base) * sign;
-    }
+        public void drawLeadingMargin(Canvas c, Paint p, int x, int dir,
+                                      int top, int baseline, int bottom, CharSequence text,
+                                      int start, int end, boolean first, Layout layout) {
+            Paint.Style style = p.getStyle();
+            int color = p.getColor();
 
-    /**
-<<<<<<< e370c9bc00e8f6b33b1d12a44b4c70a7f063c8b9
-     * Parses Spanned text for existing html links and reapplies them after the text has been Linkified
-=======
-     * Parses Spanned text for existing html links and reapplies them.
->>>>>>> Issue #168 bugfix for links not being clickable, adds autoLink feature including web, phone, map and email
-     * @see <a href="https://developer.android.com/reference/android/text/util/Linkify.html">Linkify</a>
-     *
-     * @param spann {@link Spanned} text which has to be Linkified
-     * @param mask bitmask to define which kinds of links will be searched and applied (e.g. <a href="https://developer.android.com/reference/android/text/util/Linkify.html#ALL">Linkify.ALL</a>)
-     * @return Linkified {@link Spanned} text
-     */
-    public static Spanned linkifySpanned(@NonNull final Spanned spann, final int mask) {
-        URLSpan[] existingSpans = spann.getSpans(0, spann.length(), URLSpan.class);
-        List<Pair<Integer, Integer>> links = new ArrayList<>();
+            p.setStyle(Paint.Style.FILL);
+            p.setColor(getColor());
 
-        for (URLSpan urlSpan : existingSpans) {
-            links.add(new Pair<>(spann.getSpanStart(urlSpan), spann.getSpanEnd(urlSpan)));
+            c.drawRect(x, top, x + dir * STRIPE_WIDTH, bottom, p);
+
+            p.setStyle(style);
+            p.setColor(color);
         }
-
-        Linkify.addLinks((Spannable) spann, mask);
-
-        // add the links back in
-        for (int i = 0; i < existingSpans.length; i++) {
-            ((Spannable) spann).setSpan(existingSpans[i], links.get(i).first, links.get(i).second, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        }
-
-        return spann;
     }
 
 }

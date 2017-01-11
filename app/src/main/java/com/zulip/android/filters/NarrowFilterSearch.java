@@ -18,8 +18,6 @@ import java.util.Arrays;
  * Narrow based on search terms
  */
 public class NarrowFilterSearch implements NarrowFilter {
-    private final String query;
-
     public static final Creator<NarrowFilterSearch> CREATOR = new Creator<NarrowFilterSearch>() {
         @Override
         public NarrowFilterSearch createFromParcel(Parcel parcel) {
@@ -31,6 +29,7 @@ public class NarrowFilterSearch implements NarrowFilter {
             return new NarrowFilterSearch[i];
         }
     };
+    private final String query;
 
     public NarrowFilterSearch(String query) {
         this.query = query;

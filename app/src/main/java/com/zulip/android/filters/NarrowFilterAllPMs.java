@@ -20,9 +20,6 @@ import java.util.Arrays;
  * Filter all private messages involving this person
  */
 public class NarrowFilterAllPMs implements NarrowFilter {
-    private final Person person;
-    private final String recipient;
-
     public static final Parcelable.Creator<NarrowFilterAllPMs> CREATOR = new Parcelable.Creator<NarrowFilterAllPMs>() {
         public NarrowFilterAllPMs createFromParcel(Parcel in) {
 
@@ -33,6 +30,8 @@ public class NarrowFilterAllPMs implements NarrowFilter {
             return new NarrowFilterAllPMs[size];
         }
     };
+    private final Person person;
+    private final String recipient;
 
     public NarrowFilterAllPMs(Person person) {
         this.person = person;

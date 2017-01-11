@@ -13,6 +13,7 @@ import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.Interpolator;
+
 import com.zulip.android.R;
 
 /**
@@ -21,10 +22,10 @@ import com.zulip.android.R;
  */
 public class RemoveViewsOnScroll extends CoordinatorLayout.Behavior<View> {
     private static final Interpolator FAST_OUT_SLOW_IN_INTERPOLATOR = new FastOutSlowInInterpolator();
+    private static float toolbarHeight;
     private int changeInYDir;
     private boolean mIsShowing;
     private boolean isViewHidden;
-    private static float toolbarHeight;
     private View chatBox;
 
     public RemoveViewsOnScroll(Context context, AttributeSet attrs) {

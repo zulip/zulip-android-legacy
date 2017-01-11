@@ -30,14 +30,14 @@
         android:id="@+id/name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
         android:layout_gravity="center_vertical"
         android:layout_marginLeft="20dp"
         android:layout_marginStart="20dp"
+        android:layout_toEndOf="@+id/stream_dot"
+        android:layout_toRightOf="@+id/stream_dot"
         android:padding="5dp"
         android:text="MyStream"
         android:textColor="@color/colorTextPrimary"
-        android:textSize="18sp"
-        android:layout_centerVertical="true"
-        android:layout_toRightOf="@+id/stream_dot"
-        android:layout_toEndOf="@+id/stream_dot" />
+        android:textSize="18sp" />
 </RelativeLayout>

@@ -57,10 +57,13 @@ import retrofit2.Response;
  */
 public class LoginActivity extends BaseActivity implements View.OnClickListener,
         GoogleApiClient.OnConnectionFailedListener {
+    //region state-restoration
+    static final String USERNAME = "username";
+    static final String PASSWORD = "password";
+    static final String SERVER_IN = "serverIn";
     private static final String TAG = "LoginActivity";
     private static final int REQUEST_CODE_RESOLVE_ERR = 9000;
     private static final int REQUEST_CODE_SIGN_IN = 9001;
-
     private ProgressDialog connectionProgressDialog;
     private GoogleApiClient mGoogleApiClient;
     private EditText mServerEditText;
@@ -68,10 +71,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     private EditText mPassword;
     private ImageView mShowPassword;
     private EditText serverIn;
-    //region state-restoration
-    static final String USERNAME = "username";
-    static final String PASSWORD = "password";
-    static final String SERVER_IN = "serverIn";
     private boolean skipAnimations = false;
     //endregion
 
@@ -119,7 +118,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
             }
         });
         //restore instance state on orientation change
-        if (savedInstanceState != null){
+        if (savedInstanceState != null) {
             skipAnimations = true;
             serverIn.setText(savedInstanceState.getString(SERVER_IN));
             ((Button) findViewById(R.id.server_btn)).performClick();
@@ -138,12 +137,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
 
-                if (mPassword.getText().length() > 0)
-                {
+                if (mPassword.getText().length() > 0) {
                     mShowPassword.setVisibility(View.VISIBLE);
-                }
-                else
-                {
+                } else {
                     mShowPassword.setVisibility(View.GONE);
                 }
 
@@ -160,15 +156,12 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
             @Override
             public void onClick(View v) {
 
-                if (mShowPassword.getTag().toString().equals("visible"))
-                {
+                if (mShowPassword.getTag().toString().equals("visible")) {
                     mShowPassword.setTag("hide");
                     mShowPassword.setImageResource(R.drawable.ic_visibility_off_black_24dp);
                     mPassword.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
                     mPassword.setSelection(mPassword.length());
-                }
-                else
-                {
+                } else {
                     mShowPassword.setTag("visible");
                     mShowPassword.setImageResource(R.drawable.ic_visibility_black_24dp);
                     mPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
@@ -229,7 +222,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         // add http or https if scheme is not included
         if (!serverURL.contains("://")) {
             serverURL = httpScheme + "://" + serverURL;
-            if (BuildConfig.DEBUG) showHTTPDialog(serverURL); //Ask for http or https if in non-prod builds otherwise if in prod then use https
+            if (BuildConfig.DEBUG)
+                showHTTPDialog(serverURL); //Ask for http or https if in non-prod builds otherwise if in prod then use https
             else showBackends(httpScheme, serverURL);
         } else {
             Uri serverUri = Uri.parse(serverURL);
@@ -243,11 +237,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     }
 
     @Override
-    public void onSaveInstanceState(Bundle savedInstanceState){
+    public void onSaveInstanceState(Bundle savedInstanceState) {
         Boolean inLogin = mUserName.isShown();
-        savedInstanceState.putString(SERVER_IN,mServerEditText.getText().toString());
-        savedInstanceState.putString(USERNAME,mUserName.getText().toString());
-        savedInstanceState.putString(PASSWORD,mPassword.getText().toString());
+        savedInstanceState.putString(SERVER_IN, mServerEditText.getText().toString());
+        savedInstanceState.putString(USERNAME, mUserName.getText().toString());
+        savedInstanceState.putString(PASSWORD, mPassword.getText().toString());
     }
 
     private boolean isUrlValid(String url) {
@@ -265,8 +259,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
             serverURL = serverURL + "/";
         }
 
-        if (!isUrlValid(serverURL)){
-            Toast.makeText(LoginActivity.this, R.string.invalid_url , Toast.LENGTH_SHORT).show();
+        if (!isUrlValid(serverURL)) {
+            Toast.makeText(LoginActivity.this, R.string.invalid_url, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -324,12 +318,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                     @Override
                     public void onFailure(Call<ZulipBackendResponse> call, Throwable t) {
                         super.onFailure(call, t);
-                        if (!isNetworkAvailable())
-                        {
+                        if (!isNetworkAvailable()) {
                             Toast.makeText(LoginActivity.this, R.string.toast_no_internet_connection, Toast.LENGTH_SHORT).show();
-                        }
-                        else
-                        {
+                        } else {
                             Toast.makeText(LoginActivity.this, R.string.invalid_url, Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -343,7 +334,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
-
 
 
     private void showHTTPDialog(final String serverURL) {
@@ -442,12 +432,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                 }
             } else {
                 connectionProgressDialog.dismiss();
-                if (!isNetworkAvailable())
-                {
-                    Toast.makeText(LoginActivity.this,R.string.toast_no_internet_connection, Toast.LENGTH_SHORT).show();
-                }
-                else
-                {
+                if (!isNetworkAvailable()) {
+                    Toast.makeText(LoginActivity.this, R.string.toast_no_internet_connection, Toast.LENGTH_SHORT).show();
+                } else {
                     Toast.makeText(LoginActivity.this, R.string.google_app_login_failed, Toast.LENGTH_SHORT).show();
                 }
 
@@ -519,12 +506,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                                         Toast.makeText(LoginActivity.this, R.string.login_activity_toast_login_error, Toast.LENGTH_LONG).show();
                                     }
                                 } else {
-                                    if (!isNetworkAvailable())
-                                    {
+                                    if (!isNetworkAvailable()) {
                                         Toast.makeText(LoginActivity.this, R.string.toast_no_internet_connection, Toast.LENGTH_LONG).show();
-                                    }
-                                    else
-                                    {
+                                    } else {
                                         Toast.makeText(LoginActivity.this, R.string.login_activity_toast_login_error, Toast.LENGTH_LONG).show();
                                     }
 
@@ -535,12 +519,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                             public void onFailure(Call<LoginResponse> call, Throwable t) {
                                 super.onFailure(call, t);
                                 connectionProgressDialog.dismiss();
-                                if (!isNetworkAvailable())
-                                {
+                                if (!isNetworkAvailable()) {
                                     Toast.makeText(LoginActivity.this, R.string.toast_no_internet_connection, Toast.LENGTH_LONG).show();
-                                }
-                                else
-                                {
+                                } else {
                                     Toast.makeText(LoginActivity.this, R.string.login_activity_toast_login_error, Toast.LENGTH_LONG).show();
                                 }
                             }
@@ -577,22 +558,19 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
 
     private void openRegister() {
         Uri uri;
-        if (serverIn==null || serverIn.getText().toString().isEmpty() || serverIn.getText().toString().equals(""))
-        {
+        if (serverIn == null || serverIn.getText().toString().isEmpty() || serverIn.getText().toString().equals("")) {
             return;
-        }else
-        {
-            uri = Uri.parse(serverIn.getText().toString()+"register");
+        } else {
+            uri = Uri.parse(serverIn.getText().toString() + "register");
         }
-        if (Build.VERSION.SDK_INT < 15)
-        {
-            Intent intent = new Intent(Intent.ACTION_VIEW,uri);
+        if (Build.VERSION.SDK_INT < 15) {
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
             startActivity(intent);
             return;
         }
         CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
         CustomTabsIntent intent = builder.build();
-        intent.launchUrl(LoginActivity.this,uri);
+        intent.launchUrl(LoginActivity.this, uri);
     }
 
     private boolean isInputValidForDevAuth() {

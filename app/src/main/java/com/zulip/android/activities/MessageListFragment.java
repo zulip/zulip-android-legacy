@@ -48,36 +48,16 @@ import java.util.List;
  * initiated and called by {@link ZulipActivity}
  */
 public class MessageListFragment extends Fragment implements MessageListener {
-    private LinearLayoutManager linearLayoutManager;
-    private MutedTopics mMutedTopics;
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated to
-     * the activity and potentially other fragments contained in that activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface Listener {
-        void onListResume(MessageListFragment f);
-
-        void recyclerViewScrolled();
-
-        void clearChatBox();
-    }
-
     private static final String PARAM_FILTER = "filter";
     public NarrowFilter filter;
-
+    public ZulipApp app;
+    RecyclerMessageAdapter adapter;
+    TextView emptyTextView;
+    private LinearLayoutManager linearLayoutManager;
+    private MutedTopics mMutedTopics;
     private Listener mListener;
     private RecyclerView recyclerView;
-
-    public ZulipApp app;
-
     private SparseArray<Message> messageIndex;
-    RecyclerMessageAdapter adapter;
     private boolean loadingMessages = true;
     // Whether we've loaded all available messages in that direction
     private boolean loadedToTop = false;
@@ -85,12 +65,9 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
     private int firstMessageId = -1;
     private int lastMessageId = -1;
-
-    TextView emptyTextView;
     private boolean paused = false;
     private boolean initialized = false;
     private List<Message> messageList;
-
     public MessageListFragment() {
         app = ZulipApp.get();
         mMutedTopics = MutedTopics.get();
@@ -227,7 +204,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
                 return true;
             case R.id.copy_message:
                 copyMessage(message);
-                Toast.makeText(getContext(),R.string.message_copied, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), R.string.message_copied, Toast.LENGTH_SHORT).show();
                 return true;
             default:
                 return super.onContextItemSelected(item);
@@ -270,7 +247,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
             public void onTaskComplete(String result, JSONObject jsonObject) {
                 loadingMessages = false;
                 adapter.setHeaderShowing(false);
-                if(result.equals("0")){
+                if (result.equals("0")) {
                     showEmptyView();
                 }
             }
@@ -341,7 +318,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
         int topPosBefore = linearLayoutManager.findFirstVisibleItemPosition();
         int addedCount = 0;
         int headerParents = 0;
-        StringBuilder stringBuilder = new StringBuilder ();
+        StringBuilder stringBuilder = new StringBuilder();
         if (pos == LoadPosition.NEW && !loadedToBottom) {
             // If we don't have intermediate messages loaded, don't add new
             // messages -- they'll be loaded when we scroll down.
@@ -421,7 +398,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
         loadingMessages = false;
         //check size of messageList
-        if (messageList.size()==0)
+        if (messageList.size() == 0)
             showEmptyView();
         else
             showRecyclerView();
@@ -508,5 +485,22 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
     private Message getMessageById(int id) {
         return this.messageIndex.get(id);
+    }
+
+    /**
+     * This interface must be implemented by activities that contain this
+     * fragment to allow an interaction in this fragment to be communicated to
+     * the activity and potentially other fragments contained in that activity.
+     * <p/>
+     * See the Android Training lesson <a href=
+     * "http://developer.android.com/training/basics/fragments/communicating.html"
+     * >Communicating with Other Fragments</a> for more information.
+     */
+    public interface Listener {
+        void onListResume(MessageListFragment f);
+
+        void recyclerViewScrolled();
+
+        void clearChatBox();
     }
 }

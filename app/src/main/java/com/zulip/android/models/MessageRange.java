@@ -1,12 +1,5 @@
 package com.zulip.android.models;
 
-import java.sql.SQLException;
-import java.util.List;
-import java.util.concurrent.Callable;
-
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-
 import android.util.Log;
 
 import com.j256.ormlite.dao.RuntimeExceptionDao;
@@ -15,20 +8,27 @@ import com.j256.ormlite.misc.BaseDaoEnabled;
 import com.j256.ormlite.misc.TransactionManager;
 import com.j256.ormlite.stmt.Where;
 import com.j256.ormlite.table.DatabaseTable;
-import com.zulip.android.util.ZLog;
 import com.zulip.android.ZulipApp;
+import com.zulip.android.util.ZLog;
+
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
+import java.sql.SQLException;
+import java.util.List;
+import java.util.concurrent.Callable;
 
 /**
  * Ranges of messages we have received.
  */
 @DatabaseTable(tableName = "ranges")
 public class MessageRange extends BaseDaoEnabled<MessageRange, Integer> {
-    @DatabaseField(generatedId = true)
-    private int id;
     @DatabaseField()
     public int low;
     @DatabaseField()
     public int high;
+    @DatabaseField(generatedId = true)
+    private int id;
 
     public MessageRange() {
 
@@ -58,28 +58,6 @@ public class MessageRange extends BaseDaoEnabled<MessageRange, Integer> {
         }
 
         return null;
-    }
-
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder(17, 31).append(low).append(high)
-                .toHashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (obj == this) {
-            return true;
-        }
-        if (obj.getClass() != getClass()) {
-            return false;
-        }
-        MessageRange rhs = (MessageRange) obj;
-        return new EqualsBuilder().append(this.low, rhs.low)
-                .append(this.high, rhs.high).isEquals();
     }
 
     // / Update or create the final range for new messages from server events
@@ -148,5 +126,27 @@ public class MessageRange extends BaseDaoEnabled<MessageRange, Integer> {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 31).append(low).append(high)
+                .toHashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (obj == this) {
+            return true;
+        }
+        if (obj.getClass() != getClass()) {
+            return false;
+        }
+        MessageRange rhs = (MessageRange) obj;
+        return new EqualsBuilder().append(this.low, rhs.low)
+                .append(this.high, rhs.high).isEquals();
     }
 }

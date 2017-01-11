@@ -7,11 +7,11 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.zulip.android.R;
+import com.zulip.android.ZulipApp;
 import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageType;
 import com.zulip.android.models.Person;
-import com.zulip.android.R;
-import com.zulip.android.ZulipApp;
 import com.zulip.android.util.OnItemClickListener;
 import com.zulip.android.util.ZLog;
 
@@ -26,14 +26,17 @@ public class MessageHeaderParent {
     private boolean isMute;
     private MessageType messageType;
     private String displayRecipent;
+    @ColorInt
+    private int color;
+
 
     /**
      * Constructor for the wrapper class.\
      *
-     * @param stream Stores stream name if {@link MessageType#STREAM_MESSAGE} or null if {@link MessageType#PRIVATE_MESSAGE}
+     * @param stream  Stores stream name if {@link MessageType#STREAM_MESSAGE} or null if {@link MessageType#PRIVATE_MESSAGE}
      * @param subject Stores the topic/subject name if {@link MessageType#STREAM_MESSAGE} or null if {@link MessageType#PRIVATE_MESSAGE}
-     * @param id Stores the {@link Message#getIdForHolder()} this functions returns a string "subjectnamestreamId" if if {@link MessageType#STREAM_MESSAGE}
-     *           or all the recipients ID's of the group conversation or single recipient if {@link MessageType#PRIVATE_MESSAGE}
+     * @param id      Stores the {@link Message#getIdForHolder()} this functions returns a string "subjectnamestreamId" if if {@link MessageType#STREAM_MESSAGE}
+     *                or all the recipients ID's of the group conversation or single recipient if {@link MessageType#PRIVATE_MESSAGE}
      */
     public MessageHeaderParent(String stream, String subject, String id, Message message) {
         this.stream = stream;
@@ -41,10 +44,6 @@ public class MessageHeaderParent {
         this.subject = subject;
         this.id = id;
     }
-
-
-    @ColorInt
-    private int color;
 
     public int getColor() {
         return color;

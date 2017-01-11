@@ -1,23 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:id="@+id/messageTile"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                tools:ignore="Overdraw"
-                android:background="@color/stream_background"
-                android:paddingEnd="8dp"
-                android:paddingRight="8dp">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/messageTile"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/stream_background"
+    android:paddingEnd="8dp"
+    android:paddingRight="8dp"
+    tools:ignore="Overdraw">
 
 
     <LinearLayout
+        android:id="@+id/contentBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:layout_toEndOf="@+id/gravatar"
         android:layout_toRightOf="@+id/gravatar"
-        android:id="@+id/contentBox"
-        >
+        android:orientation="vertical">
 
         <LinearLayout
             android:id="@+id/senderTile"
@@ -31,10 +30,10 @@
 
             <TextView
                 android:id="@+id/senderName"
-                android:paddingTop="10dp"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:paddingTop="10dp"
                 android:textColor="@color/colorTextPrimary"
                 android:textStyle="bold"
                 tools:text="Sender &lt;alice@example.com&gt;" />
@@ -71,28 +70,28 @@
 
             <ImageView
                 android:id="@+id/load_image"
-                android:contentDescription="@string/image_content_desp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:background="@color/colorAccent"
+                android:contentDescription="@string/image_content_desp"
                 android:scaleType="centerInside"
-                tools:src="@drawable/ic_arrow_back_24dp"/>
+                tools:src="@drawable/ic_arrow_back_24dp" />
 
         </FrameLayout>
 
     </LinearLayout>
 
     <ImageView
-        android:paddingTop="10dp"
         android:id="@+id/gravatar"
-        android:contentDescription="@string/avatar_content_desp"
         android:layout_width="45dp"
         android:layout_height="37dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_marginLeft="10dp"
+        android:contentDescription="@string/avatar_content_desp"
+        android:paddingTop="10dp"
         android:scaleType="centerInside"
         android:src="@android:drawable/presence_online" />
 

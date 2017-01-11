@@ -63,7 +63,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Stores the global variables which are frequently used.
- *
+ * <p>
  * {@link #max_message_id} This is the last Message ID stored in our database.
  * {@link #you} A reference to the user currently logged in.
  * {@link #api_key} Stores the API_KEY which was obtained from the server on successful authentication.
@@ -72,9 +72,23 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class ZulipApp extends Application {
     private static final String API_KEY = "api_key";
     private static final String EMAIL = "email";
-    private static ZulipApp instance;
     private static final String USER_AGENT = "ZulipAndroid";
     private static final String DEFAULT_SERVER_URL = "https://api.zulip.com/";
+    private static ZulipApp instance;
+    /**
+     * Mapping of email address to presence information for that user. This is
+     * updated every 2 minutes by a background thread (see AsyncStatusUpdate)
+     */
+    public final Map<String, Presence> presences = new ConcurrentHashMap<>();
+    /**
+     * Queue of message ids to be marked as read. This queue should be emptied
+     * every couple of seconds
+     */
+    public final Queue<Integer> unreadMessageQueue = new ConcurrentLinkedQueue<>();
+    // This object's intrinsic lock is used to prevent multiple threads from
+    // making conflicting updates to ranges
+    public Object updateRangeLock = new Object();
+    public String tester;
     private Person you;
     private SharedPreferences settings;
     private String api_key;
@@ -83,6 +97,22 @@ public class ZulipApp extends Application {
     private ZulipServices zulipServices;
     private ReferenceObjectCache objectCache;
     private ZulipActivity zulipActivity;
+    /**
+     * Handler to manage batching of unread messages
+     */
+    private Handler unreadMessageHandler;
+    private String eventQueueId;
+    private int lastEventId;
+    private int pointer;
+    private Gson gson;
+
+    public static ZulipApp get() {
+        return instance;
+    }
+
+    private static void setInstance(ZulipApp instance) {
+        ZulipApp.instance = instance;
+    }
 
     public ZulipActivity getZulipActivity() {
         return zulipActivity;
@@ -90,38 +120,6 @@ public class ZulipApp extends Application {
 
     public void setZulipActivity(ZulipActivity zulipActivity) {
         this.zulipActivity = zulipActivity;
-    }
-
-    /**
-     * Handler to manage batching of unread messages
-     */
-    private Handler unreadMessageHandler;
-
-    private String eventQueueId;
-    private int lastEventId;
-
-    private int pointer;
-
-    // This object's intrinsic lock is used to prevent multiple threads from
-    // making conflicting updates to ranges
-    public Object updateRangeLock = new Object();
-
-    /**
-     * Mapping of email address to presence information for that user. This is
-     * updated every 2 minutes by a background thread (see AsyncStatusUpdate)
-     */
-    public final Map<String, Presence> presences = new ConcurrentHashMap<>();
-
-    /**
-     * Queue of message ids to be marked as read. This queue should be emptied
-     * every couple of seconds
-     */
-    public final Queue<Integer> unreadMessageQueue = new ConcurrentLinkedQueue<>();
-    public String tester;
-    private Gson gson;
-
-    public static ZulipApp get() {
-        return instance;
     }
 
     @Override
@@ -175,7 +173,7 @@ public class ZulipApp extends Application {
     }
 
     public ObjectCache getObjectCache() {
-        if(objectCache == null) {
+        if (objectCache == null) {
             objectCache = new ReferenceObjectCache(true);
         }
         return objectCache;
@@ -208,7 +206,7 @@ public class ZulipApp extends Application {
     }
 
     public Gson getGson() {
-        if(gson == null) {
+        if (gson == null) {
             gson = buildGson();
         }
         return gson;
@@ -233,24 +231,24 @@ public class ZulipApp extends Application {
                     @Override
                     public Message deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
 
-                        if(BuildConfig.DEBUG) {
+                        if (BuildConfig.DEBUG) {
                             Log.d("RAW MESSAGES", json.toString());
                         }
                         Message genMess;
-                        if("stream".equalsIgnoreCase(json.getAsJsonObject().get("type").getAsString())) {
+                        if ("stream".equalsIgnoreCase(json.getAsJsonObject().get("type").getAsString())) {
                             Message.ZulipStreamMessage msg = naiveGson.fromJson(json, Message.ZulipStreamMessage.class);
                             msg.setRecipients(msg.getDisplayRecipient());
                             genMess = msg;
                         } else {
                             Message.ZulipDirectMessage msg = naiveGson.fromJson(json, Message.ZulipDirectMessage.class);
-                            if(msg.getDisplayRecipient() != null) {
+                            if (msg.getDisplayRecipient() != null) {
                                 msg.setRecipients(msg.getDisplayRecipient().toArray(new Person[msg.getDisplayRecipient().size()]));
                             }
 
                             msg.setContent(Message.formatContent(msg.getFormattedContent(), ZulipApp.get()).toString());
                             genMess = msg;
                         }
-                        if(genMess._history != null && genMess._history.size() != 0) {
+                        if (genMess._history != null && genMess._history.size() != 0) {
                             genMess.updateFromHistory(genMess._history.get(0));
                         }
                         return genMess;
@@ -278,7 +276,7 @@ public class ZulipApp extends Application {
                                 foundPerson = personDao.queryBuilder().where().eq(Person.EMAIL_FIELD,
                                         new SelectArg(Person.EMAIL_FIELD, currentPerson.getEmail()))
                                         .queryForFirst();
-                                if(foundPerson != null) {
+                                if (foundPerson != null) {
                                     currentPerson.setId(foundPerson.getId());
                                 }
                             } catch (SQLException e) {
@@ -293,11 +291,11 @@ public class ZulipApp extends Application {
                     @Override
                     public EventsBranch deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
                         EventsBranch invalid = nestedGson.fromJson(json, EventsBranch.class);
-                        if(BuildConfig.DEBUG) {
+                        if (BuildConfig.DEBUG) {
                             Log.d("RAW EVENTS", json.toString());
                         }
                         Class<? extends EventsBranch> t = EventsBranch.BranchType.fromRawType(invalid);
-                        if(t != null) {
+                        if (t != null) {
                             return nestedGson.fromJson(json, t);
                         }
                         Log.w("GSON", "Attempted to deserialize and unregistered EventBranch... See EventBranch.BranchType");
@@ -374,11 +372,6 @@ public class ZulipApp extends Application {
         }
     }
 
-    public void setEmail(String email) {
-        databaseHelper = new DatabaseHelper(this, email);
-        this.you = Person.getOrUpdate(this, email, null, null);
-    }
-
     public void setServerURL(String serverURL) {
         Editor ed = this.settings.edit();
         ed.putString("server_url", serverURL);
@@ -414,6 +407,11 @@ public class ZulipApp extends Application {
         return you == null ? "" : you.getEmail();
     }
 
+    public void setEmail(String email) {
+        databaseHelper = new DatabaseHelper(this, email);
+        this.you = Person.getOrUpdate(this, email, null, null);
+    }
+
     public DatabaseHelper getDatabaseHelper() {
         return databaseHelper;
     }
@@ -423,7 +421,7 @@ public class ZulipApp extends Application {
         try {
             RuntimeExceptionDao<C, T> ret = new RuntimeExceptionDao<>(
                     (Dao<C, T>) databaseHelper.getDao(cls));
-            if(useCache) {
+            if (useCache) {
                 ret.setObjectCache(getObjectCache());
             }
             return ret;
@@ -519,23 +517,19 @@ public class ZulipApp extends Application {
         return you;
     }
 
-    private static void setInstance(ZulipApp instance) {
-        ZulipApp.instance = instance;
-    }
-
     public void syncPointer(final int mID) {
         getZulipServices().updatePointer(Integer.toString(mID))
-        .enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                setPointer(mID);
-            }
+                .enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        setPointer(mID);
+                    }
 
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                //do nothing.. don't want to mis-update the pointer.
-            }
-        });
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        //do nothing.. don't want to mis-update the pointer.
+                    }
+                });
     }
 
 }

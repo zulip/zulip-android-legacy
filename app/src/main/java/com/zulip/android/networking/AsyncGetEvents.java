@@ -39,7 +39,7 @@ import java.util.concurrent.Callable;
  * The run method {@link #run()} which has an infinite loop and keeps fetching the latest updates
  * and handles the events appropriately.
  * If the user is not registered to a queue this registers {@link #register()} for a new lastEventId and queueID
- *
+ * <p>
  * lastEventId {@link ZulipApp#lastEventId} which is used to fetch after this ID events from the server.
  */
 public class AsyncGetEvents extends Thread {
@@ -107,7 +107,7 @@ public class AsyncGetEvents extends Thread {
         retrofit2.Response<UserConfigurationResponse> response = app.getZulipServices()
                 .register(true)
                 .execute();
-        if(response.isSuccessful()) {
+        if (response.isSuccessful()) {
             UserConfigurationResponse res = response.body();
             app.tester = app.getEventQueueId();
             app.setEventQueueId(res.getQueueId());
@@ -144,8 +144,7 @@ public class AsyncGetEvents extends Thread {
                         stream.setSubscribed(true);
                         try {
                             streamDao.createOrUpdate(stream);
-                        }
-                        catch(Exception e) {
+                        } catch (Exception e) {
                             ZLog.logException(e);
                         }
                     }
@@ -169,8 +168,7 @@ public class AsyncGetEvents extends Thread {
                         person.setActive(true);
                         try {
                             personDao.createOrUpdate(person);
-                        }
-                        catch(Exception e) {
+                        } catch (Exception e) {
                             ZLog.logException(e);
                         }
                     }
@@ -188,8 +186,7 @@ public class AsyncGetEvents extends Thread {
                     }
                 });
             }
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             ZLog.logException(e);
         }
     }
@@ -230,7 +227,7 @@ public class AsyncGetEvents extends Thread {
                                     Toast.makeText(app.getBaseContext(), R.string.force_logged_out, Toast.LENGTH_LONG).show();
                                     app.logOut();
                                     Intent i = new Intent(app, LoginActivity.class);
-                                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                                     app.startActivity(i);
                                 }
                             });
@@ -279,6 +276,7 @@ public class AsyncGetEvents extends Thread {
 
     /**
      * Handles any event returned by the server that we care about.
+     *
      * @param events sent by server
      */
     private void processEvents(GetEventResponse events) {
@@ -300,6 +298,7 @@ public class AsyncGetEvents extends Thread {
 
     /**
      * Add messages to the list {@link com.zulip.android.activities.MessageListFragment} which are already added to the database
+     *
      * @param messages List of messages to be added
      */
     private void processMessages(final List<Message> messages) {

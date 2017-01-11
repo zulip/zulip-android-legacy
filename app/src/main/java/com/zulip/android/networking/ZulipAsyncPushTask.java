@@ -14,31 +14,16 @@ import org.json.JSONObject;
 import okhttp3.Response;
 
 /**
- *  General AsyncTask for use in making various web requests to Humbug.
- *
+ * General AsyncTask for use in making various web requests to Humbug.
+ * <p>
  * This class should be extended by each asynchronous operation you
  * want to run. Most clients will need to override onPostExecute.
  */
 public abstract class ZulipAsyncPushTask extends AsyncTask<String, String, String> {
 
     public ZulipApp app;
-    private HTTPRequest request;
     AsyncTaskCompleteListener callback;
-
-    /**
-     * Interface implemented by callbacks which are run at the end of a task.
-     * <p/>
-     * Clients overriding onPostExecute will need to finish with
-     * <p/>
-     * callback.onTaskComplete(result);
-     * <p/>
-     * if they want to honor declared callback.
-     */
-    public interface AsyncTaskCompleteListener {
-        void onTaskComplete(String result, JSONObject jsonObject);
-
-        void onTaskFailure(String result);
-    }
+    private HTTPRequest request;
 
     /**
      * Declares a new HumbugAsyncPushTask, passing the activity as context.
@@ -121,5 +106,20 @@ public abstract class ZulipAsyncPushTask extends AsyncTask<String, String, Strin
     @Override
     protected void onCancelled(String result) {
         callback.onTaskFailure(result);
+    }
+
+    /**
+     * Interface implemented by callbacks which are run at the end of a task.
+     * <p/>
+     * Clients overriding onPostExecute will need to finish with
+     * <p/>
+     * callback.onTaskComplete(result);
+     * <p/>
+     * if they want to honor declared callback.
+     */
+    public interface AsyncTaskCompleteListener {
+        void onTaskComplete(String result, JSONObject jsonObject);
+
+        void onTaskFailure(String result);
     }
 }

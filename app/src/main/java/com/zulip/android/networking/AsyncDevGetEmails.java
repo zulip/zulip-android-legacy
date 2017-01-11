@@ -18,9 +18,9 @@ import org.json.JSONObject;
  * Mainly used Development builds.
  */
 public class AsyncDevGetEmails extends ZulipAsyncPushTask {
+    public final static String EMAIL_JSON = "emails_json";
     private static final String DISABLED = "dev_disabled";
     private Context context;
-    public final static String EMAIL_JSON = "emails_json";
 
     public AsyncDevGetEmails(LoginActivity loginActivity) {
         super((ZulipApp) loginActivity.getApplication());

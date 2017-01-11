@@ -6,7 +6,6 @@ import com.zulip.android.models.Message;
 import java.util.List;
 
 
-
 public class GetMessagesResponse {
 
     @SerializedName("msg")

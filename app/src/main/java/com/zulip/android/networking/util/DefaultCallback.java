@@ -14,10 +14,9 @@ public abstract class DefaultCallback<T> implements Callback<T> {
     @Override
     @CallSuper
     public void onResponse(Call<T> call, Response<T> response) {
-        if(response.isSuccessful()) {
+        if (response.isSuccessful()) {
             onSuccess(call, response);
-        }
-        else {
+        } else {
             onError(call, response);
         }
     }

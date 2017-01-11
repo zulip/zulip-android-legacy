@@ -1,24 +1,24 @@
 package com.zulip.android.test.mutated;
 
+import com.zulip.android.activities.MessageListFragment;
+import com.zulip.android.models.Message;
+import com.zulip.android.models.MessageRange;
+import com.zulip.android.networking.AsyncGetOldMessages;
+import com.zulip.android.util.MessageListener.LoadPosition;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import com.zulip.android.models.Message;
-import com.zulip.android.activities.MessageListFragment;
-import com.zulip.android.models.MessageRange;
-import com.zulip.android.util.MessageListener.LoadPosition;
-import com.zulip.android.networking.AsyncGetOldMessages;
-
 public class FakeAsyncGetOldMessages extends
         AsyncGetOldMessages {
+    public List<Message> appendTheseMessages;
+    public List<FakeAsyncGetOldMessages> recurseRequestsReceived;
     private String calculatedResult;
     private int fmAnchor;
     private int fmNumBefore;
     private int fmNumAfter;
     private boolean shouldFmSucceed;
     private boolean fmCalled;
-    public List<Message> appendTheseMessages;
-    public List<FakeAsyncGetOldMessages> recurseRequestsReceived;
     private MessageListFragment myfragment;
 
     public FakeAsyncGetOldMessages(MessageListFragment fragment) {
@@ -39,7 +39,7 @@ public class FakeAsyncGetOldMessages extends
 
     @Override
     protected boolean fetchMessages(int anchor, int numBefore, int numAfter,
-            String[] params) {
+                                    String[] params) {
         fmCalled = true;
         fmAnchor = anchor;
         fmNumBefore = numBefore;
@@ -52,7 +52,7 @@ public class FakeAsyncGetOldMessages extends
 
     @Override
     protected void recurse(LoadPosition position, int amount, MessageRange rng,
-            int anchor) {
+                           int anchor) {
         FakeAsyncGetOldMessages task = new FakeAsyncGetOldMessages(myfragment);
         task.rng = rng;
         if (position == LoadPosition.ABOVE) {

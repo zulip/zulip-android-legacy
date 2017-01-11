@@ -69,11 +69,11 @@
                 android:layout_marginLeft="2dp"
                 android:layout_marginRight="2dp"
                 android:layout_marginTop="28dp"
+                android:background="@android:color/white"
                 android:paddingBottom="12dp"
                 android:paddingLeft="4dp"
                 android:paddingRight="4dp"
-                android:paddingTop="12dp"
-                android:background="@android:color/white">
+                android:paddingTop="12dp">
 
                 <EditText
                     android:id="@+id/stream_drawer_search"
@@ -108,9 +108,9 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="@android:color/black"
+                android:layout_marginBottom="2dp"
                 android:layout_marginTop="2dp"
-                android:layout_marginBottom="2dp"/>
+                android:background="@android:color/black" />
 
             <ExpandableListView
                 android:id="@+id/streams_drawer"
@@ -143,11 +143,11 @@
                 android:layout_marginLeft="2dp"
                 android:layout_marginRight="2dp"
                 android:layout_marginTop="28dp"
+                android:background="@android:color/white"
                 android:paddingBottom="12dp"
                 android:paddingLeft="4dp"
                 android:paddingRight="4dp"
-                android:paddingTop="12dp"
-                android:background="@android:color/white">
+                android:paddingTop="12dp">
 
                 <EditText
                     android:id="@+id/people_drawer_search"
@@ -182,9 +182,9 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="@android:color/black"
+                android:layout_marginBottom="2dp"
                 android:layout_marginTop="2dp"
-                android:layout_marginBottom="2dp"/>
+                android:background="@android:color/black" />
 
             <ListView
                 android:id="@+id/people_drawer"

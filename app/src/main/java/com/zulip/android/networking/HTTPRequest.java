@@ -27,18 +27,13 @@ import okhttp3.Response;
  * Uses the {@link OkHttpClient} for requests.
  */
 public class HTTPRequest {
-    private ZulipApp app;
     volatile boolean aborting = false;
+    private ZulipApp app;
     private HashMap<String, String> properties;
     private OkHttpClient okHttpClient;
     private Response response = null;
     private String method, path;
     private Object synchronization = new Object();
-
-    public void setMethodAndUrl(String method, String URL) {
-        this.method = method;
-        this.path = URL;
-    }
 
     public HTTPRequest(ZulipApp app) {
         properties = new HashMap<>();
@@ -46,6 +41,10 @@ public class HTTPRequest {
         okHttpClient = new OkHttpClient.Builder().readTimeout(60, TimeUnit.SECONDS).build();
     }
 
+    public void setMethodAndUrl(String method, String URL) {
+        this.method = method;
+        this.path = URL;
+    }
 
     public void setProperty(String key, String value) {
         properties.put((key == null) ? "" : key, (value == null) ? "" : value);

@@ -1,7 +1,5 @@
 package com.zulip.android.gcm;
 
-import java.io.IOException;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences.Editor;
@@ -12,10 +10,12 @@ import android.util.Log;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
-import com.zulip.android.util.ZLog;
 import com.zulip.android.ZulipApp;
 import com.zulip.android.activities.ZulipActivity;
 import com.zulip.android.networking.HTTPRequest;
+import com.zulip.android.util.ZLog;
+
+import java.io.IOException;
 
 // This class manages registering and unregistering for GCM notifications.
 // When a notification is received, it is processed by GcmBroadcastReceiver.

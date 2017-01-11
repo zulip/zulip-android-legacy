@@ -1,8 +1,8 @@
 package com.zulip.android.database;
 
-import java.io.File;
-
 import com.j256.ormlite.android.apptools.OrmLiteConfigUtil;
+
+import java.io.File;
 
 /**
  * Run this utility on your workstation whenever changing fields in our Android

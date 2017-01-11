@@ -6,7 +6,6 @@ import com.zulip.android.ZulipApp;
 import com.zulip.android.service.ZulipServices;
 
 
-
 public abstract class BaseActivity extends AppCompatActivity {
 
     protected ZulipApp getApp() {

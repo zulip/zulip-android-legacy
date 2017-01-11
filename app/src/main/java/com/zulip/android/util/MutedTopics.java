@@ -16,7 +16,8 @@ public class MutedTopics {
 
     private static MutedTopics sMutedTopics;
 
-    private MutedTopics() { }
+    private MutedTopics() {
+    }
 
     public static MutedTopics get() {
         if (sMutedTopics == null) {

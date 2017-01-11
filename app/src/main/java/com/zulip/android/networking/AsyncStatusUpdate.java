@@ -5,10 +5,10 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.zulip.android.ZulipApp;
+import com.zulip.android.activities.ZulipActivity;
 import com.zulip.android.models.Presence;
 import com.zulip.android.models.PresenceType;
 import com.zulip.android.util.ZLog;
-import com.zulip.android.activities.ZulipActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;

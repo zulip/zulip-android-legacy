@@ -220,7 +220,7 @@ public class UnsortedTests extends ActivityUnitTestCase<ZulipActivity> {
                 TESTUSER_EXAMPLE_COM, ""));
         rtr.setContent("Test message");
         rtr.setType(MessageType.PRIVATE_MESSAGE);
-        rtr.setRecipient(new String[] {TESTUSER_EXAMPLE_COM});
+        rtr.setRecipient(new String[]{TESTUSER_EXAMPLE_COM});
         rtr.setID(id);
         messageDao.create(rtr);
         return rtr;
