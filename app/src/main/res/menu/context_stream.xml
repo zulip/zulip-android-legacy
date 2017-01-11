@@ -15,8 +15,13 @@
     <item
         android:id="@+id/copy_message"
         android:title="@string/copy_message" />
-
     <item
         android:id="@+id/edit_message"
         android:title="@string/edit_message" />
+    <item
+        android:id="@+id/star_message"
+        android:title="@string/star_message" />
+    <item
+        android:id="@+id/un_star_message"
+        android:title="@string/un_star_message" />
 </menu>
