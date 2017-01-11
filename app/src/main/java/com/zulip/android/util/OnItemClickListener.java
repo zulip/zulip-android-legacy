@@ -11,6 +11,7 @@ public interface OnItemClickListener {
     void onItemClick(int viewId, int position);
 
     Message getMessageAtPosition(int position);
+
     MessageHeaderParent getMessageHeaderParentAtPosition(int position);
 
     void setContextItemSelectedPosition(int adapterPosition);

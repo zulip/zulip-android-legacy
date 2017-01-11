@@ -33,22 +33,22 @@ public class EventsBranch {
             this.key = serializeKey;
         }
 
+        @Nullable
+        public static Class<? extends EventsBranch> fromRawType(@NonNull EventsBranch branch) {
+            for (BranchType t : values()) {
+                if (t.key.equalsIgnoreCase(branch.getType())) {
+                    return t.klazz;
+                }
+            }
+            return null;
+        }
+
         public String getKey() {
             return key;
         }
 
         public Class<?> getKlazz() {
             return klazz;
-        }
-
-        @Nullable
-        public static Class<? extends EventsBranch> fromRawType(@NonNull EventsBranch branch) {
-            for (BranchType t : values()) {
-                if(t.key.equalsIgnoreCase(branch.getType())) {
-                    return t.klazz;
-                }
-            }
-            return null;
         }
     }
 }

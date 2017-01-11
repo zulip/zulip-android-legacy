@@ -13,14 +13,14 @@ public class Presence {
     @SerializedName("ZulipAndroid")
     private ZulipClientPresence presence;
 
-    public ZulipClientPresence getPresence() {
-        return presence;
-    }
-
     public Presence(long age, String client, PresenceType status) {
         this.age = age;
         this.client = client;
         this.status = status;
+    }
+
+    public ZulipClientPresence getPresence() {
+        return presence;
     }
 
     public long getAge() {

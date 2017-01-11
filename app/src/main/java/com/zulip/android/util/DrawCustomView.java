@@ -22,43 +22,34 @@ import java.util.Map;
  */
 
 public class DrawCustomView extends View {
+    private static final float TOUCH_TOLERANCE = 4;
     //drawing path
     private Path drawPath;
-
     //defines what to draw
     private Paint canvasPaint;
-
     //defines how to draw
     private Paint drawPaint;
-
     //brush color
     private int paintColor;
-
     //canvas - holding pen, holds your drawings
     //and transfers them to the view
     private Canvas drawCanvas;
-
     //canvas bitmap
     private Bitmap canvasBitmap;
-
     //brush size
     private float currentBrushSize;
-
     // paths followed on canvas
     private ArrayList<Path> paths = new ArrayList<>();
-
     private Map<Path, Integer> colorsMap = new HashMap<>();
-
     // from https://android.googlesource.com/platform/development/+/master/samples/ApiDemos/src/com/example/android/apis/graphics/FingerPaint.java
     private float mX, mY;
-    private static final float TOUCH_TOLERANCE = 4;
 
     public DrawCustomView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
     }
 
-    private void init(){
+    private void init() {
         currentBrushSize = getResources().getInteger(R.integer.brush_medium_size);
         paintColor = ContextCompat.getColor(getContext(), R.color.red_marker_tool);
 
@@ -76,8 +67,7 @@ public class DrawCustomView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        for (Path p : paths)
-        {
+        for (Path p : paths) {
             drawPaint.setColor(colorsMap.get(p));
             canvas.drawPath(p, drawPaint);
         }
@@ -103,7 +93,7 @@ public class DrawCustomView extends View {
         float touchX = event.getX();
         float touchY = event.getY();
 
-        switch (event.getAction()){
+        switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 touch_start(touchX, touchY);
                 invalidate();
@@ -133,7 +123,7 @@ public class DrawCustomView extends View {
         float dx = Math.abs(x - mX);
         float dy = Math.abs(y - mY);
         if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
-            drawPath.quadTo(mX, mY, (x + mX)/2, (y + mY)/2);
+            drawPath.quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
             mX = x;
             mY = y;
         }
@@ -148,10 +138,9 @@ public class DrawCustomView extends View {
         drawPath = new Path();
     }
 
-    public void onClickUndo () {
-        if (paths.size()>0)
-        {
-            Path path = paths.remove(paths.size()-1);
+    public void onClickUndo() {
+        if (paths.size() > 0) {
+            Path path = paths.remove(paths.size() - 1);
             invalidate();
         }
     }

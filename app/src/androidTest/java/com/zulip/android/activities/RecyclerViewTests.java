@@ -47,14 +47,28 @@ import static org.hamcrest.Matchers.not;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(AndroidJUnit4.class)
 public class RecyclerViewTests {
-    @Rule
-    public ActivityTestRule<ZulipActivity> mActivityTestRule = new ActivityTestRule<>(ZulipActivity.class);
-
     public static String LOG_TAG = RecyclerViewTests.class.getName();
     private static String testMessageStream;
     private static String testMessagePrivate;
-
+    @Rule
+    public ActivityTestRule<ZulipActivity> mActivityTestRule = new ActivityTestRule<>(ZulipActivity.class);
     private ZulipApp app;
+
+    public static String getTestMessageStream() {
+        return testMessageStream;
+    }
+
+    public static void setTestMessageStream(String testMessageStream) {
+        RecyclerViewTests.testMessageStream = testMessageStream;
+    }
+
+    public static String getTestMessagePrivate() {
+        return testMessagePrivate;
+    }
+
+    public static void setTestMessagePrivate(String testMessagePrivate) {
+        RecyclerViewTests.testMessagePrivate = testMessagePrivate;
+    }
 
     @Before
     public void setUp() {
@@ -168,7 +182,6 @@ public class RecyclerViewTests {
         onView(withId(R.id.recyclerView)).check(ViewAssertions.checkIfBelongToSameNarrow(mActivityTestRule.getActivity()));
     }
 
-
     @Test
     public void checkOrderOfMessagesCurrentList() {
         sleep(2000);
@@ -180,7 +193,6 @@ public class RecyclerViewTests {
         sleep(2000);
         onView(withId(R.id.recyclerView)).check(ViewAssertions.checkIfMessagesMatchTheHeaderParent(mActivityTestRule.getActivity()));
     }
-
 
     @Test
     public void checkTodaysFilter() {
@@ -204,7 +216,6 @@ public class RecyclerViewTests {
         //Check messages if only they are from today
         onView(withId(R.id.recyclerView)).check(checkMessagesOnlyFromToday());
     }
-
 
     @Test
     public void sendPrivateMessage() {
@@ -261,21 +272,5 @@ public class RecyclerViewTests {
         sleep(500);
         //Check if Arrow TextView is not displayed for switchingChatBox
         onView(withId(R.id.textView)).check(matches(not(isDisplayed())));
-    }
-
-    public static String getTestMessageStream() {
-        return testMessageStream;
-    }
-
-    public static void setTestMessageStream(String testMessageStream) {
-        RecyclerViewTests.testMessageStream = testMessageStream;
-    }
-
-    public static String getTestMessagePrivate() {
-        return testMessagePrivate;
-    }
-
-    public static void setTestMessagePrivate(String testMessagePrivate) {
-        RecyclerViewTests.testMessagePrivate = testMessagePrivate;
     }
 }

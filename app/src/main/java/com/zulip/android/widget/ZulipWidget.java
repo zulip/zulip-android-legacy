@@ -11,7 +11,6 @@ import android.text.TextUtils;
 import android.widget.RemoteViews;
 
 import com.zulip.android.R;
-import com.zulip.android.ZulipApp;
 import com.zulip.android.networking.AsyncGetEvents;
 
 import static com.zulip.android.widget.WidgetPreferenceFragment.FROM_PREFERENCE;
@@ -20,9 +19,9 @@ import static com.zulip.android.widget.WidgetPreferenceFragment.TITLE_PREFRENCE;
 
 
 public class ZulipWidget extends AppWidgetProvider {
+    public static String WIDGET_REFRESH = "com.zulip.android.zulipwidget.REFRESH";
     private static AsyncGetEvents asyncGetEvents;
     private static int intervalMilliseconds = 0;
-    public static String WIDGET_REFRESH = "com.zulip.android.zulipwidget.REFRESH";
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
         String title = ZulipWidgetConfigureActivity.loadPref(context, appWidgetId, TITLE_PREFRENCE);
@@ -52,6 +51,11 @@ public class ZulipWidget extends AppWidgetProvider {
         }
     }
 
+    private static void setupGetEvents() {
+        asyncGetEvents = new AsyncGetEvents(intervalMilliseconds);
+        asyncGetEvents.start();
+    }
+
     @Override
     public void onReceive(Context context, Intent intent) {
         final String action = intent.getAction();
@@ -67,17 +71,11 @@ public class ZulipWidget extends AppWidgetProvider {
         super.onReceive(context, intent);
     }
 
-
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         for (int appWidgetId : appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId);
         }
-    }
-
-    private static void setupGetEvents() {
-        asyncGetEvents = new AsyncGetEvents(intervalMilliseconds);
-        asyncGetEvents.start();
     }
 
     @Override

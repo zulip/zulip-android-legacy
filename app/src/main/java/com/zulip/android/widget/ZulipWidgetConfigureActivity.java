@@ -30,6 +30,17 @@ public class ZulipWidgetConfigureActivity extends Activity {
         super();
     }
 
+    static void savePref(Context context, int appWidgetId, String preferenceKey, String text) {
+        SharedPreferences.Editor prefs = context.getSharedPreferences(PREFS_NAME + appWidgetId, 0).edit();
+        prefs.putString(preferenceKey + appWidgetId, text);
+        prefs.apply();
+    }
+
+    static String loadPref(Context context, int appWidgetId, String preferenceKey) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME + appWidgetId, 0);
+        return prefs.getString(preferenceKey + appWidgetId, null);
+    }
+
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
@@ -75,16 +86,5 @@ public class ZulipWidgetConfigureActivity extends Activity {
             finish();
             return;
         }
-    }
-
-    static void savePref(Context context, int appWidgetId, String preferenceKey, String text) {
-        SharedPreferences.Editor prefs = context.getSharedPreferences(PREFS_NAME + appWidgetId, 0).edit();
-        prefs.putString(preferenceKey + appWidgetId, text);
-        prefs.apply();
-    }
-
-    static String loadPref(Context context, int appWidgetId, String preferenceKey) {
-        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME + appWidgetId, 0);
-        return prefs.getString(preferenceKey + appWidgetId, null);
     }
 }

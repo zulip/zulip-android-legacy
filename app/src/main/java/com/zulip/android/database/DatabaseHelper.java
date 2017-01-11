@@ -38,6 +38,16 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
     }
 
     /**
+     * Escape LIKE wildcards with a backslash. Must also use ESCAPE clause
+     *
+     * @param likeClause string to escape
+     * @return Escaped string
+     */
+    public static String likeEscape(String likeClause) {
+        return likeClause.replace("%", "\\%").replace("_", "\\_");
+    }
+
+    /**
      * This is called when the database is first created. Usually you should
      * call createTable statements here to create the tables that will store
      * your data.
@@ -105,15 +115,5 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
     @Override
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         resetDatabase(db);
-    }
-
-    /**
-     * Escape LIKE wildcards with a backslash. Must also use ESCAPE clause
-     *
-     * @param likeClause string to escape
-     * @return Escaped string
-     */
-    public static String likeEscape(String likeClause) {
-        return likeClause.replace("%", "\\%").replace("_", "\\_");
     }
 }

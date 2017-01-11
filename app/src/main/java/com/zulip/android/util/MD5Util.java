@@ -2,8 +2,9 @@ package com.zulip.android.util;
 
 import android.util.Log;
 
-import java.io.*;
-import java.security.*;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Gravatar example from http://en.gravatar.com/site/implement/images/java/

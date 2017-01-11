@@ -8,8 +8,8 @@ import android.widget.LinearLayout;
 
 public class SwipeRemoveLinearLayout extends LinearLayout {
 
-    private float x1, x2;
     private static int MIN_DISTANCE = 150;
+    private float x1, x2;
     private leftToRightSwipeListener leftToRightSwipeListen;
 
     public SwipeRemoveLinearLayout(Context context) {
@@ -51,11 +51,11 @@ public class SwipeRemoveLinearLayout extends LinearLayout {
         return super.onInterceptTouchEvent(ev);
     }
 
-    public interface leftToRightSwipeListener {
-        void removeChatBox(boolean animToRight);
-    }
-
     public void registerToSwipeEvents(leftToRightSwipeListener listener) {
         this.leftToRightSwipeListen = listener;
+    }
+
+    public interface leftToRightSwipeListener {
+        void removeChatBox(boolean animToRight);
     }
 }

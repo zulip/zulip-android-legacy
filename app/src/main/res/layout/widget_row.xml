@@ -2,8 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="14dp"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="14dp">
 
 
     <TextView
@@ -13,11 +13,11 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
+        android:paddingBottom="5dp"
+        android:paddingTop="5dp"
         android:text="Social"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        android:textColor="@color/indigo_material_500"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp" />
+        android:textColor="@color/indigo_material_500" />
 
     <TextView
         android:id="@+id/widget_sendername"
@@ -25,10 +25,10 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:text="Sender name"
         android:layout_below="@+id/widget_header"
-        android:textColor="@android:color/black"
-        android:paddingTop="3dp" />
+        android:paddingTop="3dp"
+        android:text="Sender name"
+        android:textColor="@android:color/black" />
 
     <TextView
         android:id="@+id/widget_message"
@@ -37,10 +37,10 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/widget_sendername"
-        android:text="Message Here"
-        android:textColor="@android:color/black"
+        android:paddingBottom="3dp"
         android:paddingTop="3dp"
-        android:paddingBottom="3dp" />
+        android:text="Message Here"
+        android:textColor="@android:color/black" />
 
     <TextView
         android:id="@+id/widget_timestamp"
@@ -49,8 +49,8 @@
         android:layout_alignBottom="@+id/widget_sendername"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:text="1:02 PM"
-        android:textColor="@android:color/black"
         android:paddingBottom="3dp"
-        android:paddingTop="3dp" />
+        android:paddingTop="3dp"
+        android:text="1:02 PM"
+        android:textColor="@android:color/black" />
 </RelativeLayout>

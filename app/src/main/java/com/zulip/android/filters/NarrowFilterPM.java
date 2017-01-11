@@ -21,9 +21,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class NarrowFilterPM implements NarrowFilter {
-    private List<Person> people;
-    private String recipientString;
-
     public static final Parcelable.Creator<NarrowFilterPM> CREATOR = new Parcelable.Creator<NarrowFilterPM>() {
         public NarrowFilterPM createFromParcel(Parcel in) {
             return new NarrowFilterPM(in.readString());
@@ -33,6 +30,8 @@ public class NarrowFilterPM implements NarrowFilter {
             return new NarrowFilterPM[size];
         }
     };
+    private List<Person> people;
+    private String recipientString;
 
     public NarrowFilterPM(List<Person> people) {
         this.people = people;

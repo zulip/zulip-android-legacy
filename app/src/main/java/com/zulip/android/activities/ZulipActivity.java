@@ -74,10 +74,10 @@ import com.zulip.android.ZulipApp;
 import com.zulip.android.database.DatabaseHelper;
 import com.zulip.android.filters.NarrowFilter;
 import com.zulip.android.filters.NarrowFilterAllPMs;
+import com.zulip.android.filters.NarrowFilterByDate;
 import com.zulip.android.filters.NarrowFilterPM;
 import com.zulip.android.filters.NarrowFilterSearch;
 import com.zulip.android.filters.NarrowFilterStream;
-import com.zulip.android.filters.NarrowFilterByDate;
 import com.zulip.android.filters.NarrowListener;
 import com.zulip.android.gcm.GcmBroadcastReceiver;
 import com.zulip.android.gcm.Notifications;
@@ -124,7 +124,7 @@ import retrofit2.Response;
 /**
  * The main Activity responsible for holding the {@link MessageListFragment} which has the list to the
  * messages
- * */
+ */
 public class ZulipActivity extends BaseActivity implements
         MessageListFragment.Listener, NarrowListener, SwipeRemoveLinearLayout.leftToRightSwipeListener {
 
@@ -136,33 +136,28 @@ public class ZulipActivity extends BaseActivity implements
     private static final int MIN_THRESOLD_EMOJI_HINT = 1;
     private static final int PERMISSION_REQUEST_READ_CONTACTS = 1;
     private static final int REQUEST_TAKE_PHOTO = 2;
+    private static final Interpolator FAST_OUT_SLOW_IN_INTERPOLATOR = new FastOutSlowInInterpolator();
+    private static final int HIDE_FAB_AFTER_SEC = 5;
+    // row number which is used to differentiate the 'All private messages'
+    // row from the people
+    final int allPeopleId = -1;
+    public MessageListFragment currentList;
+    FloatingActionButton fab;
     private ZulipApp app;
-
     private boolean logged_in = false;
     private boolean backPressedOnce = false;
-
     private ZulipActivity that = this; // self-ref
-
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
-    private static final Interpolator FAST_OUT_SLOW_IN_INTERPOLATOR = new FastOutSlowInInterpolator();
     private SwipeRemoveLinearLayout chatBox;
-    FloatingActionButton fab;
     private CountDownTimer fabHidder;
     private boolean isTextFieldFocused = false;
-    private static final int HIDE_FAB_AFTER_SEC = 5;
-
     private HashMap<String, Bitmap> gravatars = new HashMap<>();
-
     private AsyncGetEvents event_poll;
-
     private Handler statusUpdateHandler;
     private Runnable statusUpdateRunnable;
-
-    public MessageListFragment currentList;
     private MessageListFragment narrowedList;
     private MessageListFragment homeList;
-
     private AutoCompleteTextView streamActv;
     private AutoCompleteTextView topicActv;
     private AutoCompleteTextView messageEt;
@@ -174,9 +169,7 @@ public class ZulipActivity extends BaseActivity implements
     private SimpleCursorAdapter subjectActvAdapter;
     private SimpleCursorAdapter emailActvAdapter;
     private AppBarLayout appBarLayout;
-
     private MutedTopics mMutedTopics;
-
     private BroadcastReceiver onGcmMessage = new BroadcastReceiver() {
         public void onReceive(Context contenxt, Intent intent) {
             // Block the event before it propagates to show a notification.
@@ -193,33 +186,13 @@ public class ZulipActivity extends BaseActivity implements
     private Uri mPhotoURI;
     private Menu menu;
     private Calendar calendar;
-
-    @Override
-    public void removeChatBox(boolean animToRight) {
-        AnimationHelper.hideViewX(chatBox, animToRight);
-    }
-
-    // Intent Extra constants
-    public enum Flag {
-        RESET_DATABASE,
-    }
-
     private EditText etSearchPeople;
     private ImageView ivSearchPeopleCancel;
     private EditText etSearchStream;
     private ImageView ivSearchStreamCancel;
     private ListView peopleDrawer;
-    // row number which is used to differentiate the 'All private messages'
-    // row from the people
-    final int allPeopleId = -1;
-
     //
-    private String streamSearchFilterKeyword="";
-
-    public HashMap<String, Bitmap> getGravatars() {
-        return gravatars;
-    }
-
+    private String streamSearchFilterKeyword = "";
     private SimpleCursorAdapter.ViewBinder peopleBinder = new SimpleCursorAdapter.ViewBinder() {
         @Override
         public boolean setViewValue(View view, Cursor cursor, int i) {
@@ -260,28 +233,34 @@ public class ZulipActivity extends BaseActivity implements
             return false;
         }
     };
-
     private RefreshableCursorAdapter peopleAdapter;
+    private LinearLayout composeStatus;
+    private String tempStreamSave = null;
+
+    @Override
+    public void removeChatBox(boolean animToRight) {
+        AnimationHelper.hideViewX(chatBox, animToRight);
+    }
+
+    public HashMap<String, Bitmap> getGravatars() {
+        return gravatars;
+    }
 
     @Override
     public void recyclerViewScrolled() {
             /* in this method we check if the messageEt is empty or not
             if messageEt is not empty, it means that the user has typed something in the chatBox and that the chatBox should be open
             in spite of scrolling */
-        if(chatBox.getVisibility()== View.VISIBLE && !isCurrentModeStream()){
+        if (chatBox.getVisibility() == View.VISIBLE && !isCurrentModeStream()) {
             //if messageEt is empty in private msg mode, then the chatBox can disappear on scrolling else it will stay
-            if(messageEt.getText().toString().equals(""))
-            {
+            if (messageEt.getText().toString().equals("")) {
                 displayChatBox(false);
                 displayFAB(true);
 
             }
-        }
-
-        else if(chatBox.getVisibility()==View.VISIBLE && isCurrentModeStream()){
+        } else if (chatBox.getVisibility() == View.VISIBLE && isCurrentModeStream()) {
             //check if messageEt is empty in stream msg mode, then the chatBox can disappear on scrolling else it will disappear
-            if(messageEt.getText().toString().equals("") && topicActv.getText().toString().equals(""))
-            {
+            if (messageEt.getText().toString().equals("") && topicActv.getText().toString().equals("")) {
                 displayChatBox(false);
                 displayFAB(true);
 
@@ -338,24 +317,24 @@ public class ZulipActivity extends BaseActivity implements
         sendBtn = (ImageView) findViewById(R.id.send_btn);
         cameraBtn = (ImageView) findViewById(R.id.camera_btn);
         appBarLayout = (AppBarLayout) findViewById(R.id.appBarLayout);
-        etSearchPeople = (EditText)findViewById(R.id.people_drawer_search);
-        ivSearchPeopleCancel = (ImageView)findViewById(R.id.iv_people__search_cancel_button);
+        etSearchPeople = (EditText) findViewById(R.id.people_drawer_search);
+        ivSearchPeopleCancel = (ImageView) findViewById(R.id.iv_people__search_cancel_button);
         onTextChangeOfPeopleSearchEditText();
         ivSearchPeopleCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //set default people list
-               resetPeopleSearch();
+                resetPeopleSearch();
             }
         });
-        etSearchStream = (EditText)findViewById(R.id.stream_drawer_search);
-        ivSearchStreamCancel = (ImageView)findViewById(R.id.iv_stream_search_cancel_button);
+        etSearchStream = (EditText) findViewById(R.id.stream_drawer_search);
+        ivSearchStreamCancel = (ImageView) findViewById(R.id.iv_stream_search_cancel_button);
         onTextChangeOfStreamSearchEditText();
         ivSearchStreamCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //set default stream list
-               resetStreamSearch();
+                resetStreamSearch();
             }
         });
         app.setZulipActivity(this);
@@ -386,7 +365,7 @@ public class ZulipActivity extends BaseActivity implements
         drawerLayout.setDrawerListener(drawerToggle);
 
 
-         peopleDrawer = (ListView) findViewById(R.id.people_drawer);
+        peopleDrawer = (ListView) findViewById(R.id.people_drawer);
 
         //set up people list
         setUpPeopleList();
@@ -568,7 +547,7 @@ public class ZulipActivity extends BaseActivity implements
             public void onBackStackChanged() {
                 if (menu == null)
                     return;
-                if (narrowedList==null) {
+                if (narrowedList == null) {
                     calendar = Calendar.getInstance();
                     menu.getItem(2).getSubMenu().getItem(0).setTitle(R.string.menu_today);
                 } else if (narrowedList.filter instanceof NarrowFilterByDate) {
@@ -604,7 +583,7 @@ public class ZulipActivity extends BaseActivity implements
         // Check if no view has focus:
         View view = this.getCurrentFocus();
         if (view != null) {
-            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
     }
@@ -634,26 +613,24 @@ public class ZulipActivity extends BaseActivity implements
 
     private Callable<Cursor> getSteamCursorGenerator() {
 
-        Callable<Cursor> steamCursorGenerator =  new Callable<Cursor>() {
+        Callable<Cursor> steamCursorGenerator = new Callable<Cursor>() {
             @Override
             public Cursor call() throws Exception {
                 int pointer = app.getPointer();
-                String query="SELECT s.id as _id,  s.name, s.color, count(case when m.id > " + pointer + " or m." + Message.MESSAGE_READ_FIELD
+                String query = "SELECT s.id as _id,  s.name, s.color, count(case when m.id > " + pointer + " or m." + Message.MESSAGE_READ_FIELD
                         + " = 0 then 1 end) as " + ExpandableStreamDrawerAdapter.UNREAD_TABLE_NAME
                         + " FROM streams as s LEFT JOIN messages as m ON s.id=m.stream ";
-                if (!etSearchStream.getText().toString().equals("") && !etSearchStream.getText().toString().isEmpty())
-                {
+                if (!etSearchStream.getText().toString().equals("") && !etSearchStream.getText().toString().isEmpty()) {
                     //append where clause
-                    query+=" WHERE s.name LIKE '%"+ etSearchStream.getText().toString()  + "%'";
+                    query += " WHERE s.name LIKE '%" + etSearchStream.getText().toString() + "%'";
                     //set visibility of this image false
                     ivSearchStreamCancel.setVisibility(View.VISIBLE);
-                }else
-                {
+                } else {
                     //set visibility of this image false
                     ivSearchStreamCancel.setVisibility(View.GONE);
                 }
                 //append group by
-                query+= " group by s.name order by s.name COLLATE NOCASE";
+                query += " group by s.name order by s.name COLLATE NOCASE";
 
                 return ((AndroidDatabaseResults) app.getDao(Stream.class).queryRaw(query).closeableIterator().getRawResults()).getRawCursor();
             }
@@ -715,11 +692,10 @@ public class ZulipActivity extends BaseActivity implements
                             .eq(Person.ISACTIVE_FIELD, true).query();
                     //set visibility of this image false
                     ivSearchPeopleCancel.setVisibility(View.GONE);
-                }else
-                {
+                } else {
                     people = app.getDao(Person.class).queryBuilder()
                             .where().eq(Person.ISBOT_FIELD, false).and()
-                            .like(Person.NAME_FIELD,"%"+etSearchPeople.getText().toString()+"%").and()
+                            .like(Person.NAME_FIELD, "%" + etSearchPeople.getText().toString() + "%").and()
                             .eq(Person.ISACTIVE_FIELD, true).query();
                     //set visibility of this image false
                     ivSearchPeopleCancel.setVisibility(View.VISIBLE);
@@ -806,6 +782,7 @@ public class ZulipActivity extends BaseActivity implements
 
     /**
      * Function invoked when a user shares an image with the zulip app
+     *
      * @param intent passed to the activity with action SEND
      */
     @SuppressLint("InlinedApi")
@@ -883,6 +860,7 @@ public class ZulipActivity extends BaseActivity implements
 
     /**
      * This function creates a file for the photo to be captured
+     *
      * @return new {@link File} object where photo will be stored
      * @throws IOException
      */
@@ -938,6 +916,7 @@ public class ZulipActivity extends BaseActivity implements
     /**
      * Function to upload file asynchronously to the server using retrofit callback
      * upload {@link com.zulip.android.service.ZulipServices#upload(MultipartBody.Part)}
+     *
      * @param file on local storage
      */
     private void uploadFile(File file) {
@@ -961,8 +940,8 @@ public class ZulipActivity extends BaseActivity implements
                                    Response<UploadResponse> response) {
                 if (response.isSuccessful()) {
                     String filePathOnServer = "";
-                        UploadResponse uploadResponse = response.body();
-                        filePathOnServer = uploadResponse.getUri();
+                    UploadResponse uploadResponse = response.body();
+                    filePathOnServer = uploadResponse.getUri();
                     if (!filePathOnServer.equals("")) {
                         // remove loading message from the screen
                         sendingMessage(false, loadingMsg);
@@ -974,8 +953,7 @@ public class ZulipActivity extends BaseActivity implements
                         sendingMessage(false, loadingMsg);
                         Toast.makeText(ZulipActivity.this, R.string.failed_to_upload, Toast.LENGTH_SHORT).show();
                     }
-                }
-                else {
+                } else {
                     // remove loading message from the screen
                     sendingMessage(false, loadingMsg);
                     Toast.makeText(ZulipActivity.this, R.string.failed_to_upload, Toast.LENGTH_SHORT).show();
@@ -994,6 +972,7 @@ public class ZulipActivity extends BaseActivity implements
 
     /**
      * Returns a cursor for the combinedAdapter used to suggest Emoji when ':' is typed in the {@link #messageEt}
+     *
      * @param emoji A string to search in the existing database
      */
     private Cursor makeEmojiCursor(CharSequence emoji)
@@ -1139,10 +1118,10 @@ public class ZulipActivity extends BaseActivity implements
         final ExpandableListView streamsDrawer = (ExpandableListView) findViewById(R.id.streams_drawer);
         streamsDrawer.setGroupIndicator(null);
         try {
-                streamsDrawerAdapter = new ExpandableStreamDrawerAdapter(this, getSteamCursorGenerator().call(),
-                        R.layout.stream_tile_new, groupFrom,
-                        groupTo, R.layout.stream_tile_child, childFrom,
-                        childTo);
+            streamsDrawerAdapter = new ExpandableStreamDrawerAdapter(this, getSteamCursorGenerator().call(),
+                    R.layout.stream_tile_new, groupFrom,
+                    groupTo, R.layout.stream_tile_child, childFrom,
+                    childTo);
         } catch (Exception e) {
             ZLog.logException(e);
         }
@@ -1353,18 +1332,15 @@ public class ZulipActivity extends BaseActivity implements
             TextView msg = (TextView) composeStatus.findViewById(R.id.sending_message);
             msg.setText(message);
             composeStatus.setVisibility(View.VISIBLE);
-        }
-        else
+        } else
             composeStatus.setVisibility(View.GONE);
     }
 
-    private LinearLayout composeStatus;
-
     /**
      * Setup adapter's for the {@link AutoCompleteTextView}
-     *
+     * <p>
      * These adapters are being intialized -
-     *
+     * <p>
      * {@link #streamActvAdapter} Adapter for suggesting all the stream names in this AutoCompleteTextView
      * {@link #emailActvAdapter} Adapter for suggesting all the person email's in this AutoCompleteTextView
      * {@link #subjectActvAdapter} Adapter for suggesting all the topic for the stream specified in the {@link #streamActv} in this AutoCompleteTextView
@@ -1455,6 +1431,7 @@ public class ZulipActivity extends BaseActivity implements
 
     /**
      * Creates a cursor to get the streams saved in the database
+     *
      * @param streamName Filter out streams name containing this string
      */
     private Cursor makeStreamCursor(CharSequence streamName)
@@ -1477,8 +1454,9 @@ public class ZulipActivity extends BaseActivity implements
 
     /**
      * Creates a cursor to get the topics in the stream in
-     * @param stream from which topics similar to {@param subject} are selected
-     * @param  subject Filter out subject containing this string
+     *
+     * @param stream  from which topics similar to {@param subject} are selected
+     * @param subject Filter out subject containing this string
      */
     private Cursor makeSubjectCursor(CharSequence stream, CharSequence subject)
             throws SQLException {
@@ -1508,6 +1486,7 @@ public class ZulipActivity extends BaseActivity implements
 
     /**
      * Creates a cursor to get the E-Mails stored in the database
+     *
      * @param email Filter out emails containing this string
      */
     private Cursor makePeopleCursor(CharSequence email) throws SQLException {
@@ -1585,8 +1564,6 @@ public class ZulipActivity extends BaseActivity implements
         }
     }
 
-    private String tempStreamSave = null;
-
     @Override
     public void clearChatBox() {
         if (messageEt != null) {
@@ -1616,9 +1593,9 @@ public class ZulipActivity extends BaseActivity implements
             statusUpdateHandler.postDelayed(statusUpdateRunnable, 2000);
 
 
-        }   else {
-              narrowedList = null;
-              getSupportFragmentManager().popBackStack(NARROW,
+        } else {
+            narrowedList = null;
+            getSupportFragmentManager().popBackStack(NARROW,
                     FragmentManager.POP_BACK_STACK_INCLUSIVE);
         }
     }
@@ -1733,6 +1710,7 @@ public class ZulipActivity extends BaseActivity implements
 
     /**
      * Fills the chatBox according to the {@link MessageType}
+     *
      * @param openSoftKeyboard If true open's up the SoftKeyboard else not.
      */
     @Override
@@ -1758,8 +1736,9 @@ public class ZulipActivity extends BaseActivity implements
 
     /**
      * Fills the chatBox with the stream name and the topic
-     * @param stream Stream name to be filled
-     * @param subject Subject to be filled
+     *
+     * @param stream           Stream name to be filled
+     * @param subject          Subject to be filled
      * @param openSoftKeyboard If true open's the softKeyboard else not
      */
     public void onNarrowFillSendBoxStream(String stream, String subject, boolean openSoftKeyboard) {
@@ -1844,7 +1823,7 @@ public class ZulipActivity extends BaseActivity implements
         // Handle item selection
         switch (item.getItemId()) {
             case android.R.id.home:
-                narrowedList=null;
+                narrowedList = null;
                 getSupportFragmentManager().popBackStack(NARROW,
                         FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 break;
@@ -1902,10 +1881,10 @@ public class ZulipActivity extends BaseActivity implements
                 DatePickerDialog datePickerDialog = new DatePickerDialog(ZulipActivity.this, new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                        calendar.set(year,month,dayOfMonth);
+                        calendar.set(year, month, dayOfMonth);
                         doNarrow(new NarrowFilterByDate(calendar.getTime()));
                     }
-                },calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH),calendar.get(Calendar.DAY_OF_MONTH));
+                }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
                 //set max date to today so future dates are not selectable
                 datePickerDialog.getDatePicker().setMaxDate(new Date().getTime());
                 datePickerDialog.show();
@@ -1924,6 +1903,7 @@ public class ZulipActivity extends BaseActivity implements
 
     /**
      * Switches the current Day/Night mode to Night/Day mode
+     *
      * @param nightMode which Mode {@link android.support.v7.app.AppCompatDelegate.NightMode}
      */
     private void setNightMode(@AppCompatDelegate.NightMode int nightMode) {
@@ -2003,6 +1983,7 @@ public class ZulipActivity extends BaseActivity implements
         }
         startRequests();
     }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -2053,5 +2034,10 @@ public class ZulipActivity extends BaseActivity implements
         if (narrowedList != null) {
             narrowedList.onNewMessages(messages);
         }
+    }
+
+    // Intent Extra constants
+    public enum Flag {
+        RESET_DATABASE,
     }
 }

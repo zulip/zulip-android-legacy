@@ -38,12 +38,11 @@ import static org.hamcrest.core.AllOf.allOf;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class LoginDevAuthTest {
 
-    @Rule
-    public ActivityTestRule<ZulipActivity> mActivityTestRule = new ActivityTestRule<>(ZulipActivity.class);
-
     private static String EMAIL_TEST = "";
     private static String SERVER_URL = "http://www.local.test.com";
-
+    private static boolean matchedBefore = false;
+    @Rule
+    public ActivityTestRule<ZulipActivity> mActivityTestRule = new ActivityTestRule<>(ZulipActivity.class);
 
     // Convenience helper
     @Test
@@ -60,7 +59,6 @@ public class LoginDevAuthTest {
         getDevEmails();
         loginThroughDevMail();
     }
-
 
     public void getDevEmails() {
         try {
@@ -84,8 +82,6 @@ public class LoginDevAuthTest {
         //Check if there are Emails
         onView(withId(R.id.devAuthRecyclerView)).check(hasItemsCount());
     }
-
-    private static boolean matchedBefore = false;
 
     private void loginThroughDevMail() {
         //If EMAIL not specified click on first EMAIL.

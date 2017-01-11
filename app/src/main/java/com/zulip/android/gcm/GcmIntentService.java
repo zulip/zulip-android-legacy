@@ -1,8 +1,5 @@
 package com.zulip.android.gcm;
 
-import java.io.IOException;
-import java.net.URL;
-
 import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -14,9 +11,12 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.zulip.android.R;
+import com.zulip.android.activities.ZulipActivity;
 import com.zulip.android.networking.GravatarAsyncFetchTask;
 import com.zulip.android.util.ZLog;
-import com.zulip.android.activities.ZulipActivity;
+
+import java.io.IOException;
+import java.net.URL;
 
 /**
  * This {@code IntentService} does the actual handling of the GCM message.

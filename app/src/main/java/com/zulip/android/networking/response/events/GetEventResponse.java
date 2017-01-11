@@ -25,13 +25,13 @@ public class GetEventResponse {
     private List<EventsBranch> events;
 
     @Nullable
-    public <T>List<T> getEventsOf(EventsBranch.BranchType branchType) {
+    public <T> List<T> getEventsOf(EventsBranch.BranchType branchType) {
         return getEventsOf(branchType, null);
     }
 
     @Nullable
-    public <T extends EventsBranch, R>List<R> getEventsOf(EventsBranch.BranchType branchType, TypeSwapper<T, R> converter) {
-        if(events == null) {
+    public <T extends EventsBranch, R> List<R> getEventsOf(EventsBranch.BranchType branchType, TypeSwapper<T, R> converter) {
+        if (events == null) {
             return null;
         }
         try {
@@ -39,17 +39,15 @@ public class GetEventResponse {
             for (int i = 0; i < events.size(); i++) {
                 EventsBranch orig = events.get(i);
                 if (orig.getClass().equals(branchType.getKlazz())) {
-                    if(converter != null) {
+                    if (converter != null) {
                         types.add(converter.convert((T) orig));
-                    }
-                    else {
+                    } else {
                         types.add((R) orig);
                     }
                 }
             }
             return types;
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             //catch misuse
             ZLog.logException(e);
             return null;

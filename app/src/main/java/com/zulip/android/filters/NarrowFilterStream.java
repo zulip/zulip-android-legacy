@@ -17,9 +17,6 @@ import java.sql.SQLException;
 import java.util.Arrays;
 
 public class NarrowFilterStream implements NarrowFilter {
-    private Stream stream;
-    private String subject;
-
     public static final Parcelable.Creator<NarrowFilterStream> CREATOR = new Parcelable.Creator<NarrowFilterStream>() {
         public NarrowFilterStream createFromParcel(Parcel in) {
             String[] pair = in.createStringArray();
@@ -31,6 +28,8 @@ public class NarrowFilterStream implements NarrowFilter {
             return new NarrowFilterStream[size];
         }
     };
+    private Stream stream;
+    private String subject;
 
     public NarrowFilterStream(Stream stream, String subject) {
         this.stream = stream;

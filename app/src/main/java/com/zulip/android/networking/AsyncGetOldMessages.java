@@ -23,12 +23,12 @@ import java.util.List;
 import retrofit2.Response;
 
 public class AsyncGetOldMessages extends ZulipAsyncPushTask {
-    private MessageListener listener;
     public List<Message> receivedMessages;
-    private MessageListener.LoadPosition position;
     protected MessageRange rng;
-    private int mainAnchor;
     protected NarrowFilter filter;
+    private MessageListener listener;
+    private MessageListener.LoadPosition position;
+    private int mainAnchor;
     private int before;
     private int afterAnchor;
     private int after;
@@ -199,15 +199,15 @@ public class AsyncGetOldMessages extends ZulipAsyncPushTask {
                                     String[] params) {
 
         Response<GetMessagesResponse> result;
-        try{
-             result = app.getZulipServices()
+        try {
+            result = app.getZulipServices()
                     .getMessages(
                             Integer.toString(anchor),
                             Integer.toString(numBefore),
                             Integer.toString(numAfter),
                             filter)
                     .execute();
-            if(!result.isSuccessful()) {
+            if (!result.isSuccessful()) {
                 return false;
             }
         } catch (IOException e) {

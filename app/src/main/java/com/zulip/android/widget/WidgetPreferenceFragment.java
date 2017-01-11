@@ -1,6 +1,5 @@
 package com.zulip.android.widget;
 
-import android.app.ListFragment;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;

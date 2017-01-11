@@ -1,12 +1,12 @@
 package com.zulip.android.networking;
 
-import java.util.concurrent.Callable;
-
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.support.v4.widget.SimpleCursorAdapter;
 
 import com.zulip.android.util.ZLog;
+
+import java.util.concurrent.Callable;
 
 /**
  * A background task which asynchronously updates data.

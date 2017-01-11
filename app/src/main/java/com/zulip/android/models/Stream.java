@@ -22,17 +22,14 @@ import java.util.List;
 
 @DatabaseTable(tableName = "streams")
 public class Stream {
-    private static final int DEFAULT_COLOR = Color.GRAY;
-
     public static final String ID_FIELD = "id";
     public static final String NAME_FIELD = "name";
-    private static final String MESSAGES_FIELD = "messages";
     public static final String COLOR_FIELD = "color";
+    public static final String SUBSCRIBED_FIELD = "subscribed";
+    private static final int DEFAULT_COLOR = Color.GRAY;
+    private static final String MESSAGES_FIELD = "messages";
     private static final String INHOMEVIEW_FIELD = "inHomeView";
     private static final String INVITEONLY_FIELD = "inviteOnly";
-    public static final String SUBSCRIBED_FIELD = "subscribed";
-
-
     @SerializedName("stream_id")
     @DatabaseField(columnName = ID_FIELD, id = true)
     private int id;
@@ -100,33 +97,6 @@ public class Stream {
         inviteOnly = false; // Most probably
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public int getParsedColor() {
-        if(!TextUtils.isEmpty(fetchedColor)) {
-            parsedColor = parseColor(fetchedColor);
-        }
-        return parsedColor;
-    }
-
-    public Boolean getInHomeView() {
-        return inHomeView;
-    }
-
-    public Boolean getInviteOnly() {
-        return inviteOnly;
-    }
-
-    public boolean isSubscribed() {
-        return subscribed;
-    }
-
-    public void setSubscribed(boolean isSubscribed) {
-        subscribed = isSubscribed;
-    }
-
     private static int parseColor(String color) {
         // Color.parseColor does not handle colors of the form #f00.
         // Pre-process them into normal 6-char hex form.
@@ -137,26 +107,6 @@ public class Stream {
             color = "#" + r + r + g + g + b + b;
         }
         return Color.parseColor(color);
-    }
-
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder(17, 31).append(name).toHashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (obj == this) {
-            return true;
-        }
-        if (obj.getClass() != getClass()) {
-            return false;
-        }
-        Stream rhs = (Stream) obj;
-        return new EqualsBuilder().append(this.name, rhs.name).isEquals();
     }
 
     public static Stream getByName(ZulipApp app, String name) {
@@ -187,6 +137,53 @@ public class Stream {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getParsedColor() {
+        if (!TextUtils.isEmpty(fetchedColor)) {
+            parsedColor = parseColor(fetchedColor);
+        }
+        return parsedColor;
+    }
+
+    public Boolean getInHomeView() {
+        return inHomeView;
+    }
+
+    public Boolean getInviteOnly() {
+        return inviteOnly;
+    }
+
+    public boolean isSubscribed() {
+        return subscribed;
+    }
+
+    public void setSubscribed(boolean isSubscribed) {
+        subscribed = isSubscribed;
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 31).append(name).toHashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (obj == this) {
+            return true;
+        }
+        if (obj.getClass() != getClass()) {
+            return false;
+        }
+        Stream rhs = (Stream) obj;
+        return new EqualsBuilder().append(this.name, rhs.name).isEquals();
     }
 
     public int getId() {

@@ -14,8 +14,8 @@ import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -53,7 +53,7 @@ import java.util.Random;
  * This has two main ViewTypes {@link MessageHeaderParent.MessageHeaderHolder} and {@link MessageHolder}
  * Each Message is inserted to its MessageHeader which are distinguished by the {@link Message#getIdForHolder()}
  * saved in {@link MessageHeaderParent#getId()}
- *
+ * <p>
  * There are two ways to insert a message in this adapter one {@link RecyclerMessageAdapter#addOldMessage(Message, int, StringBuilder)}
  * and second one {@link RecyclerMessageAdapter#addNewMessage(Message)}
  * The first one is used to add old messages from the databases with {@link com.zulip.android.util.MessageListener.LoadPosition#BELOW}
@@ -64,17 +64,17 @@ import java.util.Random;
 public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public static final int VIEWTYPE_MESSAGE_HEADER = 1;
-    private static final int VIEWTYPE_MESSAGE = 2;
     public static final int VIEWTYPE_HEADER = 3; //At position 0
+    private static final int VIEWTYPE_MESSAGE = 2;
     private static final int VIEWTYPE_FOOTER = 4; //At end position
-    private boolean startedFromFilter;
+    private static final float HEIGHT_IN_DP = 48;
     private static String privateHuddleText;
+    private boolean startedFromFilter;
     private List<Object> items;
     private ZulipApp zulipApp;
     private MutedTopics mMutedTopics;
     private Context context;
     private NarrowListener narrowListener;
-    private static final float HEIGHT_IN_DP = 48;
     private
     @ColorInt
     int mDefaultStreamHeaderColor;
@@ -92,10 +92,6 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
     private boolean isCurrentThemeNight;
     private HashMap<Integer, Integer> defaultAvatarColorHMap;
-
-    int getContextMenuItemSelectedPosition() {
-        return contextMenuItemSelectedPosition;
-    }
 
     RecyclerMessageAdapter(List<Message> messageList, final Context context, boolean startedFromFilter) {
         super();
@@ -185,6 +181,10 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         updateBuilder = zulipApp.getDao(Message.class).updateBuilder();
     }
 
+    int getContextMenuItemSelectedPosition() {
+        return contextMenuItemSelectedPosition;
+    }
+
     /**
      * Add's a placeHolder value for Header and footer loading with values of 3-{@link #VIEWTYPE_HEADER} and 4-{@link #VIEWTYPE_FOOTER} respectively.
      * So that for these placeHolder can be created a ViewHolder in {@link #onCreateViewHolder(ViewGroup, int)}
@@ -245,9 +245,10 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     /**
      * Add an old message to the current list and add those messages to the existing messageHeaders if no
      * messageHeader is found then create a new messageHeader
-     * @param message Message to be added
+     *
+     * @param message                Message to be added
      * @param messageAndHeadersCount Count of the (messages + messageHeaderParent) added in the loop from where this function is being called
-     * @param lastHolderId This is StringBuilder so as to make pass by reference work, the new lastHolderId is saved here if the value changes
+     * @param lastHolderId           This is StringBuilder so as to make pass by reference work, the new lastHolderId is saved here if the value changes
      * @return returns true if a new messageHeaderParent is created for this message so as to increment the count by where this function is being called.
      */
     public boolean addOldMessage(Message message, int messageAndHeadersCount, StringBuilder lastHolderId) {
@@ -274,8 +275,9 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     }
 
     /**
-     *  Add a new message to the bottom of the list and create a new messageHeaderParent if last did not match this message
-     *  Stream/subject or private recipients.
+     * Add a new message to the bottom of the list and create a new messageHeaderParent if last did not match this message
+     * Stream/subject or private recipients.
+     *
      * @param message Message to be added
      */
     public void addNewMessage(Message message) {
@@ -372,7 +374,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 messageHolder.contentView.setMovementMethod(LinkMovementMethod.getInstance());
 
                 final String url = message.extractImageUrl(zulipApp);
-                if(url != null) {
+                if (url != null) {
                     messageHolder.contentImageContainer.setVisibility(View.VISIBLE);
                     Picasso.with(context).load(url)
                             .into(messageHolder.contentImage);
@@ -387,8 +389,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                                     zulipApp.startActivity(i);
                                 }
                             });
-                }
-                else {
+                } else {
                     messageHolder.contentImageContainer.setVisibility(View.GONE);
                     messageHolder.contentImage.setImageDrawable(null);
                 }
@@ -420,6 +421,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
     /**
      * This is called when the Message is bind to the Holder and attached, displayed in the window.
+     *
      * @param message Mark this message read
      */
     private void markThisMessageAsRead(Message message) {
@@ -513,6 +515,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
     /**
      * Method to generate random saturated colors for default avatar {@link R.drawable#default_avatar}
+     *
      * @param mix integer color is mixed with randomly generated red, blue, green colors
      * @return a randomly generated color
      */
@@ -552,6 +555,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
     /**
      * Return the size of the list with including or excluding footer
+     *
      * @param includeFooter true to return the size including footer or false to return size excluding footer.
      * @return size of list
      */

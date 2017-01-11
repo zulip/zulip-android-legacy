@@ -37,12 +37,15 @@ import static org.junit.Assert.assertNull;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class BaseTest {
 
+    public static final String SERVER_URL = "www.local.test.com";
     private static final String PASSWORD_TEST = "yourpasswordhere";
     private static final String EMAIL_TEST = "iago@zulip.com";
-    public static final String SERVER_URL = "www.local.test.com";
-
     @Rule
     public ActivityTestRule<ZulipActivity> mActivityTestRule = new ActivityTestRule<>(ZulipActivity.class);
+
+    public static Matcher<Root> isToast() {
+        return new ToastMatcher();
+    }
 
     @Before
     public void setUp() {
@@ -87,10 +90,6 @@ public class BaseTest {
         button.perform(click());
 
         onView(withText("Your username or password is incorrect.")).inRoot(isToast()).check(matches(isDisplayed()));
-    }
-
-    public static Matcher<Root> isToast() {
-        return new ToastMatcher();
     }
 
     @Test

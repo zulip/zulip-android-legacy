@@ -23,10 +23,9 @@ class AuthEmailAdapter extends RecyclerView.Adapter<AuthEmailAdapter.AuthEmailVi
     private static final int VIEW_TYPE_HEADER = 0;
     private static final int VIEW_TYPE_ADMIN = 1;
     private static final int VIEW_TYPE_USER = 2;
+    private static AuthClickListener authClickListener;
     private List<String> emails;
     private int userStringPosition; //Position of the User String header
-    private static AuthClickListener authClickListener;
-
     private
     @ColorInt
     int devAuthUserColor;

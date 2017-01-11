@@ -23,14 +23,13 @@ import java.util.Map;
 
 @DatabaseTable(tableName = "people")
 public class Person {
-    private static final String ID_FIELD = "id";
     public static final String NAME_FIELD = "name";
     public static final String MESSAGESPARTICIPATEDIN_FIELD = "messagesParticipatedIn";
     public static final String EMAIL_FIELD = "email";
-    private static final String AVATARURL_FIELD = "avatarUrl";
     public static final String ISBOT_FIELD = "isBot";
     public static final String ISACTIVE_FIELD = "isActive";
-
+    private static final String ID_FIELD = "id";
+    private static final String AVATARURL_FIELD = "avatarUrl";
     @SerializedName("IGNORE_MASK")
     @DatabaseField(columnName = ID_FIELD, generatedId = true)
     protected int id;
@@ -92,79 +91,6 @@ public class Person {
 
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    private void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public boolean getIsBot() {
-        return isBot;
-    }
-
-    private void setEmail(String email) {
-        if (email != null) {
-            this.email = email.toLowerCase(Locale.US);
-        }
-    }
-
-    public String getAvatarURL() {
-        return avatarURL;
-    }
-
-    private void setAvatarURL(String avatarURL) {
-        this.avatarURL = avatarURL;
-    }
-
-    /**
-     * Calculate the Humbug realm for the person, currently by splitting the
-     * email address.
-     * <p/>
-     * In the future, realms may be distinct from your email hostname.
-     *
-     * @return the Person's realm.
-     */
-    public String getRealm() {
-        String[] splitEmail = this.getEmail().split("@");
-        return splitEmail[splitEmail.length - 1];
-    }
-
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (obj == this) {
-            return true;
-        }
-        if (!(obj instanceof Person)) {
-            return false;
-        }
-        Person per = (Person) obj;
-        if(this.name == null || this.email == null)
-            return false;
-        return this.name.equals(per.getName()) && this.email.equals(per
-                .getEmail());
-    }
-
-    public int hashCode() {
-        return new HashCodeBuilder(17, 31).append(name).append(email)
-                .toHashCode();
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public static Person getByEmail(ZulipApp app, String email) {
         try {
             return getByEmail(app.getDatabaseHelper().getDao(
@@ -189,7 +115,7 @@ public class Person {
                                     + " where " + Person.EMAIL_FIELD + " = ? ;",
                             new RawRowMapper<Person>() {
                                 public Person mapRow(String[] columnNames,
-                                                  String[] resultColumns) {
+                                                     String[] resultColumns) {
                                     return new Person(Integer.parseInt(resultColumns[0]),
                                             resultColumns[1], resultColumns[2], resultColumns[3],
                                             Boolean.parseBoolean(resultColumns[4]),
@@ -200,7 +126,7 @@ public class Person {
             // we only care about the first result
             Person returnValue = rawResults.getFirstResult();
             rawResults.close();
-            return  returnValue;
+            return returnValue;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
@@ -252,15 +178,6 @@ public class Person {
         return getOrUpdate(app, email, name, avatarURL, null);
     }
 
-    @SuppressWarnings("WeakerAccess")
-    public void setBot(boolean isBot) {
-        this.isBot = isBot;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
-
     public static Person getById(ZulipApp app, int id) {
         RuntimeExceptionDao<Person, Object> dao = app.getDao(Person.class);
         return dao.queryForId(id);
@@ -308,6 +225,88 @@ public class Person {
                 }
             }
         });
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    private void setName(String name) {
+        this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    private void setEmail(String email) {
+        if (email != null) {
+            this.email = email.toLowerCase(Locale.US);
+        }
+    }
+
+    public boolean getIsBot() {
+        return isBot;
+    }
+
+    public String getAvatarURL() {
+        return avatarURL;
+    }
+
+    private void setAvatarURL(String avatarURL) {
+        this.avatarURL = avatarURL;
+    }
+
+    /**
+     * Calculate the Humbug realm for the person, currently by splitting the
+     * email address.
+     * <p/>
+     * In the future, realms may be distinct from your email hostname.
+     *
+     * @return the Person's realm.
+     */
+    public String getRealm() {
+        String[] splitEmail = this.getEmail().split("@");
+        return splitEmail[splitEmail.length - 1];
+    }
+
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof Person)) {
+            return false;
+        }
+        Person per = (Person) obj;
+        if (this.name == null || this.email == null)
+            return false;
+        return this.name.equals(per.getName()) && this.email.equals(per
+                .getEmail());
+    }
+
+    public int hashCode() {
+        return new HashCodeBuilder(17, 31).append(name).append(email)
+                .toHashCode();
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public void setBot(boolean isBot) {
+        this.isBot = isBot;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 
 }

@@ -1,13 +1,13 @@
 package com.zulip.android.activities;
 
-import java.util.concurrent.Callable;
-
 import android.content.Context;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.support.v4.widget.SimpleCursorAdapter;
 
 import com.zulip.android.networking.AsyncCursorAdapterUpdater;
+
+import java.util.concurrent.Callable;
 
 /**
  * An adapter that can be refreshed by any object that has a reference to it.

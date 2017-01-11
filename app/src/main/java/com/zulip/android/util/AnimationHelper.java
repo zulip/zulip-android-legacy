@@ -2,7 +2,6 @@ package com.zulip.android.util;
 
 import android.animation.Animator;
 import android.annotation.SuppressLint;
-import android.support.design.widget.AppBarLayout;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.view.View;
 import android.view.ViewPropertyAnimator;

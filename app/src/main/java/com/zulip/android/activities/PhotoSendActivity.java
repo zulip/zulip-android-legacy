@@ -81,7 +81,7 @@ public class PhotoSendActivity extends AppCompatActivity {
                     Drawable drawable = mImageView.getDrawable();
                     if (drawable instanceof GlideBitmapDrawable) {
                         // if imageview has drawable of type GlideBitmapDrawable
-                        bitmap = ((GlideBitmapDrawable)mImageView.getDrawable().getCurrent())
+                        bitmap = ((GlideBitmapDrawable) mImageView.getDrawable().getCurrent())
                                 .getBitmap();
 
                     } else {
@@ -120,7 +120,7 @@ public class PhotoSendActivity extends AppCompatActivity {
                     Drawable drawable = mImageView.getDrawable();
                     if (drawable instanceof GlideBitmapDrawable) {
                         // if imageview has drawable of type GlideBitmapDrawable
-                        bitmap = ((GlideBitmapDrawable)mImageView.getDrawable().getCurrent())
+                        bitmap = ((GlideBitmapDrawable) mImageView.getDrawable().getCurrent())
                                 .getBitmap();
 
                     } else {
@@ -148,7 +148,7 @@ public class PhotoSendActivity extends AppCompatActivity {
                     Drawable drawable = mImageView.getDrawable();
                     if (drawable instanceof GlideBitmapDrawable) {
                         // if imageview has drawable of type GlideBitmapDrawable
-                        bitmap = ((GlideBitmapDrawable)mImageView.getDrawable().getCurrent())
+                        bitmap = ((GlideBitmapDrawable) mImageView.getDrawable().getCurrent())
                                 .getBitmap();
 
                     } else {
@@ -209,8 +209,7 @@ public class PhotoSendActivity extends AppCompatActivity {
                 && hasFocus) {
             // use simple target to know when image is loaded
             Glide.with(this).load(mPhotoPath).asBitmap().into(mGlideTarget);
-        }
-        else if (!mIsCropped && hasFocus) {
+        } else if (!mIsCropped && hasFocus) {
             // load image specified at mPhotoPath in imageView
             Glide.with(this).load(mPhotoPath).crossFade().into(mImageView);
         }

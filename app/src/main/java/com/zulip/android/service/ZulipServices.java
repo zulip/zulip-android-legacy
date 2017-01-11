@@ -2,8 +2,8 @@ package com.zulip.android.service;
 
 import com.zulip.android.filters.NarrowFilter;
 import com.zulip.android.networking.response.GetMessagesResponse;
-import com.zulip.android.networking.response.UploadResponse;
 import com.zulip.android.networking.response.LoginResponse;
+import com.zulip.android.networking.response.UploadResponse;
 import com.zulip.android.networking.response.UserConfigurationResponse;
 import com.zulip.android.networking.response.ZulipBackendResponse;
 import com.zulip.android.networking.response.events.GetEventResponse;
@@ -24,11 +24,10 @@ import retrofit2.http.Query;
 public interface ZulipServices {
 
     @GET("v1/messages?apply_markdown=true")
-
     Call<GetMessagesResponse> getMessages(@Query("anchor") String anchor,
                                           @Query("num_before") String numBefore,
                                           @Query("num_after") String numAfter,
-                                          @Query("narrow")NarrowFilter narrowFilter);
+                                          @Query("narrow") NarrowFilter narrowFilter);
 
     @GET("v1/events")
     Call<GetEventResponse> getEvents(@Query("dont_block") Boolean dontLongPoll, @Query("last_event_id") int id, @Query("queue_id") String queueId);

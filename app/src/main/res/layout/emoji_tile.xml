@@ -8,9 +8,9 @@
 
     <ImageView
         android:id="@+id/emojiImageView"
-        android:contentDescription="@string/image_content_desp"
         android:layout_width="36dp"
         android:layout_height="36dp"
+        android:contentDescription="@string/image_content_desp"
         android:gravity="center_vertical" />
 
     <TextView

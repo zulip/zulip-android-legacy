@@ -3,7 +3,6 @@ package com.zulip.android.models;
 import com.google.gson.annotations.SerializedName;
 
 
-
 public class ZulipClientPresence {
     @SerializedName("status")
     private String status;

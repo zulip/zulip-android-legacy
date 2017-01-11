@@ -14,6 +14,6 @@ public class UrlHelper {
             }
         }
 
-       return url;
+        return url;
     }
 }
