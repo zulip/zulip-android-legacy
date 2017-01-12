@@ -221,7 +221,11 @@ public class AsyncGetEvents extends Thread {
                 mActivity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        mActivity.getPeopleAdapter().refresh();
+                        try {
+                            mActivity.refreshPeopleDrawer();
+                        } catch (SQLException e) {
+                            ZLog.logException(e);
+                        }
                         mActivity.onReadyToDisplay(true);
                         mActivity.checkAndSetupStreamsDrawer();
                         if (mActivity.commonProgressDialog != null && mActivity.commonProgressDialog.isShowing()) {

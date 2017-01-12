@@ -15,4 +15,11 @@ public class Constants {
     public static int MILLISECONDS_IN_A_MINUTE = 1000;
     public static String DATE_FORMAT = "dd/MM/yyyy";
 
+    public static final long STATUS_UPDATER_INTERVAL = 25 * 1000; //in milliseconds
+    public static final int INACTIVE_TIME_OUT = 2 * 60; //in milliseconds
+    public static final int PEOPLE_DRAWER_ACTIVE_GROUP_ID = 0;
+    public static final int PEOPLE_DRAWER_RECENT_PM_GROUP_ID = 1;
+    public static final int PEOPLE_DRAWER_OTHERS_GROUP_ID = 2;
+    // row number which is used to differentiate the 'All private messages' in people drawer
+    public static final int ALL_PEOPLE_ID = -1;
 }

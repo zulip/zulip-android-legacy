@@ -145,6 +145,7 @@
     <string name="today_messages">Today\'s messages</string>
     <string name="messages">Messages</string>
     <string name="starred_messages">Starred Messages</string>
+    <string name="all_private_messages">All Private Messages</string>
     <plurals name="new_message_mul_sender">
         <item quantity="one">%d new message</item>
         <item quantity="other">%d new messages</item>
@@ -162,4 +163,7 @@
     <string name="copy_message_fetch">Copying message to clipboard</string>
     <string name="copy_failed">Copying to clipboard failed</string>
     <string name="try_again_error_msg">Something went wrong, try again</string>
+    <string name="people_drawer_active_label">Active</string>
+    <string name="people_drawer_recent_pm_label">Recent Private Messages</string>
+    <string name="people_drawer_others_label">New Private Message</string>
 </resources>

@@ -188,7 +188,7 @@
                 android:layout_marginTop="2dp"
                 android:background="@android:color/black" />
 
-            <ListView
+            <android.support.v7.widget.RecyclerView
                 android:id="@+id/people_drawer"
                 android:layout_width="320dp"
                 android:layout_height="match_parent"
