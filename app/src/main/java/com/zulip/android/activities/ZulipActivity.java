@@ -1203,7 +1203,7 @@ public class ZulipActivity extends BaseActivity implements
             public boolean onGroupClick(ExpandableListView expandableListView, View view, int position, long l) {
                 resetStreamSearch();
                 String streamName = ((TextView) view.findViewById(R.id.name)).getText().toString();
-                doNarrow(new NarrowFilterStream(streamName, null));
+                doNarrowToLastRead(streamName);
                 drawerLayout.openDrawer(GravityCompat.START);
                 if (previousClick != -1 && expandableListView.getCount() > previousClick) {
                     expandableListView.collapseGroup(previousClick);
@@ -1232,7 +1232,7 @@ public class ZulipActivity extends BaseActivity implements
                             @Override
                             public void onClick(View v) {
                                 resetStreamSearch();
-                                onNarrow(new NarrowFilterStream(streamName, null));
+                                doNarrowToLastRead(streamName);
                                 onNarrowFillSendBoxStream(streamName, "", false);
                             }
                         });
@@ -1275,6 +1275,24 @@ public class ZulipActivity extends BaseActivity implements
             }
         });
         streamsDrawer.setAdapter(streamsDrawerAdapter);
+    }
+
+    /**
+     * Helper function used to call {@link ZulipActivity#onNarrow(NarrowFilter, int)} or
+     * {@link ZulipActivity#onNarrow(NarrowFilter)} based on last message read in {@param streamName} stream.
+     *
+     * @param streamName stream name
+     */
+    private void doNarrowToLastRead(String streamName) {
+        // get last message read in stream
+        Message message = Stream.getLastMessageRead(app, streamName);
+        if (message != null) {
+            // fetch results around the last message read
+            onNarrow(new NarrowFilterStream(streamName, null), message.getId());
+        } else {
+            // new stream
+            onNarrow(new NarrowFilterStream(streamName, null));
+        }
     }
 
     /**
@@ -1878,7 +1896,7 @@ public class ZulipActivity extends BaseActivity implements
     }
 
     public void onNarrow(NarrowFilter narrowFilter) {
-        // TODO: check if already narrowed to this particular stream/subject
+        if (narrowedList == null || narrowFilter != narrowedList.filter)
         doNarrow(narrowFilter);
     }
 
