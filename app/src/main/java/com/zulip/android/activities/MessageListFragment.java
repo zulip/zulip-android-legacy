@@ -35,6 +35,7 @@ import com.zulip.android.filters.NarrowFilterPM;
 import com.zulip.android.filters.NarrowFilterStream;
 import com.zulip.android.filters.NarrowListener;
 import com.zulip.android.models.Message;
+import com.zulip.android.models.MessageType;
 import com.zulip.android.models.Person;
 import com.zulip.android.models.Stream;
 import com.zulip.android.networking.AsyncGetOldMessages;
@@ -647,6 +648,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
             return;
         }
 
+        boolean isNewPM = false;
         for (int i = 0; i < messages.length; i++) {
             Message message = messages[i];
 
@@ -688,6 +690,14 @@ public class MessageListFragment extends Fragment implements MessageListener {
             if (message.getID() < firstMessageId || firstMessageId == -1) {
                 firstMessageId = message.getID();
             }
+
+            if (!isNewPM && message.getType() == MessageType.PRIVATE_MESSAGE) {
+                isNewPM = true;
+            }
+        }
+
+        if (isNewPM) {
+            app.getZulipActivity().updateRecentPMHashMap();
         }
 
         if (pos == LoadPosition.ABOVE) {

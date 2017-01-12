@@ -1,6 +1,14 @@
 package com.zulip.android.activities;
 
 import android.Manifest;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.Callable;
+import java.util.ArrayList;
+
 import android.animation.Animator;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -17,8 +25,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
-import android.database.MatrixCursor;
-import android.database.MergeCursor;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -45,6 +51,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -58,8 +65,6 @@ import android.view.ViewPropertyAnimator;
 import android.view.WindowManager;
 import android.view.animation.Interpolator;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AutoCompleteTextView;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -67,12 +72,13 @@ import android.widget.ExpandableListView;
 import android.widget.FilterQueryProvider;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.SimpleCursorTreeAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.j256.ormlite.android.AndroidDatabaseResults;
+import com.j256.ormlite.stmt.SelectArg;
+import com.j256.ormlite.stmt.Where;
 import com.zulip.android.BuildConfig;
 import com.zulip.android.R;
 import com.zulip.android.ZulipApp;
@@ -92,7 +98,7 @@ import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageType;
 import com.zulip.android.models.Person;
 import com.zulip.android.models.Presence;
-import com.zulip.android.models.PresenceType;
+import com.zulip.android.models.PeopleDrawerList;
 import com.zulip.android.models.Stream;
 import com.zulip.android.networking.AsyncGetEvents;
 import com.zulip.android.networking.AsyncSend;
@@ -110,20 +116,16 @@ import com.zulip.android.util.SwipeRemoveLinearLayout;
 import com.zulip.android.util.UrlHelper;
 import com.zulip.android.util.ZLog;
 import com.zulip.android.viewholders.TopSnackBar;
+import com.zulip.android.viewholders.floatingRecyclerViewLables.DividerDecoration;
+import com.zulip.android.viewholders.floatingRecyclerViewLables.FloatingHeaderDecoration;
 
 import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.Callable;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -149,9 +151,6 @@ public class ZulipActivity extends BaseActivity implements
     private static final int REQUEST_TAKE_PHOTO = 2;
     private static final Interpolator FAST_OUT_SLOW_IN_INTERPOLATOR = new FastOutSlowInInterpolator();
     private static final int HIDE_FAB_AFTER_SEC = 5;
-    // row number which is used to differentiate the 'All private messages'
-    // row from the people
-    final int allPeopleId = -1;
     public MessageListFragment currentList;
     public CommonProgressDialog commonProgressDialog;
     FloatingActionButton fab;
@@ -199,6 +198,8 @@ public class ZulipActivity extends BaseActivity implements
         }
     };
     private ExpandableStreamDrawerAdapter streamsDrawerAdapter;
+    private List<PeopleDrawerList> recentPeopleDrawerList;
+    private List<PeopleDrawerList> filteredRecentPeopleDrawerList;
     private Uri mImageUri;
     private ImageView cameraBtn;
     private String mCurrentPhotoPath;
@@ -209,50 +210,11 @@ public class ZulipActivity extends BaseActivity implements
     private ImageView ivSearchPeopleCancel;
     private EditText etSearchStream;
     private ImageView ivSearchStreamCancel;
-    private ListView peopleDrawer;
     private Toast toast;
+    private RecyclerView peopleDrawer;
+    private List<PeopleDrawerList> peopleDrawerList;
     //
     private String streamSearchFilterKeyword = "";
-    private SimpleCursorAdapter.ViewBinder peopleBinder = new SimpleCursorAdapter.ViewBinder() {
-        @Override
-        public boolean setViewValue(View view, Cursor cursor, int i) {
-            switch (view.getId()) {
-                case R.id.name:
-                    TextView name = (TextView) view;
-                    name.setText(cursor.getString(i));
-                    return true;
-                case R.id.stream_dot:
-                    String email = cursor.getString(i);
-                    if (app == null || email == null) {
-                        view.setVisibility(View.INVISIBLE);
-                    } else {
-                        Presence presence = app.presences.get(email);
-                        if (presence == null) {
-                            view.setVisibility(View.INVISIBLE);
-                        } else {
-                            PresenceType status = presence.getStatus();
-                            long age = presence.getAge();
-                            if (age > 2 * 60) {
-                                view.setVisibility(View.VISIBLE);
-                                view.setBackgroundResource(R.drawable.presence_inactive);
-                            } else if (PresenceType.ACTIVE == status) {
-                                view.setVisibility(View.VISIBLE);
-                                view.setBackgroundResource(R.drawable.presence_active);
-                            } else if (PresenceType.IDLE == status) {
-                                view.setVisibility(View.VISIBLE);
-                                view.setBackgroundResource(R.drawable.presence_away);
-                            } else {
-                                view.setVisibility(View.INVISIBLE);
-                            }
-                        }
-                    }
-                    return true;
-                default:
-                    break;
-            }
-            return false;
-        }
-    };
     private RefreshableCursorAdapter peopleAdapter;
     private LinearLayout composeStatus;
     private String tempStreamSave = null;
@@ -322,7 +284,34 @@ public class ZulipActivity extends BaseActivity implements
         super.onCreate(savedInstanceState);
 
         app = (ZulipApp) getApplicationContext();
+        filteredRecentPeopleDrawerList = new ArrayList<>();
         processParams();
+
+        setContentView(R.layout.main);
+        peopleDrawer = (RecyclerView) findViewById(R.id.people_drawer);
+        etSearchPeople = (EditText) findViewById(R.id.people_drawer_search);
+        ivSearchPeopleCancel = (ImageView) findViewById(R.id.iv_people__search_cancel_button);
+        onTextChangeOfPeopleSearchEditText();
+        ivSearchPeopleCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //set default people list
+                resetPeopleSearch();
+            }
+        });
+        final DividerDecoration divider = new DividerDecoration.Builder(this).build();
+
+        peopleDrawer.setHasFixedSize(true);
+        peopleDrawer.setLayoutManager(new LinearLayoutManager(this));
+        peopleDrawer.addItemDecoration(divider);
+
+        peopleDrawerList = new ArrayList<>();
+
+        //set up people list
+        setUpPeopleDrawerAdapter();
+
+        //update recent chat person hashmap
+        updateRecentPMHashMap();
 
         if (!app.isLoggedIn()) {
             openLogin(null);
@@ -336,7 +325,6 @@ public class ZulipActivity extends BaseActivity implements
         this.logged_in = true;
         notifications = new Notifications(this);
         notifications.register();
-        setContentView(R.layout.main);
         commonProgressDialog = new CommonProgressDialog(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -403,27 +391,6 @@ public class ZulipActivity extends BaseActivity implements
         // Set the drawer toggle as the DrawerListener
         drawerLayout.setDrawerListener(drawerToggle);
 
-
-        peopleDrawer = (ListView) findViewById(R.id.people_drawer);
-
-        //set up people list
-        setUpPeopleList();
-
-        peopleDrawer.setOnItemClickListener(new OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view,
-                                    int position, long id) {
-                resetPeopleSearch();
-                if (id == allPeopleId) {
-                    doNarrow(new NarrowFilterAllPMs(app.getYou()));
-                } else {
-                    Person person = Person.getById(app, (int) id);
-                    narrowPMWith(person);
-                    switchToPrivate();
-                }
-            }
-        });
-
         // send status update and check again every couple minutes
         statusUpdateHandler = new Handler();
         statusUpdateRunnable = new Runnable() {
@@ -434,7 +401,11 @@ public class ZulipActivity extends BaseActivity implements
                 task.setCallback(new ZulipAsyncPushTask.AsyncTaskCompleteListener() {
                     @Override
                     public void onTaskComplete(String result, JSONObject object) {
-                        peopleAdapter.refresh();
+                        try {
+                            refreshPeopleDrawer();
+                        } catch (SQLException e) {
+                            ZLog.logException(e);
+                        }
                     }
 
                     @Override
@@ -443,7 +414,7 @@ public class ZulipActivity extends BaseActivity implements
                     }
                 });
                 task.execute();
-                statusUpdateHandler.postDelayed(this, 2 * 60 * 1000);
+                statusUpdateHandler.postDelayed(this, Constants.STATUS_UPDATER_INTERVAL);
             }
         };
         statusUpdateHandler.post(statusUpdateRunnable);
@@ -581,6 +552,47 @@ public class ZulipActivity extends BaseActivity implements
     }
 
     /**
+     * Updates recentPMPersons in ZulipApp
+     */
+    public void updateRecentPMHashMap() {
+        if (app.getDatabaseHelper() == null)
+            return;
+        try {
+            int order;
+            recentPeopleDrawerList = new ArrayList<>();
+            app.recentPMPersons.clear();
+            //join people and messages table to get recent messages persons
+            String query = "SELECT DISTINCT people.id ,people.email, people.name FROM messages " +
+                    " JOIN people ON messages.recipients  LIKE ( people.id || ',%') OR messages.recipients  LIKE ('%,' || people.id)" +
+                    " WHERE (LTRIM(RTRIM(messages.recipients)) LIKE '%," + new SelectArg(app.getYou().getId()) + "' OR LTRIM(RTRIM(messages.recipients)) LIKE '" + new SelectArg(app.getYou().getId()) + ",%') AND "
+                    + Person.ISBOT_FIELD + " = 0 AND people.isActive = 1 ORDER BY messages.id DESC ;";
+
+            Cursor recentMessages = app.getDatabaseHelper().getReadableDatabase().rawQuery(query, null);
+            //add them to sortedPeopleCursor
+            if (recentMessages.moveToFirst()) {
+                order = 0;
+                do {
+                    PeopleDrawerList peopleDrawerList = new PeopleDrawerList(order, new Person(Integer.parseInt(recentMessages.getString(0))
+                            , recentMessages.getString(1), recentMessages.getString(2)), Constants.PEOPLE_DRAWER_RECENT_PM_GROUP_ID, getString(R.string.people_drawer_recent_pm_label));
+                    app.recentPMPersons.put(recentMessages.getString(1), peopleDrawerList);
+                    recentPeopleDrawerList.add(peopleDrawerList);
+                    order++;
+                } while (recentMessages.moveToNext());
+            }
+
+            try {
+                refreshPeopleDrawer();
+            } catch (SQLException e) {
+                ZLog.logException(e);
+            }
+
+            recentMessages.close();
+        } catch (NullPointerException e) {
+            ZLog.logException(e);
+        }
+    }
+
+    /**
      * Called when fragment is changed
      * When narrowedList == null means home page show Today in menu
      * When narrowedList.filter instanceof NarrowFilterByDate show One Day before in menu
@@ -620,7 +632,7 @@ public class ZulipActivity extends BaseActivity implements
      */
     private void resetPeopleSearch() {
         try {
-            peopleAdapter.changeCursor(getPeopleCursorGenerator().call());
+            refreshPeopleDrawer();
         } catch (Exception e) {
             ZLog.logException(e);
         }
@@ -674,8 +686,10 @@ public class ZulipActivity extends BaseActivity implements
             public Cursor call() throws Exception {
                 String query = "SELECT s.id as _id,  s.name, s.color"
                         + " FROM streams as s LEFT JOIN messages as m ON s.id=m.stream ";
+
                 String selectArg = null;
-                if (!etSearchStream.getText().toString().equals("") && !etSearchStream.getText().toString().isEmpty()) {
+
+                if (!TextUtils.isEmpty(etSearchStream.getText().toString())) {
                     //append where clause
                     selectArg = etSearchStream.getText().toString() + '%';
                     query += " WHERE s.name LIKE ? " + " and s." + Stream.SUBSCRIBED_FIELD + " = " + "1 ";
@@ -699,22 +713,38 @@ public class ZulipActivity extends BaseActivity implements
         return steamCursorGenerator;
     }
 
-    private void setUpPeopleList() {
+    private void setUpPeopleDrawerAdapter() {
         try {
-            this.peopleAdapter = new RefreshableCursorAdapter(
-                    this.getApplicationContext(), R.layout.stream_tile,
-                    getPeopleCursorGenerator().call(), getPeopleCursorGenerator(), new String[]{
-                    Person.NAME_FIELD, Person.EMAIL_FIELD}, new int[]{
-                    R.id.name, R.id.stream_dot}, 0);
-            peopleAdapter.setViewBinder(peopleBinder);
+            peopleDrawerList = new ArrayList<>();
+            this.peopleAdapter = new RefreshableCursorAdapter(ZulipActivity.this, peopleDrawerList, app) {
+                @Override
+                protected void onPeopleSelect(int id) {
+                    resetPeopleSearch();
+                    if (id == Constants.ALL_PEOPLE_ID) {
+                        openAllPrivateMessages();
+                    } else {
+                        Person person = Person.getById(app, id);
+                        narrowPMWith(person);
+                        switchToPrivate();
+                    }
+                }
+            };
+            peopleDrawer.setAdapter(peopleAdapter);
+            FloatingHeaderDecoration decor = new FloatingHeaderDecoration(peopleAdapter);
 
             peopleDrawer.setAdapter(peopleAdapter);
-        } catch (SQLException e) {
-            ZLog.logException(e);
-            throw new RuntimeException(e);
+            peopleDrawer.addItemDecoration(decor, 1);
+
         } catch (Exception e) {
             ZLog.logException(e);
         }
+    }
+
+    /**
+     * Narrow to All Private Messages
+     */
+    private void openAllPrivateMessages() {
+        doNarrow(new NarrowFilterAllPMs(app.getYou()));
     }
 
     private void onTextChangeOfPeopleSearchEditText() {
@@ -727,7 +757,7 @@ public class ZulipActivity extends BaseActivity implements
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 try {
-                    peopleAdapter.changeCursor(getPeopleCursorGenerator().call());
+                    filterPeopleDrawer(s.toString().toLowerCase(Locale.getDefault()));
                 } catch (Exception e) {
                     ZLog.logException(e);
                 }
@@ -740,56 +770,85 @@ public class ZulipActivity extends BaseActivity implements
         });
     }
 
-    private Callable<Cursor> getPeopleCursorGenerator() {
-        Callable<Cursor> peopleGenerator = new Callable<Cursor>() {
-
-            @Override
-            public Cursor call() throws Exception {
-                // TODO Auto-generated method stub
-                List<Person> people;
-                if (etSearchPeople.getText().toString().equals("") || etSearchPeople.getText().toString().isEmpty()) {
-                    people = app.getDao(Person.class).queryBuilder()
-                            .where().eq(Person.ISBOT_FIELD, false).and()
-                            .eq(Person.ISACTIVE_FIELD, true).query();
-                    //set visibility of this image false
-                    ivSearchPeopleCancel.setVisibility(View.GONE);
-                } else {
-                    people = app.getDao(Person.class).queryBuilder()
-                            .where().eq(Person.ISBOT_FIELD, false).and()
-                            .like(Person.NAME_FIELD, "%" + etSearchPeople.getText().toString() + "%").and()
-                            .eq(Person.ISACTIVE_FIELD, true).query();
-                    //set visibility of this image false
-                    ivSearchPeopleCancel.setVisibility(View.VISIBLE);
+    /**
+     * Filter'keyWords people drawer according to name
+     * @param keyWords removes names which don't contain keyWords
+     */
+    private void filterPeopleDrawer(String keyWords) {
+        if (TextUtils.isEmpty(keyWords)) {
+            //set visibility of this image false
+            ivSearchPeopleCancel.setVisibility(View.GONE);
+        } else {
+            filteredRecentPeopleDrawerList = new ArrayList<>();
+            for (int i = 0; i < recentPeopleDrawerList.size(); i++) {
+                if (recentPeopleDrawerList.get(i).getPerson().getName().toLowerCase(Locale.getDefault()).contains(keyWords)) {
+                    filteredRecentPeopleDrawerList.add(recentPeopleDrawerList.get(i));
                 }
-
-                Person.sortByPresence(app, people);
-
-                String[] columnsWithPresence = new String[]{"_id",
-                        Person.EMAIL_FIELD, Person.NAME_FIELD};
-
-                MatrixCursor sortedPeopleCursor = new MatrixCursor(
-                        columnsWithPresence);
-                for (Person person : people) {
-                    Object[] row = new Object[]{person.getId(), person.getEmail(),
-                            person.getName()};
-                    sortedPeopleCursor.addRow(row);
-                }
-
-                // add private messages row
-                MatrixCursor allPrivateMessages = new MatrixCursor(
-                        sortedPeopleCursor.getColumnNames());
-                Object[] row = new Object[]{allPeopleId, "",
-                        "All private messages"};
-
-                allPrivateMessages.addRow(row);
-
-                return new MergeCursor(new Cursor[]{
-                        allPrivateMessages, sortedPeopleCursor});
-
             }
+            //set visibility of this image false
+            ivSearchPeopleCancel.setVisibility(View.VISIBLE);
+        }
+        try {
+            refreshPeopleDrawer();
+        } catch (SQLException e) {
+            ZLog.logException(e);
+        }
+    }
 
-        };
-        return peopleGenerator;
+    /**
+     * Refreshes recyclerView of people drawer
+     * @throws SQLException
+     */
+    public void refreshPeopleDrawer() throws SQLException {
+        // TODO Auto-generated method stub
+        List<Person> people;
+        Where<Person, Object> where = app.getDao(Person.class).queryBuilder()
+                .where().eq(Person.ISBOT_FIELD, false).and()
+                .eq(Person.ISACTIVE_FIELD, true);
+        List<PeopleDrawerList> drawerLists = new ArrayList<>();
+        if (!TextUtils.isEmpty(etSearchPeople.getText().toString())) {
+            where.and().like(Person.NAME_FIELD, "%" + etSearchPeople.getText().toString() + "%");
+        }
+
+        people = where.query();
+
+        for (int i = 0; i < people.size(); i++) {
+            Presence presence = app.presences.get(people.get(i).getEmail());
+            if (!app.recentPMPersons.containsKey(people.get(i).getEmail())) {
+                PeopleDrawerList peopleDrawerList;
+                if (Person.checkIsActive(presence)) {
+                    peopleDrawerList = new PeopleDrawerList(people.get(i), getString(R.string.people_drawer_active_label), Constants.PEOPLE_DRAWER_ACTIVE_GROUP_ID);
+                } else {
+                    peopleDrawerList = new PeopleDrawerList(people.get(i), getString(R.string.people_drawer_others_label), Constants.PEOPLE_DRAWER_OTHERS_GROUP_ID);
+                }
+                drawerLists.add(peopleDrawerList);
+            } else if (Person.checkIsActive(presence)) {
+                int position = app.recentPMPersons.get(people.get(i).getEmail()).getOrder();
+                recentPeopleDrawerList.get(position).setGroupName(getString(R.string.people_drawer_active_label));
+                recentPeopleDrawerList.get(position).setGroupId(Constants.PEOPLE_DRAWER_ACTIVE_GROUP_ID);
+            } else {
+                int position = app.recentPMPersons.get(people.get(i).getEmail()).getOrder();
+                recentPeopleDrawerList.get(position).setGroupName(getString(R.string.people_drawer_recent_pm_label));
+                recentPeopleDrawerList.get(position).setGroupId(Constants.PEOPLE_DRAWER_RECENT_PM_GROUP_ID);
+            }
+        }
+        combineList(drawerLists);
+        Person.sortByPresence(app, peopleDrawerList);
+        peopleAdapter.filterList(peopleDrawerList);
+    }
+
+    /**
+     * Combine list of recent private messages persons and persons with no recent messages
+     * @param drawerLists persons with whom no recent messages
+     */
+    private void combineList(List<PeopleDrawerList> drawerLists) {
+        peopleDrawerList.clear();
+        if (TextUtils.isEmpty(etSearchPeople.getText().toString())) {
+            peopleDrawerList.addAll(recentPeopleDrawerList);
+        } else {
+            peopleDrawerList.addAll(filteredRecentPeopleDrawerList);
+        }
+        peopleDrawerList.addAll(drawerLists);
     }
 
     @Override
@@ -1392,7 +1451,7 @@ public class ZulipActivity extends BaseActivity implements
         final String sendingMsg = getResources().getString(R.string.sending_message);
         sendingMessage(true, sendingMsg);
         MessageType messageType = isCurrentModeStream() ? MessageType.STREAM_MESSAGE : MessageType.PRIVATE_MESSAGE;
-        Message msg = new Message(app);
+        final Message msg = new Message(app);
         msg.setSender(app.getYou());
 
         if (messageType == MessageType.STREAM_MESSAGE) {
@@ -1410,6 +1469,10 @@ public class ZulipActivity extends BaseActivity implements
                 Toast.makeText(ZulipActivity.this, R.string.message_sent, Toast.LENGTH_SHORT).show();
                 messageEt.setText("");
                 sendingMessage(false, sendingMsg);
+                if (msg.getType() == MessageType.PRIVATE_MESSAGE) {
+                    //update hash table
+                    updateRecentPMHashMap();
+                }
             }
 
             public void onTaskFailure(String result) {
