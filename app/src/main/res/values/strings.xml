@@ -21,12 +21,16 @@
     <string name="press_again_to_exit">Press again to exit</string>
 
     <!-- Used on the indicator when loading messages -->
+    <string name="editing_message">Editing message</string>
     <string name="loading_messages">Loading messages</string>
     <string name="sending_message">Sending</string>
     <string name="search">Search</string>
     <string name="reply_to_private_message">Reply to private message</string>
     <string name="narrow_to_this_conversation">Narrow to this conversation</string>
     <string name="copy_message">Copy message</string>
+    <string name="edit_message">Edit message</string>
+    <string name="message_edit_failed">Error editing message</string>
+    <string name="message_edited">Message Edited</string>
     <string name="stream_txt">Stream</string>
     <string name="arrow">❯</string>
     <string name="toast_no_internet_connection">No internet connection</string>
@@ -131,4 +135,6 @@
         <item quantity="one">%d new message</item>
         <item quantity="other">%d new messages</item>
     </plurals>
+    <string name="maximum_time_limit_error">Maximum time limit exceeded</string>
+    <string name="editing_message_disabled">Editing message is disabled</string>
 </resources>

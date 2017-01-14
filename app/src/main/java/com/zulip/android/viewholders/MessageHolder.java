@@ -58,12 +58,21 @@ public class MessageHolder extends RecyclerView.ViewHolder implements View.OnCli
         if (msg.getType().equals(MessageType.STREAM_MESSAGE)) {
             MenuInflater inflater = ((Activity) v.getContext()).getMenuInflater();
             inflater.inflate(R.menu.context_stream, menu);
+            if (msg.getSender().getId() != ZulipApp.get().getYou().getId()){
+                menu.findItem(R.id.edit_message).setVisible(false);
+            }
         } else if (msg.getPersonalReplyTo(ZulipApp.get()).length > 1) {
             MenuInflater inflater = ((Activity) v.getContext()).getMenuInflater();
             inflater.inflate(R.menu.context_private, menu);
+            if (msg.getSender().getId() != ZulipApp.get().getYou().getId()){
+                menu.findItem(R.id.edit_message).setVisible(false);
+            }
         } else {
             MenuInflater inflater = ((Activity) v.getContext()).getMenuInflater();
             inflater.inflate(R.menu.context_single_private, menu);
+            if (msg.getSender().getId() != ZulipApp.get().getYou().getId()){
+                menu.findItem(R.id.edit_message).setVisible(false);
+            }
         }
     }
 
