@@ -585,7 +585,7 @@ public class Message {
         return formattedContent;
     }
 
-    private void setFormattedContent(String formattedContent) {
+    public void setFormattedContent(String formattedContent) {
         this.formattedContent = formattedContent;
     }
 
