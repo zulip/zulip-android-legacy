@@ -1193,11 +1193,11 @@ public class ZulipActivity extends BaseActivity implements
      */
     private void setupListViewAdapter() {
         streamsDrawerAdapter = null;
-        String[] groupFrom = {Stream.NAME_FIELD, Stream.COLOR_FIELD};
-        int[] groupTo = {R.id.name, R.id.stream_dot};
+        String[] groupFrom = {Stream.NAME_FIELD, Stream.COLOR_FIELD, ExpandableStreamDrawerAdapter.UNREAD_TABLE_NAME};
+        int[] groupTo = {R.id.name, R.id.stream_dot, R.id.unread_group};;
         // Comparison of data elements and View
-        String[] childFrom = {Message.SUBJECT_FIELD};
-        int[] childTo = {R.id.name_child};
+        String[] childFrom = {Message.SUBJECT_FIELD, ExpandableStreamDrawerAdapter.UNREAD_TABLE_NAME};
+        int[] childTo = {R.id.name_child, R.id.unread_child};
         final ExpandableListView streamsDrawer = (ExpandableListView) findViewById(R.id.streams_drawer);
         streamsDrawer.setGroupIndicator(null);
         try {
@@ -1275,12 +1275,12 @@ public class ZulipActivity extends BaseActivity implements
                     case R.id.unread_group:
                         TextView unreadGroupTextView = (TextView) view;
                         final String unreadGroupCount = cursor.getString(columnIndex);
-//                        if (unreadGroupCount.equals("0")) {
-//                            unreadGroupTextView.setVisibility(View.GONE);
-//                        } else {
-//                            unreadGroupTextView.setText(unreadGroupCount);
-//                            unreadGroupTextView.setVisibility(View.VISIBLE);
-//                        }
+                        if (unreadGroupCount.equals("0")) {
+                            unreadGroupTextView.setVisibility(View.GONE);
+                        } else {
+                            unreadGroupTextView.setText(unreadGroupCount);
+                            unreadGroupTextView.setVisibility(View.VISIBLE);
+                        }
                         return true;
                     case R.id.unread_child:
                         TextView unreadChildTextView = (TextView) view;
