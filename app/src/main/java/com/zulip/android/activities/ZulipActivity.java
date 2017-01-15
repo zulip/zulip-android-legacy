@@ -157,6 +157,7 @@ public class ZulipActivity extends BaseActivity implements
     private ZulipApp app;
     private boolean logged_in = false;
     private boolean backPressedOnce = false;
+    private boolean inSearch = false;
     private ZulipActivity that = this; // self-ref
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
@@ -177,6 +178,7 @@ public class ZulipActivity extends BaseActivity implements
     private TextView textView;
     private ImageView sendBtn;
     private ImageView togglePrivateStreamBtn;
+    private android.support.v7.widget.SearchView searchView;
     private Notifications notifications;
     private SimpleCursorAdapter streamActvAdapter;
     private SimpleCursorAdapter subjectActvAdapter;
@@ -1594,6 +1596,7 @@ public class ZulipActivity extends BaseActivity implements
         }
     }
 
+    @Override
     public void onBackPressed() {
         if (narrowedList == null) {
 
@@ -1601,6 +1604,12 @@ public class ZulipActivity extends BaseActivity implements
                 finish();
             }
 
+            //Clears search if already open
+            if (!searchView.isIconified()) {
+                getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_24dp);
+                clearSearch();
+                return;
+            }
             backPressedOnce = true;
             Toast.makeText(this, R.string.press_again_to_exit, Toast.LENGTH_SHORT).show();
             statusUpdateRunnable = new Runnable() {
@@ -1617,7 +1626,17 @@ public class ZulipActivity extends BaseActivity implements
             narrowedList = null;
             getSupportFragmentManager().popBackStack(NARROW,
                     FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            clearSearch();
         }
+    }
+
+    public void clearSearch() {
+        //First time clears the searchEditText
+        searchView.setIconified(true);
+        //Second time closes the searchEditText
+        searchView.setIconified(true);
+        //Setting in search status to false
+        inSearch = false;
     }
 
     private void pushListFragment(MessageListFragment list, String back) {
@@ -1627,6 +1646,7 @@ public class ZulipActivity extends BaseActivity implements
         transaction.replace(R.id.list_fragment_container, list);
         if (back != null) {
             transaction.addToBackStack(back);
+            clearSearch();
         }
         transaction.commit();
         getSupportFragmentManager().executePendingTransactions();
@@ -1807,7 +1827,7 @@ public class ZulipActivity extends BaseActivity implements
             final SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
             // Assumes current activity is the searchable activity
             final MenuItem mSearchMenuItem = menu.findItem(R.id.search);
-            final android.support.v7.widget.SearchView searchView = (android.support.v7.widget.SearchView) MenuItemCompat.getActionView(mSearchMenuItem);
+            searchView = (android.support.v7.widget.SearchView) MenuItemCompat.getActionView(mSearchMenuItem);
             searchView.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(getApplicationContext(), ZulipActivity.class)));
             searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
             ((EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text)).setHintTextColor(ContextCompat.getColor(this, R.color.colorTextPrimary));
@@ -1827,11 +1847,25 @@ public class ZulipActivity extends BaseActivity implements
                 }
             });
         }
+        searchView.setOnSearchClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //Change the NavigationDrawer Icon to back on starting search
+                getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_arrow_back_24dp);
+                inSearch = true;
+            }
+        });
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        //Check if the search is open then close the search
+        if (inSearch) {
+            getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_24dp);
+            clearSearch();
+            return true;
+        }
         // Pass the event to ActionBarDrawerToggle, if it returns
         // true, then it has handled the app icon touch event
         if (drawerToggle.onOptionsItemSelected(item)) {
@@ -1846,6 +1880,7 @@ public class ZulipActivity extends BaseActivity implements
                 narrowedList = null;
                 getSupportFragmentManager().popBackStack(NARROW,
                         FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                clearSearch();
                 break;
             case R.id.search:
                 // show a pop up dialog only if gingerbread or under
