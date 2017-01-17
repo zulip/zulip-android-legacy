@@ -160,6 +160,7 @@ public class Person {
             // use the person id passed to generate person skeleton object which is consistent
             // with server id.
             person.setId(personId);
+            person.setActive(true);
             app.getDao(Person.class).createOrUpdate(person);
         } else {
             boolean changed = false;
@@ -172,6 +173,7 @@ public class Person {
                 changed = true;
             }
             if (changed) {
+                person.setActive(true);
                 app.getDao(Person.class).update(person);
             }
         }
