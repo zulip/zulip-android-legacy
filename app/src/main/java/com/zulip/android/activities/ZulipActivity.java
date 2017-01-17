@@ -1175,6 +1175,7 @@ public class ZulipActivity extends BaseActivity implements
                 }
                 expandableListView.expandGroup(position);
                 previousClick = position;
+                drawerLayout.closeDrawers();
                 return true;
             }
         });
