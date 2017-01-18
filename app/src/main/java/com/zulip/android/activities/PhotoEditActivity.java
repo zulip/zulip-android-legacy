@@ -152,11 +152,16 @@ public class PhotoEditActivity extends AppCompatActivity {
                 frameLayout.setVisibility(View.INVISIBLE);
 
                 // take screenshot of cropped image
-                Bitmap bitmap = screenShot(frameLayout);
-                mPhotoPath = PhotoHelper.saveBitmapAsFile(mPhotoPath, bitmap);
+                if (frameLayout.getWidth() > 0 && frameLayout.getHeight() > 0) {
+                    Bitmap bitmap = screenShot(frameLayout);
+                    mPhotoPath = PhotoHelper.saveBitmapAsFile(mPhotoPath, bitmap);
 
-                sendIntent.putExtra(Intent.EXTRA_TEXT, mPhotoPath);
-                startActivity(sendIntent);
+                    sendIntent.putExtra(Intent.EXTRA_TEXT, mPhotoPath);
+                    startActivity(sendIntent);
+                } else {
+                    // do nothing
+                    // wait for layout to be constructed
+                }
             }
         });
     }
