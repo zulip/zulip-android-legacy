@@ -125,6 +125,8 @@
     <string name="SHOW">SHOW</string>
     <string name="notify_stream" formatted="false">" in %1$s/%2$s"</string>
     <string name="notify_private" formatted="false">from %1$s</string>
+    <string name="today_messages">Today Messages</string>
+    <string name="messages">Messages</string>
     <plurals name="new_message_mul_sender">
         <item quantity="one">%d new message</item>
         <item quantity="other">%d new messages</item>
