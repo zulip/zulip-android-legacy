@@ -1596,6 +1596,12 @@ public class ZulipActivity extends BaseActivity implements
 
     @Override
     public void onBackPressed() {
+        //check for drawer
+        if (drawerLayout.isDrawerOpen(GravityCompat.START) || drawerLayout.isDrawerOpen(GravityCompat.END)) {
+            drawerLayout.closeDrawers();
+            return;
+        }
+       //check for narrowed or not
         if (narrowedList == null) {
 
             if (backPressedOnce) {
