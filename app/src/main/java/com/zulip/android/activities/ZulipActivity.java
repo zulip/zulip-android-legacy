@@ -44,6 +44,7 @@ import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AppCompatDelegate;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -100,6 +101,7 @@ import com.zulip.android.networking.response.UploadResponse;
 import com.zulip.android.util.AnimationHelper;
 import com.zulip.android.util.FilePathHelper;
 import com.zulip.android.util.MutedTopics;
+import com.zulip.android.util.RemoveViewsOnScroll;
 import com.zulip.android.util.SwipeRemoveLinearLayout;
 import com.zulip.android.util.UrlHelper;
 import com.zulip.android.util.ZLog;
@@ -1591,6 +1593,11 @@ public class ZulipActivity extends BaseActivity implements
     }
 
     @Override
+    public void setLayoutBehaviour(LinearLayoutManager linearLayoutManager, RecyclerMessageAdapter adapter) {
+        setActionBarLayoutBehaviour(linearLayoutManager,adapter);
+        setFabLayoutBehaviour(linearLayoutManager,adapter);
+    }
+
     public void onBackPressed() {
         if (narrowedList == null) {
 
@@ -2166,8 +2173,43 @@ public class ZulipActivity extends BaseActivity implements
         snackbar.show();
     }
 
+    /**
+     * Set layout behaviour for AppBarLayout
+     * @param linearLayoutManager of messageRecyclerView
+     * @param adapter of messageRecyclerView
+     */
+    public void setActionBarLayoutBehaviour(LinearLayoutManager linearLayoutManager, RecyclerMessageAdapter adapter) {
+        getAppBarLayoutParams().setBehavior(new RemoveViewsOnScroll(linearLayoutManager, adapter));
+        getAppBarLayout().requestLayout();
+    }
+
+    /**
+     * @return LayoutParams of appBarLayout
+     */
+    private CoordinatorLayout.LayoutParams getAppBarLayoutParams() {
+        return (CoordinatorLayout.LayoutParams)getAppBarLayout().getLayoutParams();
+    }
+
+    /**
+     * Set layoutBehaviour for Floating button
+     * @param linearLayoutManager of messageRecyclerView
+     * @param adapter of messageRecyclerView
+     */
+    private void setFabLayoutBehaviour(LinearLayoutManager linearLayoutManager, RecyclerMessageAdapter adapter) {
+        CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) fab.getLayoutParams();
+        layoutParams.setBehavior(new RemoveViewsOnScroll(linearLayoutManager, adapter));
+        fab.setLayoutParams(layoutParams);
+    }
+
     // Intent Extra constants
     public enum Flag {
         RESET_DATABASE,
+    }
+
+    /**
+     * @return appBarLayout which toolbar
+     */
+    public View getAppBarLayout() {
+        return appBarLayout;
     }
 }
