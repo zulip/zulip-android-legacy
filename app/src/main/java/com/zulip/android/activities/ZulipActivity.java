@@ -199,6 +199,7 @@ public class ZulipActivity extends BaseActivity implements
     private EditText etSearchStream;
     private ImageView ivSearchStreamCancel;
     private ListView peopleDrawer;
+    private  Toast toast;
     //
     private String streamSearchFilterKeyword = "";
     private SimpleCursorAdapter.ViewBinder peopleBinder = new SimpleCursorAdapter.ViewBinder() {
@@ -1598,7 +1599,9 @@ public class ZulipActivity extends BaseActivity implements
         if (narrowedList == null) {
 
             if (backPressedOnce) {
+                dismissToast();
                 finish();
+                return;
             }
 
             //Clears search if already open
@@ -1608,7 +1611,7 @@ public class ZulipActivity extends BaseActivity implements
                 return;
             }
             backPressedOnce = true;
-            Toast.makeText(this, R.string.press_again_to_exit, Toast.LENGTH_SHORT).show();
+            showToast(getString(R.string.press_again_to_exit), Toast.LENGTH_SHORT);
             statusUpdateRunnable = new Runnable() {
                 @Override
                 public void run() {
@@ -1634,6 +1637,27 @@ public class ZulipActivity extends BaseActivity implements
         searchView.setIconified(true);
         //Setting in search status to false
         inSearch = false;
+    }
+
+    /**
+     * dismiss toast
+     */
+    private void dismissToast() {
+        if (toast != null) {
+            toast.cancel();
+        }
+    }
+
+    /**
+     * If previous toast is showing cancel it and show new one
+     * @param string message in the toast
+     * @param duration of the toast to be shown
+     */
+    private void showToast(String string, int duration) {
+        toast = Toast.makeText(this, string, duration);
+        if (toast.getView().isShown())
+            toast.cancel();
+        toast.show();
     }
 
     private void pushListFragment(MessageListFragment list, String back) {
