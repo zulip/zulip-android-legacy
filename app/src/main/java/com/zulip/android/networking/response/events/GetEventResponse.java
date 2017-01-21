@@ -74,5 +74,16 @@ public class GetEventResponse {
         this.result = result;
     }
 
+    public List<EventsBranch> getEventsOfBranchType(EventsBranch.BranchType branchType) {
+        List<EventsBranch> branches = this.getEvents();
 
+        List<EventsBranch> retVal = new ArrayList<>();
+        for (EventsBranch eventBranch : branches) {
+            if (eventBranch.getClass().equals(branchType.getKlazz())) {
+                retVal.add(eventBranch);
+            }
+        }
+
+        return retVal;
+    }
 }
