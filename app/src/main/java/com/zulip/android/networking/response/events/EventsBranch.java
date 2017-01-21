@@ -23,7 +23,8 @@ public class EventsBranch {
 
     public enum BranchType {
         MESSAGE(MessageWrapper.class, "message"),
-        PRESENCE(PresenceWrapper.class, "presence");
+        PRESENCE(PresenceWrapper.class, "presence"),
+        SUBSCRIPTIONS(SubscriptionWrapper.class, "subscription");
 
         private final Class<? extends EventsBranch> klazz;
         private final String key;

@@ -21,6 +21,7 @@ import com.zulip.android.networking.response.UserConfigurationResponse;
 import com.zulip.android.networking.response.events.EventsBranch;
 import com.zulip.android.networking.response.events.GetEventResponse;
 import com.zulip.android.networking.response.events.MessageWrapper;
+import com.zulip.android.networking.response.events.SubscriptionWrapper;
 import com.zulip.android.util.MutedTopics;
 import com.zulip.android.util.TypeSwapper;
 import com.zulip.android.util.ZLog;
@@ -175,8 +176,7 @@ public class AsyncGetEvents extends Thread {
                             } else {
                                 personDao.update(person);
                             }
-                        }
-                        catch(Exception e) {
+                        } catch (Exception e) {
                             ZLog.logException(e);
                         }
                     }
@@ -289,6 +289,15 @@ public class AsyncGetEvents extends Thread {
      */
     private void processEvents(GetEventResponse events) {
         // In task thread
+        List<EventsBranch> subscriptions = events.getEventsOfBranchType(EventsBranch.BranchType.SUBSCRIPTIONS);
+
+        if (!subscriptions.isEmpty()) {
+            Log.i("AsyncGetEvents", "Received " + subscriptions.size()
+                    + " streams event");
+            processSubsciptions(subscriptions);
+        }
+
+        // get messages from events
         List<Message> messages = events.getEventsOf(EventsBranch.BranchType.MESSAGE, new TypeSwapper<MessageWrapper, Message>() {
             @Override
             public Message convert(MessageWrapper messageWrapper) {
@@ -332,4 +341,51 @@ public class AsyncGetEvents extends Thread {
         }
     }
 
+    private void processSubsciptions(List<EventsBranch> subscriptionWrapperList) {
+        RuntimeExceptionDao<Stream, Object> streamDao = app
+                .getDao(Stream.class);
+
+        for (EventsBranch wrapper : subscriptionWrapperList) {
+            SubscriptionWrapper subscriptionwrapper = (SubscriptionWrapper) wrapper;
+            List<Stream> streams = subscriptionwrapper.getStreams();
+            if (subscriptionwrapper.getOperation().equalsIgnoreCase(SubscriptionWrapper.OPERATION_ADD)) {
+
+                for (Stream stream : streams) {
+                    stream.getParsedColor();
+                    stream.setSubscribed(true);
+                    try {
+                        streamDao.createOrUpdate(stream);
+                    } catch (Exception e) {
+                        ZLog.logException(e);
+                    }
+                }
+            } else if (subscriptionwrapper.getOperation().equalsIgnoreCase(SubscriptionWrapper.OPERATION_UPDATE)) {
+                Stream stream = subscriptionwrapper.getUpdatedStream();
+                try {
+                    streamDao.createOrUpdate(stream);
+                } catch (Exception e) {
+                    ZLog.logException(e);
+                }
+            } else if (subscriptionwrapper.getOperation().equalsIgnoreCase(SubscriptionWrapper.OPERATION_REMOVE)) {
+                for (Stream stream : streams) {
+                    stream.getParsedColor();
+                    stream.setSubscribed(false);
+                    try {
+                        streamDao.createOrUpdate(stream);
+                    } catch (Exception e) {
+                        ZLog.logException(e);
+                    }
+                }
+            } else {
+                Log.d("AsyncEvents", "unknown operation for subscription type event");
+            }
+        }
+
+        mActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mActivity.checkAndSetupStreamsDrawer();
+            }
+        });
+    }
 }
