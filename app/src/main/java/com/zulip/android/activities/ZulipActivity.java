@@ -21,6 +21,7 @@ import android.database.MatrixCursor;
 import android.database.MergeCursor;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
@@ -32,7 +33,6 @@ import android.provider.MediaStore;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
@@ -58,6 +58,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.view.WindowManager;
+import android.view.Window;
 import android.view.animation.Interpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -107,6 +108,7 @@ import com.zulip.android.util.RemoveViewsOnScroll;
 import com.zulip.android.util.SwipeRemoveLinearLayout;
 import com.zulip.android.util.UrlHelper;
 import com.zulip.android.util.ZLog;
+import com.zulip.android.viewholders.TopSnackBar;
 
 import org.json.JSONObject;
 
@@ -167,6 +169,7 @@ public class ZulipActivity extends BaseActivity implements
     private Runnable statusUpdateRunnable;
 
     private int mToolbarHeightInPx;
+    private int statusBarHeight = 0;
     private MessageListFragment narrowedList;
     private MessageListFragment homeList;
     private AutoCompleteTextView streamActv;
@@ -249,6 +252,7 @@ public class ZulipActivity extends BaseActivity implements
     private RefreshableCursorAdapter peopleAdapter;
     private LinearLayout composeStatus;
     private String tempStreamSave = null;
+    private TopSnackBar topSnackBar;
 
     @Override
     public void removeChatBox(boolean animToRight) {
@@ -1663,6 +1667,9 @@ public class ZulipActivity extends BaseActivity implements
         layoutParams = (CoordinatorLayout.LayoutParams) fab.getLayoutParams();
         layoutParams.setBehavior(new RemoveViewsOnScroll(linearLayoutManager, adapter));
         fab.setLayoutParams(layoutParams);
+
+        topSnackBar.setMessagesLayoutManager(linearLayoutManager);
+        topSnackBar.setMessagesAdapter(adapter);
     }
 
     @Override
@@ -2218,25 +2225,19 @@ public class ZulipActivity extends BaseActivity implements
             showSnackbarNotification(messages); //Show notification
     }
 
-    Snackbar snackbar;
-    CoordinatorLayout.LayoutParams snackBarParams;
     private void setupSnackBar() {
         final CoordinatorLayout coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout);
-        snackbar = Snackbar.make(coordinatorLayout, "", Snackbar.LENGTH_LONG);
-        View v = snackbar.getView();
-        snackBarParams = (CoordinatorLayout.LayoutParams) v.getLayoutParams();
-        snackBarParams.gravity = Gravity.TOP;
-        v.setLayoutParams(snackBarParams);
         TypedValue tv = new TypedValue();
         if (getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true))
             mToolbarHeightInPx = TypedValue.complexToDimensionPixelSize(tv.data, getResources().getDisplayMetrics());
-        snackbar.setCallback(new Snackbar.Callback() {
-            @Override
-            public void onDismissed(Snackbar snackbar, int event) {
-                super.onDismissed(snackbar, event);
-                if (event == Snackbar.Callback.DISMISS_EVENT_TIMEOUT) prevMessageSameCount = -1;
-            }
-        });
+
+        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            statusBarHeight = getResources().getDimensionPixelSize(resourceId);
+        }
+
+        topSnackBar = new TopSnackBar(this);
+        coordinatorLayout.addView(topSnackBar.getLinearLayout());
     }
 
     NarrowFilter narrowFilter;
@@ -2244,6 +2245,7 @@ public class ZulipActivity extends BaseActivity implements
     int prevMessageSameCount = -1;
     private void showSnackbarNotification(Message[] messages) {
         MutedTopics mutedTopics = MutedTopics.get();
+        String notificationMessage;
         int nonMutedMessagesCount = 0;
         Message tempMessage = null; //Stores a temporary message which is non-muted, later used for retrieving Stream/Topic
         for (Message message : messages) {
@@ -2266,16 +2268,17 @@ public class ZulipActivity extends BaseActivity implements
         }
         if (nonMutedMessagesCount == 0) return;
         if (prevId == null && messages.length > 1) {
-            snackbar.setText(getResources().getQuantityString(R.plurals.new_message_mul_sender, nonMutedMessagesCount, nonMutedMessagesCount));
+            notificationMessage = getResources().getQuantityString(R.plurals.new_message_mul_sender, nonMutedMessagesCount, nonMutedMessagesCount);
             narrowFilter = null;
             if (narrowedList != null) {
                 narrowedList = null;
                 getSupportFragmentManager().popBackStack(NARROW,
                         FragmentManager.POP_BACK_STACK_INCLUSIVE);
             }
-            snackbar.setAction(R.string.SHOW, new View.OnClickListener() {
+            topSnackBar.setAction(R.string.SHOW, new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    topSnackBar.dismiss();
                     homeList.showLatestMessages();
                 }
             });
@@ -2283,21 +2286,17 @@ public class ZulipActivity extends BaseActivity implements
             if (messages.length == 1) tempMessage = messages[0];
             String name = (tempMessage.getType() == MessageType.PRIVATE_MESSAGE) ? getString(R.string.notify_private, tempMessage.getSenderFullName()) : getString(R.string.notify_stream, tempMessage.getStream().getName() , tempMessage.getSubject());
             if (prevMessageSameCount > 0) name += " (" + prevMessageSameCount + ")";
-            snackbar.setText(getResources().getQuantityString(R.plurals.new_message, nonMutedMessagesCount, nonMutedMessagesCount, name));
+            notificationMessage = getResources().getQuantityString(R.plurals.new_message, nonMutedMessagesCount, nonMutedMessagesCount, name);
             narrowFilter = (tempMessage.getType() == MessageType.PRIVATE_MESSAGE) ? new NarrowFilterPM(Arrays.asList(tempMessage.getRecipients(app))) : new NarrowFilterStream(tempMessage.getStream(), tempMessage.getSubject());
-            snackbar.setAction(R.string.SHOW, new View.OnClickListener() {
+            topSnackBar.setAction(R.string.SHOW, new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    topSnackBar.dismiss();
                     doNarrow(narrowFilter);
                 }
             });
         }
-        if (appBarLayout.getVisibility() == View.GONE) {
-            snackBarParams.setMargins(0, 0, 0, 0);
-        } else {
-            snackBarParams.setMargins(0, mToolbarHeightInPx, 0, 0);
-        }
-        snackbar.show();
+        topSnackBar.show((appBarLayout.getVisibility() == View.GONE) ? statusBarHeight : statusBarHeight + mToolbarHeightInPx, notificationMessage, TopSnackBar.LENGTH_LONG);
     }
 
     // Intent Extra constants
