@@ -14,6 +14,7 @@ import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.Interpolator;
+import android.widget.LinearLayout;
 
 import com.zulip.android.R;
 import com.zulip.android.activities.RecyclerMessageAdapter;
@@ -62,9 +63,9 @@ public class RemoveViewsOnScroll extends CoordinatorLayout.Behavior<View> {
             }
 
             changeInYDir += dy;
-            if (changeInYDir > toolbarHeight && child.getVisibility() == View.VISIBLE && !isViewHidden)
+            if ((changeInYDir > toolbarHeight && child.getVisibility() == View.VISIBLE) && (!isViewHidden || isTopSnackBar(child)))
                 hideView(child);
-            else if (changeInYDir < 0 && child.getVisibility() == View.GONE && !mIsShowing) {
+            else if (changeInYDir < 0 && (child.getVisibility() == View.GONE && !mIsShowing) || isTopSnackBar(child)) {
                 if (child instanceof FloatingActionButton) {
                     if (chatBox == null)
                         chatBox = coordinatorLayout.findViewById(R.id.messageBoxContainer);
@@ -77,11 +78,22 @@ public class RemoveViewsOnScroll extends CoordinatorLayout.Behavior<View> {
         }
     }
 
+    private boolean isTopSnackBar(View child) {
+        return (child.getId() != R.id.appBarLayout && !(child instanceof FloatingActionButton));
+    }
+
     @SuppressLint("NewApi")
     private void hideView(final View view) {
         isViewHidden = true;
+        int y = view.getHeight();
+        ;
+        if (view instanceof AppBarLayout) {
+            y = -1 * view.getHeight();
+        } else if (view instanceof LinearLayout) {
+            y = 0;
+        }
         ViewPropertyAnimator animator = view.animate()
-                .translationY((view instanceof AppBarLayout) ? -1 * view.getHeight() : view.getHeight())
+                .translationY(y)
                 .setInterpolator(FAST_OUT_SLOW_IN_INTERPOLATOR)
                 .setDuration(200);
 
@@ -114,7 +126,7 @@ public class RemoveViewsOnScroll extends CoordinatorLayout.Behavior<View> {
     public void showView(final View view) {
         mIsShowing = true;
         ViewPropertyAnimator animator = view.animate()
-                .translationY(0)
+                .translationY((view.getId() == R.id.appBarLayout || view instanceof FloatingActionButton) ? 0 : toolbarHeight)
                 .setInterpolator(FAST_OUT_SLOW_IN_INTERPOLATOR)
                 .setDuration(200);
 
