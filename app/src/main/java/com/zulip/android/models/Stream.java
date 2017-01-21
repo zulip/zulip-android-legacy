@@ -39,7 +39,7 @@ public class Stream {
     private String description;
 
     @SerializedName("subscribers")
-    private List<Integer> subscribers;
+    private List<String> subscribers;
 
     @SerializedName("pin_to_top")
     private boolean pinToTop;
@@ -211,4 +211,12 @@ public class Stream {
         return null;
     }
 
+    public void setFetchColor(String fetchedColor) {
+        this.fetchedColor = fetchedColor;
+        getParsedColor();
+    }
+
+    public void setInHomeView(boolean inHomeView) {
+        this.inHomeView = inHomeView;
+    }
 }
