@@ -443,8 +443,8 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 } catch (SQLException e) {
                     ZLog.logException(e);
                 }
+                zulipApp.markMessageAsRead(message);
             }
-            zulipApp.markMessageAsRead(message);
         } catch (NullPointerException e) {
             Log.w("scrolling", "Could not find a location to scroll to!");
         }

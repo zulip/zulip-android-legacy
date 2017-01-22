@@ -134,7 +134,7 @@ public class AsyncGetEvents extends Thread {
 
                     RuntimeExceptionDao<Stream, Object> streamDao = app
                             .getDao(Stream.class);
-                    Log.i("stream", "" + subscriptions.size() + " streams");
+                    Log.i("stream", "" + subscriptions.size() + " subscribed streams");
 
                     // Mark all existing subscriptions as not subscribed
                     streamDao.updateBuilder().updateColumnValue(
@@ -150,6 +150,19 @@ public class AsyncGetEvents extends Thread {
                             ZLog.logException(e);
                         }
                     }
+
+                    // get unsubscribed streams
+                    List<Stream> unsubscribed = response.getUnsubscribed();
+                    for (Stream stream : unsubscribed) {
+                        stream.getParsedColor();
+                        stream.setSubscribed(false);
+                        try {
+                            streamDao.createOrUpdate(stream);
+                        } catch (Exception e) {
+                            ZLog.logException(e);
+                        }
+                    }
+
                     //MUST UPDATE AFTER SUBSCRIPTIONS ARE STORED IN DB
                     mMutedTopics.addToMutedTopics(response.getMutedTopics());
 
