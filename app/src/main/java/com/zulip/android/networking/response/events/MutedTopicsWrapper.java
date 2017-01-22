@@ -5,8 +5,11 @@ import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
 /**
- * TODO: add description
- * example : {"muted_topics":[["testing","(no topic)"]],"type":"muted_topics","id":42}
+ * This class is used to deserialize muted_topic type event
+ * {@link EventsBranch.BranchType#MUTED_TOPICS}.
+ *
+ * example: {"muted_topics":[["devel","(no topic)"],["foraaron","(no topic)"],["announce","Streams"]],
+ *      "type":"muted_topics","id":20}
  */
 
 public class MutedTopicsWrapper extends EventsBranch{

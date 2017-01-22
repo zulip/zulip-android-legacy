@@ -75,9 +75,11 @@ public class GetEventResponse {
     }
 
     /**
-     * TODO: add description
-     * @param branchType
-     * @return
+     * Function to get events of branch type {@param branchType} from {@link GetEventResponse#events}
+     * list.
+     *
+     * @param branchType {@link EventsBranch.BranchType}
+     * @return list of events of branch type {@param branchType}
      */
     public List<EventsBranch> getEventsOfBranchType(EventsBranch.BranchType branchType) {
         List<EventsBranch> branches = this.getEvents();

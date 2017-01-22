@@ -7,7 +7,28 @@ import com.zulip.android.models.Stream;
 import java.util.List;
 
 /**
- * TODO: add description
+ * This class is used to deserialize the subscription type events {@link EventsBranch.BranchType#SUBSCRIPTIONS}.
+ *
+ * example : Add operation  {"subscriptions":[{"desktop_notifications":true,"description":"For sales discussion",
+ *      "color":"#f4ae55","name":"sales","stream_id":11,"subscribers":["emailgateway@zulip.com",
+ *      "webhook-bot@zulip.com","welcome-bot@zulip.com","notification-bot@zulip.com",
+ *      "new-user-bot@zulip.com","nagios-send-bot@zulip.com","nagios-receive-bot@zulip.com",
+ *      "error-bot@zulip.com","default-bot@zulip.com","iago@zulip.com","prospero@zulip.com",
+ *      "othello@zulip.com","AARON@zulip.com"],"invite_only":false,"audible_notifications":true,"email_address":"sales+51d742945283fef74dc08bdd4d251dde@localhost:9991",
+ *      "pin_to_top":false,"in_home_view":true}],"type":"subscription","id":14,"op":"add"}
+ *
+ * UPDATE operation {"name":"sales","id":15,"property":"color","type":"subscription",
+ *      "email":"AARON@zulip.com","value":"#c2c2c2","op":"update"}
+ *
+ * REMOVE operation {"subscriptions":[{"stream_id":7,"name":"design"}],"type":"subscription","id":16,"op":"remove"}
+ *
+ * {@link SubscriptionWrapper#operation} signifies the operation of the event
+ * namely : add {@link SubscriptionWrapper#OPERATION_ADD},
+ * update {@link SubscriptionWrapper#OPERATION_UPDATE} and
+ * remove {@link SubscriptionWrapper#OPERATION_REMOVE}.
+ *
+ * {@link SubscriptionWrapper#property} holds the property updated and {@link SubscriptionWrapper#value}
+ * holds the updated value of this property.
  */
 
 public class SubscriptionWrapper extends EventsBranch {
@@ -50,16 +71,23 @@ public class SubscriptionWrapper extends EventsBranch {
         this.operation = operation;
     }
 
-    public Stream getUpdatedStream() {
+    /**
+     * This function returns the updated stream object in case of an update subscription event.
+     *
+     * @param app {@link ZulipApp} instance
+     * @return updated {@link Stream} object
+     */
+    public Stream getUpdatedStream(ZulipApp app) {
         if (this.operation.equalsIgnoreCase(SubscriptionWrapper.OPERATION_UPDATE)) {
-            // TODO: account for other updates as well
+            // TODO: account for other updates
             if (property.equalsIgnoreCase("color")) {
-                Stream stream = Stream.getByName(ZulipApp.get(), streamName);
+                // color of stream is changed
+                Stream stream = Stream.getByName(app, streamName);
                 stream.setFetchColor((String) this.value);
                 return stream;
             } else if (property.equalsIgnoreCase("in_home_view")) {
-                // stream mute unmute
-                Stream stream = Stream.getByName(ZulipApp.get(), streamName);
+                // stream is muted or unmuted
+                Stream stream = Stream.getByName(app, streamName);
                 stream.setInHomeView((boolean) this.value);
                 return stream;
             }
