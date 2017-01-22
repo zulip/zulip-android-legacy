@@ -21,6 +21,7 @@ import com.zulip.android.networking.response.UserConfigurationResponse;
 import com.zulip.android.networking.response.events.EventsBranch;
 import com.zulip.android.networking.response.events.GetEventResponse;
 import com.zulip.android.networking.response.events.MessageWrapper;
+import com.zulip.android.networking.response.events.MutedTopicsWrapper;
 import com.zulip.android.networking.response.events.SubscriptionWrapper;
 import com.zulip.android.util.MutedTopics;
 import com.zulip.android.util.TypeSwapper;
@@ -289,6 +290,7 @@ public class AsyncGetEvents extends Thread {
      */
     private void processEvents(GetEventResponse events) {
         // In task thread
+        // get subscription events
         List<EventsBranch> subscriptions = events.getEventsOfBranchType(EventsBranch.BranchType.SUBSCRIPTIONS);
 
         if (!subscriptions.isEmpty()) {
@@ -297,7 +299,15 @@ public class AsyncGetEvents extends Thread {
             processSubsciptions(subscriptions);
         }
 
-        // get messages from events
+        // get muted topics events
+        List<EventsBranch> mutedTopics = events.getEventsOfBranchType(EventsBranch.BranchType.MUTED_TOPICS);
+        if (!mutedTopics.isEmpty()) {
+            Log.i("AsyncGetEvents", "Received " + mutedTopics.size()
+                    + " muted_topics event");
+            processMutedTopics(mutedTopics);
+        }
+
+        // get messages events
         List<Message> messages = events.getEventsOf(EventsBranch.BranchType.MESSAGE, new TypeSwapper<MessageWrapper, Message>() {
             @Override
             public Message convert(MessageWrapper messageWrapper) {
@@ -341,6 +351,10 @@ public class AsyncGetEvents extends Thread {
         }
     }
 
+    /**
+     * TODO: add description
+     * @param subscriptionWrapperList
+     */
     private void processSubsciptions(List<EventsBranch> subscriptionWrapperList) {
         RuntimeExceptionDao<Stream, Object> streamDao = app
                 .getDao(Stream.class);
@@ -384,6 +398,26 @@ public class AsyncGetEvents extends Thread {
         mActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                mActivity.onReadyToDisplay(true);
+                mActivity.checkAndSetupStreamsDrawer();
+            }
+        });
+    }
+
+    /**
+     * TODO: add description
+     * @param genericMutedTopics
+     */
+    private void processMutedTopics(List<EventsBranch> genericMutedTopics) {
+        for (EventsBranch wrapper : genericMutedTopics) {
+            MutedTopicsWrapper mutedTopics = (MutedTopicsWrapper) wrapper;
+            mMutedTopics.addToMutedTopics(mutedTopics.getMutedTopics());
+        }
+
+        mActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mActivity.onReadyToDisplay(true);
                 mActivity.checkAndSetupStreamsDrawer();
             }
         });
