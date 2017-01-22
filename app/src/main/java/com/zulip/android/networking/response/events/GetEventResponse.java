@@ -74,6 +74,11 @@ public class GetEventResponse {
         this.result = result;
     }
 
+    /**
+     * TODO: add description
+     * @param branchType
+     * @return
+     */
     public List<EventsBranch> getEventsOfBranchType(EventsBranch.BranchType branchType) {
         List<EventsBranch> branches = this.getEvents();
 
