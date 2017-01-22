@@ -97,7 +97,7 @@ public class UserConfigurationResponse {
     private List<Stream> realmDefaultStreams;
 
     @SerializedName("unsubscribed")
-    private List<?> unsubscribed;
+    private List<Stream> unsubscribed;
 
     @SerializedName("subscriptions")
     private List<Stream> subscriptions;
@@ -216,7 +216,7 @@ public class UserConfigurationResponse {
         return realmDefaultStreams;
     }
 
-    public List<?> getUnsubscribed() {
+    public List<Stream> getUnsubscribed() {
         return unsubscribed;
     }
 
