@@ -309,7 +309,11 @@ public class AsyncGetEvents extends Thread {
         if (!subscriptions.isEmpty()) {
             Log.i("AsyncGetEvents", "Received " + subscriptions.size()
                     + " streams event");
-            processSubsciptions(subscriptions);
+            try {
+                processSubsciptions(subscriptions);
+            } catch (Exception e) {
+                ZLog.logException(e);
+            }
         }
 
         // get muted topics events
@@ -327,7 +331,7 @@ public class AsyncGetEvents extends Thread {
                 return messageWrapper.getMessage();
             }
         });
-        if (!messages.isEmpty()) {
+        if (messages != null && !messages.isEmpty()) {
             Log.i("AsyncGetEvents", "Received " + messages.size()
                     + " messages");
             Message.createMessages(app, messages);
@@ -365,10 +369,12 @@ public class AsyncGetEvents extends Thread {
     }
 
     /**
-     * TODO: add description
-     * @param subscriptionWrapperList
+     * Create or update streams extract from {@param subscriptionWrapperList}. This function takes
+     * care of 3 cases : add, remove and update subscription streams
+     *
+     * @param subscriptionWrapperList list of {@link SubscriptionWrapper}
      */
-    private void processSubsciptions(List<EventsBranch> subscriptionWrapperList) {
+    private void processSubsciptions(List<EventsBranch> subscriptionWrapperList) throws Exception {
         RuntimeExceptionDao<Stream, Object> streamDao = app
                 .getDao(Stream.class);
 
@@ -377,37 +383,32 @@ public class AsyncGetEvents extends Thread {
             List<Stream> streams = subscriptionwrapper.getStreams();
             if (subscriptionwrapper.getOperation().equalsIgnoreCase(SubscriptionWrapper.OPERATION_ADD)) {
 
+                // add new subscriptions
                 for (Stream stream : streams) {
                     stream.getParsedColor();
                     stream.setSubscribed(true);
-                    try {
-                        streamDao.createOrUpdate(stream);
-                    } catch (Exception e) {
-                        ZLog.logException(e);
-                    }
+                    streamDao.createOrUpdate(stream);
                 }
             } else if (subscriptionwrapper.getOperation().equalsIgnoreCase(SubscriptionWrapper.OPERATION_UPDATE)) {
-                Stream stream = subscriptionwrapper.getUpdatedStream();
-                try {
-                    streamDao.createOrUpdate(stream);
-                } catch (Exception e) {
-                    ZLog.logException(e);
-                }
+
+                // update existing subscriptions
+                Stream stream = subscriptionwrapper.getUpdatedStream(app);
+                streamDao.createOrUpdate(stream);
             } else if (subscriptionwrapper.getOperation().equalsIgnoreCase(SubscriptionWrapper.OPERATION_REMOVE)) {
+
+                // unsubscribe streams
                 for (Stream stream : streams) {
                     stream.getParsedColor();
                     stream.setSubscribed(false);
-                    try {
-                        streamDao.createOrUpdate(stream);
-                    } catch (Exception e) {
-                        ZLog.logException(e);
-                    }
+                    streamDao.createOrUpdate(stream);
                 }
             } else {
                 Log.d("AsyncEvents", "unknown operation for subscription type event");
+                return;
             }
         }
 
+        // update the message list and streams drawer
         mActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -418,15 +419,18 @@ public class AsyncGetEvents extends Thread {
     }
 
     /**
-     * TODO: add description
-     * @param genericMutedTopics
+     * Update the muted topics list from {@param genericMutedTopics}
+     *
+     * @param genericMutedTopics list of {@link MutedTopicsWrapper}
      */
     private void processMutedTopics(List<EventsBranch> genericMutedTopics) {
+        // update muted topics from events
         for (EventsBranch wrapper : genericMutedTopics) {
             MutedTopicsWrapper mutedTopics = (MutedTopicsWrapper) wrapper;
             mMutedTopics.addToMutedTopics(mutedTopics.getMutedTopics());
         }
 
+        // update the message list and streams drawer
         mActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
