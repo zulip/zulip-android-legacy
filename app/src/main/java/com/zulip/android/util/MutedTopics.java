@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 
 import com.zulip.android.ZulipApp;
 import com.zulip.android.models.Message;
+import com.zulip.android.models.MessageType;
 import com.zulip.android.models.Stream;
 
 import java.util.HashSet;
@@ -49,6 +50,10 @@ public class MutedTopics {
     }
 
     public boolean isTopicMute(Message message) {
+        // if message is private it cannot be muted
+        if (message.getType() == MessageType.PRIVATE_MESSAGE) {
+            return false;
+        }
         return getPrefs().getStringSet(MUTED_TOPIC_KEY, new HashSet<String>()).contains(message.concatStreamAndTopic());
     }
 
