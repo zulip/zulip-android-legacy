@@ -2149,8 +2149,9 @@ public class ZulipActivity extends BaseActivity implements
         int nonMutedMessagesCount = 0;
         Message tempMessage = null; //Stores a temporary message which is non-muted, later used for retrieving Stream/Topic
         for (Message message : messages) { //Check if all messages from same topic/private and remove all the muted messages
-            if (message.getType() == MessageType.STREAM_MESSAGE && mutedTopics.isTopicMute(message))
+            if (mutedTopics.isTopicMute(message) || ((message.getStream() != null) && !message.getStream().getInHomeView())) {
                 continue;
+            }
             nonMutedMessagesCount++;
             if (prevId != null && !prevId.equals(message.getIdForHolder())) {
                 prevId = null;
