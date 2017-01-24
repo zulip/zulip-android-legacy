@@ -111,6 +111,16 @@ public class NarrowFilterPM implements NarrowFilter {
     }
 
     @Override
+    public boolean equals(NarrowFilter filter) {
+        if (filter instanceof NarrowFilterPM) {
+            NarrowFilterPM filterPM = (NarrowFilterPM) filter;
+            return this.getTitle().equals(filterPM.getTitle());
+        } else {
+            return false;
+        }
+    }
+
+    @Override
     public String toString() {
         try {
             return getJsonFilter();

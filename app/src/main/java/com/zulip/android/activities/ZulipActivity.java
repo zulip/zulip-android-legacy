@@ -1896,13 +1896,14 @@ public class ZulipActivity extends BaseActivity implements
     }
 
     public void onNarrow(NarrowFilter narrowFilter) {
-        if (narrowedList == null || narrowFilter != narrowedList.filter)
-        doNarrow(narrowFilter);
+        if (narrowedList == null || !narrowedList.filter.equals(narrowFilter)) {
+            doNarrow(narrowFilter);
+        }
     }
 
 
     public void onNarrow(NarrowFilter narrowFilter, int messageId) {
-        if (narrowedList == null || narrowFilter != narrowedList.filter) {
+        if (narrowedList == null || !narrowedList.filter.equals(narrowFilter)) {
             doNarrow(narrowFilter, messageId);
         }
     }
@@ -1941,7 +1942,7 @@ public class ZulipActivity extends BaseActivity implements
             searchView.setOnQueryTextListener(new android.support.v7.widget.SearchView.OnQueryTextListener() {
                 @Override
                 public boolean onQueryTextSubmit(String s) {
-                    doNarrow(new NarrowFilterSearch(s));
+                    onNarrow(new NarrowFilterSearch(s));
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
                         mSearchMenuItem.collapseActionView();
                     }
@@ -2003,7 +2004,7 @@ public class ZulipActivity extends BaseActivity implements
                                 public void onClick(
                                         DialogInterface dialogInterface, int i) {
                                     String query = editText.getText().toString();
-                                    doNarrow(new NarrowFilterSearch(query));
+                                    onNarrow(new NarrowFilterSearch(query));
                                 }
                             });
                     builder.show();
@@ -2032,11 +2033,11 @@ public class ZulipActivity extends BaseActivity implements
                 if (menu != null && menu.getItem(2).getSubMenu().getItem(0).getTitle().equals(getString(R.string.menu_one_day_before))) {
                     //user selected One Day Before
                     calendar.add(Calendar.DATE, -1);
-                    doNarrow(new NarrowFilterByDate(calendar.getTime()));
+                    onNarrow(new NarrowFilterByDate(calendar.getTime()));
                     break;
                 }
                 //else Narrow to Today
-                doNarrow(new NarrowFilterByDate());
+                onNarrow(new NarrowFilterByDate());
                 break;
             case R.id.enterDate:
                 //show Dialog with calendar date as selected to pick Date
@@ -2044,7 +2045,7 @@ public class ZulipActivity extends BaseActivity implements
                     @Override
                     public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
                         calendar.set(year, month, dayOfMonth);
-                        doNarrow(new NarrowFilterByDate(calendar.getTime()));
+                        onNarrow(new NarrowFilterByDate(calendar.getTime()));
                     }
                 }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
                 //set max date to today so future dates are not selectable

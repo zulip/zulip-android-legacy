@@ -48,6 +48,10 @@ public class NarrowFilterByDate implements NarrowFilter {
         dest.writeLong(date.getTime());
     }
 
+    public Date getDate() {
+        return this.date;
+    }
+
     @Override
     public Where<Message, Object> modWhere(Where<Message, Object> where)
             throws SQLException {
@@ -95,6 +99,17 @@ public class NarrowFilterByDate implements NarrowFilter {
     @Override
     public String getJsonFilter() throws JSONException {
         return "{}";
+    }
+
+    @Override
+    public boolean equals(NarrowFilter filter) {
+        if (filter instanceof NarrowFilterByDate) {
+            NarrowFilterByDate filterByDate = (NarrowFilterByDate) filter;
+            return NarrowFilterByDate.isSameDay(this.getDate(),
+                    filterByDate.getDate());
+        } else {
+            return false;
+        }
     }
 
     @Override
