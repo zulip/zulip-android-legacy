@@ -218,6 +218,7 @@ public class Stream {
 
     public void setInHomeView(boolean inHomeView) {
         this.inHomeView = inHomeView;
+    }
 
     /**
      * This function returns the last message read in {@param streamName} stream.
