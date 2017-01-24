@@ -1,0 +1,25 @@
+apply plugin: 'java'
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile 'com.android.tools.lint:lint:25.0.0'
+    compile 'com.android.tools.lint:lint-api:25.0.0'
+    compile 'com.android.tools.lint:lint-checks:25.0.0'
+    testCompile 'com.android.tools.lint:lint-tests:24.5.0'
+}
+
+jar {
+    manifest {
+        attributes('Lint-Registry': 'com.zulip.android.customlintrules.MyIssueRegistry')
+    }
+}
+
+configurations {
+    lintJarOutput
+}
+
+dependencies {
+    lintJarOutput files(jar)
+}
+
+defaultTasks 'assemble'

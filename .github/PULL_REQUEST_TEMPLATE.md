@@ -13,6 +13,4 @@ Please make sure these boxes are checked before submitting your pull request - t
 
 - [ ] If new feature is implemeted then it is compatible with Night theme too.
 
-- [ ] Used `Zlog.logException(e)` instead of `e.printStackTrace()`
-
 - [ ] Read https://zulip.readthedocs.io/en/latest/version-control.html#commit-messages
