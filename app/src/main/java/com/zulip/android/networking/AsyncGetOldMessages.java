@@ -11,6 +11,7 @@ import com.zulip.android.models.MessageRange;
 import com.zulip.android.networking.response.GetMessagesResponse;
 import com.zulip.android.util.MessageListener;
 import com.zulip.android.util.MessageListener.LoadPosition;
+import com.zulip.android.util.ZLog;
 
 import org.apache.commons.lang.time.StopWatch;
 
@@ -211,7 +212,7 @@ public class AsyncGetOldMessages extends ZulipAsyncPushTask {
                 return false;
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            ZLog.logException(e);
             return false;
         }
 
