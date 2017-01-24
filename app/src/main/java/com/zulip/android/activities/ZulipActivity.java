@@ -614,7 +614,7 @@ public class ZulipActivity extends BaseActivity implements
                 try {
                     streamsDrawerAdapter.changeCursor(getSteamCursorGenerator().call());
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    ZLog.logException(e);
                 }
             }
 

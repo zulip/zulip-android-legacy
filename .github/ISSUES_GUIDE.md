@@ -8,4 +8,4 @@
 
 - . If issue is faced on performing steps in any specific order, then state them under **Steps to reproduce**.
 
-- . Read more at https://guides.github.com/features/issues/
+- . Read more at https://guides.github.com/features/issues/ 
