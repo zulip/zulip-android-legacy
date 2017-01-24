@@ -96,6 +96,15 @@ public class NarrowFilterAllPMs implements NarrowFilter {
     }
 
     @Override
+    public boolean equals(NarrowFilter filter) {
+        if (filter instanceof NarrowFilterAllPMs) {
+            return filter.getTitle().equals("All private messages");
+        } else {
+            return false;
+        }
+    }
+
+    @Override
     public String toString() {
         try {
             return getJsonFilter();
