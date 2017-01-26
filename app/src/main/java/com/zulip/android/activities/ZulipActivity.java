@@ -1046,8 +1046,24 @@ public class ZulipActivity extends BaseActivity implements
                 displayChatBox(true);
                 displayFAB(false);
                 fabHidder.start();
+                showSoftKeyboard();
+                if (TextUtils.isEmpty(streamActv.getText().toString())) {
+                    streamActv.requestFocus();
+                } else if (TextUtils.isEmpty(topicActv.getText().toString())) {
+                    topicActv.requestFocus();
+                } else {
+                    messageEt.requestFocus();
+                }
             }
         });
+    }
+
+    /**
+     * Shows soft keyboard
+     */
+    private void showSoftKeyboard() {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT,InputMethodManager.HIDE_IMPLICIT_ONLY);
     }
 
     private void displayChatBox(boolean show) {
@@ -1771,7 +1787,7 @@ public class ZulipActivity extends BaseActivity implements
         topicActv.setText(TextUtils.join(", ", names));
         messageEt.requestFocus();
         if (openSoftKeyboard) {
-            ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE)).toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+            showSoftKeyboard();
         }
     }
 
@@ -1797,7 +1813,7 @@ public class ZulipActivity extends BaseActivity implements
             } else messageEt.requestFocus();
         }
         if (openSoftKeyboard) {
-            ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE)).toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+            showSoftKeyboard();
         }
     }
 
@@ -1818,7 +1834,7 @@ public class ZulipActivity extends BaseActivity implements
             topicActv.requestFocus();
         } else messageEt.requestFocus();
         if (openSoftKeyboard) {
-            ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE)).toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+            showSoftKeyboard();
         }
     }
 

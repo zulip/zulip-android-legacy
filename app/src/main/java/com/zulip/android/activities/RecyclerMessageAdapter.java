@@ -138,7 +138,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                     case R.id.senderTile: // Sender Tile
                     case R.id.contentView: //Main message
                         Message message = (Message) getItem(position);
-                        narrowListener.onNarrowFillSendBox(message, false);
+                        narrowListener.onNarrowFillSendBox(message, true);
                         break;
                     case R.id.messageTile:
                         Message msg = (Message) getItem(position);
