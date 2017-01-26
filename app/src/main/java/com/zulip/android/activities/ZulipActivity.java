@@ -247,6 +247,9 @@ public class ZulipActivity extends BaseActivity implements
 
     @Override
     public void removeChatBox(boolean animToRight) {
+        if (!searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text).hasFocus()) {
+            hideSoftKeyBoard();
+        }
         AnimationHelper.hideViewX(chatBox, animToRight);
     }
 
