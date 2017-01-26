@@ -358,7 +358,8 @@ public class MessageListFragment extends Fragment implements MessageListener {
                     progress.setCancelable(false);
                     progress.setMessage(app.getString(R.string.editing_message));
                     progress.show();
-                    final String editedMessageContent = dialogMessageEditText.getText().toString();
+                    final String editedMessageContent =
+                            dialogMessageEditText.getText().toString().length() == 0 ? getString(R.string.default_delete_text) : dialogMessageEditText.getText().toString();
 
                     app.getZulipServices()
                             .editMessage(String.valueOf(message.getID()), editedMessageContent)
