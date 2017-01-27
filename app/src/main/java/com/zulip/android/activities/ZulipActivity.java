@@ -2169,8 +2169,10 @@ public class ZulipActivity extends BaseActivity implements
         MutedTopics mutedTopics = MutedTopics.get();
         int nonMutedMessagesCount = 0;
         Message tempMessage = null; //Stores a temporary message which is non-muted, later used for retrieving Stream/Topic
-        for (Message message : messages) { //Check if all messages from same topic/private and remove all the muted messages
-            if (mutedTopics.isTopicMute(message) || ((message.getStream() != null) && !message.getStream().getInHomeView())) {
+        for (Message message : messages) {
+            //Check if all messages from same topic/private and remove all the muted messages or send by user itself
+            if (mutedTopics.isTopicMute(message) || ((message.getStream() != null) && !message.getStream().getInHomeView())
+                    || message.getSender().getEmail().equals(app.getYou().getEmail())) {
                 continue;
             }
             nonMutedMessagesCount++;
