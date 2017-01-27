@@ -2,6 +2,7 @@ package com.zulip.android.filters;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 import com.j256.ormlite.stmt.SelectArg;
 import com.j256.ormlite.stmt.Where;
@@ -71,8 +72,14 @@ public class NarrowFilterStream implements NarrowFilter {
 
     @Override
     public boolean matches(Message msg) {
-        return msg.getType() == MessageType.STREAM_MESSAGE
-                && msg.getStream().equals(stream);
+        if (TextUtils.isEmpty(this.subject)) {
+            return msg.getType() == MessageType.STREAM_MESSAGE
+                    && msg.getStream().equals(stream);
+        } else {
+            return msg.getType() == MessageType.STREAM_MESSAGE
+                    && msg.getStream().equals(stream)
+                    && this.subject.equals(msg.getSubject());
+        }
     }
 
     @Override
