@@ -1971,7 +1971,12 @@ public class ZulipActivity extends BaseActivity implements
             searchView.setOnQueryTextListener(new android.support.v7.widget.SearchView.OnQueryTextListener() {
                 @Override
                 public boolean onQueryTextSubmit(String s) {
-                    onNarrow(new NarrowFilterSearch(s));
+                    if (narrowedList != null) {
+                        onNarrow(new NarrowFilterSearch(s, narrowedList.filter));
+                    } else {
+                        onNarrow(new NarrowFilterSearch(s, null));
+                    }
+
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
                         mSearchMenuItem.collapseActionView();
                     }
@@ -2033,7 +2038,11 @@ public class ZulipActivity extends BaseActivity implements
                                 public void onClick(
                                         DialogInterface dialogInterface, int i) {
                                     String query = editText.getText().toString();
-                                    onNarrow(new NarrowFilterSearch(query));
+                                    if (narrowedList != null) {
+                                        onNarrow(new NarrowFilterSearch(query, narrowedList.filter));
+                                    } else {
+                                        onNarrow(new NarrowFilterSearch(query, null));
+                                    }
                                 }
                             });
                     builder.show();

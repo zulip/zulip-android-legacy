@@ -16,12 +16,14 @@ import java.util.Arrays;
 
 /**
  * Narrow based on search terms
+ * {@link NarrowFilterSearch#query} is the search query
+ * {@link NarrowFilterSearch#filter} indicates the current narrow filter
  */
 public class NarrowFilterSearch implements NarrowFilter {
     public static final Creator<NarrowFilterSearch> CREATOR = new Creator<NarrowFilterSearch>() {
         @Override
         public NarrowFilterSearch createFromParcel(Parcel parcel) {
-            return new NarrowFilterSearch(parcel.readString());
+            return new NarrowFilterSearch(parcel.readString(), null);
         }
 
         @Override
@@ -29,10 +31,13 @@ public class NarrowFilterSearch implements NarrowFilter {
             return new NarrowFilterSearch[i];
         }
     };
-    private final String query;
 
-    public NarrowFilterSearch(String query) {
+    private String query;
+    private NarrowFilter filter;
+
+    public NarrowFilterSearch(String query, NarrowFilter filter) {
         this.query = query;
+        this.filter = filter;
     }
 
     @Override
@@ -47,8 +52,10 @@ public class NarrowFilterSearch implements NarrowFilter {
 
     @Override
     public boolean matches(Message msg) {
-        //api matching for us
-        return true;
+        // api gives a list of messages matching the search query
+        // when in home view, we want to show all the matching results
+        // when narrowed, we want to show messages which match the current narrow of user
+        return filter == null || filter.matches(msg);
     }
 
     @Override
