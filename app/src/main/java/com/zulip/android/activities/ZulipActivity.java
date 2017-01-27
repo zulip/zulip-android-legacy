@@ -564,11 +564,22 @@ public class ZulipActivity extends BaseActivity implements
                 if (narrowedList == null) {
                     calendar = Calendar.getInstance();
                     menu.getItem(2).getSubMenu().getItem(0).setTitle(R.string.menu_today);
+                    checkForChatBoxFocusRequest();
                 } else if (narrowedList.filter instanceof NarrowFilterByDate) {
                     menu.getItem(2).getSubMenu().getItem(0).setTitle(R.string.menu_one_day_before);
                 }
             }
         });
+    }
+
+    private void checkForChatBoxFocusRequest() {
+        if (TextUtils.isEmpty(streamActv.getText().toString())) {
+            streamActv.requestFocus();
+        } else if (TextUtils.isEmpty(topicActv.getText().toString())) {
+            topicActv.requestFocus();
+        } else {
+            messageEt.requestFocus();
+        }
     }
 
     /**
@@ -1043,13 +1054,7 @@ public class ZulipActivity extends BaseActivity implements
                 displayFAB(false);
                 fabHidder.start();
                 showSoftKeyboard();
-                if (TextUtils.isEmpty(streamActv.getText().toString())) {
-                    streamActv.requestFocus();
-                } else if (TextUtils.isEmpty(topicActv.getText().toString())) {
-                    topicActv.requestFocus();
-                } else {
-                    messageEt.requestFocus();
-                }
+                checkForChatBoxFocusRequest();
             }
         });
     }
