@@ -495,6 +495,7 @@ public class Message {
         }
     }
 
+
     /**
      * Creates a comma-separated String of the email addressed of all the
      * recipients of the message, as would be suitable to place in the compose
