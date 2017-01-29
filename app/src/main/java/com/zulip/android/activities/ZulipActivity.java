@@ -56,6 +56,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
+import android.view.WindowManager;
 import android.view.animation.Interpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -555,6 +556,8 @@ public class ZulipActivity extends BaseActivity implements
         handleOnFragmentChange();
         calendar = Calendar.getInstance();
         setupSnackBar();
+        //Hides Keyboard if it was open with focus on an editText before restart of the activity
+        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
     }
 
     /**
