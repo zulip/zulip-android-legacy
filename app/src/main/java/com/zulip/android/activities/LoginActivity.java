@@ -115,6 +115,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                 findViewById(R.id.passwordAuthLayout).setVisibility(View.GONE);
                 findViewById(R.id.google_sign_in_button).setVisibility(View.GONE);
                 findViewById(R.id.local_server_button).setVisibility(View.GONE);
+                //remove error from all editText as user now corrected serverUrl
+                mPassword.setError(null);
+                mUserName.setError(null);
+                serverIn.setError(null);
+                mServerEditText.setError(null);
             }
         });
         //restore instance state on orientation change
@@ -269,8 +274,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         serverUri = serverUri.buildUpon().scheme(httpScheme).build();
 
         // display server url with http scheme used
-        serverIn.setText(serverUri.toString());
-        mServerEditText.setText(serverUri.toString());
+        serverIn.setText(serverUri.toString().toLowerCase());
+        mServerEditText.setText(serverUri.toString().toLowerCase());
         mServerEditText.setEnabled(false);
 
         // if server url does not end with "api/" or if the path is empty, use "/api" as last segment in the path
@@ -279,7 +284,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
             serverUri = serverUri.buildUpon().appendEncodedPath("api/").build();
         }
 
-        ((ZulipApp) getApplication()).setServerURL(serverUri.toString());
+        ((ZulipApp) getApplication()).setServerURL(serverUri.toString().toLowerCase());
 
         // create new zulipServices object every time by setting it to null
         getApp().setZulipServices(null);
