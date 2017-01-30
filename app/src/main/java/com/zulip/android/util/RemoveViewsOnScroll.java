@@ -8,6 +8,7 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
+import android.support.v7.widget.LinearLayoutManager;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
@@ -15,6 +16,7 @@ import android.view.ViewPropertyAnimator;
 import android.view.animation.Interpolator;
 
 import com.zulip.android.R;
+import com.zulip.android.activities.RecyclerMessageAdapter;
 
 /**
  * This hides the {@link AppBarLayout} and {@link android.support.design.widget.FloatingActionButton} when the
@@ -27,12 +29,19 @@ public class RemoveViewsOnScroll extends CoordinatorLayout.Behavior<View> {
     private boolean mIsShowing;
     private boolean isViewHidden;
     private View chatBox;
+    private LinearLayoutManager linearLayoutManager;
+    private RecyclerMessageAdapter adapter;
 
     public RemoveViewsOnScroll(Context context, AttributeSet attrs) {
         super(context, attrs);
         TypedValue tv = new TypedValue();
         if (context.getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true))
             toolbarHeight = TypedValue.complexToDimensionPixelSize(tv.data, context.getResources().getDisplayMetrics());
+    }
+
+    public RemoveViewsOnScroll(LinearLayoutManager linearLayoutManager, RecyclerMessageAdapter adapter) {
+        this.linearLayoutManager = linearLayoutManager;
+        this.adapter = adapter;
     }
 
     @Override
@@ -42,26 +51,30 @@ public class RemoveViewsOnScroll extends CoordinatorLayout.Behavior<View> {
 
     @SuppressLint("NewApi")
     @Override
-    public void onNestedPreScroll(CoordinatorLayout coordinatorLayout, View child, View target, int dx, int dy, int[] consumed) {
-        if (dy > 0 && changeInYDir < 0 || dy < 0 && changeInYDir > 0) {
-            child.animate().cancel();
-            changeInYDir = 0;
-        }
-
-        changeInYDir += dy;
-        if (changeInYDir > toolbarHeight && child.getVisibility() == View.VISIBLE && !isViewHidden)
-            hideView(child);
-        else if (changeInYDir < 0 && child.getVisibility() == View.GONE && !mIsShowing) {
-            if (child instanceof FloatingActionButton) {
-                if (chatBox == null)
-                    chatBox = coordinatorLayout.findViewById(R.id.messageBoxContainer);
-                if (chatBox.getVisibility() == View.VISIBLE) {
-                    return;
-                }
+    public void onNestedPreScroll(CoordinatorLayout coordinatorLayout, View child, View target, int dx, int dy, int[] consumed) throws NullPointerException {
+        //count index starts from 1 where as position starts from 0, thus difference 1
+        //we have 2 loading layouts one at top and another at bottom of the messages which should be ignored
+        //resulting in a overall difference of 3
+        if (linearLayoutManager.findLastCompletelyVisibleItemPosition() < adapter.getItemCount() - 3) {
+            if (dy > 0 && changeInYDir < 0 || dy < 0 && changeInYDir > 0) {
+                child.animate().cancel();
+                changeInYDir = 0;
             }
-            showView(child);
-        }
 
+            changeInYDir += dy;
+            if (changeInYDir > toolbarHeight && child.getVisibility() == View.VISIBLE && !isViewHidden)
+                hideView(child);
+            else if (changeInYDir < 0 && child.getVisibility() == View.GONE && !mIsShowing) {
+                if (child instanceof FloatingActionButton) {
+                    if (chatBox == null)
+                        chatBox = coordinatorLayout.findViewById(R.id.messageBoxContainer);
+                    if (chatBox.getVisibility() == View.VISIBLE) {
+                        return;
+                    }
+                }
+                showView(child);
+            }
+        }
     }
 
     @SuppressLint("NewApi")
@@ -98,7 +111,7 @@ public class RemoveViewsOnScroll extends CoordinatorLayout.Behavior<View> {
     }
 
     @SuppressLint("NewApi")
-    private void showView(final View view) {
+    public void showView(final View view) {
         mIsShowing = true;
         ViewPropertyAnimator animator = view.animate()
                 .translationY(0)
