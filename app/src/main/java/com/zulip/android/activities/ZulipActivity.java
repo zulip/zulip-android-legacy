@@ -1748,8 +1748,12 @@ public class ZulipActivity extends BaseActivity implements
         doNarrow(new NarrowFilterStream(stream, null));
     }
 
-        doNarrow(new NarrowFilterPM(Arrays.asList(app.getYou(), person)));
     private void narrowPMWith(final Person person) {
+        List<Person> list = new ArrayList<>();
+        list.add(person);
+        if (!person.getEmail().equals(app.getYou().getEmail()))
+            list.add(app.getYou());
+        doNarrow(new NarrowFilterPM(list));
         onNarrowFillSendBoxPrivate(new Person[]{person},false);
     }
 
