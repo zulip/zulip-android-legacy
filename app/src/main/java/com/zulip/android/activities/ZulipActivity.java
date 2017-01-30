@@ -45,6 +45,7 @@ import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AppCompatDelegate;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -102,6 +103,7 @@ import com.zulip.android.networking.response.UploadResponse;
 import com.zulip.android.util.AnimationHelper;
 import com.zulip.android.util.FilePathHelper;
 import com.zulip.android.util.MutedTopics;
+import com.zulip.android.util.RemoveViewsOnScroll;
 import com.zulip.android.util.SwipeRemoveLinearLayout;
 import com.zulip.android.util.UrlHelper;
 import com.zulip.android.util.ZLog;
@@ -254,6 +256,10 @@ public class ZulipActivity extends BaseActivity implements
             hideSoftKeyBoard();
         }
         AnimationHelper.hideViewX(chatBox, animToRight);
+        //show fab button
+        CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) fab.getLayoutParams();
+        RemoveViewsOnScroll removeViewsOnScroll = (RemoveViewsOnScroll) layoutParams.getBehavior();
+        removeViewsOnScroll.showView(fab);
     }
 
     public HashMap<String, Bitmap> getGravatars() {
@@ -1646,6 +1652,17 @@ public class ZulipActivity extends BaseActivity implements
                 streamActv.setText("");
             }
         }
+    }
+
+    @Override
+    public void setLayoutBehaviour(LinearLayoutManager linearLayoutManager, RecyclerMessageAdapter adapter) {
+        CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) appBarLayout.getLayoutParams();
+        layoutParams.setBehavior(new RemoveViewsOnScroll(linearLayoutManager, adapter));
+        appBarLayout.requestLayout();
+
+        layoutParams = (CoordinatorLayout.LayoutParams) fab.getLayoutParams();
+        layoutParams.setBehavior(new RemoveViewsOnScroll(linearLayoutManager, adapter));
+        fab.setLayoutParams(layoutParams);
     }
 
     @Override
