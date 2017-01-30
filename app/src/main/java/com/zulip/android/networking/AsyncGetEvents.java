@@ -190,6 +190,11 @@ public class AsyncGetEvents extends Thread {
                             } else {
                                 personDao.update(person);
                             }
+                            if (person.getEmail().equals(app.getEmail())) {
+                                //person is user itself
+                                // update in app.getYou()
+                                app.setYou(person);
+                            }
                         } catch (Exception e) {
                             ZLog.logException(e);
                         }
