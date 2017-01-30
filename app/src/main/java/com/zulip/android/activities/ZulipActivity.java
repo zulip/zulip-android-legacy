@@ -396,7 +396,9 @@ public class ZulipActivity extends BaseActivity implements
                 if (id == allPeopleId) {
                     doNarrow(new NarrowFilterAllPMs(app.getYou()));
                 } else {
-                    narrow_pm_with(Person.getById(app, (int) id));
+                    Person person = Person.getById(app, (int) id);
+                    narrowPMWith(person);
+                    switchToPrivate();
                 }
             }
         });
@@ -569,6 +571,7 @@ public class ZulipActivity extends BaseActivity implements
                 if (narrowedList == null) {
                     calendar = Calendar.getInstance();
                     menu.getItem(2).getSubMenu().getItem(0).setTitle(R.string.menu_today);
+                    switchToStream();
                     checkForChatBoxFocusRequest();
                 } else if (narrowedList.filter instanceof NarrowFilterByDate) {
                     menu.getItem(2).getSubMenu().getItem(0).setTitle(R.string.menu_one_day_before);
@@ -578,7 +581,7 @@ public class ZulipActivity extends BaseActivity implements
     }
 
     private void checkForChatBoxFocusRequest() {
-        if (TextUtils.isEmpty(streamActv.getText().toString())) {
+        if (TextUtils.isEmpty(streamActv.getText().toString()) && isCurrentModeStream()) {
             streamActv.requestFocus();
         } else if (TextUtils.isEmpty(topicActv.getText().toString())) {
             topicActv.requestFocus();
@@ -1083,6 +1086,7 @@ public class ZulipActivity extends BaseActivity implements
             showView(chatBox);
         } else {
             hideView(chatBox);
+            hideSoftKeyBoard();
         }
     }
 
@@ -1203,6 +1207,7 @@ public class ZulipActivity extends BaseActivity implements
                 }
                 expandableListView.expandGroup(position);
                 previousClick = position;
+                onNarrowFillSendBoxStream(streamName, "", false);
                 return true;
             }
         });
@@ -1743,8 +1748,9 @@ public class ZulipActivity extends BaseActivity implements
         doNarrow(new NarrowFilterStream(stream, null));
     }
 
-    private void narrow_pm_with(final Person person) {
         doNarrow(new NarrowFilterPM(Arrays.asList(app.getYou(), person)));
+    private void narrowPMWith(final Person person) {
+        onNarrowFillSendBoxPrivate(new Person[]{person},false);
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)

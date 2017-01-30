@@ -116,8 +116,9 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                     case R.id.displayRecipient: //StreamTV
                         MessageHeaderParent messageHeaderParent = (MessageHeaderParent) getItem(position);
                         if (messageHeaderParent.getMessageType() == MessageType.PRIVATE_MESSAGE) {
-                            narrowListener.onNarrow(new NarrowFilterPM(
-                                    Arrays.asList(messageHeaderParent.getRecipients((ZulipApp.get())))));
+                            Person[] recipientArray = messageHeaderParent.getRecipients(zulipApp);
+                            narrowListener.onNarrow(new NarrowFilterPM(Arrays.asList(recipientArray)));
+                            narrowListener.onNarrowFillSendBoxPrivate(recipientArray,false);
                         } else {
 
                             narrowListener.onNarrow(new NarrowFilterStream(Stream.getByName(zulipApp, messageHeaderParent.getStream()), null));
@@ -128,7 +129,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                         MessageHeaderParent messageParent = (MessageHeaderParent) getItem(position);
                         if (messageParent.getMessageType() == MessageType.STREAM_MESSAGE) {
                             narrowListener.onNarrow(new NarrowFilterStream(Stream.getByName(zulipApp, messageParent.getStream()), messageParent.getSubject()));
-                            narrowListener.onNarrowFillSendBoxStream(messageParent.getStream(), "", false);
+                            narrowListener.onNarrowFillSendBoxStream(messageParent.getStream(), messageParent.getSubject(), false);
                         } else {
                             Person[] recipentArray = messageParent.getRecipients(zulipApp);
                             narrowListener.onNarrow(new NarrowFilterPM(Arrays.asList(recipentArray)));
