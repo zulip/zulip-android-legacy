@@ -435,8 +435,16 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
         if (pos == LoadPosition.ABOVE) {
             adapter.setHeaderShowing(moreAbove);
+            /* if we don't account for message headers generated, a scroll jitter is observed
+             whenever messages are loaded ABOVE as the original top message's position is not
+             retained. We also need to account for the message header of original top message in
+             order to retain the correct scroll position.
+            */
+
             // Restore the position of the top item
-            this.recyclerView.scrollToPosition(topPosBefore + addedCount);
+            // account for generated message headers
+            // +1 for the header of top item
+            this.recyclerView.scrollToPosition(topPosBefore + addedCount + headerParents + 1);
 
             if (noFurtherMessages) {
                 loadedToTop = true;
