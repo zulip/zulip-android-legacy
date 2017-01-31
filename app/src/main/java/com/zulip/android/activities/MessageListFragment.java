@@ -164,6 +164,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
                 }
             }
         });
+        mListener.setLayoutBehaviour(linearLayoutManager,adapter);
         return view;
     }
 
@@ -701,6 +702,8 @@ public class MessageListFragment extends Fragment implements MessageListener {
         void recyclerViewScrolled();
 
         void clearChatBox();
+
+        void setLayoutBehaviour(LinearLayoutManager linearLayoutManager , RecyclerMessageAdapter adapter);
     }
 
     public void showLatestMessages() {
