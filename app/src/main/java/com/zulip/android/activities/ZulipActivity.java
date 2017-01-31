@@ -2043,6 +2043,8 @@ public class ZulipActivity extends BaseActivity implements
      */
     private void openLogin() {
         Intent i = new Intent(this, LoginActivity.class);
+        String server_url = getSharedPreferences(LoginActivity.PREFS_NAME,MODE_PRIVATE).getString(LoginActivity.PREFS_SERVER,null);
+        i.putExtra("server_url",server_url);
         startActivity(i);
         finish();
     }

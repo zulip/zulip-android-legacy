@@ -15,6 +15,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.InputType;
+import android.text.StaticLayout;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.util.Patterns;
@@ -74,6 +75,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     private boolean skipAnimations = false;
     //endregion
 
+    public static String PREFS_NAME = "preferences";
+    public static String PREFS_SERVER = "server_url";
     private View mGoogleSignInButton;
 
     @Override
@@ -98,6 +101,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         mPassword = (EditText) findViewById(R.id.password);
         mShowPassword = (ImageView) findViewById(R.id.showPassword);
         serverIn = (EditText) findViewById(R.id.server_url_in);
+        String url = getIntent().getStringExtra("server_url");
+        if (url!=null){
+            serverIn.setText(url);
+        }
         findViewById(R.id.server_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -272,6 +279,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         serverIn.setText(serverUri.toString());
         mServerEditText.setText(serverUri.toString());
         mServerEditText.setEnabled(false);
+
+        getSharedPreferences(PREFS_NAME,MODE_PRIVATE).edit().putString(PREFS_SERVER,serverUri.toString()).commit();
 
         // if server url does not end with "api/" or if the path is empty, use "/api" as last segment in the path
         List<String> paths = serverUri.getPathSegments();
