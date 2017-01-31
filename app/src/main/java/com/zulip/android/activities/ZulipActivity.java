@@ -1204,7 +1204,7 @@ public class ZulipActivity extends BaseActivity implements
                 resetStreamSearch();
                 String streamName = ((TextView) view.findViewById(R.id.name)).getText().toString();
                 doNarrow(new NarrowFilterStream(streamName, null));
-                drawerLayout.openDrawer(GravityCompat.START);
+                drawerLayout.closeDrawer(GravityCompat.START);
                 if (previousClick != -1 && expandableListView.getCount() > previousClick) {
                     expandableListView.collapseGroup(previousClick);
                 }
