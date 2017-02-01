@@ -9,7 +9,6 @@ import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.support.annotation.ColorInt;
-import android.support.annotation.Keep;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatDelegate;
@@ -411,6 +410,14 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                         messageHolder.leftBar.setBackgroundColor(privateMessageBackground);
                     }
                     messageHolder.messageTile.setBackgroundColor(privateMessageBackground);
+                }
+
+                // set visibility of edited tag
+                Boolean isEdited = message.isHasBeenEdited();
+                if (isEdited != null && isEdited) {
+                    messageHolder.edited.setVisibility(View.VISIBLE);
+                } else {
+                    messageHolder.edited.setVisibility(View.GONE);
                 }
 
                 setUpGravatar(message, messageHolder);

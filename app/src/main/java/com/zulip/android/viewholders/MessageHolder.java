@@ -21,6 +21,7 @@ public class MessageHolder extends RecyclerView.ViewHolder implements View.OnCli
     public ImageView gravatar;
     public TextView senderName;
     public TextView timestamp;
+    public TextView edited;
     public TextView contentView;
     public View leftBar;
     public RelativeLayout messageTile;
@@ -33,6 +34,7 @@ public class MessageHolder extends RecyclerView.ViewHolder implements View.OnCli
         gravatar = (ImageView) itemView.findViewById(R.id.gravatar);
         senderName = (TextView) itemView.findViewById(R.id.senderName);
         timestamp = (TextView) itemView.findViewById(R.id.timestamp);
+        edited = (TextView) itemView.findViewById(R.id.message_edit_tag);
         contentView = (TextView) itemView.findViewById(R.id.contentView);
         contentView.setMovementMethod(LinkMovementMethod.getInstance());
         leftBar = itemView.findViewById(R.id.leftBar);

@@ -138,4 +138,5 @@
     <string name="maximum_time_limit_error">Maximum time limit exceeded</string>
     <string name="editing_message_disabled">Editing message is disabled</string>
     <string name="default_delete_text">(deleted)</string>
+    <string name="message_edited_tag">(EDITED)</string>
 </resources>

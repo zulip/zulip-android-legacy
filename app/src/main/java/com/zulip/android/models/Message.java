@@ -689,10 +689,13 @@ public class Message {
         editDate = history.date;
     }
 
-    public boolean isHasBeenEdited() {
+    public Boolean isHasBeenEdited() {
         return hasBeenEdited;
     }
 
+    public void setHasBeenEdited(boolean isEdited) {
+        this.hasBeenEdited = isEdited;
+    }
 
     //endregion
 
