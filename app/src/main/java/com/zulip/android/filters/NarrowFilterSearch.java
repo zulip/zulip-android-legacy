@@ -79,16 +79,6 @@ public class NarrowFilterSearch implements NarrowFilter {
     }
 
     @Override
-    public boolean equals(NarrowFilter filter) {
-        if (filter instanceof NarrowFilterSearch) {
-            NarrowFilterSearch filterSearch = (NarrowFilterSearch) filter;
-            return this.getTitle().equals(filterSearch.getTitle());
-        } else {
-            return false;
-        }
-    }
-
-    @Override
     public String toString() {
         try {
             return getJsonFilter();

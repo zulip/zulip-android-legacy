@@ -104,19 +104,4 @@ public class NarrowFilterStream implements NarrowFilter {
         }
         return filter.toString();
     }
-
-    @Override
-    public boolean equals(NarrowFilter filter) {
-        if (filter instanceof NarrowFilterStream) {
-            NarrowFilterStream filterStream = (NarrowFilterStream) filter;
-            if (filterStream.getSubtitle() == null) {
-                return this.getSubtitle() == null && filterStream.getTitle().equals(this.getTitle());
-            } else {
-                return (filterStream.getTitle().equals(this.getTitle()) &&
-                        filterStream.getSubtitle().equals(this.getSubtitle()));
-            }
-        } else {
-            return false;
-        }
-    }
 }

@@ -1,7 +1,6 @@
 package com.zulip.android.service;
 
 import com.zulip.android.filters.NarrowFilter;
-import com.zulip.android.networking.response.EditResponse;
 import com.zulip.android.networking.response.GetMessagesResponse;
 import com.zulip.android.networking.response.LoginResponse;
 import com.zulip.android.networking.response.UploadResponse;
@@ -16,11 +15,9 @@ import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Multipart;
-import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Part;
-import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 
@@ -61,8 +58,4 @@ public interface ZulipServices {
     @Multipart
     @POST("v1/user_uploads")
     Call<UploadResponse> upload(@Part MultipartBody.Part file);
-
-    @FormUrlEncoded
-    @PATCH("v1/messages/{id}")
-    Call<EditResponse> editMessage(@Path("id") String messageId, @Field("content") String messageContent);
 }

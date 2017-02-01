@@ -25,9 +25,7 @@ public class EventsBranch {
         MESSAGE(MessageWrapper.class, "message"),
         PRESENCE(PresenceWrapper.class, "presence"),
         SUBSCRIPTIONS(SubscriptionWrapper.class, "subscription"),
-        MUTED_TOPICS(MutedTopicsWrapper.class, "muted_topics"),
-        EDIT_MESSAGE_TIME_LIMIT(EditMessageWrapper.class, "realm");
-
+        MUTED_TOPICS(MutedTopicsWrapper.class, "muted_topics");
 
         private final Class<? extends EventsBranch> klazz;
         private final String key;

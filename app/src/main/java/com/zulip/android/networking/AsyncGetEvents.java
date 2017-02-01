@@ -18,7 +18,6 @@ import com.zulip.android.models.MessageRange;
 import com.zulip.android.models.Person;
 import com.zulip.android.models.Stream;
 import com.zulip.android.networking.response.UserConfigurationResponse;
-import com.zulip.android.networking.response.events.EditMessageWrapper;
 import com.zulip.android.networking.response.events.EventsBranch;
 import com.zulip.android.networking.response.events.GetEventResponse;
 import com.zulip.android.networking.response.events.MessageWrapper;
@@ -117,8 +116,6 @@ public class AsyncGetEvents extends Thread {
             app.setLastEventId(res.getLastEventId());
             app.setPointer(res.getPointer());
             app.setMaxMessageId(res.getMaxMessageId());
-            app.setMessageContentEditParams(res.getRealmMessageContentEditLimitSeconds(),
-                    res.isRealmAllowMessageEditing());
             registeredOrGotEventsThisRun = true;
             processRegister(res);
         }
@@ -341,13 +338,6 @@ public class AsyncGetEvents extends Thread {
             processMessages(messages);
         }
 
-        //get message time limit events
-        List<EventsBranch> messageTimeLimit = events.getEventsOfBranchType(EventsBranch.BranchType.EDIT_MESSAGE_TIME_LIMIT);
-        if (!messageTimeLimit.isEmpty()) {
-            Log.i("AsyncGetEvents", "Received " + messageTimeLimit.size()
-                    + " realm event");
-            processMessageEditParam(messageTimeLimit);
-        }
     }
 
     /**
@@ -448,15 +438,5 @@ public class AsyncGetEvents extends Thread {
                 mActivity.checkAndSetupStreamsDrawer();
             }
         });
-    }
-
-    private void processMessageEditParam(List<EventsBranch> messageEditLimitEvents) {
-        for (EventsBranch wrapper : messageEditLimitEvents) {
-            EditMessageWrapper timeLimitResponse = (EditMessageWrapper) wrapper;
-            app.setMessageContentEditParams(
-                    timeLimitResponse.getData().getMessageContentEditLimitSeconds(),
-                    timeLimitResponse.getData().isMessageEditingAllowed()
-            );
-        }
     }
 }
