@@ -2308,4 +2308,16 @@ public class ZulipActivity extends BaseActivity implements
     public enum Flag {
         RESET_DATABASE,
     }
+
+    /**
+     * TODO: add description
+     * @return
+     */
+    public MessageListFragment getCurrentMessageList() {
+        if (narrowedList == null) {
+            return homeList;
+        } else {
+            return narrowedList;
+        }
+    }
 }
