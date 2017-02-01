@@ -8,6 +8,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -46,6 +50,7 @@ import com.zulip.android.util.CommonProgressDialog;
 import com.zulip.android.util.Constants;
 import com.zulip.android.util.MessageListener;
 import com.zulip.android.util.MutedTopics;
+import com.zulip.android.util.ShrinkBehaviorOfFab;
 import com.zulip.android.util.ZLog;
 import com.zulip.android.viewholders.HeaderSpaceItemDecoration;
 
@@ -86,6 +91,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
     private boolean paused = false;
     private boolean initialized = false;
     private List<Message> messageList;
+    private Snackbar snackbar;
 
     public MessageListFragment() {
         app = ZulipApp.get();
@@ -180,6 +186,17 @@ public class MessageListFragment extends Fragment implements MessageListener {
         });
         mListener.setLayoutBehaviour(linearLayoutManager, adapter);
         return view;
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        CoordinatorLayout coordinatorLayout = (CoordinatorLayout) getActivity().findViewById(R.id.coordinatorLayout);
+        snackbar = Snackbar.make(coordinatorLayout, R.string.no_new_messages, Snackbar.LENGTH_SHORT)
+                .setDuration(1000);
+        FloatingActionButton floatingActionButton = (FloatingActionButton) coordinatorLayout.findViewById(R.id.fab);
+        CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) floatingActionButton.getLayoutParams();
+        params.setBehavior(new ShrinkBehaviorOfFab());
     }
 
     @Override
@@ -568,6 +585,10 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
         if (!initialized) {
             return;
+        }
+
+        if (loadedToBottom){
+            snackbar.show();
         }
         Log.i("onMessages", "Adding " + messages.length + " messages at " + pos);
         int topPosBefore = linearLayoutManager.findFirstVisibleItemPosition();
