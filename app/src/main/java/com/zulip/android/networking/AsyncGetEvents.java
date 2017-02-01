@@ -490,6 +490,7 @@ public class AsyncGetEvents extends Thread {
             Message message = updateEvent.getMessage();
             if (message != null) {
                 message.setFormattedContent(updateEvent.getFormattedContent());
+                message.setHasBeenEdited(true);
 
                 // update the message in database
                 Dao<Message, Integer> messageDao = app.getDao(Message.class);
