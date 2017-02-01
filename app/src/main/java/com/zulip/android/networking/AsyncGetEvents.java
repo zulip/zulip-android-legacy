@@ -7,6 +7,7 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.misc.TransactionManager;
 import com.zulip.android.R;
@@ -24,6 +25,7 @@ import com.zulip.android.networking.response.events.GetEventResponse;
 import com.zulip.android.networking.response.events.MessageWrapper;
 import com.zulip.android.networking.response.events.MutedTopicsWrapper;
 import com.zulip.android.networking.response.events.SubscriptionWrapper;
+import com.zulip.android.networking.response.events.UpdateMessageWrapper;
 import com.zulip.android.util.MutedTopics;
 import com.zulip.android.util.TypeSwapper;
 import com.zulip.android.util.ZLog;
@@ -341,6 +343,14 @@ public class AsyncGetEvents extends Thread {
             processMessages(messages);
         }
 
+        // update message
+        List<EventsBranch> updateMessageEvents = events.getEventsOfBranchType(EventsBranch.BranchType.UPDATE_MESSAGE);
+        if (!updateMessageEvents.isEmpty()) {
+            Log.i("AsyncGetEvents", "Received " + updateMessageEvents.size()
+                    + " update message events");
+            processUpdateMessages(updateMessageEvents);
+        }
+
         //get message time limit events
         List<EventsBranch> messageTimeLimit = events.getEventsOfBranchType(EventsBranch.BranchType.EDIT_MESSAGE_TIME_LIMIT);
         if (!messageTimeLimit.isEmpty()) {
@@ -348,9 +358,6 @@ public class AsyncGetEvents extends Thread {
                     + " realm event");
             processMessageEditParam(messageTimeLimit);
         }
-
-        // update message
-        // TODO: handle update message event
     }
 
     /**
@@ -453,6 +460,10 @@ public class AsyncGetEvents extends Thread {
         });
     }
 
+    /**
+     * TODO: add description
+     * @param messageEditLimitEvents
+     */
     private void processMessageEditParam(List<EventsBranch> messageEditLimitEvents) {
         for (EventsBranch wrapper : messageEditLimitEvents) {
             EditMessageWrapper timeLimitResponse = (EditMessageWrapper) wrapper;
@@ -461,5 +472,31 @@ public class AsyncGetEvents extends Thread {
                     timeLimitResponse.getData().isMessageEditingAllowed()
             );
         }
+    }
+
+    private void processUpdateMessages(List<EventsBranch> updateEvents) {
+        for (EventsBranch event : updateEvents) {
+            UpdateMessageWrapper updateEvent = (UpdateMessageWrapper) event;
+            Message message = updateEvent.getMessage();
+            if (message != null) {
+                message.setFormattedContent(updateEvent.getFormattedContent());
+
+                // update the message in database
+                Dao<Message, Integer> messageDao = app.getDao(Message.class);
+                try {
+                    messageDao.update(message);
+                } catch (SQLException e) {
+                    ZLog.logException(e);
+                }
+            }
+        }
+
+        mActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // notify adapter dataset changed
+                mActivity.getCurrentMessageList().getAdapter().notifyDataSetChanged();
+            }
+        });
     }
 }
