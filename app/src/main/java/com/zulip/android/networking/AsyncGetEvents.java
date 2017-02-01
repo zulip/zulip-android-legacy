@@ -348,6 +348,9 @@ public class AsyncGetEvents extends Thread {
                     + " realm event");
             processMessageEditParam(messageTimeLimit);
         }
+
+        // update message
+        // TODO: handle update message event
     }
 
     /**
