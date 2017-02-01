@@ -13,6 +13,7 @@ import com.j256.ormlite.misc.TransactionManager;
 import com.zulip.android.R;
 import com.zulip.android.ZulipApp;
 import com.zulip.android.activities.LoginActivity;
+import com.zulip.android.activities.RecyclerMessageAdapter;
 import com.zulip.android.activities.ZulipActivity;
 import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageRange;
@@ -36,6 +37,7 @@ import org.json.JSONException;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -482,6 +484,7 @@ public class AsyncGetEvents extends Thread {
      * @param updateEvents list of events {@link EventsBranch.BranchType#UPDATE_MESSAGE}
      */
     private void processUpdateMessages(List<EventsBranch> updateEvents) {
+        final List<Integer> messageIds = new ArrayList<>();
         for (EventsBranch event : updateEvents) {
             UpdateMessageWrapper updateEvent = (UpdateMessageWrapper) event;
             Message message = updateEvent.getMessage();
@@ -492,6 +495,7 @@ public class AsyncGetEvents extends Thread {
                 Dao<Message, Integer> messageDao = app.getDao(Message.class);
                 try {
                     messageDao.update(message);
+                    messageIds.add(message.getId());
                 } catch (SQLException e) {
                     ZLog.logException(e);
                 }
@@ -501,8 +505,11 @@ public class AsyncGetEvents extends Thread {
         mActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                // notify adapter dataset changed
-                mActivity.getCurrentMessageList().getAdapter().notifyDataSetChanged();
+                RecyclerMessageAdapter adapter = mActivity.getCurrentMessageList().getAdapter();
+                for (int id : messageIds) {
+                    // notify adapter data item changed
+                    adapter.notifyItemChanged(adapter.getItemIndex(id));
+                }
             }
         });
     }
