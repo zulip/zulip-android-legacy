@@ -461,8 +461,9 @@ public class AsyncGetEvents extends Thread {
     }
 
     /**
-     * TODO: add description
-     * @param messageEditLimitEvents
+     * Get updated edit time limit from event of type {@link EventsBranch.BranchType#EDIT_MESSAGE_TIME_LIMIT}
+     *
+     * @param messageEditLimitEvents list of events {@link EventsBranch}
      */
     private void processMessageEditParam(List<EventsBranch> messageEditLimitEvents) {
         for (EventsBranch wrapper : messageEditLimitEvents) {
@@ -474,6 +475,12 @@ public class AsyncGetEvents extends Thread {
         }
     }
 
+    /**
+     * Update messages in database from list of {@link EventsBranch.BranchType#UPDATE_MESSAGE} type
+     * events {@link EventsBranch}.
+     *
+     * @param updateEvents list of events {@link EventsBranch.BranchType#UPDATE_MESSAGE}
+     */
     private void processUpdateMessages(List<EventsBranch> updateEvents) {
         for (EventsBranch event : updateEvents) {
             UpdateMessageWrapper updateEvent = (UpdateMessageWrapper) event;

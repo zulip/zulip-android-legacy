@@ -10,7 +10,8 @@ import java.sql.SQLException;
 import java.util.List;
 
 /**
- * TODO: Add description
+ * This class is used to deserialize the update_message type events {@link EventsBranch.BranchType#UPDATE_MESSAGE}.
+ *
  * example: {"rendered_content":"<p>(deleted</p>","sender":"example@gmail.com",
  *      "edit_timestamp":1485954038,"orig_content":"(deleted)","message_ids":[142650],
  *      "content":"(deleted","orig_rendered_content":"<p>(deleted)</p>","flags":["read"],"id":31,
@@ -59,15 +60,6 @@ public class UpdateMessageWrapper extends EventsBranch {
         }
 
         return null;
-    }
-
-    // TODO: remove these if cntent is not used
-    public String getContent() {
-        return this.content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
     }
 
     public String getFormattedContent() {

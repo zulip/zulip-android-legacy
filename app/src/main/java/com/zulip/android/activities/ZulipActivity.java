@@ -2289,8 +2289,9 @@ public class ZulipActivity extends BaseActivity implements
     }
 
     /**
-     * TODO: add description
-     * @return
+     * Get current message list fragment.
+     *
+     * @return {@link MessageListFragment}
      */
     public MessageListFragment getCurrentMessageList() {
         if (narrowedList == null) {
