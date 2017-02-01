@@ -75,8 +75,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     private boolean skipAnimations = false;
     //endregion
 
-    public static String PREFS_NAME = "preferences";
-    public static String PREFS_SERVER = "server_url";
     private View mGoogleSignInButton;
 
     @Override
@@ -102,7 +100,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         mShowPassword = (ImageView) findViewById(R.id.showPassword);
         serverIn = (EditText) findViewById(R.id.server_url_in);
         String url = getIntent().getStringExtra("server_url");
-        if (url!=null){
+        if (url!=null || !url.equals("") || !url.isEmpty()){
             serverIn.setText(url);
         }
         findViewById(R.id.server_btn).setOnClickListener(new View.OnClickListener() {
@@ -122,6 +120,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                 findViewById(R.id.passwordAuthLayout).setVisibility(View.GONE);
                 findViewById(R.id.google_sign_in_button).setVisibility(View.GONE);
                 findViewById(R.id.local_server_button).setVisibility(View.GONE);
+                //remove error from all editText as user now corrected serverUrl
+                mPassword.setError(null);
+                mUserName.setError(null);
+                serverIn.setError(null);
+                mServerEditText.setError(null);
             }
         });
         //restore instance state on orientation change
@@ -276,11 +279,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         serverUri = serverUri.buildUpon().scheme(httpScheme).build();
 
         // display server url with http scheme used
-        serverIn.setText(serverUri.toString());
-        mServerEditText.setText(serverUri.toString());
+        serverIn.setText(serverUri.toString().toLowerCase());
+        mServerEditText.setText(serverUri.toString().toLowerCase());
         mServerEditText.setEnabled(false);
-
-        getSharedPreferences(PREFS_NAME,MODE_PRIVATE).edit().putString(PREFS_SERVER,serverUri.toString()).commit();
 
         // if server url does not end with "api/" or if the path is empty, use "/api" as last segment in the path
         List<String> paths = serverUri.getPathSegments();
@@ -288,7 +289,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
             serverUri = serverUri.buildUpon().appendEncodedPath("api/").build();
         }
 
-        ((ZulipApp) getApplication()).setServerURL(serverUri.toString());
+        ((ZulipApp) getApplication()).setServerURL(serverUri.toString().toLowerCase());
 
         // create new zulipServices object every time by setting it to null
         getApp().setZulipServices(null);

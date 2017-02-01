@@ -219,4 +219,25 @@ public class Stream {
     public void setInHomeView(boolean inHomeView) {
         this.inHomeView = inHomeView;
     }
+
+    /**
+     * This function returns the last message read in {@param streamName} stream.
+     *
+     * @param app {@link ZulipApp}
+     * @param streamName name of stream
+     * @return last message {@link Message} read
+     */
+    public static Message getLastMessageRead(ZulipApp app, String streamName) {
+        try {
+            Dao<Message, Integer> messageDao = app.getDatabaseHelper().getDao(Message.class);
+
+            // query for message in given stream and orderby timestamp decreasingly
+            return messageDao.queryBuilder().orderBy(Message.TIMESTAMP_FIELD, false)
+                    .where().eq(Message.RECIPIENTS_FIELD, new SelectArg(Message.RECIPIENTS_FIELD, streamName))
+                    .queryForFirst();
+        } catch (SQLException e) {
+            ZLog.logException(e);
+        }
+        return null;
+    }
 }

@@ -2,11 +2,14 @@ package com.zulip.android.activities;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -16,6 +19,9 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,8 +38,11 @@ import com.zulip.android.models.Person;
 import com.zulip.android.models.Stream;
 import com.zulip.android.networking.AsyncGetOldMessages;
 import com.zulip.android.networking.ZulipAsyncPushTask;
+import com.zulip.android.networking.response.EditResponse;
+import com.zulip.android.util.Constants;
 import com.zulip.android.util.MessageListener;
 import com.zulip.android.util.MutedTopics;
+import com.zulip.android.util.ZLog;
 import com.zulip.android.viewholders.HeaderSpaceItemDecoration;
 
 import org.json.JSONObject;
@@ -42,6 +51,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * This is a Fragment which holds the recyclerView for displaying the messages
@@ -62,9 +75,10 @@ public class MessageListFragment extends Fragment implements MessageListener {
     // Whether we've loaded all available messages in that direction
     private boolean loadedToTop = false;
     private boolean loadedToBottom = false;
-
     private int firstMessageId = -1;
     private int lastMessageId = -1;
+    // anchor message id used while narrowing to a subject or stream
+    private int anchorId = -1;
     private boolean paused = false;
     private boolean initialized = false;
     private List<Message> messageList;
@@ -187,19 +201,19 @@ public class MessageListFragment extends Fragment implements MessageListener {
                 return true;
             case R.id.narrow_to_private:
                 if (getActivity() instanceof NarrowListener) {
-                    ((NarrowListener) getActivity()).onNarrow(new NarrowFilterPM(Arrays.asList(message.getRecipients(app))));
+                    ((NarrowListener) getActivity()).onNarrow(new NarrowFilterPM(Arrays.asList(message.getRecipients(app))), message.getId());
                     ((NarrowListener) getActivity()).onNarrowFillSendBox(message, false);
                 }
                 return true;
             case R.id.narrow_to_stream:
                 if (getActivity() instanceof NarrowListener) {
-                    ((NarrowListener) getActivity()).onNarrow(new NarrowFilterStream(message.getStream(), null));
+                    ((NarrowListener) getActivity()).onNarrow(new NarrowFilterStream(message.getStream(), null), message.getId());
                     ((NarrowListener) getActivity()).onNarrowFillSendBox(message, false);
                 }
                 return true;
             case R.id.narrow_to_subject:
                 if (getActivity() instanceof NarrowListener) {
-                    ((NarrowListener) getActivity()).onNarrow(new NarrowFilterStream(message.getStream(), message.getSubject()));
+                    ((NarrowListener) getActivity()).onNarrow(new NarrowFilterStream(message.getStream(), message.getSubject()), message.getId());
                     ((NarrowListener) getActivity()).onNarrowFillSendBox(message, false);
                 }
                 return true;
@@ -207,9 +221,23 @@ public class MessageListFragment extends Fragment implements MessageListener {
                 copyMessage(message);
                 Toast.makeText(getContext(), R.string.message_copied, Toast.LENGTH_SHORT).show();
                 return true;
+            case R.id.edit_message:
+                editMessage(message, adapter.getContextMenuItemSelectedPosition());
+                return true;
             default:
                 return super.onContextItemSelected(item);
         }
+    }
+
+    private void initializeNarrow() {
+        adapter.clear();
+        messageIndex.clear();
+
+        firstMessageId = -1;
+        lastMessageId = -1;
+
+        loadingMessages = true;
+        adapter.setFooterShowing(true);
     }
 
     public void onReadyToDisplay(boolean registered) {
@@ -222,18 +250,32 @@ public class MessageListFragment extends Fragment implements MessageListener {
             return;
         }
 
-        adapter.clear();
-        messageIndex.clear();
-
-        firstMessageId = -1;
-        lastMessageId = -1;
-
-        loadingMessages = true;
-        adapter.setFooterShowing(true);
-
+        initializeNarrow();
         fetch();
         initialized = true;
     }
+
+    /**
+     * Prepare to display narrowed view with {@param messageId} as anchor
+     *
+     * @param registered is event registered
+     * @param messageId  anchor message id
+     */
+    public void onReadyToDisplay(boolean registered, int messageId) {
+        if (initialized && !registered) {
+            // Already have state, and already processed any events that came in
+            // when resuming the existing queue.
+            adapter.setFooterShowing(false);
+            loadingMessages = false;
+            Log.i("onReadyToDisplay", "just a resume");
+            return;
+        }
+
+        initializeNarrow();
+        fetch(messageId);
+        initialized = true;
+    }
+
 
     private void showEmptyView() {
         Log.d("ErrorRecieving", "No Messages found for current list" + ((filter != null) ? ":" + filter.getTitle() : ""));
@@ -263,6 +305,37 @@ public class MessageListFragment extends Fragment implements MessageListener {
                 100, filter);
     }
 
+    /**
+     * This function fetches messages using {@link MessageListFragment#filter} and anchors them
+     * around {@param messageID}.
+     *
+     * @param messageID anchor message id
+     */
+    private void fetch(int messageID) {
+        // set the achor for fetching messages as the message clicked
+        this.anchorId = messageID;
+
+        final AsyncGetOldMessages oldMessagesReq = new AsyncGetOldMessages(this);
+        oldMessagesReq.setCallback(new ZulipAsyncPushTask.AsyncTaskCompleteListener() {
+            @Override
+            public void onTaskComplete(String result, JSONObject jsonObject) {
+                loadingMessages = false;
+                adapter.setHeaderShowing(false);
+                if (result.equals("0")) {
+                    showEmptyView();
+                }
+            }
+
+            @Override
+            public void onTaskFailure(String result) {
+                loadingMessages = false;
+                adapter.setHeaderShowing(false);
+            }
+        });
+        oldMessagesReq.execute(messageID, LoadPosition.INITIAL, 100,
+                100, filter);
+    }
+
     private void selectPointer() {
         if (filter != null) {
             Where<Message, Object> filteredWhere;
@@ -277,16 +350,104 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
                 closestQuery.orderBy(Message.TIMESTAMP_FIELD, false).setWhere(
                         filteredWhere);
+                Message closestMessage = closestQuery.queryForFirst();
 
-                recyclerView.scrollToPosition(adapter.getItemIndex(closestQuery
-                        .queryForFirst()));
-
+                // use anchor message id if message was narrowed
+                if (anchorId != -1) {
+                    selectMessage(getMessageById(anchorId));
+                } else {
+                    recyclerView.scrollToPosition(adapter.getItemIndex(closestMessage));
+                }
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         } else {
             int anc = app.getPointer();
             selectMessage(getMessageById(anc));
+        }
+    }
+
+    /**
+     * Edit a message passed as parameter
+     *
+     * @param message Message to be edited
+     */
+    private void editMessage(final Message message, final int position) {
+        boolean isEditingAllowed = app.
+                getSettings().
+                getBoolean(Constants.IS_EDITING_ALLOWED, Constants.DEFAULT_EDITING_ALLOWED);
+        if (!isEditingAllowed) {
+            Toast.makeText(getContext(), R.string.editing_message_disabled, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        int maxMessageContentEditLimit = app.
+                getSettings().
+                getInt(Constants.MAXIMUM_CONTENT_EDIT_LIMIT, Constants.DEFAULT_MAXIMUM_CONTENT_EDIT_LIMIT);
+        int timeSinceMessageSend = (int) ((System.currentTimeMillis() - message.getTimestamp().getTime()) / 1000);
+        if (timeSinceMessageSend > maxMessageContentEditLimit) {
+            Toast.makeText(getContext(), R.string.maximum_time_limit_error, Toast.LENGTH_SHORT).show();
+        } else {
+            final View dialogView = View.inflate(getContext(),
+                    R.layout.message_edit_dialog, null);
+            //Pop up a dialog box with previous message content
+            final AlertDialog dialog = new AlertDialog.Builder(getContext())
+                    .setTitle(R.string.edit_message)
+                    .setView(dialogView)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .create();
+            dialog.getWindow().setSoftInputMode(
+                    WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+            dialog.show();
+
+            final EditText dialogMessageEditText = (EditText) dialogView.findViewById(R.id.message_content);
+            dialogMessageEditText.setText(message.getContent().trim());
+
+            //Move cursor to end of text
+            dialogMessageEditText.setSelection(dialogMessageEditText.getText().length());
+
+            //OK button listener
+            dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+                //Show edit option only on if current user send it.
+                @Override
+                public void onClick(View view) {
+                    dialog.cancel();
+                    InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                    //Start a progress dialog indicating editing message
+                    final ProgressDialog progress = new ProgressDialog(getActivity());
+                    progress.setCancelable(false);
+                    progress.setMessage(app.getString(R.string.editing_message));
+                    progress.show();
+                    final String editedMessageContent =
+                            dialogMessageEditText.getText().toString().length() == 0 ? getString(R.string.default_delete_text) : dialogMessageEditText.getText().toString();
+
+                    app.getZulipServices()
+                            .editMessage(String.valueOf(message.getID()), editedMessageContent)
+                            .enqueue(new Callback<EditResponse>() {
+                                @Override
+                                public void onResponse(Call<EditResponse> call, Response<EditResponse> response) {
+                                    if (response.isSuccessful()) {
+                                        message.setContent(editedMessageContent);
+                                        message.setFormattedContent(editedMessageContent);
+                                        adapter.notifyItemChanged(position);
+                                        progress.dismiss();
+                                        Toast.makeText(getActivity(), R.string.message_edited, Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        progress.dismiss();
+                                        Toast.makeText(getActivity(), R.string.message_edit_failed, Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(Call<EditResponse> call, Throwable t) {
+                                    progress.dismiss();
+                                    ZLog.logException(t);
+                                    Toast.makeText(getActivity(), R.string.message_edit_failed, Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                }
+            });
         }
     }
 
@@ -374,8 +535,16 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
         if (pos == LoadPosition.ABOVE) {
             adapter.setHeaderShowing(moreAbove);
+            /* if we don't account for message headers generated, a scroll jitter is observed
+             whenever messages are loaded ABOVE as the original top message's position is not
+             retained. We also need to account for the message header of original top message in
+             order to retain the correct scroll position.
+            */
+
             // Restore the position of the top item
-            this.recyclerView.scrollToPosition(topPosBefore + addedCount);
+            // account for generated message headers
+            // +1 for the header of top item
+            this.recyclerView.scrollToPosition(topPosBefore + addedCount + headerParents + 1);
 
             if (noFurtherMessages) {
                 loadedToTop = true;
@@ -541,6 +710,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
             loadMessageId(app.getMaxMessageId());
         }
     }
+
     public boolean scrolledToLastMessage() {
         Object object = adapter.getItem(linearLayoutManager.findLastVisibleItemPosition());
         return object instanceof Message && (((Message) object).getId() >= app.getMaxMessageId() - 2);

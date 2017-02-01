@@ -13,5 +13,10 @@
         <ignore path="**/ic_person_24dp.png"/>
         <ignore path="**/ic_search_24dp.png"/>
     </issue>
-
+    <issue id="UnusedNamespace" severity="error"/>
+    <issue id="UnusedAttribute" severity="error"/>
+    <issue id="Deprecated" severity="error"/>
+    <issue id="Typos" severity="error"/>
+    <issue id="SdCardPath" severity="error"/>
+    <issue id="NewerVersionAvailable" severity="error"/>
 </lint>
