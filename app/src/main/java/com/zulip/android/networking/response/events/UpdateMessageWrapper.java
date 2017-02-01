@@ -6,7 +6,6 @@ import com.zulip.android.ZulipApp;
 import com.zulip.android.models.Message;
 import com.zulip.android.util.ZLog;
 
-import java.sql.Date;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -26,7 +25,7 @@ public class UpdateMessageWrapper extends EventsBranch {
     private String senderEmail;
 
     @SerializedName("edit_timestamp")
-    private Date editedTimeStamp;
+    private long editedTimeStamp;
 
     @SerializedName("orig_content")
     private String origContent;
@@ -62,6 +61,7 @@ public class UpdateMessageWrapper extends EventsBranch {
         return null;
     }
 
+    // TODO: remove these if cntent is not used
     public String getContent() {
         return this.content;
     }

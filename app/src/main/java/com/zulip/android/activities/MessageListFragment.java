@@ -715,4 +715,8 @@ public class MessageListFragment extends Fragment implements MessageListener {
         Object object = adapter.getItem(linearLayoutManager.findLastVisibleItemPosition());
         return object instanceof Message && (((Message) object).getId() >= app.getMaxMessageId() - 2);
     }
+
+    public RecyclerMessageAdapter getAdapter() {
+        return this.adapter;
+    }
 }
