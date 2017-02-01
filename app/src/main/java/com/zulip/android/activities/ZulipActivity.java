@@ -56,7 +56,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
-import android.view.WindowManager;
 import android.view.animation.Interpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -397,9 +396,7 @@ public class ZulipActivity extends BaseActivity implements
                 if (id == allPeopleId) {
                     doNarrow(new NarrowFilterAllPMs(app.getYou()));
                 } else {
-                    Person person = Person.getById(app, (int) id);
-                    narrowPMWith(person);
-                    switchToPrivate();
+                    narrow_pm_with(Person.getById(app, (int) id));
                 }
             }
         });
@@ -556,8 +553,6 @@ public class ZulipActivity extends BaseActivity implements
         handleOnFragmentChange();
         calendar = Calendar.getInstance();
         setupSnackBar();
-        //Hides Keyboard if it was open with focus on an editText before restart of the activity
-        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
     }
 
     /**
@@ -574,7 +569,6 @@ public class ZulipActivity extends BaseActivity implements
                 if (narrowedList == null) {
                     calendar = Calendar.getInstance();
                     menu.getItem(2).getSubMenu().getItem(0).setTitle(R.string.menu_today);
-                    switchToStream();
                     checkForChatBoxFocusRequest();
                 } else if (narrowedList.filter instanceof NarrowFilterByDate) {
                     menu.getItem(2).getSubMenu().getItem(0).setTitle(R.string.menu_one_day_before);
@@ -584,7 +578,7 @@ public class ZulipActivity extends BaseActivity implements
     }
 
     private void checkForChatBoxFocusRequest() {
-        if (TextUtils.isEmpty(streamActv.getText().toString()) && isCurrentModeStream()) {
+        if (TextUtils.isEmpty(streamActv.getText().toString())) {
             streamActv.requestFocus();
         } else if (TextUtils.isEmpty(topicActv.getText().toString())) {
             topicActv.requestFocus();
@@ -1089,7 +1083,6 @@ public class ZulipActivity extends BaseActivity implements
             showView(chatBox);
         } else {
             hideView(chatBox);
-            hideSoftKeyBoard();
         }
     }
 
@@ -1203,14 +1196,13 @@ public class ZulipActivity extends BaseActivity implements
             public boolean onGroupClick(ExpandableListView expandableListView, View view, int position, long l) {
                 resetStreamSearch();
                 String streamName = ((TextView) view.findViewById(R.id.name)).getText().toString();
-                doNarrowToLastRead(streamName);
+                doNarrow(new NarrowFilterStream(streamName, null));
                 drawerLayout.openDrawer(GravityCompat.START);
                 if (previousClick != -1 && expandableListView.getCount() > previousClick) {
                     expandableListView.collapseGroup(previousClick);
                 }
                 expandableListView.expandGroup(position);
                 previousClick = position;
-                onNarrowFillSendBoxStream(streamName, "", false);
                 return true;
             }
         });
@@ -1232,7 +1224,7 @@ public class ZulipActivity extends BaseActivity implements
                             @Override
                             public void onClick(View v) {
                                 resetStreamSearch();
-                                doNarrowToLastRead(streamName);
+                                onNarrow(new NarrowFilterStream(streamName, null));
                                 onNarrowFillSendBoxStream(streamName, "", false);
                             }
                         });
@@ -1275,24 +1267,6 @@ public class ZulipActivity extends BaseActivity implements
             }
         });
         streamsDrawer.setAdapter(streamsDrawerAdapter);
-    }
-
-    /**
-     * Helper function used to call {@link ZulipActivity#onNarrow(NarrowFilter, int)} or
-     * {@link ZulipActivity#onNarrow(NarrowFilter)} based on last message read in {@param streamName} stream.
-     *
-     * @param streamName stream name
-     */
-    private void doNarrowToLastRead(String streamName) {
-        // get last message read in stream
-        Message message = Stream.getLastMessageRead(app, streamName);
-        if (message != null) {
-            // fetch results around the last message read
-            onNarrow(new NarrowFilterStream(streamName, null), message.getId());
-        } else {
-            // new stream
-            onNarrow(new NarrowFilterStream(streamName, null));
-        }
     }
 
     /**
@@ -1769,13 +1743,8 @@ public class ZulipActivity extends BaseActivity implements
         doNarrow(new NarrowFilterStream(stream, null));
     }
 
-    private void narrowPMWith(final Person person) {
-        List<Person> list = new ArrayList<>();
-        list.add(person);
-        if (!person.getEmail().equals(app.getYou().getEmail()))
-            list.add(app.getYou());
-        doNarrow(new NarrowFilterPM(list));
-        onNarrowFillSendBoxPrivate(new Person[]{person},false);
+    private void narrow_pm_with(final Person person) {
+        doNarrow(new NarrowFilterPM(Arrays.asList(app.getYou(), person)));
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
@@ -1809,20 +1778,6 @@ public class ZulipActivity extends BaseActivity implements
         // Push to the back stack if we are not already narrowed
         pushListFragment(narrowedList, NARROW);
         narrowedList.onReadyToDisplay(true);
-        showView(appBarLayout);
-    }
-
-    /**
-     * This method creates a new Instance of the MessageListFragment and displays it with the filter
-     * whiling keeping the view anchored at {@param messageId}.
-     * @param filter NarrowFilter passed
-     * @param messageId used as anchor for fetching messages
-     */
-    public void doNarrow(NarrowFilter filter, int messageId) {
-        narrowedList = MessageListFragment.newInstance(filter);
-        // Push to the back stack if we are not already narrowed
-        pushListFragment(narrowedList, NARROW);
-        narrowedList.onReadyToDisplay(true, messageId);
         showView(appBarLayout);
     }
 
@@ -1896,16 +1851,8 @@ public class ZulipActivity extends BaseActivity implements
     }
 
     public void onNarrow(NarrowFilter narrowFilter) {
-        if (narrowedList == null || !narrowedList.filter.equals(narrowFilter)) {
-            doNarrow(narrowFilter);
-        }
-    }
-
-
-    public void onNarrow(NarrowFilter narrowFilter, int messageId) {
-        if (narrowedList == null || !narrowedList.filter.equals(narrowFilter)) {
-            doNarrow(narrowFilter, messageId);
-        }
+        // TODO: check if already narrowed to this particular stream/subject
+        doNarrow(narrowFilter);
     }
 
     @Override
@@ -1942,7 +1889,7 @@ public class ZulipActivity extends BaseActivity implements
             searchView.setOnQueryTextListener(new android.support.v7.widget.SearchView.OnQueryTextListener() {
                 @Override
                 public boolean onQueryTextSubmit(String s) {
-                    onNarrow(new NarrowFilterSearch(s));
+                    doNarrow(new NarrowFilterSearch(s));
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
                         mSearchMenuItem.collapseActionView();
                     }
@@ -2004,7 +1951,7 @@ public class ZulipActivity extends BaseActivity implements
                                 public void onClick(
                                         DialogInterface dialogInterface, int i) {
                                     String query = editText.getText().toString();
-                                    onNarrow(new NarrowFilterSearch(query));
+                                    doNarrow(new NarrowFilterSearch(query));
                                 }
                             });
                     builder.show();
@@ -2033,11 +1980,11 @@ public class ZulipActivity extends BaseActivity implements
                 if (menu != null && menu.getItem(2).getSubMenu().getItem(0).getTitle().equals(getString(R.string.menu_one_day_before))) {
                     //user selected One Day Before
                     calendar.add(Calendar.DATE, -1);
-                    onNarrow(new NarrowFilterByDate(calendar.getTime()));
+                    doNarrow(new NarrowFilterByDate(calendar.getTime()));
                     break;
                 }
                 //else Narrow to Today
-                onNarrow(new NarrowFilterByDate());
+                doNarrow(new NarrowFilterByDate());
                 break;
             case R.id.enterDate:
                 //show Dialog with calendar date as selected to pick Date
@@ -2045,7 +1992,7 @@ public class ZulipActivity extends BaseActivity implements
                     @Override
                     public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
                         calendar.set(year, month, dayOfMonth);
-                        onNarrow(new NarrowFilterByDate(calendar.getTime()));
+                        doNarrow(new NarrowFilterByDate(calendar.getTime()));
                     }
                 }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
                 //set max date to today so future dates are not selectable

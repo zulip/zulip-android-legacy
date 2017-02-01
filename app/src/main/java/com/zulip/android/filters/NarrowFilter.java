@@ -51,9 +51,4 @@ public interface NarrowFilter extends Parcelable {
      * A filter to apply when fetching additional messages from the server
      */
     public String getJsonFilter() throws JSONException;
-
-    /**
-     * Check if the current narrow filter matches the passed filter
-     */
-    public boolean equals(NarrowFilter filter);
 }

@@ -73,9 +73,7 @@ public class NarrowFilterPM implements NarrowFilter {
     public String getTitle() {
         ArrayList<String> names = new ArrayList<>();
         for (Person person : people) {
-            // If PM to self then show title as your name
-            // people size == 1 implies PM to self
-            if (person.getId() != ZulipApp.get().getYou().getId() || people.size() == 1) {
+            if (!person.equals(ZulipApp.get().getYou()) || people.size() == 1) { //If PM to self then show title as your name
                 names.add(person.getName());
             }
         }
@@ -108,16 +106,6 @@ public class NarrowFilterPM implements NarrowFilter {
         return (new JSONArray()).put(
                 new JSONArray(Arrays.asList("pm-with",
                         TextUtils.join(",", emails)))).toString();
-    }
-
-    @Override
-    public boolean equals(NarrowFilter filter) {
-        if (filter instanceof NarrowFilterPM) {
-            NarrowFilterPM filterPM = (NarrowFilterPM) filter;
-            return this.getTitle().equals(filterPM.getTitle());
-        } else {
-            return false;
-        }
     }
 
     @Override

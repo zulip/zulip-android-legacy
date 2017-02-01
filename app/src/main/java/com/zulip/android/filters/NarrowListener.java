@@ -9,8 +9,6 @@ import com.zulip.android.models.Person;
 public interface NarrowListener {
     void onNarrow(NarrowFilter narrowFilter);
 
-    void onNarrow(NarrowFilter narrowFilter, int messageId);
-
     void onNarrowFillSendBox(Message message, boolean openSoftKeyboard);
 
     void onNarrowFillSendBoxStream(String stream, String message, boolean openSoftKeyboard);

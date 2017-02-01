@@ -20,7 +20,6 @@ import com.j256.ormlite.stmt.DeleteBuilder;
 import com.j256.ormlite.table.DatabaseTable;
 import com.zulip.android.R;
 import com.zulip.android.ZulipApp;
-import com.zulip.android.util.Constants;
 import com.zulip.android.util.CustomHtmlToSpannedConverter;
 import com.zulip.android.util.UrlHelper;
 import com.zulip.android.util.ZLog;
@@ -197,7 +196,7 @@ public class Message {
             this.setSubject(null);
         }
 
-        this.setTimestamp(new Date(message.getLong("timestamp") * Constants.MILLISECONDS_IN_A_MINUTE));
+        this.setTimestamp(new Date(message.getLong("timestamp") * 1000));
         this.setMessageRead(false);
     }
 
@@ -585,7 +584,7 @@ public class Message {
         return formattedContent;
     }
 
-    public void setFormattedContent(String formattedContent) {
+    private void setFormattedContent(String formattedContent) {
         this.formattedContent = formattedContent;
     }
 

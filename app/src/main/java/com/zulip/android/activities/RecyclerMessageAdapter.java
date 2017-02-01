@@ -9,7 +9,6 @@ import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.support.annotation.ColorInt;
-import android.support.annotation.Keep;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatDelegate;
@@ -117,28 +116,22 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                     case R.id.displayRecipient: //StreamTV
                         MessageHeaderParent messageHeaderParent = (MessageHeaderParent) getItem(position);
                         if (messageHeaderParent.getMessageType() == MessageType.PRIVATE_MESSAGE) {
-                            Person[] recipientArray = messageHeaderParent.getRecipients(zulipApp);
-                            narrowListener.onNarrow(new NarrowFilterPM(Arrays.asList(recipientArray)),
-                                    messageHeaderParent.getMessageId());
-                            narrowListener.onNarrowFillSendBoxPrivate(recipientArray,false);
+                            narrowListener.onNarrow(new NarrowFilterPM(
+                                    Arrays.asList(messageHeaderParent.getRecipients((ZulipApp.get())))));
                         } else {
-                            narrowListener.onNarrow(new NarrowFilterStream(Stream.getByName(zulipApp,
-                                    messageHeaderParent.getStream()), null),
-                                    messageHeaderParent.getMessageId());
+
+                            narrowListener.onNarrow(new NarrowFilterStream(Stream.getByName(zulipApp, messageHeaderParent.getStream()), null));
                             narrowListener.onNarrowFillSendBoxStream(messageHeaderParent.getStream(), "", false);
                         }
                         break;
                     case R.id.instance: //Topic
                         MessageHeaderParent messageParent = (MessageHeaderParent) getItem(position);
                         if (messageParent.getMessageType() == MessageType.STREAM_MESSAGE) {
-                            narrowListener.onNarrow(new NarrowFilterStream(Stream.getByName(zulipApp,
-                                    messageParent.getStream()), messageParent.getSubject()),
-                                    messageParent.getMessageId());
-                            narrowListener.onNarrowFillSendBoxStream(messageParent.getStream(), messageParent.getSubject(), false);
+                            narrowListener.onNarrow(new NarrowFilterStream(Stream.getByName(zulipApp, messageParent.getStream()), messageParent.getSubject()));
+                            narrowListener.onNarrowFillSendBoxStream(messageParent.getStream(), "", false);
                         } else {
                             Person[] recipentArray = messageParent.getRecipients(zulipApp);
-                            narrowListener.onNarrow(new NarrowFilterPM(Arrays.asList(recipentArray)),
-                                    messageParent.getMessageId());
+                            narrowListener.onNarrow(new NarrowFilterPM(Arrays.asList(recipentArray)));
                             narrowListener.onNarrowFillSendBoxPrivate(recipentArray, false);
                         }
                         break;
@@ -422,8 +415,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     @Override
     public void onViewAttachedToWindow(RecyclerView.ViewHolder holder) {
         super.onViewRecycled(holder);
-        if (holder.getItemViewType() == VIEWTYPE_MESSAGE)
-            // mark fields as read in homeview and streams narrow
+        if (holder.getItemViewType() == VIEWTYPE_MESSAGE && !startedFromFilter)
             markThisMessageAsRead((Message) getItem(holder.getAdapterPosition()));
     }
 
@@ -435,7 +427,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     private void markThisMessageAsRead(Message message) {
         try {
             int mID = message.getID();
-            if (!startedFromFilter && zulipApp.getPointer() < mID) {
+            if (zulipApp.getPointer() < mID) {
                 zulipApp.syncPointer(mID);
             }
 

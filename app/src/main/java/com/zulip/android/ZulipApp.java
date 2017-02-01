@@ -37,7 +37,6 @@ import com.zulip.android.networking.ZulipInterceptor;
 import com.zulip.android.networking.response.UserConfigurationResponse;
 import com.zulip.android.networking.response.events.EventsBranch;
 import com.zulip.android.service.ZulipServices;
-import com.zulip.android.util.Constants;
 import com.zulip.android.util.GoogleAuthHelper;
 import com.zulip.android.util.ZLog;
 
@@ -533,36 +532,4 @@ public class ZulipApp extends Application {
                 });
     }
 
-    /**
-     * Sets message content editing parameters
-     *
-     * @param seconds time limit in seconds for editing message
-     * @param param   parameter indicating editing message is allowed or not
-     */
-    public void setMessageContentEditParams(int seconds, boolean param) {
-        SharedPreferences preferences = getSettings();
-        SharedPreferences.Editor editor = preferences.edit();
-
-        //Firsts Checks if maximum content edit limit is already saved or not
-        if (!preferences.getBoolean(Constants.IS_CONTENT_EDIT_PARAM_SAVED, false)) {
-            editor.putBoolean(Constants.IS_EDITING_ALLOWED, param);
-            editor.putInt(Constants.MAXIMUM_CONTENT_EDIT_LIMIT, seconds);
-            editor.putBoolean(Constants.IS_CONTENT_EDIT_PARAM_SAVED, true);
-            editor.apply();
-        } else {
-            //Check if any value is changed from server
-            if (getSettings().getInt(Constants.MAXIMUM_CONTENT_EDIT_LIMIT,
-                    Constants.DEFAULT_MAXIMUM_CONTENT_EDIT_LIMIT) != seconds) {
-                //time is changed from server and update it locally too
-                editor.putInt(Constants.MAXIMUM_CONTENT_EDIT_LIMIT, seconds);
-                editor.apply();
-            }
-            if (getSettings().getBoolean(Constants.IS_EDITING_ALLOWED,
-                    Constants.DEFAULT_EDITING_ALLOWED) != param) {
-                //isEditingAllowed is changed from server and update it locally too
-                editor.putBoolean(Constants.IS_EDITING_ALLOWED, param);
-                editor.apply();
-            }
-        }
-    }
 }

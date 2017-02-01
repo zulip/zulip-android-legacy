@@ -81,14 +81,6 @@ public class MessageHeaderParent {
         return id;
     }
 
-    /**
-     * Returns message id of containing message {@link MessageHeaderParent#message}.
-     * @return message id
-     */
-    public int getMessageId() {
-        return message.getID();
-    }
-
     public void setId(String id) {
         this.id = id;
     }

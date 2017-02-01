@@ -13,7 +13,4 @@
         android:id="@+id/copy_message"
         android:title="@string/copy_message" />
 
-    <item
-        android:id="@+id/edit_message"
-        android:title="@string/edit_message" />
 </menu>
