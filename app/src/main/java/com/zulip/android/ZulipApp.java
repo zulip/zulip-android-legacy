@@ -24,7 +24,6 @@ import com.j256.ormlite.dao.ObjectCache;
 import com.j256.ormlite.dao.ReferenceObjectCache;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.misc.TransactionManager;
-import com.j256.ormlite.stmt.SelectArg;
 import com.zulip.android.activities.ZulipActivity;
 import com.zulip.android.database.DatabaseHelper;
 import com.zulip.android.models.Emoji;
@@ -266,26 +265,7 @@ public class ZulipApp extends Application {
 
                     @Override
                     public UserConfigurationResponse read(JsonReader in) throws IOException {
-                        UserConfigurationResponse res = nestedGson.fromJson(in, UserConfigurationResponse.class);
-
-                        RuntimeExceptionDao<Person, Object> personDao = ZulipApp.this.getDao(Person.class);
-                        for (int i = 0; i < res.getRealmUsers().size(); i++) {
-
-                            Person currentPerson = res.getRealmUsers().get(i);
-                            Person foundPerson = null;
-                            try {
-                                foundPerson = personDao.queryBuilder().where().eq(Person.EMAIL_FIELD,
-                                        new SelectArg(Person.EMAIL_FIELD, currentPerson.getEmail()))
-                                        .queryForFirst();
-                                if (foundPerson != null) {
-                                    currentPerson.setId(foundPerson.getId());
-                                }
-                            } catch (SQLException e) {
-                                ZLog.logException(e);
-                            }
-                        }
-
-                        return res;
+                        return nestedGson.fromJson(in, UserConfigurationResponse.class);
                     }
                 })
                 .registerTypeAdapter(EventsBranch.class, new JsonDeserializer<EventsBranch>() {
