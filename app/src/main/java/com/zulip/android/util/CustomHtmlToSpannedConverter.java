@@ -48,6 +48,7 @@ import android.util.Pair;
 
 import com.zulip.android.R;
 import com.zulip.android.ZulipApp;
+import com.zulip.android.models.Person;
 
 import org.ccil.cowan.tagsoup.Parser;
 import org.xml.sax.Attributes;
@@ -63,6 +64,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+
+import static android.R.attr.id;
 
 public class CustomHtmlToSpannedConverter implements ContentHandler {
 
@@ -233,7 +236,16 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
     }
 
     private static void startSpan(SpannableStringBuilder text, Attributes attributes) {
-        String email = attributes.getValue("data-user-email");
+        String email;
+        String stringId = attributes.getValue("data-user-id");
+        if (stringId != null) {
+            int id = Integer.parseInt(stringId);
+            email = Person.getById(ZulipApp.get(), id).getEmail();
+        } else {
+            // for historical messages
+            email = attributes.getValue("data-user-email");
+        }
+
         int len = text.length();
         text.setSpan(new Href(email), len, len, Spannable.SPAN_MARK_MARK);
     }
