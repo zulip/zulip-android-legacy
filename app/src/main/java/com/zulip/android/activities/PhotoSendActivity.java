@@ -115,23 +115,26 @@ public class PhotoSendActivity extends AppCompatActivity {
         sendPhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mIsCropped) {
-                    Bitmap bitmap;
-                    Drawable drawable = mImageView.getDrawable();
-                    if (drawable instanceof GlideBitmapDrawable) {
-                        // if imageview has drawable of type GlideBitmapDrawable
-                        bitmap = ((GlideBitmapDrawable) mImageView.getDrawable().getCurrent())
-                                .getBitmap();
+                Bitmap bitmap;
+                Drawable drawable = mImageView.getDrawable();
+                if (drawable instanceof GlideBitmapDrawable) {
+                    // if imageview has drawable of type GlideBitmapDrawable
+                    bitmap = ((GlideBitmapDrawable) mImageView.getDrawable().getCurrent())
+                            .getBitmap();
 
-                    } else {
-                        // if imageView stores cropped image drawable which is of type drawable
-                        bitmap = ((BitmapDrawable) mImageView.getDrawable()).getBitmap();
-                    }
-
-                    // if image was cropped, delete old file
-                    // and store new bitmap on that location
-                    mPhotoPath = PhotoHelper.saveBitmapAsFile(mPhotoPath, bitmap);
+                } else {
+                    // if imageView stores cropped image drawable which is of type drawable
+                    bitmap = ((BitmapDrawable) mImageView.getDrawable()).getBitmap();
                 }
+
+                /* Most phone cameras are landscape, meaning if you take the photo in portrait,
+                   the resulting photos will be rotated 90 degrees. Hence used the displayed image
+                   with correct orientation and saved that in the current photo path.
+                */
+
+                // delete old file and store new bitmap on that location
+                // used the displayed image and saved it in the mPhotoPath
+                mPhotoPath = PhotoHelper.saveBitmapAsFile(mPhotoPath, bitmap);
 
                 // add the file path of cropped image
                 sendIntent.putExtra(Intent.EXTRA_TEXT, mPhotoPath);
