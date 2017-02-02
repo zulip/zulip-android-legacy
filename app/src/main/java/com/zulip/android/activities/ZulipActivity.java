@@ -271,7 +271,7 @@ public class ZulipActivity extends BaseActivity implements
     }
 
     @Override
-    public void recyclerViewScrolled() {
+    public void recyclerViewScrolled(boolean isReachedAtBottom) {
             /* in this method we check if the messageEt is empty or not
             if messageEt is not empty, it means that the user has typed something in the chatBox and that the chatBox should be open
             in spite of scrolling */
@@ -295,6 +295,11 @@ public class ZulipActivity extends BaseActivity implements
         else if (chatBox.getVisibility() == View.VISIBLE && streamActv.getText().toString().equals("") && topicActv.getText().toString().equals("") && messageEt.getText().toString().equals("")) {
             displayChatBox(false);
             displayFAB(true);
+        }
+
+        //on reaching at bottom dismiss snackBar
+        if (isReachedAtBottom && topSnackBar.isShown()) {
+            topSnackBar.dismiss();
         }
 
     }
