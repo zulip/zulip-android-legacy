@@ -190,7 +190,8 @@ public class AsyncGetEvents extends Thread {
                         person.setActive(true);
                         try {
                             if (person.getEmail().equalsIgnoreCase(app.getYou().getEmail())) {
-                                // change the id
+                                // change the id of "you" to correct server id after login
+                                // this statement also updates app.getYou with updated id
                                 personDao.updateId(app.getYou(), person.getId());
                             }
                             personDao.createOrUpdate(person);

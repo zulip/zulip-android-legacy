@@ -430,6 +430,10 @@ public class Message {
         this.recipientsCache = list;
 
         try {
+            /* Since person ids were auto-generated before, we needed to get the person object "to"
+            and "from" from the database to have the correct id. After shifting to server
+            generated ids, the list passed already has person objects "to"(list[0]) and
+            "from"(list[1]) having correct ids. */
             Person to = list[0];
 
             if (list.length == 1) {
