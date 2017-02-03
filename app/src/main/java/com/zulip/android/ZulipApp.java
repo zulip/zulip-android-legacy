@@ -400,13 +400,7 @@ public class ZulipApp extends Application {
 
     public void setEmail(String email) {
         databaseHelper = new DatabaseHelper(this, email);
-        if (this.getYou() != null) {
-            // on every consequent refresh
-            this.you = Person.getOrUpdate(this, email, null, null, this.getYou().getId());
-        } else {
-            // only on first login
-            this.you = Person.getOrUpdate(this, email, null, null, 0);
-        }
+        this.you = Person.get(this, email);
     }
 
     public DatabaseHelper getDatabaseHelper() {
@@ -512,6 +506,10 @@ public class ZulipApp extends Application {
 
     public Person getYou() {
         return you;
+    }
+
+    public void setYou(Person person) {
+        this.you = person;
     }
 
     public void syncPointer(final int mID) {
