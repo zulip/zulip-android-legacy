@@ -62,6 +62,9 @@ public class Person {
     @SerializedName("is_mirror_dummy")
     private boolean isMirrorDummy;
 
+    /**
+     * used to get person id in case of {@link Message.ZulipDirectMessage}
+     */
     @SerializedName("id")
     private int recipientId;
 
@@ -115,6 +118,19 @@ public class Person {
     }
 
     @SuppressWarnings("WeakerAccess")
+    /**
+     * Returns person object {@link Person} from the database if exists or newly created object using
+     * the passed parameters.
+     * Note: always call this method with valid Person id {@link Person#id} passed as argument.
+     *
+     * @param app Zulip god object {@link ZulipApp}
+     * @param email person email {@link Person#email}
+     * @param name person name {@link Person#name}
+     * @param avatarURL person avatar url {@link Person#avatarURL}
+     * @param personId person id {@link Person#id}
+     * @param personCache person cache used ofr faster fetching of results
+     * @return {@link Person} object
+     */
     public static Person getOrUpdate(ZulipApp app, String email, String name,
                                      String avatarURL, int personId, Map<String, Person> personCache) {
 
@@ -133,6 +149,9 @@ public class Person {
 
         if (person == null) {
             person = new Person(name, email, avatarURL);
+
+            // use the person id passed to generate person skeleton object which is consistent
+            // with server id.
             person.setId(personId);
             app.getDao(Person.class).create(person);
         } else {
@@ -152,6 +171,18 @@ public class Person {
         return person;
     }
 
+    /**
+     * This function is used to call {@link Person#getOrUpdate(ZulipApp, String, String, String, int, Map)}
+     * with no cache.
+     * Note: always call this method with valid Person id {@link Person#id} passed as argument.
+     *
+     * @param app Zulip god object {@link ZulipApp}
+     * @param email person email {@link Person#email}
+     * @param name person name {@link Person#name}
+     * @param avatarURL person avatar url {@link Person#avatarURL}
+     * @param personId person id {@link Person#id}
+     * @return {@link Person} object
+     * */
     public static Person getOrUpdate(ZulipApp app, String email, String name,
                                      String avatarURL, int personId) {
         return getOrUpdate(app, email, name, avatarURL, personId, null);
