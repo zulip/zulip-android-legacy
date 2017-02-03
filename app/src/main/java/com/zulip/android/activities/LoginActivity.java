@@ -41,6 +41,7 @@ import com.zulip.android.networking.response.LoginResponse;
 import com.zulip.android.networking.response.ZulipBackendResponse;
 import com.zulip.android.networking.util.DefaultCallback;
 import com.zulip.android.util.AnimationHelper;
+import com.zulip.android.util.Constants;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -98,6 +99,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         mPassword = (EditText) findViewById(R.id.password);
         mShowPassword = (ImageView) findViewById(R.id.showPassword);
         serverIn = (EditText) findViewById(R.id.server_url_in);
+        String serverUrl = getIntent().getStringExtra(Constants.SERVER_URL);
+        if (serverUrl != null) {
+            serverIn.setText(serverUrl);
+        }
         findViewById(R.id.server_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

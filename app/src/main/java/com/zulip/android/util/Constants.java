@@ -13,5 +13,6 @@ public class Constants {
     //Default maximum time limit for editing message(Same as server)
     public final static int DEFAULT_MAXIMUM_CONTENT_EDIT_LIMIT = 600;
     public final static boolean DEFAULT_EDITING_ALLOWED = true;
+    public final static String SERVER_URL = "SERVER_URL";
 
 }
