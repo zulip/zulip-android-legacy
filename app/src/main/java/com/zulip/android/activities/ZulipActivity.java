@@ -102,6 +102,7 @@ import com.zulip.android.networking.AsyncStatusUpdate;
 import com.zulip.android.networking.ZulipAsyncPushTask;
 import com.zulip.android.networking.response.UploadResponse;
 import com.zulip.android.util.AnimationHelper;
+import com.zulip.android.util.Constants;
 import com.zulip.android.util.FilePathHelper;
 import com.zulip.android.util.MutedTopics;
 import com.zulip.android.util.RemoveViewsOnScroll;
@@ -321,7 +322,7 @@ public class ZulipActivity extends BaseActivity implements
         processParams();
 
         if (!app.isLoggedIn()) {
-            openLogin();
+            openLogin(null);
             return;
         }
 
@@ -2120,11 +2121,12 @@ public class ZulipActivity extends BaseActivity implements
      */
     private void logout() {
         this.logged_in = false;
+        final String serverUrl = app.getServerURI();
 
         notifications.logOut(new Runnable() {
             public void run() {
                 app.logOut();
-                openLogin();
+                openLogin(serverUrl);
             }
         });
     }
@@ -2132,8 +2134,9 @@ public class ZulipActivity extends BaseActivity implements
     /**
      * Switch to the login view.
      */
-    private void openLogin() {
+    private void openLogin(String serverUrl) {
         Intent i = new Intent(this, LoginActivity.class);
+        i.putExtra(Constants.SERVER_URL, serverUrl);
         startActivity(i);
         finish();
     }
