@@ -242,7 +242,7 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
             int id = Integer.parseInt(stringId);
             email = Person.getById(ZulipApp.get(), id).getEmail();
         } else {
-            // for historical messages
+            // for historical messages, revert to use of this attribute
             email = attributes.getValue("data-user-email");
         }
 

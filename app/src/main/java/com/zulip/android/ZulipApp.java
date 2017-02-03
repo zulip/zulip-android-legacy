@@ -243,8 +243,12 @@ public class ZulipApp extends Application {
                         } else {
                             Message.ZulipDirectMessage msg = naiveGson.fromJson(json, Message.ZulipDirectMessage.class);
                             if (msg.getDisplayRecipient() != null) {
+                                // set the correct person id for message recipients
                                 List<Person> people = msg.getDisplayRecipient();
                                 for (Person person : people) {
+                                    // this is needed as the json field name for person id is
+                                    // "user_id" in realm configuration response and "id" in
+                                    // GET v1/messages response.
                                     person.setId(person.getRecipientId());
                                 }
 
