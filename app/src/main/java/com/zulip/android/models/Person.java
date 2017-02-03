@@ -62,6 +62,9 @@ public class Person {
     @SerializedName("is_mirror_dummy")
     private boolean isMirrorDummy;
 
+    @SerializedName("id")
+    private int recipientId;
+
     public Person(String name, String email) {
         this.setName(name);
         this.setEmail(email);
@@ -113,7 +116,7 @@ public class Person {
 
     @SuppressWarnings("WeakerAccess")
     public static Person getOrUpdate(ZulipApp app, String email, String name,
-                                     String avatarURL, Map<String, Person> personCache) {
+                                     String avatarURL, int personId, Map<String, Person> personCache) {
 
         Person person = null;
 
@@ -130,6 +133,7 @@ public class Person {
 
         if (person == null) {
             person = new Person(name, email, avatarURL);
+            person.setId(personId);
             app.getDao(Person.class).create(person);
         } else {
             boolean changed = false;
@@ -149,8 +153,8 @@ public class Person {
     }
 
     public static Person getOrUpdate(ZulipApp app, String email, String name,
-                                     String avatarURL) {
-        return getOrUpdate(app, email, name, avatarURL, null);
+                                     String avatarURL, int personId) {
+        return getOrUpdate(app, email, name, avatarURL, personId, null);
     }
 
     public static Person getById(ZulipApp app, int id) {
@@ -284,4 +288,11 @@ public class Person {
         isActive = active;
     }
 
+    public int getRecipientId() {
+        return this.recipientId;
+    }
+
+    public void setRecipientId(int id) {
+        this.recipientId = id;
+    }
 }

@@ -148,7 +148,8 @@ public class Message {
         this.setSender(Person.getOrUpdate(app,
                 message.getString("sender_email"),
                 message.getString("sender_full_name"),
-                message.getString("avatar_url"), personCache));
+                message.getString("avatar_url"),
+                Integer.parseInt(message.getString("sender_id")), personCache));
 
         if (message.getString("type").equals("stream")) {
             this.setType(MessageType.STREAM_MESSAGE);
@@ -178,7 +179,7 @@ public class Message {
             for (int i = 0; i < jsonRecipients.length(); i++) {
                 JSONObject obj = jsonRecipients.getJSONObject(i);
                 Person person = Person.getOrUpdate(app, obj.getString("email"),
-                        obj.getString("full_name"), null, personCache);
+                        obj.getString("full_name"), null, Integer.parseInt(obj.getString("sender_id")), personCache);
                 r[i] = person;
             }
             setRecipients(recipientList(r));
@@ -234,7 +235,7 @@ public class Message {
                     RuntimeExceptionDao<Message, Object> messageDao = app.getDao(Message.class);
 
                     for (Message m : messages) {
-                        Person person = Person.getOrUpdate(app, m.getSenderEmail(), m.getSenderFullName(), m.getAvatarUrl());
+                        Person person = Person.getOrUpdate(app, m.getSenderEmail(), m.getSenderFullName(), m.getAvatarUrl(), m.getSenderId());
                         m.setSender(person);
                         Stream stream = null;
                         if (m.getType() == MessageType.STREAM_MESSAGE) {
@@ -429,14 +430,14 @@ public class Message {
         this.recipientsCache = list;
 
         try {
-            Person to = ZulipApp.get().getDao(Person.class, true).queryBuilder().where().eq(Person.EMAIL_FIELD, list[0].getEmail()).queryForFirst();
-            ;
+            Person to = list[0];
+
             if (list.length == 1) {
                 setRecipients(to.getId() + "");
                 return;
             }
-            Person from = ZulipApp.get().getDao(Person.class, true).queryBuilder().where().eq(Person.EMAIL_FIELD, list[1].getEmail()).queryForFirst();
 
+            Person from = list[1];
             if (to == null && from != null) {
                 setRecipients("" + from.getId());
             }
