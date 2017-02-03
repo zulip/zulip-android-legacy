@@ -217,7 +217,7 @@ public class UnsortedTests extends ActivityUnitTestCase<ZulipActivity> {
     private Message sampleMessage(ZulipApp app, int id) throws SQLException {
         Message rtr = new Message(app);
         rtr.setSender(Person.getOrUpdate(app, "Test User",
-                TESTUSER_EXAMPLE_COM, ""));
+                TESTUSER_EXAMPLE_COM, "", 0));
         rtr.setContent("Test message");
         rtr.setType(MessageType.PRIVATE_MESSAGE);
         rtr.setRecipient(new String[]{TESTUSER_EXAMPLE_COM});

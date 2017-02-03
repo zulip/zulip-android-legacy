@@ -44,6 +44,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.Callable;
@@ -242,7 +243,12 @@ public class ZulipApp extends Application {
                         } else {
                             Message.ZulipDirectMessage msg = naiveGson.fromJson(json, Message.ZulipDirectMessage.class);
                             if (msg.getDisplayRecipient() != null) {
-                                msg.setRecipients(msg.getDisplayRecipient().toArray(new Person[msg.getDisplayRecipient().size()]));
+                                List<Person> people = msg.getDisplayRecipient();
+                                for (Person person : people) {
+                                    person.setId(person.getRecipientId());
+                                }
+
+                                msg.setRecipients(people.toArray(new Person[people.size()]));
                             }
 
                             msg.setContent(Message.formatContent(msg.getFormattedContent(), ZulipApp.get()).toString());
@@ -390,7 +396,13 @@ public class ZulipApp extends Application {
 
     public void setEmail(String email) {
         databaseHelper = new DatabaseHelper(this, email);
-        this.you = Person.getOrUpdate(this, email, null, null);
+        if (this.getYou() != null) {
+            // on every consequent refresh
+            this.you = Person.getOrUpdate(this, email, null, null, this.getYou().getId());
+        } else {
+            // only on first login
+            this.you = Person.getOrUpdate(this, email, null, null, 0);
+        }
     }
 
     public DatabaseHelper getDatabaseHelper() {
