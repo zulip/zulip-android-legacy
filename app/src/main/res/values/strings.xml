@@ -6,7 +6,7 @@
     <string name="login_button">Log in</string>
     <string name="username">Email</string>
     <string name="password">Password</string>
-    <string name="server_url">Server Url</string>
+    <string name="server_url">Server URL</string>
     <string name="server_domain">Server domain</string>
     <string name="legal">Legal information</string>
     <string name="logout">Log out</string>
@@ -30,7 +30,7 @@
     <string name="copy_message">Copy message</string>
     <string name="edit_message">Edit message</string>
     <string name="message_edit_failed">Error editing message</string>
-    <string name="message_edited">Message Edited</string>
+    <string name="message_edited">Message edited</string>
     <string name="stream_txt">Stream</string>
     <string name="arrow">❯</string>
     <string name="toast_no_internet_connection">No internet connection</string>
@@ -66,7 +66,7 @@
     <string name="title_login">Login</string>
     <string name="enter">Enter</string>
     <string name="enter_server">Please enter your server URL</string>
-    <string name="auth_login">Your server allows these Authentication Options:</string>
+    <string name="auth_login">Your server allows these authentication options:</string>
     <string name="another_server">Another server</string>
     <string name="no_message">No messages to receive.</string>
     <string name="menu_filter">Filter</string>
@@ -77,33 +77,33 @@
     <string name="use_https">Use HTTPS</string>
     <string name="use_http">Use HTTP</string>
     <string name="empty_list">Sorry, no messages here.</string>
-    <string name="switch_theme">Switch Day/Night Theme</string>
-    <string name="reply_stream">Reply to Stream</string>
-    <string name="reply_sender">Reply to Sender</string>
+    <string name="switch_theme">Switch day/night theme</string>
+    <string name="reply_stream">Reply to stream</string>
+    <string name="reply_sender">Reply to sender</string>
     <string name="narrow_stream">Narrow to this stream</string>
     <string name="narrow_topic">Narrow to this topic</string>
     <string name="add_widget">Add widget</string>
-    <string name="widget_today_default_value">Today\'s Messages</string>
-    <string name="widget_title">Widget Title</string>
-    <string name="default_summary_interval">30 Minutes</string>
+    <string name="widget_today_default_value">Today\'s messages</string>
+    <string name="widget_title">Widget\'s title</string>
+    <string name="default_summary_interval">30 minutes</string>
     <string name="update_interval">Update interval</string>
     <string name="default_summary_from">Today</string>
     <string name="widget_title_from">Show messages since</string>
     <string name="no_login_error_widget">First login to Zulip app.</string>
-    <string name="toast_login_failed_fetching_backends">Failed to fetch Backends!</string>
+    <string name="toast_login_failed_fetching_backends">Failed to fetch backends!</string>
     <string name="login_activity_toast_login_error">Unknown login error.</string>
     <string name="no_topic_in_message">(no topic)</string>
-    <string name="message_copied">Message Copied</string>
+    <string name="message_copied">Message copied</string>
     <string name="login_failed">Unable to login</string>
     <string name="uploading_message">Uploading</string>
-    <string name="cannot_upload_image">Cannot Upload Image</string>
+    <string name="cannot_upload_image">Cannot upload image</string>
     <string name="cannot_find_image">Could not find the image</string>
     <string name="failed_to_upload">Failed to upload</string>
     <string name="invalid_image">Unable to load that image</string>
     <string name="content_description_cancel_icon">cancel icon</string>
     <string name="content_description_search_icon">search icon</string>
-    <string name="hint_search_people">Search People</string>
-    <string name="hint_search_stream">Search Stream</string>
+    <string name="hint_search_people">Search people</string>
+    <string name="hint_search_stream">Search stream</string>
     <string name="register_button">Register</string>
     <string name="image_content_desp">image</string>
     <string name="stream_private_content_desp">stream/private</string>
@@ -118,8 +118,8 @@
     <string name="delete_content_desp">delete</string>
     <string name="cancel_content_desp" tools:ignore="ButtonCase">cancel</string>
     <string name="camera_content_desp">take photo</string>
-    <string name="menu_one_day_before">One Day Before</string>
-    <string name="enter_date">Enter Date</string>
+    <string name="menu_one_day_before">One day before</string>
+    <string name="enter_date">Enter date</string>
     <string name="message_not_subscribed">Not subscribed to</string>
     <string name="keyword_stream">stream</string>
     <plurals name="new_message" formatted="false">
@@ -129,13 +129,13 @@
     <string name="SHOW">SHOW</string>
     <string name="notify_stream" formatted="false">" in %1$s/%2$s"</string>
     <string name="notify_private" formatted="false">from %1$s</string>
-    <string name="today_messages">Today Messages</string>
+    <string name="today_messages">Today\'s messages</string>
     <string name="messages">Messages</string>
     <plurals name="new_message_mul_sender">
         <item quantity="one">%d new message</item>
         <item quantity="other">%d new messages</item>
     </plurals>
-    <string name="maximum_time_limit_error">Maximum time limit exceeded</string>
+    <string name="maximum_time_limit_error">Time limit exceeded</string>
     <string name="editing_message_disabled">Editing message is disabled</string>
     <string name="default_delete_text">(deleted)</string>
 </resources>
