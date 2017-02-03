@@ -172,6 +172,24 @@ public class Person {
     }
 
     /**
+     * This function is called from setEmail {@link ZulipApp#setEmail(String)}.
+     * It is used to get current user person {@link Person} object if it exists in the database
+     * or create a new object using {@param email}.
+     *
+     * @param app {@link ZulipApp}
+     * @param email Person email id {@link Person#email}
+     * @return {@link Person} object
+     */
+    public static Person get(ZulipApp app, String email) {
+        Person foundPerson = getByEmail(app, email);
+        if (foundPerson == null) {
+            // fake it till you make it
+            return new Person(null, email);
+        }
+        return foundPerson;
+    }
+
+    /**
      * This function is used to call {@link Person#getOrUpdate(ZulipApp, String, String, String, int, Map)}
      * with no cache.
      * Note: always call this method with valid Person id {@link Person#id} passed as argument.
