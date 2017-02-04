@@ -105,6 +105,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
         }
         messageIndex = new SparseArray<>();
         messageList = new ArrayList<>();
+        adapter = new RecyclerMessageAdapter(messageList, getActivity(), (filter != null));
     }
 
     public void onPause() {
@@ -139,8 +140,16 @@ public class MessageListFragment extends Fragment implements MessageListener {
         recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
         linearLayoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(linearLayoutManager);
-        adapter = new RecyclerMessageAdapter(messageList, getActivity(), (filter != null));
         recyclerView.addItemDecoration(new HeaderSpaceItemDecoration(getContext()));
+        //as onCreateView is even called when fragment is popped from stack
+        //if adapter is null then create new instance else use the previous one
+        if (adapter == null) {
+            adapter = new RecyclerMessageAdapter(messageList, getActivity(), (filter != null));
+        } else {
+            //footer is shown when it is resumed, and then it is hidden in setupLists method
+            //but now setupLists is not called so hide footer here
+            adapter.setFooterShowing(false);
+        }
         recyclerView.setAdapter(adapter);
         registerForContextMenu(recyclerView);
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
