@@ -36,6 +36,7 @@ import android.text.style.ImageSpan;
 import android.text.style.ParagraphStyle;
 import android.text.style.QuoteSpan;
 import android.text.style.RelativeSizeSpan;
+import android.text.style.StrikethroughSpan;
 import android.text.style.StyleSpan;
 import android.text.style.SubscriptSpan;
 import android.text.style.SuperscriptSpan;
@@ -525,6 +526,12 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
             start(mSpannableStringBuilder, new InlineCode());
         } else if (tag.equalsIgnoreCase("pre")) {
             start(mSpannableStringBuilder, new CodeBlock());
+        } else if (tag.equalsIgnoreCase("del")) {
+            start(mSpannableStringBuilder, new StrikeThrough());
+        } else if (tag.equalsIgnoreCase("s")) {
+            start(mSpannableStringBuilder, new StrikeThrough());
+        } else if (tag.equalsIgnoreCase("strike")) {
+            start(mSpannableStringBuilder, new StrikeThrough());
         } else if (tag.length() == 2
                 && Character.toLowerCase(tag.charAt(0)) == 'h'
                 && tag.charAt(1) >= '1' && tag.charAt(1) <= '6') {
@@ -599,6 +606,12 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
         } else if (tag.equalsIgnoreCase("pre")) {
             end(mSpannableStringBuilder, CodeBlock.class, new TypefaceSpan(
                     MONOSPACE));
+        } else if (tag.equalsIgnoreCase("del")) {
+            end(mSpannableStringBuilder, StrikeThrough.class, new StrikethroughSpan());
+        } else if (tag.equalsIgnoreCase("s")) {
+            end(mSpannableStringBuilder, StrikeThrough.class, new StrikethroughSpan());
+        } else if (tag.equalsIgnoreCase("strike")) {
+            end(mSpannableStringBuilder, StrikeThrough.class, new StrikethroughSpan());
         } else if (tag.length() == 2
                 && Character.toLowerCase(tag.charAt(0)) == 'h'
                 && tag.charAt(1) >= '1' && tag.charAt(1) <= '6') {
@@ -716,6 +729,9 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
     }
 
     private static class CodeBlock {
+    }
+
+    private static class StrikeThrough {
     }
 
     private static class Font {
