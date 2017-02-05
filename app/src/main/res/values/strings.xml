@@ -15,6 +15,8 @@
     <string name="topic">Topic</string>
     <string name="close">Close</string>
     <string name="refresh">Refresh</string>
+    <string name="toast_unable_to_load_image">Unable to load image</string>
+    <string name="link_copied">Link copied to clipboard</string>
     <string name="title_activity_legal">Legal</string>
     <string name="streams_open">Open stream sidebar</string>
     <string name="streams_close">Close stream sidebar</string>

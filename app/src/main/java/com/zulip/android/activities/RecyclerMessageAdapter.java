@@ -1,5 +1,6 @@
 package com.zulip.android.activities;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
@@ -390,10 +391,11 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                             .setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    Intent i = new Intent(Intent.ACTION_VIEW);
+                                    Intent i = new Intent(zulipApp.getApplicationContext(), PhotoViewActivity.class);
                                     i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                    i.setData(Uri.parse(url));
+                                    i.putExtra(Intent.EXTRA_TEXT , url);
                                     zulipApp.startActivity(i);
+                                    ((Activity) context).overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                                 }
                             });
                 } else {
