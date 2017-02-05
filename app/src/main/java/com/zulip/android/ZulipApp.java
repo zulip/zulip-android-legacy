@@ -123,6 +123,10 @@ public class ZulipApp extends Application {
         this.zulipActivity = zulipActivity;
     }
 
+    public void setYou(Person you) {
+        this.you = you;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
