@@ -5,10 +5,14 @@
 
     <item
         android:id="@+id/open"
-        android:title="Open" />
+        android:title="@string/open" />
 
     <item
         android:id="@+id/copy_link"
-        android:title="Copy link" />
+        android:title="@string/copy_link" />
+
+    <item
+        android:id="@+id/download"
+        android:title="@string/download_image" />
 
 </menu>

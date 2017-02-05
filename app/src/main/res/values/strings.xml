@@ -12,6 +12,13 @@
     <string name="logout">Log out</string>
     <string name="force_logged_out">You\'ve been logged out</string>
     <string name="huddle_text">You</string>
+    <string name="download_image">Download image</string>
+    <string name="copy_link">Copy link</string>
+    <string name="open">Open</string>
+    <string name="link_image">ImageView of link</string>
+    <string name="permission_message">Zulip app needs storage permission.</string>
+    <string name="permission_title">Need Storage Permission</string>
+    <string name="downloading">Downloading..</string>
     <string name="topic">Topic</string>
     <string name="close">Close</string>
     <string name="refresh">Refresh</string>
