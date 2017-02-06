@@ -8,25 +8,34 @@ per http://pivotallabs.com/android-tidbits-6-22-2011-hiding-header-views/
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:layout_gravity="center"
         android:background="@color/loadingBackground"
-        android:gravity="center|center_vertical"
         tools:ignore="UselessParent">
 
         <ProgressBar
-            android:layout_width="30dp"
-            android:layout_height="30dp" />
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingLeft="16dp"
-            android:text="@string/loading_messages"
-            android:textColor="@color/colorTextPrimary"
-            android:textSize="18sp" />
-    </LinearLayout>
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/progress_background_circle"
+            tools:ignore="ContentDescription" />
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/zulip_notification"
+            android:contentDescription="@string/progress_bar_description" />
+    </RelativeLayout>
 
 </LinearLayout>
