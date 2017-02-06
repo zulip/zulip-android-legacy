@@ -8,7 +8,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
-import android.net.Uri;
 import android.support.annotation.ColorInt;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
@@ -34,6 +33,7 @@ import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageType;
 import com.zulip.android.models.Person;
 import com.zulip.android.models.Stream;
+import com.zulip.android.util.ConvertDpPx;
 import com.zulip.android.util.MutedTopics;
 import com.zulip.android.util.OnItemClickListener;
 import com.zulip.android.util.UrlHelper;
@@ -379,6 +379,9 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
                 messageHolder.contentView.setText(message.getFormattedContent(zulipApp));
                 messageHolder.contentView.setMovementMethod(LinkMovementMethod.getInstance());
+
+                int padding = ConvertDpPx.convertDpToPixel(4);
+                messageHolder.contentView.setShadowLayer(padding, 0, 0, 0);
 
                 final String url = message.extractImageUrl(zulipApp);
                 if (url != null) {
