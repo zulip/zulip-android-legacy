@@ -22,6 +22,7 @@ import com.zulip.android.R;
 import com.zulip.android.ZulipApp;
 import com.zulip.android.util.Constants;
 import com.zulip.android.util.CustomHtmlToSpannedConverter;
+import com.zulip.android.util.ListTagHandler;
 import com.zulip.android.util.UrlHelper;
 import com.zulip.android.util.ZLog;
 
@@ -361,7 +362,7 @@ public class Message {
         };
 
         CustomHtmlToSpannedConverter converter = new CustomHtmlToSpannedConverter(
-                source, null, null, parser, emojiGetter, app.getServerURI(), context);
+                source, null, new ListTagHandler(), parser, emojiGetter, app.getServerURI(), context);
 
         return CustomHtmlToSpannedConverter.linkifySpanned(converter.convert(), Linkify.ALL);
     }
