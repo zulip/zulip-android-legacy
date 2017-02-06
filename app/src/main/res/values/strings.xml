@@ -31,7 +31,6 @@
 
     <!-- Used on the indicator when loading messages -->
     <string name="editing_message">Editing message</string>
-    <string name="loading_messages">Loading messages</string>
     <string name="sending_message">Sending</string>
     <string name="search">Search</string>
     <string name="reply_to_private_message">Reply to private message</string>
@@ -148,4 +147,5 @@
     <string name="editing_message_disabled">Editing message is disabled</string>
     <string name="default_delete_text">(deleted)</string>
     <string name="message_edited_tag">(EDITED)</string>
+    <string name="progress_bar_description">Loading new messages</string>
 </resources>
