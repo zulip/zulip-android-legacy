@@ -21,6 +21,7 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
@@ -31,8 +32,10 @@ import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
+import android.text.style.LineBackgroundSpan;
 import android.text.style.ParagraphStyle;
 import android.text.style.QuoteSpan;
 import android.text.style.RelativeSizeSpan;
@@ -45,6 +48,7 @@ import android.text.style.TypefaceSpan;
 import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
 import android.text.util.Linkify;
+import android.util.DisplayMetrics;
 import android.util.Pair;
 
 import com.zulip.android.R;
@@ -66,8 +70,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-import static android.R.attr.id;
-
 public class CustomHtmlToSpannedConverter implements ContentHandler {
 
     private static final float[] HEADER_SIZES = {1.5f, 1.4f, 1.3f, 1.2f, 1.1f,
@@ -84,6 +86,7 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
     private Html.TagHandler mTagHandler;
     private Html.ImageGetter mEmojiGetter;
     private String mBaseUri;
+    private boolean isCode;
 
     public CustomHtmlToSpannedConverter(String source,
                                         Html.ImageGetter imageGetter, Html.TagHandler tagHandler,
@@ -523,8 +526,10 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
         } else if (tag.equalsIgnoreCase("sub")) {
             start(mSpannableStringBuilder, new Sub());
         } else if (tag.equalsIgnoreCase("code")) {
+            isCode = true;
             start(mSpannableStringBuilder, new InlineCode());
         } else if (tag.equalsIgnoreCase("pre")) {
+            isCode = true;
             start(mSpannableStringBuilder, new CodeBlock());
         } else if (tag.equalsIgnoreCase("del")) {
             start(mSpannableStringBuilder, new StrikeThrough());
@@ -601,11 +606,17 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
         } else if (tag.equalsIgnoreCase("code")) {
             endMultiple(mSpannableStringBuilder, InlineCode.class,
                     new Object[]{new TypefaceSpan(MONOSPACE),
-                            new ForegroundColorSpan(0xffdd1144) // pink
+                            new ForegroundColorSpan(0xffdd1144),
+                            new BackgroundColorSpan(0xfff7f7f9)
                     });
+            isCode = false;
         } else if (tag.equalsIgnoreCase("pre")) {
-            end(mSpannableStringBuilder, CodeBlock.class, new TypefaceSpan(
-                    MONOSPACE));
+            endMultiple(mSpannableStringBuilder, CodeBlock.class, new Object[]{
+                    new TypefaceSpan(MONOSPACE),
+                    new ForegroundColorSpan(0xff000000),
+                    new CodeBlockLine(0xfff5f5f5)
+            });
+            isCode = false;
         } else if (tag.equalsIgnoreCase("del")) {
             end(mSpannableStringBuilder, StrikeThrough.class, new StrikethroughSpan());
         } else if (tag.equalsIgnoreCase("s")) {
@@ -676,8 +687,14 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
                     pred = sb.charAt(len - 1);
                 }
 
-                if (pred != ' ' && pred != '\n') {
-                    sb.append(' ');
+                if (!isCode) {
+                    if (pred != ' ' && pred != '\n') {
+                        sb.append(' ');
+                    }
+                } else {
+                    if ((pred != ' ' && c == ' ') || (pred != '\n' && c == '\n')) {
+                        sb.append(c);
+                    }
                 }
             } else {
                 sb.append(c);
@@ -757,6 +774,26 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
 
         public Header(int level) {
             mLevel = level;
+        }
+    }
+
+    private static class CodeBlockLine implements LineBackgroundSpan {
+        private int fillColor;
+
+        public CodeBlockLine(int fillColor) {
+            this.fillColor = fillColor;
+        }
+
+        @Override
+        public void drawBackground(Canvas c, Paint p, int left, int right, int top, int baseline,
+                                   int bottom, CharSequence text, int start, int end, int lnum) {
+            int paddingInPx = ConvertDpPx.convertDpToPixel(12);
+            Rect rect = new Rect(left - paddingInPx, top - paddingInPx,
+                    right + paddingInPx, bottom + paddingInPx);
+            final int paintColor = p.getColor();
+            p.setColor(this.fillColor);
+            c.drawRect(rect, p);
+            p.setColor(paintColor);
         }
     }
 
