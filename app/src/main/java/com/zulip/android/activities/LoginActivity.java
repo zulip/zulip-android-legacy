@@ -1,6 +1,5 @@
 package com.zulip.android.activities;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -42,6 +41,7 @@ import com.zulip.android.networking.response.ZulipBackendResponse;
 import com.zulip.android.networking.util.DefaultCallback;
 import com.zulip.android.util.AnimationHelper;
 import com.zulip.android.util.Constants;
+import com.zulip.android.util.CommonProgressDialog;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -65,7 +65,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     private static final String TAG = "LoginActivity";
     private static final int REQUEST_CODE_RESOLVE_ERR = 9000;
     private static final int REQUEST_CODE_SIGN_IN = 9001;
-    private ProgressDialog connectionProgressDialog;
+    private CommonProgressDialog commonProgressDialog;
     private GoogleApiClient mGoogleApiClient;
     private EditText mServerEditText;
     private EditText mUserName;
@@ -88,9 +88,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         setSupportActionBar(toolbar);
 
         // Progress bar to be displayed if the connection failure is not resolved.
-        connectionProgressDialog = new ProgressDialog(this);
-        connectionProgressDialog.setMessage(getString(R.string.signing_in));
-
+        commonProgressDialog = new CommonProgressDialog(this);
         mServerEditText = (EditText) findViewById(R.id.server_url);
         mGoogleSignInButton = findViewById(R.id.google_sign_in_button);
         findViewById(R.id.google_sign_in_button).setOnClickListener(this);
@@ -264,6 +262,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     }
 
     private void showBackends(String httpScheme, String serverURL) {
+        commonProgressDialog.showWithMessage(getString(R.string.connecting_to_server));
         // if server url does not end with "/", then append it
         if (!serverURL.endsWith("/")) {
             serverURL = serverURL + "/";
@@ -317,12 +316,14 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                         if (response.body().isDev()) {
                             findViewById(R.id.local_server_button).setVisibility(View.VISIBLE);
                         }
+                        commonProgressDialog.dismiss();
                         showLoginFields();
                     }
 
                     @Override
                     public void onError(Call<ZulipBackendResponse> call, Response<ZulipBackendResponse> response) {
                         Toast.makeText(LoginActivity.this, R.string.toast_login_failed_fetching_backends, Toast.LENGTH_SHORT).show();
+                        commonProgressDialog.dismiss();
                     }
 
                     @Override
@@ -333,6 +334,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                         } else {
                             Toast.makeText(LoginActivity.this, R.string.invalid_url, Toast.LENGTH_SHORT).show();
                         }
+                        commonProgressDialog.dismiss();
                     }
                 });
 
@@ -377,7 +379,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
 
             // if there's a problem with fetching the account, bail
             if (account == null) {
-                connectionProgressDialog.dismiss();
+                commonProgressDialog.dismiss();
                 Toast.makeText(LoginActivity.this, R.string.google_app_login_failed, Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -388,26 +390,26 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
 
                         @Override
                         public void onSuccess(Call<LoginResponse> call, Response<LoginResponse> response) {
-                            connectionProgressDialog.dismiss();
+                            commonProgressDialog.dismiss();
                             getApp().setLoggedInApiKey(response.body().getApiKey(), response.body().getEmail());
                             openHome();
                         }
 
                         @Override
                         public void onError(Call<LoginResponse> call, Response<LoginResponse> response) {
-                            connectionProgressDialog.dismiss();
+                            commonProgressDialog.dismiss();
                         }
 
                         @Override
                         public void onFailure(Call<LoginResponse> call, Throwable t) {
                             super.onFailure(call, t);
-                            connectionProgressDialog.dismiss();
+                            commonProgressDialog.dismiss();
                         }
                     });
 
         } else {
             // something bad happened. whoops.
-            connectionProgressDialog.dismiss();
+            commonProgressDialog.dismiss();
             Toast.makeText(LoginActivity.this, R.string.google_app_login_failed, Toast.LENGTH_SHORT).show();
         }
     }
@@ -419,7 +421,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
 
     public void openHome() {
         // Cancel before leaving activity to avoid leaking windows
-        connectionProgressDialog.dismiss();
+        commonProgressDialog.dismiss();
         Intent i = new Intent(this, ZulipActivity.class);
         startActivity(i);
         finish();
@@ -427,7 +429,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
 
     @Override
     public void onConnectionFailed(ConnectionResult result) {
-        if (connectionProgressDialog.isShowing()) {
+        if (commonProgressDialog.isShowing()) {
             // The user clicked the sign-in button already. Start to resolve
             // connection errors. Wait until onConnected() to dismiss the
             // connection dialog.
@@ -437,11 +439,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                 } catch (SendIntentException e) {
                     Log.e(TAG, e.getMessage(), e);
                     // Yeah, no idea what to do here.
-                    connectionProgressDialog.dismiss();
+                    commonProgressDialog.dismiss();
                     Toast.makeText(LoginActivity.this, R.string.google_app_login_failed, Toast.LENGTH_SHORT).show();
                 }
             } else {
-                connectionProgressDialog.dismiss();
+                commonProgressDialog.dismiss();
                 if (!isNetworkAvailable()) {
                     Toast.makeText(LoginActivity.this, R.string.toast_no_internet_connection, Toast.LENGTH_SHORT).show();
                 } else {
@@ -482,14 +484,14 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.google_sign_in_button:
-                connectionProgressDialog.show();
+                commonProgressDialog.showWithMessage(getString(R.string.signing_in));
                 setupGoogleSignIn();
                 break;
             case R.id.zulip_login:
                 if (!isInputValid()) {
                     return;
                 }
-                connectionProgressDialog.show();
+                commonProgressDialog.showWithMessage(getString(R.string.signing_in));
                 String username = mUserName.getText().toString();
                 String password = mPassword.getText().toString();
                 getServices()
@@ -498,7 +500,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
 
                             @Override
                             public void onSuccess(Call<LoginResponse> call, Response<LoginResponse> response) {
-                                connectionProgressDialog.dismiss();
+                                commonProgressDialog.dismiss();
                                 getApp().setLoggedInApiKey(response.body().getApiKey(), response.body().getEmail());
                                 openHome();
                             }
@@ -506,7 +508,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
 
                             @Override
                             public void onError(Call<LoginResponse> call, Response<LoginResponse> response) {
-                                connectionProgressDialog.dismiss();
+                                commonProgressDialog.dismiss();
                                 if (response != null && response.errorBody() != null) {
                                     try {
                                         JSONObject message = new JSONObject(response.errorBody().string());
@@ -528,7 +530,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                             @Override
                             public void onFailure(Call<LoginResponse> call, Throwable t) {
                                 super.onFailure(call, t);
-                                connectionProgressDialog.dismiss();
+                                commonProgressDialog.dismiss();
                                 if (!isNetworkAvailable()) {
                                     Toast.makeText(LoginActivity.this, R.string.toast_no_internet_connection, Toast.LENGTH_LONG).show();
                                 } else {
@@ -543,17 +545,17 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                 break;
             case R.id.local_server_button:
                 if (!isInputValidForDevAuth()) return;
-                connectionProgressDialog.show();
+                commonProgressDialog.showWithMessage(getString(R.string.signing_in));
                 AsyncDevGetEmails asyncDevGetEmails = new AsyncDevGetEmails(LoginActivity.this);
                 asyncDevGetEmails.setCallback(new ZulipAsyncPushTask.AsyncTaskCompleteListener() {
                     @Override
                     public void onTaskComplete(String result, JSONObject jsonObject) {
-                        connectionProgressDialog.dismiss();
+                        commonProgressDialog.dismiss();
                     }
 
                     @Override
                     public void onTaskFailure(String result) {
-                        connectionProgressDialog.dismiss();
+                        commonProgressDialog.dismiss();
                     }
                 });
                 asyncDevGetEmails.execute();

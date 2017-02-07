@@ -103,6 +103,7 @@ import com.zulip.android.networking.ZulipAsyncPushTask;
 import com.zulip.android.networking.response.UploadResponse;
 import com.zulip.android.util.AnimationHelper;
 import com.zulip.android.util.Constants;
+import com.zulip.android.util.CommonProgressDialog;
 import com.zulip.android.util.FilePathHelper;
 import com.zulip.android.util.MutedTopics;
 import com.zulip.android.util.RemoveViewsOnScroll;
@@ -168,7 +169,7 @@ public class ZulipActivity extends BaseActivity implements
     private AsyncGetEvents event_poll;
     private Handler statusUpdateHandler;
     private Runnable statusUpdateRunnable;
-
+    public CommonProgressDialog commonProgressDialog;
     private int mToolbarHeightInPx;
     private int statusBarHeight = 0;
     private MessageListFragment narrowedList;
@@ -334,6 +335,7 @@ public class ZulipActivity extends BaseActivity implements
         notifications = new Notifications(this);
         notifications.register();
         setContentView(R.layout.main);
+        commonProgressDialog = new CommonProgressDialog(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -1787,6 +1789,7 @@ public class ZulipActivity extends BaseActivity implements
                     Log.i(PARAMS, "Resetting the database...");
                     app.resetDatabase();
                     Log.i(PARAMS, "Database deleted successfully.");
+                    commonProgressDialog.dismiss();
                     this.finish();
                     break;
                 default:
@@ -2065,6 +2068,7 @@ public class ZulipActivity extends BaseActivity implements
                 break;
             case R.id.refresh:
                 Log.w("menu", "Refreshed manually by user. We shouldn't need this.");
+                commonProgressDialog.showWithMessage(getString(R.string.refreshing));
                 onRefresh();
                 break;
             case R.id.today:
@@ -2120,6 +2124,7 @@ public class ZulipActivity extends BaseActivity implements
      * Log the user out of the app, clearing our cache of their credentials.
      */
     private void logout() {
+        commonProgressDialog.showWithMessage(getString(R.string.logging_out));
         this.logged_in = false;
         final String serverUrl = app.getServerURI();
 
@@ -2135,6 +2140,9 @@ public class ZulipActivity extends BaseActivity implements
      * Switch to the login view.
      */
     private void openLogin(String serverUrl) {
+        if (commonProgressDialog != null && commonProgressDialog.isShowing()) {
+            commonProgressDialog.dismiss();
+        }
         Intent i = new Intent(this, LoginActivity.class);
         i.putExtra(Constants.SERVER_URL, serverUrl);
         startActivity(i);

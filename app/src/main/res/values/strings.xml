@@ -148,4 +148,7 @@
     <string name="default_delete_text">(deleted)</string>
     <string name="message_edited_tag">(EDITED)</string>
     <string name="progress_bar_description">Loading new messages</string>
+    <string name="connecting_to_server">Connecting to server</string>
+    <string name="refreshing">Refreshing</string>
+    <string name="logging_out">Logging out</string>
 </resources>
