@@ -21,7 +21,6 @@ import android.database.MatrixCursor;
 import android.database.MergeCursor;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
@@ -52,13 +51,11 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.view.WindowManager;
-import android.view.Window;
 import android.view.animation.Interpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -1299,7 +1296,7 @@ public class ZulipActivity extends BaseActivity implements
      *
      * @param streamName stream name
      */
-    private void doNarrowToLastRead(String streamName) {
+    public void doNarrowToLastRead(String streamName) {
         // get last message read in stream
         Message message = Stream.getLastMessageRead(app, streamName);
         if (message != null) {

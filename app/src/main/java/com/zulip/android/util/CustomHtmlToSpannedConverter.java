@@ -54,6 +54,7 @@ import android.util.Pair;
 import com.zulip.android.R;
 import com.zulip.android.ZulipApp;
 import com.zulip.android.models.Person;
+import com.zulip.android.models.Stream;
 
 import org.ccil.cowan.tagsoup.Parser;
 import org.xml.sax.Attributes;
@@ -87,6 +88,7 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
     private Html.ImageGetter mEmojiGetter;
     private String mBaseUri;
     private boolean isCode;
+    private boolean isStreamLink;
 
     public CustomHtmlToSpannedConverter(String source,
                                         Html.ImageGetter imageGetter, Html.TagHandler tagHandler,
@@ -267,6 +269,30 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
                 } else {
                     text.setSpan(new ProfileSpan(h.mHref, userMentionColor), where, len, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
+            }
+        }
+    }
+
+    private static void startStreamA(SpannableStringBuilder text, Attributes attributes) {
+        /**
+         example: <a class="stream" data-stream-id="4" href="/#narrow/stream/android">#android</a>
+         */
+        String streamId = attributes.getValue("data-stream-id");
+
+        int len = text.length();
+        text.setSpan(new Href(streamId), len, len, Spannable.SPAN_MARK_MARK);
+    }
+
+    private static void endStreamA(SpannableStringBuilder text) {
+        int len = text.length();
+        Object obj = getLast(text, Href.class);
+        int where = text.getSpanStart(obj);
+        text.removeSpan(obj);
+        if (where != len) {
+            Href h = (Href) obj;
+            if (h != null && h.mHref != null) {
+                text.setSpan(new StreamSpan(h.mHref, 0xFF0088cc), where, len,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
         }
     }
@@ -515,7 +541,12 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
         } else if (tag.equalsIgnoreCase("tt")) {
             start(mSpannableStringBuilder, new Monospace());
         } else if (tag.equalsIgnoreCase("a")) {
-            startA(mSpannableStringBuilder, attributes, mBaseUri);
+            if ("stream".equalsIgnoreCase(attributes.getValue("class"))) {
+                startStreamA(mSpannableStringBuilder, attributes);
+                isStreamLink = true;
+            } else {
+                startA(mSpannableStringBuilder, attributes, mBaseUri);
+            }
         } else if (tag.equalsIgnoreCase("span")
                 && "user-mention".equals(attributes.getValue("class"))) {
             startSpan(mSpannableStringBuilder, attributes);
@@ -594,7 +625,12 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
             end(mSpannableStringBuilder, Monospace.class, new TypefaceSpan(
                     MONOSPACE));
         } else if (tag.equalsIgnoreCase("a")) {
-            endA(mSpannableStringBuilder);
+            if (isStreamLink) {
+                endStreamA(mSpannableStringBuilder);
+                isStreamLink = true;
+            } else {
+                endA(mSpannableStringBuilder);
+            }
         } else if (tag.equalsIgnoreCase("span")) {
             endSpan(mSpannableStringBuilder);
         } else if (tag.equalsIgnoreCase("u")) {
