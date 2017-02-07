@@ -153,7 +153,7 @@ public class Person {
             // use the person id passed to generate person skeleton object which is consistent
             // with server id.
             person.setId(personId);
-            app.getDao(Person.class).create(person);
+            app.getDao(Person.class).createOrUpdate(person);
         } else {
             boolean changed = false;
             if (name != null && !name.equals(person.name)) {
