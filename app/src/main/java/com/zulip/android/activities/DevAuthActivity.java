@@ -12,6 +12,7 @@ import com.zulip.android.networking.AsyncDevGetEmails;
 import com.zulip.android.networking.response.LoginResponse;
 import com.zulip.android.networking.util.DefaultCallback;
 import com.zulip.android.util.AuthClickListener;
+import com.zulip.android.util.CommonProgressDialog;
 import com.zulip.android.util.ZLog;
 
 import org.json.JSONArray;
@@ -29,7 +30,7 @@ import retrofit2.Response;
  */
 public class DevAuthActivity extends BaseActivity {
     private RecyclerView recyclerView;
-    private ProgressDialog connectionProgressDialog;
+    private CommonProgressDialog commonProgressDialog;
 
 
     @Override
@@ -40,8 +41,7 @@ public class DevAuthActivity extends BaseActivity {
         recyclerView = (RecyclerView) findViewById(R.id.devAuthRecyclerView);
         List<String> emails = new ArrayList<>();
         int directAdminSize = 1;
-        connectionProgressDialog = new ProgressDialog(this);
-        connectionProgressDialog.setMessage(getString(R.string.signing_in));
+        commonProgressDialog = new CommonProgressDialog(this);
 
         try {
             JSONObject jsonObject = new JSONObject(json);
@@ -62,6 +62,7 @@ public class DevAuthActivity extends BaseActivity {
         authEmailAdapter.setOnItemClickListener(new AuthClickListener() {
             @Override
             public void onItemClick(String email) {
+                commonProgressDialog.showWithMessage(getString(R.string.signing_in));
                 getServices()
                         .loginDEV(email)
                         .enqueue(new DefaultCallback<LoginResponse>() {
@@ -75,6 +76,7 @@ public class DevAuthActivity extends BaseActivity {
                             public void onError(Call<LoginResponse> call, Response<LoginResponse> response) {
                                 // do nothing
                                 Toast.makeText(DevAuthActivity.this, R.string.login_failed, Toast.LENGTH_LONG).show();
+                                commonProgressDialog.dismiss();
                             }
 
                         });
@@ -86,7 +88,7 @@ public class DevAuthActivity extends BaseActivity {
 
     public void openHome() {
         // Cancel before leaving activity to avoid leaking windows
-        connectionProgressDialog.dismiss();
+        commonProgressDialog.dismiss();
         Intent i = new Intent(this, ZulipActivity.class);
         startActivity(i);
         finish();
