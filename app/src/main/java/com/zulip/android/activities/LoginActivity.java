@@ -15,6 +15,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.InputType;
+import android.text.StaticLayout;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.util.Patterns;
@@ -98,6 +99,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         mPassword = (EditText) findViewById(R.id.password);
         mShowPassword = (ImageView) findViewById(R.id.showPassword);
         serverIn = (EditText) findViewById(R.id.server_url_in);
+        String url = getIntent().getStringExtra("server_url");
+        if (url!=null || !url.equals("") || !url.isEmpty()){
+            serverIn.setText(url);
+        }
         findViewById(R.id.server_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

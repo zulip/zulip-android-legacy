@@ -208,6 +208,7 @@ public class ZulipActivity extends BaseActivity implements
     private ListView peopleDrawer;
     private  Toast toast;
     //
+    private String server_url;
     private String streamSearchFilterKeyword = "";
     private SimpleCursorAdapter.ViewBinder peopleBinder = new SimpleCursorAdapter.ViewBinder() {
         @Override
@@ -2120,7 +2121,7 @@ public class ZulipActivity extends BaseActivity implements
      */
     private void logout() {
         this.logged_in = false;
-
+        server_url = app.getServerURI();
         notifications.logOut(new Runnable() {
             public void run() {
                 app.logOut();
@@ -2134,6 +2135,7 @@ public class ZulipActivity extends BaseActivity implements
      */
     private void openLogin() {
         Intent i = new Intent(this, LoginActivity.class);
+        i.putExtra("server_url",server_url);
         startActivity(i);
         finish();
     }
