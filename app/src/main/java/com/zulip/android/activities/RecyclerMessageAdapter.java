@@ -1,6 +1,5 @@
 package com.zulip.android.activities;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
@@ -34,6 +33,7 @@ import com.zulip.android.models.MessageType;
 import com.zulip.android.models.Person;
 import com.zulip.android.models.Stream;
 import com.zulip.android.util.ConvertDpPx;
+import com.zulip.android.util.ActivityTransitionAnim;
 import com.zulip.android.util.MutedTopics;
 import com.zulip.android.util.OnItemClickListener;
 import com.zulip.android.util.UrlHelper;
@@ -397,7 +397,9 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                                     i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                     i.putExtra(Intent.EXTRA_TEXT , url);
                                     zulipApp.startActivity(i);
-                                    ((Activity) context).overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+
+                                    // activity transition animation
+                                    ActivityTransitionAnim.transition(context);
                                 }
                             });
                 } else {
