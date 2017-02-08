@@ -71,6 +71,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import static android.R.attr.id;
+
 public class CustomHtmlToSpannedConverter implements ContentHandler {
 
     private static final float[] HEADER_SIZES = {1.5f, 1.4f, 1.3f, 1.2f, 1.1f,
@@ -245,8 +247,13 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
         String email;
         String stringId = attributes.getValue("data-user-id");
         if (stringId != null) {
-            int id = Integer.parseInt(stringId);
-            email = Person.getById(ZulipApp.get(), id).getEmail();
+            // in case of "@all"
+            if (stringId.equals("*")) {
+                email = stringId;
+            } else {
+                int id = Integer.parseInt(stringId);
+                email = Person.getById(ZulipApp.get(), id).getEmail();
+            }
         } else {
             // for historical messages, revert to use of this attribute
             email = attributes.getValue("data-user-email");
