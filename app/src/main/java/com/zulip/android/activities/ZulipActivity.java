@@ -98,6 +98,7 @@ import com.zulip.android.networking.AsyncSend;
 import com.zulip.android.networking.AsyncStatusUpdate;
 import com.zulip.android.networking.ZulipAsyncPushTask;
 import com.zulip.android.networking.response.UploadResponse;
+import com.zulip.android.util.ActivityTransitionAnim;
 import com.zulip.android.util.AnimationHelper;
 import com.zulip.android.util.Constants;
 import com.zulip.android.util.CommonProgressDialog;
@@ -827,6 +828,9 @@ public class ZulipActivity extends BaseActivity implements
             Intent photoSendIntent = new Intent(this, PhotoSendActivity.class);
             photoSendIntent.putExtra(Intent.EXTRA_TEXT, mCurrentPhotoPath);
             startActivity(photoSendIntent);
+
+            // activity transition animation
+            ActivityTransitionAnim.transition(ZulipActivity.this);
         }
     }
 
@@ -912,6 +916,9 @@ public class ZulipActivity extends BaseActivity implements
                 }
 
                 startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+
+                // activity transition animation
+                ActivityTransitionAnim.transition(ZulipActivity.this);
             }
         }
     }
