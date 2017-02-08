@@ -2150,6 +2150,10 @@ public class ZulipActivity extends BaseActivity implements
         Intent i = new Intent(this, LoginActivity.class);
         i.putExtra(Constants.SERVER_URL, serverUrl);
         startActivity(i);
+
+        // activity transition animation
+        ActivityTransitionAnim.transition(this);
+
         finish();
     }
 

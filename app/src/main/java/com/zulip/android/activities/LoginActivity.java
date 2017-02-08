@@ -39,6 +39,7 @@ import com.zulip.android.networking.ZulipAsyncPushTask;
 import com.zulip.android.networking.response.LoginResponse;
 import com.zulip.android.networking.response.ZulipBackendResponse;
 import com.zulip.android.networking.util.DefaultCallback;
+import com.zulip.android.util.ActivityTransitionAnim;
 import com.zulip.android.util.AnimationHelper;
 import com.zulip.android.util.Constants;
 import com.zulip.android.util.CommonProgressDialog;
@@ -424,6 +425,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         commonProgressDialog.dismiss();
         Intent i = new Intent(this, ZulipActivity.class);
         startActivity(i);
+
+        // activity transition animation
+        ActivityTransitionAnim.transition(this);
+
         finish();
     }
 
