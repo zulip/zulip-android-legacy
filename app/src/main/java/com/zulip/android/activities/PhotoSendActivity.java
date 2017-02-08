@@ -21,6 +21,7 @@ import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.theartofdev.edmodo.cropper.CropImageView;
 import com.zulip.android.R;
+import com.zulip.android.util.ActivityTransitionAnim;
 import com.zulip.android.util.PhotoHelper;
 
 import java.io.File;
@@ -67,6 +68,9 @@ public class PhotoSendActivity extends AppCompatActivity {
 
                 // go back to ZulipActivity to start camera intent
                 startActivity(sendIntent);
+
+                // activity transition animation
+                ActivityTransitionAnim.transition(PhotoSendActivity.this);
             }
         });
 
@@ -139,6 +143,9 @@ public class PhotoSendActivity extends AppCompatActivity {
                 // add the file path of cropped image
                 sendIntent.putExtra(Intent.EXTRA_TEXT, mPhotoPath);
                 startActivity(sendIntent);
+
+                // activity transition animation
+                ActivityTransitionAnim.transition(PhotoSendActivity.this);
             }
         });
 
@@ -168,6 +175,9 @@ public class PhotoSendActivity extends AppCompatActivity {
                 Intent intent = new Intent(PhotoSendActivity.this, PhotoEditActivity.class);
                 intent.putExtra(Intent.EXTRA_TEXT, mPhotoPath);
                 startActivity(intent);
+
+                // activity transition animation
+                ActivityTransitionAnim.transition(PhotoSendActivity.this);
             }
         });
 

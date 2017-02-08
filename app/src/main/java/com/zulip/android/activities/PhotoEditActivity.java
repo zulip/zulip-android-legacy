@@ -22,6 +22,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.zulip.android.R;
+import com.zulip.android.util.ActivityTransitionAnim;
 import com.zulip.android.util.DrawCustomView;
 import com.zulip.android.util.PhotoHelper;
 
@@ -132,6 +133,9 @@ public class PhotoEditActivity extends AppCompatActivity {
                     cropIntent.putExtra(PhotoEditActivity.class.getSimpleName(), true);
                     cropIntent.putExtra(Intent.EXTRA_TEXT, mPhotoPath);
                     startActivity(cropIntent);
+
+                    // activity transition animation
+                    ActivityTransitionAnim.transition(PhotoEditActivity.this);
                 } else {
                     // do nothing
                     // wait for layout to be constructed
@@ -158,6 +162,9 @@ public class PhotoEditActivity extends AppCompatActivity {
 
                     sendIntent.putExtra(Intent.EXTRA_TEXT, mPhotoPath);
                     startActivity(sendIntent);
+
+                    // activity transition animation
+                    ActivityTransitionAnim.transition(PhotoEditActivity.this);
                 } else {
                     // do nothing
                     // wait for layout to be constructed
