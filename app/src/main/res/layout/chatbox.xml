@@ -83,16 +83,18 @@
     <LinearLayout
         android:id="@+id/composeStatus"
         android:layout_width="match_parent"
-        android:layout_height="24dp"
-
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
         android:layout_gravity="center"
-        android:background="#eeeeee"
+        android:background="@color/colorPrimary"
         android:gravity="center|center_vertical"
         android:visibility="gone">
 
         <ProgressBar
             android:layout_width="15dp"
-            android:layout_height="15dp" />
+            android:layout_height="15dp"
+            style="@style/AppTheme.DayNight"
+            />
 
         <TextView
             android:id="@+id/sending_message"
@@ -100,6 +102,7 @@
             android:layout_height="wrap_content"
             android:paddingLeft="8dp"
             android:text="@string/sending_message"
+            android:textColor="@color/colorTextPrimary"
             android:textSize="16sp" />
     </LinearLayout>
 
