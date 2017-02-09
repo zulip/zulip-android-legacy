@@ -105,6 +105,10 @@ public class NarrowFilterPM implements NarrowFilter {
                 emails.add(person.getEmail());
             }
         }
+        if (people.size() == 1 && people.get(0).equals(ZulipApp.get().getYou())) {
+            //PM to self
+            emails.add(people.get(0).getEmail());
+        }
         return (new JSONArray()).put(
                 new JSONArray(Arrays.asList("pm-with",
                         TextUtils.join(",", emails)))).toString();
