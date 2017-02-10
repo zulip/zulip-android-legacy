@@ -93,4 +93,13 @@ public class DevAuthActivity extends BaseActivity {
         startActivity(i);
         finish();
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (commonProgressDialog != null && commonProgressDialog.isShowing()) {
+            commonProgressDialog.dismiss();
+        }
+    }
+
 }
