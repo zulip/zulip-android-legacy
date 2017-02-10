@@ -213,6 +213,14 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         super.onStop();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (commonProgressDialog != null && commonProgressDialog.isShowing()) {
+            commonProgressDialog.dismiss();
+        }
+    }
+
     private void checkForError() {
         String serverURL = serverIn.getText().toString();
 
