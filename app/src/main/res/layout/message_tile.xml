@@ -66,6 +66,7 @@
             android:paddingLeft="8dp"
             android:paddingRight="16dp"
             android:paddingStart="8dp"
+            android:paddingBottom="8dp"
             tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam mollis pretium purus, faucibus accumsan enim placerat non. " />
 
         <FrameLayout
