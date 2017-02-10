@@ -312,6 +312,7 @@ public class PhotoViewActivity extends AppCompatActivity implements ActivityComp
             intent.setDataAndType(uri, "image/*");
             PendingIntent pIntent = PendingIntent.getActivity(PhotoViewActivity.this, 0, intent, 0);
             mBuilder.setContentIntent(pIntent).build();
+            mBuilder.setAutoCancel(true);
             mNotifyManager.notify(id, mBuilder.build());
 
         }
