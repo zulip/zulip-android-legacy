@@ -31,14 +31,14 @@ import java.util.List;
  * holds the updated value of this property.
  */
 
-public class SubscriptionWrapper extends EventsBranch {
+public class SubscriptionWrapper<T> extends EventsBranch {
 
     public static final String OPERATION_ADD = "add";
     public static final String OPERATION_REMOVE = "remove";
     public static final String OPERATION_UPDATE = "update";
 
     @SerializedName("subscriptions")
-    private List<Stream> streams;
+    private List<T> streams;
 
     @SerializedName("op")
     private String operation;
@@ -55,12 +55,13 @@ public class SubscriptionWrapper extends EventsBranch {
     @SerializedName("value")
     private Object value;
 
-    public List<Stream> getStreams() {
-        return this.streams;
-    }
-
-    public void setStreams(List<Stream> streams) {
-        this.streams = streams;
+    public List<T> getStreams() {
+        if (getOperation().equalsIgnoreCase(OPERATION_ADD) ||
+                getOperation().equalsIgnoreCase(OPERATION_REMOVE) ||
+                getOperation().equalsIgnoreCase(OPERATION_UPDATE)) {
+            return this.streams;
+        }
+        return null;
     }
 
     public String getOperation() {
