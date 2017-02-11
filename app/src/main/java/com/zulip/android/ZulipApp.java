@@ -17,6 +17,7 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.TypeAdapter;
+import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import com.j256.ormlite.dao.Dao;
@@ -31,10 +32,12 @@ import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageType;
 import com.zulip.android.models.Person;
 import com.zulip.android.models.Presence;
+import com.zulip.android.models.Stream;
 import com.zulip.android.networking.AsyncUnreadMessagesUpdate;
 import com.zulip.android.networking.ZulipInterceptor;
 import com.zulip.android.networking.response.UserConfigurationResponse;
 import com.zulip.android.networking.response.events.EventsBranch;
+import com.zulip.android.networking.response.events.SubscriptionWrapper;
 import com.zulip.android.service.ZulipServices;
 import com.zulip.android.util.Constants;
 import com.zulip.android.util.GoogleAuthHelper;
@@ -288,6 +291,18 @@ public class ZulipApp extends Application {
                         }
                         Class<? extends EventsBranch> t = EventsBranch.BranchType.fromRawType(invalid);
                         if (t != null) {
+                            if (t.getSimpleName().equalsIgnoreCase("SubscriptionWrapper")) {
+                                // check operation
+                                if (SubscriptionWrapper.OPERATION_ADD.equalsIgnoreCase(json.getAsJsonObject().get("op").getAsString()) ||
+                                        SubscriptionWrapper.OPERATION_REMOVE.equalsIgnoreCase(json.getAsJsonObject().get("op").getAsString()) ||
+                                        SubscriptionWrapper.OPERATION_UPDATE.equalsIgnoreCase(json.getAsJsonObject().get("op").getAsString())) {
+                                    Type type = new TypeToken<SubscriptionWrapper<Stream>>(){}.getType();
+                                    return nestedGson.fromJson(json, type);
+                                } else {
+                                    Type type = new TypeToken<SubscriptionWrapper<String>>(){}.getType();
+                                    return nestedGson.fromJson(json, type);
+                                }
+                            }
                             return nestedGson.fromJson(json, t);
                         }
                         Log.w("GSON", "Attempted to deserialize and unregistered EventBranch... See EventBranch.BranchType");
