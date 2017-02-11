@@ -220,6 +220,10 @@ public class Stream {
         this.inHomeView = inHomeView;
     }
 
+    public void setDefaultColor() {
+        this.parsedColor = DEFAULT_COLOR;
+    }
+
     /**
      * This function returns the last message read in {@param streamName} stream.
      *

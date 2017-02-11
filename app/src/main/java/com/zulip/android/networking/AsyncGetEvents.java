@@ -25,6 +25,7 @@ import com.zulip.android.networking.response.events.EventsBranch;
 import com.zulip.android.networking.response.events.GetEventResponse;
 import com.zulip.android.networking.response.events.MessageWrapper;
 import com.zulip.android.networking.response.events.MutedTopicsWrapper;
+import com.zulip.android.networking.response.events.StreamWrapper;
 import com.zulip.android.networking.response.events.SubscriptionWrapper;
 import com.zulip.android.networking.response.events.UpdateMessageWrapper;
 import com.zulip.android.util.MutedTopics;
@@ -165,6 +166,18 @@ public class AsyncGetEvents extends Thread {
                         stream.setSubscribed(false);
                         try {
                             streamDao.createOrUpdate(stream);
+                        } catch (Exception e) {
+                            ZLog.logException(e);
+                        }
+                    }
+
+                    // get rest of the streams in the realm
+                    List<Stream> streams = response.getStreams();
+                    for (Stream stream : streams) {
+                        try {
+                            // use default color for not subscribed streams
+                            stream.setDefaultColor();
+                            streamDao.createIfNotExists(stream);
                         } catch (Exception e) {
                             ZLog.logException(e);
                         }
@@ -353,13 +366,22 @@ public class AsyncGetEvents extends Thread {
             processUpdateMessages(updateMessageEvents);
         }
 
-        //get message time limit events
+        // get message time limit events
         List<EventsBranch> messageTimeLimit = events.getEventsOfBranchType(EventsBranch.BranchType.EDIT_MESSAGE_TIME_LIMIT);
         if (!messageTimeLimit.isEmpty()) {
             Log.i("AsyncGetEvents", "Received " + messageTimeLimit.size()
                     + " realm event");
             processMessageEditParam(messageTimeLimit);
         }
+
+        // get stream events
+        List<EventsBranch> streamEvents = events.getEventsOfBranchType(EventsBranch.BranchType.STREAM);
+        if (!streamEvents.isEmpty()) {
+            Log.i("AsyncGetEvents", "Received " + streamEvents.size()
+                    + " stream event");
+            processStreams(streamEvents);
+        }
+
     }
 
     /**
@@ -513,5 +535,28 @@ public class AsyncGetEvents extends Thread {
                 }
             }
         });
+    }
+
+    public void processStreams(List<EventsBranch> events) {
+        for (EventsBranch event : events) {
+            StreamWrapper streamEvent = (StreamWrapper) event;
+            if (streamEvent.getOperation().equalsIgnoreCase(StreamWrapper.OP_OCCUPY)) {
+                Dao<Stream, Integer> streamDao = app.getDao(Stream.class);
+                List<Stream> streams = streamEvent.getStreams();
+                for (Stream stream : streams) {
+                    try {
+                        // use default color for not subscribed streams
+                        stream.setDefaultColor();
+                        streamDao.createIfNotExists(stream);
+                    } catch (SQLException e) {
+                        ZLog.logException(e);
+                    }
+                }
+            } else {
+                // TODO: handle other operations of stream event
+                Log.d("AsyncEvents", "unhandled operation for stream type event");
+                return;
+            }
+        }
     }
 }

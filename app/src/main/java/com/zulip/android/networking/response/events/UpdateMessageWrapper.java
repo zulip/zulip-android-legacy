@@ -69,4 +69,8 @@ public class UpdateMessageWrapper extends EventsBranch {
     public void setFormattedContent(String formattedContent) {
         this.formattedContent = formattedContent;
     }
+
+    public String getOrigFormattedContent() {
+        return this.origFormattedContent;
+    }
 }
