@@ -8,6 +8,8 @@ import android.view.View;
 import com.zulip.android.ZulipApp;
 import com.zulip.android.models.Stream;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * Custom ClickableSpan to support #stream-name click. The user is taken to the last message read
  * in the stream.
@@ -31,15 +33,17 @@ public class StreamSpan extends ClickableSpan {
 
         // get stream name from streamId string
         String streamName = null;
-        if (streamId != null) {
+        if (StringUtils.isNumeric(streamId)) {
             Stream stream = Stream.getById(ZulipApp.get(), Integer.parseInt(streamId));
             if (stream != null) {
                 streamName = stream.getName();
             }
-        }
 
-        // go to last message read in the stream
-        (((ZulipApp) context).getZulipActivity()).doNarrowToLastRead(streamName);
+            // go to last message read in the stream
+            if (streamName != null) {
+                (((ZulipApp) context).getZulipActivity()).doNarrowToLastRead(streamName);
+            }
+        }
     }
 
     /**
