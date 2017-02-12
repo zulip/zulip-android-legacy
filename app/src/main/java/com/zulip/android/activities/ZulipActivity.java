@@ -2123,7 +2123,7 @@ public class ZulipActivity extends BaseActivity implements
     private void logout() {
         commonProgressDialog.showWithMessage(getString(R.string.logging_out));
         this.logged_in = false;
-        final String serverUrl = app.getServerURI();
+        final String serverUrl = app.getServerHostUri() ;
 
         notifications.logOut(new Runnable() {
             public void run() {
