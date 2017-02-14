@@ -126,7 +126,8 @@ public class ZulipApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        Fabric.with(this, new Crashlytics());
+        if (!BuildConfig.DEBUG)
+            Fabric.with(this, new Crashlytics());
         ZulipApp.setInstance(this);
 
         // This used to be from HumbugActivity.getPreferences, so we keep that

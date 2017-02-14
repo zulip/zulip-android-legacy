@@ -6,6 +6,7 @@ import android.os.Build;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
+import com.zulip.android.BuildConfig;
 import com.zulip.android.ZulipApp;
 import com.zulip.android.util.ZLog;
 
@@ -76,7 +77,8 @@ public abstract class ZulipAsyncPushTask extends AsyncTask<String, String, Strin
     }
 
     protected String doInBackground(String... api_path) {
-        Crashlytics.log(Log.VERBOSE, "Network call", getClass().getCanonicalName() + request);
+        if (!BuildConfig.DEBUG)
+            Crashlytics.log(Log.VERBOSE, "Network call", getClass().getCanonicalName() + request);
 
         try {
             Response response = request.execute();
