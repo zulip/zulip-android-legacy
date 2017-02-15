@@ -29,6 +29,10 @@
     </item>
 
     <item
+        android:id="@+id/attach"
+        android:title="@string/attach" />
+
+    <item
         android:id="@+id/daynight"
         android:title="@string/switch_theme" />
     <item

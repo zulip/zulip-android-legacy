@@ -16,6 +16,7 @@ import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
+import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -152,6 +153,10 @@ public class ZulipActivity extends BaseActivity implements
     private static final int REQUEST_TAKE_PHOTO = 2;
     private static final Interpolator FAST_OUT_SLOW_IN_INTERPOLATOR = new FastOutSlowInInterpolator();
     private static final int HIDE_FAB_AFTER_SEC = 5;
+    private static final int REQUEST_PICK_FILE = 3;
+    // row number which is used to differentiate the 'All private messages'
+    // row from the people
+    final int allPeopleId = -1;
     public MessageListFragment currentList;
     public CommonProgressDialog commonProgressDialog;
     FloatingActionButton fab;
@@ -541,7 +546,7 @@ public class ZulipActivity extends BaseActivity implements
                 handleSentText(intent);
             } else {
                 // Handle single file being sent
-                handleSentFile(intent);
+                handleSentFile((Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM));
             }
         }
         // if device doesn't have camera, disable camera button
@@ -866,12 +871,12 @@ public class ZulipActivity extends BaseActivity implements
         String type = intent.getType();
 
         if (Intent.ACTION_SEND.equals(action) && type != null) {
-            if (type.startsWith("image/")) {
-                // Handle single image being sent
-                handleSentFile(intent);
-            } else if ("text/plain".equals(type)) {
+            if ("text/plain".equals(type)) {
                 // Handle text being sent
                 handleSentText(intent);
+            } else {
+                // Handle single file being sent
+                handleSentFile((Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM));
             }
         }
 
@@ -908,10 +913,31 @@ public class ZulipActivity extends BaseActivity implements
             // activity transition animation
             ActivityTransitionAnim.transition(ZulipActivity.this);
         }
+
+        // TODO: rearrange code
+        // in else if upload file sent and show notification for it
+        else if (requestCode == REQUEST_PICK_FILE && resultCode == RESULT_OK) {
+            List<Uri> fileUris = new ArrayList<>();
+            if (data.getData() != null) {
+                fileUris.add(data.getData());
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                ClipData clipData = data.getClipData();
+                if (clipData != null) {
+                    for (int i = 0; i < clipData.getItemCount(); i++) {
+                        fileUris.add(clipData.getItemAt(i).getUri());
+                    }
+                }
+            }
+            for (Uri file : fileUris) {
+                handleSentFile(file);
+            }
+        }
     }
 
     /**
      * Function invoked when a user shares a text with the zulip app
+     *
      * @param intent passed to the activity with action SEND
      */
     private void handleSentText(Intent intent) {
@@ -927,11 +953,11 @@ public class ZulipActivity extends BaseActivity implements
     /**
      * Function invoked when a user shares an image with the zulip app
      *
-     * @param intent passed to the activity with action SEND
+     * @param fileUri obtained from intent passed to the activity
      */
     @SuppressLint("InlinedApi")
-    private void handleSentFile(Intent intent) {
-        mFileUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+    private void handleSentFile(Uri fileUri) {
+        mFileUri = fileUri;
         if (mFileUri != null) {
             // check if user has granted read external storage permission
             // for Android 6.0 or higher
@@ -2197,10 +2223,29 @@ public class ZulipActivity extends BaseActivity implements
             case R.id.legal:
                 openLegal();
                 break;
+            case R.id.attach:
+                dispatchPickIntent();
+                break;
             default:
                 return super.onOptionsItemSelected(item);
         }
         return true;
+    }
+
+    private void dispatchPickIntent() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("*/*");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+
+        // For Api level greater than or equal to 18, allow user to select multiple files
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        }
+
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(intent, REQUEST_PICK_FILE);
+        }
     }
 
     /**
