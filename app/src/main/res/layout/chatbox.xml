@@ -38,7 +38,8 @@
             android:layout_height="wrap_content"
             android:contentDescription="@string/stream_private_content_desp"
             android:padding="3dp"
-            android:src="@drawable/ic_action_person" />
+            android:src="@drawable/ic_action_person"
+            android:tint="@color/colorTextSecondary" />
     </LinearLayout>
 
     <LinearLayout
@@ -51,13 +52,14 @@
             android:id="@+id/camera_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:alpha="0.7"
             android:contentDescription="@string/camera_content_desp"
             android:paddingBottom="4dp"
             android:paddingLeft="8dp"
             android:paddingRight="4dp"
             android:paddingTop="4dp"
             android:src="@drawable/ic_photo_camera_black_24dp"
-            android:tint="#757575" />
+            android:tint="@color/colorTextSecondary" />
 
         <AutoCompleteTextView
             android:id="@+id/message_et"
@@ -73,10 +75,11 @@
             android:id="@+id/send_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:alpha="0.7"
             android:contentDescription="@string/send_content_desp"
             android:padding="4dp"
             android:src="@drawable/ic_send_24dp"
-            android:tint="#757575" />
+            android:tint="@color/colorTextSecondary" />
 
     </LinearLayout>
 
@@ -84,17 +87,16 @@
         android:id="@+id/composeStatus"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:layout_gravity="center"
         android:background="@color/colorPrimary"
         android:gravity="center|center_vertical"
+        android:orientation="horizontal"
         android:visibility="gone">
 
         <ProgressBar
-            android:layout_width="15dp"
-            android:layout_height="15dp"
             style="@style/AppTheme.DayNight"
-            />
+            android:layout_width="15dp"
+            android:layout_height="15dp" />
 
         <TextView
             android:id="@+id/sending_message"
