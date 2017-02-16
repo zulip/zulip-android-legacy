@@ -1,14 +1,6 @@
 package com.zulip.android.activities;
 
 import android.Manifest;
-import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.Callable;
-import java.util.ArrayList;
-
 import android.animation.Animator;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -98,9 +90,9 @@ import com.zulip.android.gcm.Notifications;
 import com.zulip.android.models.Emoji;
 import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageType;
+import com.zulip.android.models.PeopleDrawerList;
 import com.zulip.android.models.Person;
 import com.zulip.android.models.Presence;
-import com.zulip.android.models.PeopleDrawerList;
 import com.zulip.android.models.Stream;
 import com.zulip.android.networking.AsyncGetEvents;
 import com.zulip.android.networking.AsyncSend;
@@ -112,7 +104,7 @@ import com.zulip.android.networking.util.DefaultCallback;
 import com.zulip.android.util.AnimationHelper;
 import com.zulip.android.util.CommonProgressDialog;
 import com.zulip.android.util.Constants;
-import com.zulip.android.util.FilePathHelper;
+import com.zulip.android.util.FileUtils;
 import com.zulip.android.util.MutedTopics;
 import com.zulip.android.util.RemoveViewsOnScroll;
 import com.zulip.android.util.SwipeRemoveLinearLayout;
@@ -126,9 +118,16 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.Callable;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -1066,15 +1065,15 @@ public class ZulipActivity extends BaseActivity implements
      */
     private void startFileUpload() {
         File file = null;
-        if (FilePathHelper.isLegacy(mFileUri)) {
-            file = FilePathHelper.getTempFileFromContentUri(this, mFileUri);
+        if (FileUtils.isLegacy(mFileUri)) {
+            file = FileUtils.getTempFileFromContentUri(this, mFileUri);
         } else {
             // get actual file path
-            String filePath = FilePathHelper.getPath(this, mFileUri);
+            String filePath = FileUtils.getPath(this, mFileUri);
             if (filePath != null) {
                 file = new File(filePath);
             } else if ("content".equalsIgnoreCase(mFileUri.getScheme())) {
-                file = FilePathHelper.getTempFileFromContentUri(this, mFileUri);
+                file = FileUtils.getTempFileFromContentUri(this, mFileUri);
             }
         }
 
@@ -1096,7 +1095,7 @@ public class ZulipActivity extends BaseActivity implements
 
         // create RequestBody instance from file
         RequestBody requestFile =
-                RequestBody.create(MediaType.parse(getContentResolver().getType(mFileUri)), file);
+                RequestBody.create(MediaType.parse("multipart/form-data"), file);
 
         // MultipartBody.Part is used to send also the actual file name
         MultipartBody.Part body =
