@@ -209,7 +209,6 @@ public class ZulipActivity extends BaseActivity implements
     private Uri mFileUri;
     private ImageView cameraBtn;
     private String mCurrentPhotoPath;
-    private Uri mPhotoURI;
     private Menu menu;
     private Calendar calendar;
     private EditText etSearchPeople;
@@ -1019,16 +1018,16 @@ public class ZulipActivity extends BaseActivity implements
 
             // Continue only if the File was successfully created
             if (photoFile != null) {
-                mPhotoURI = FileProvider.getUriForFile(this,
+                mFileUri = FileProvider.getUriForFile(this,
                         "com.zulip.fileprovider",
                         photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mPhotoURI);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mFileUri);
 
                 // grant uri permissions for lower api levels
                 List<ResolveInfo> resInfoList = this.getPackageManager().queryIntentActivities(takePictureIntent, PackageManager.MATCH_DEFAULT_ONLY);
                 for (ResolveInfo resolveInfo : resInfoList) {
                     String packageName = resolveInfo.activityInfo.packageName;
-                    this.grantUriPermission(packageName, mPhotoURI, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    this.grantUriPermission(packageName, mFileUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 }
 
                 startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
@@ -1097,7 +1096,7 @@ public class ZulipActivity extends BaseActivity implements
 
         // create RequestBody instance from file
         RequestBody requestFile =
-                RequestBody.create(MediaType.parse("multipart/form-data"), file);
+                RequestBody.create(MediaType.parse(getContentResolver().getType(mFileUri)), file);
 
         // MultipartBody.Part is used to send also the actual file name
         MultipartBody.Part body =
