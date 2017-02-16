@@ -108,6 +108,7 @@ import com.zulip.android.networking.AsyncStatusUpdate;
 import com.zulip.android.networking.ZulipAsyncPushTask;
 import com.zulip.android.networking.response.UploadResponse;
 import com.zulip.android.util.ActivityTransitionAnim;
+import com.zulip.android.networking.util.DefaultCallback;
 import com.zulip.android.util.AnimationHelper;
 import com.zulip.android.util.CommonProgressDialog;
 import com.zulip.android.util.Constants;
@@ -133,7 +134,6 @@ import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
@@ -1108,32 +1108,31 @@ public class ZulipActivity extends BaseActivity implements
         // finally, execute the request
         // create upload service client
         Call<UploadResponse> call = ((ZulipApp) getApplicationContext()).getZulipServices().upload(body);
-        call.enqueue(new Callback<UploadResponse>() {
+        call.enqueue(new DefaultCallback<UploadResponse>() {
             @Override
-            public void onResponse(Call<UploadResponse> call,
-                                   Response<UploadResponse> response) {
-                if (response.isSuccessful()) {
-                    String filePathOnServer = "";
-                    UploadResponse uploadResponse = response.body();
-                    filePathOnServer = uploadResponse.getUri();
-                    if (!filePathOnServer.equals("")) {
-                        // remove loading message from the screen
-                        sendingMessage(false, loadingMsg);
+            public void onSuccess(Call<UploadResponse> call, Response<UploadResponse> response) {
+                String filePathOnServer = "";
+                UploadResponse uploadResponse = response.body();
+                filePathOnServer = uploadResponse.getUri();
+                if (!filePathOnServer.equals("")) {
+                    // remove loading message from the screen
+                    sendingMessage(false, loadingMsg);
 
-                        // print message to compose box
-                        messageEt.append(" [" + file.getName() + "](" +
-                                UrlHelper.addHost(filePathOnServer) + ")");
-                    } else {
-                        // remove loading message from the screen
-                        sendingMessage(false, loadingMsg);
-                        Toast.makeText(ZulipActivity.this, R.string.failed_to_upload, Toast.LENGTH_SHORT).show();
-                    }
+                    // print message to compose box
+                    messageEt.append(" [" + file.getName() + "](" +
+                            UrlHelper.addHost(filePathOnServer) + ")");
                 } else {
                     // remove loading message from the screen
                     sendingMessage(false, loadingMsg);
                     Toast.makeText(ZulipActivity.this, R.string.failed_to_upload, Toast.LENGTH_SHORT).show();
                 }
+            }
 
+            @Override
+            public void onError(Call<UploadResponse> call, Response<UploadResponse> response) {
+                // remove loading message from the screen
+                sendingMessage(false, loadingMsg);
+                Toast.makeText(ZulipActivity.this, R.string.failed_to_upload, Toast.LENGTH_SHORT).show();
             }
 
             @Override
