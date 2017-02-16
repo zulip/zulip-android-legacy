@@ -28,6 +28,7 @@ import android.os.CountDownTimer;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -1085,6 +1086,19 @@ public class ZulipActivity extends BaseActivity implements
         uploadFile(file);
     }
 
+    @NonNull
+    private MultipartBody.Part prepareFilePart(String partName, File file) {
+        // create RequestBody instance from file
+        RequestBody requestFile =
+                RequestBody.create(
+                        MediaType.parse("multipart/form-data"),
+                        file
+                );
+
+        // MultipartBody.Part is used to send also the actual file name
+        return MultipartBody.Part.createFormData(partName, file.getName(), requestFile);
+    }
+
     /**
      * Function to upload file asynchronously to the server using retrofit callback
      * upload {@link com.zulip.android.service.ZulipServices#upload(MultipartBody.Part)}
@@ -1093,13 +1107,8 @@ public class ZulipActivity extends BaseActivity implements
      */
     private void uploadFile(final File file) {
 
-        // create RequestBody instance from file
-        RequestBody requestFile =
-                RequestBody.create(MediaType.parse("multipart/form-data"), file);
-
         // MultipartBody.Part is used to send also the actual file name
-        MultipartBody.Part body =
-                MultipartBody.Part.createFormData("file", file.getName(), requestFile);
+        MultipartBody.Part body = prepareFilePart("file", file);
 
         final String loadingMsg = getResources().getString(R.string.uploading_message);
 
