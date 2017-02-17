@@ -168,4 +168,7 @@
     <string name="people_drawer_others_label">New Private Message</string>
     <string name="mentions">\@-mentions</string>
     <string name="attach">Attach</string>
+    <string name="notif_title">Upload to Zulip</string>
+    <string name="init_notif_title">Starting upload</string>
+    <string name="finish_notif_title">Complete</string>
 </resources>

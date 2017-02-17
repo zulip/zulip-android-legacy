@@ -6,6 +6,8 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
@@ -44,6 +46,7 @@ import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AppCompatDelegate;
+import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -557,6 +560,8 @@ public class ZulipActivity extends BaseActivity implements
         setupSnackBar();
         //Hides Keyboard if it was open with focus on an editText before restart of the activity
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+
+        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
     /**
@@ -1099,6 +1104,49 @@ public class ZulipActivity extends BaseActivity implements
         return MultipartBody.Part.createFormData(partName, file.getName(), requestFile);
     }
 
+    NotificationManager mNotificationManager;
+
+    /**
+     * TODO: add description
+     *
+     * @param notificationId
+     * @param title
+     * @param content
+     */
+    private void setNotification(int notificationId, String title, String content) {
+        NotificationCompat.Builder builder =
+                (NotificationCompat.Builder) new NotificationCompat.Builder(this)
+                        .setSmallIcon(android.R.drawable.stat_sys_upload)
+                        .setContentTitle(title)
+                        .setContentText(content)
+                        .setColor(getColor(R.color.notif_background));
+        PendingIntent contentIntent = PendingIntent.getActivity(
+                getApplicationContext(),
+                0,
+                new Intent(),
+                PendingIntent.FLAG_UPDATE_CURRENT);
+        builder.setContentIntent(contentIntent);
+        mNotificationManager.notify(notificationId, builder.build());
+    }
+
+    private void endNotification(int notificationId, String title, String content) {
+        NotificationCompat.Builder builder =
+                (NotificationCompat.Builder) new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.drawable.ic_done_white_24dp)
+                        .setContentTitle(title)
+                        .setContentText(content)
+                        .setAutoCancel(true)
+                        .setColor(getColor(R.color.notif_background));
+
+        PendingIntent contentIntent = PendingIntent.getActivity(
+                getApplicationContext(),
+                0,
+                new Intent(),
+                PendingIntent.FLAG_UPDATE_CURRENT);
+        builder.setContentIntent(contentIntent);
+        mNotificationManager.notify(notificationId, builder.build());
+    }
+
     /**
      * Function to upload file asynchronously to the server using retrofit callback
      * upload {@link com.zulip.android.service.ZulipServices#upload(MultipartBody.Part)}
@@ -1112,6 +1160,10 @@ public class ZulipActivity extends BaseActivity implements
 
         final String loadingMsg = getResources().getString(R.string.uploading_message);
 
+        // start notification
+        // TODO: handle different notif ids
+        setNotification(100, getString(R.string.notif_title), getString(R.string.init_notif_title));
+
         // finally, execute the request
         // create upload service client
         Call<UploadResponse> call = ((ZulipApp) getApplicationContext()).getZulipServices().upload(body);
@@ -1122,6 +1174,7 @@ public class ZulipActivity extends BaseActivity implements
                 UploadResponse uploadResponse = response.body();
                 filePathOnServer = uploadResponse.getUri();
                 if (!filePathOnServer.equals("")) {
+                    endNotification(100, getString(R.string.notif_title), getString(R.string.finish_notif_title));
                     // remove loading message from the screen
                     sendingMessage(false, loadingMsg);
 
@@ -2353,6 +2406,10 @@ public class ZulipActivity extends BaseActivity implements
         if (statusUpdateHandler != null) {
             statusUpdateHandler.removeMessages(0);
             statusUpdateHandler.removeCallbacks(statusUpdateRunnable);
+        }
+        if (mNotificationManager == null) {
+            mNotificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+            mNotificationManager.cancelAll();
         }
     }
 
