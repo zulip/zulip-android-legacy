@@ -101,6 +101,7 @@ import com.zulip.android.models.Stream;
 import com.zulip.android.networking.AsyncGetEvents;
 import com.zulip.android.networking.AsyncSend;
 import com.zulip.android.networking.AsyncStatusUpdate;
+import com.zulip.android.networking.UploadProgressRequest;
 import com.zulip.android.networking.ZulipAsyncPushTask;
 import com.zulip.android.networking.response.UploadResponse;
 import com.zulip.android.util.ActivityTransitionAnim;
@@ -133,9 +134,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Callable;
 
-import okhttp3.MediaType;
 import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Response;
 
@@ -562,6 +561,9 @@ public class ZulipActivity extends BaseActivity implements
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        mBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(this)
+                .setContentTitle(getString(R.string.notif_title))
+                .setColor(getColor(R.color.notif_background));
     }
 
     /**
@@ -1093,58 +1095,77 @@ public class ZulipActivity extends BaseActivity implements
 
     @NonNull
     private MultipartBody.Part prepareFilePart(String partName, File file) {
-        // create RequestBody instance from file
-        RequestBody requestFile =
-                RequestBody.create(
-                        MediaType.parse("multipart/form-data"),
-                        file
-                );
+        // create UploadProgressRequest instance from file
+        // TODO: change for multiple uploads
+        UploadProgressRequest request = new UploadProgressRequest(file, new UploadProgressRequest.UploadCallbacks() {
+            @Override
+            public void onProgressUpdate(int percentage, String progress, int notificationId) {
+                // update notification
+                progressNotification(notificationId, percentage, progress);
+            }
+        }, 100);
 
         // MultipartBody.Part is used to send also the actual file name
-        return MultipartBody.Part.createFormData(partName, file.getName(), requestFile);
+        return MultipartBody.Part.createFormData(partName, file.getName(), request);
     }
 
-    NotificationManager mNotificationManager;
+    private NotificationManager mNotificationManager;
+    private NotificationCompat.Builder mBuilder;
 
     /**
      * TODO: add description
      *
      * @param notificationId
-     * @param title
      * @param content
      */
-    private void setNotification(int notificationId, String title, String content) {
-        NotificationCompat.Builder builder =
-                (NotificationCompat.Builder) new NotificationCompat.Builder(this)
-                        .setSmallIcon(android.R.drawable.stat_sys_upload)
-                        .setContentTitle(title)
-                        .setContentText(content)
-                        .setColor(getColor(R.color.notif_background));
+    private void setNotification(int notificationId, String content) {
+        mBuilder.setSmallIcon(android.R.drawable.stat_sys_upload)
+                .setContentText(content)
+                .setAutoCancel(false)
+                // Removes the progress bar
+                .setProgress(0,0,false);
         PendingIntent contentIntent = PendingIntent.getActivity(
                 getApplicationContext(),
                 0,
                 new Intent(),
                 PendingIntent.FLAG_UPDATE_CURRENT);
-        builder.setContentIntent(contentIntent);
-        mNotificationManager.notify(notificationId, builder.build());
+        mBuilder.setContentIntent(contentIntent);
+        mNotificationManager.notify(notificationId, mBuilder.build());
     }
 
-    private void endNotification(int notificationId, String title, String content) {
-        NotificationCompat.Builder builder =
-                (NotificationCompat.Builder) new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.ic_done_white_24dp)
-                        .setContentTitle(title)
-                        .setContentText(content)
-                        .setAutoCancel(true)
-                        .setColor(getColor(R.color.notif_background));
+    /**
+     * TODO: add description
+     *
+     * @param notificationId
+     * @param percentage
+     */
+    private void progressNotification(int notificationId, int percentage, String progress) {
+        mBuilder.setSmallIcon(android.R.drawable.stat_sys_upload)
+                .setContentText(progress)
+                .setAutoCancel(false)
+                .setProgress(100, percentage, false);
+        mNotificationManager.notify(notificationId, mBuilder.build());
+    }
 
+    /**
+     * TODO: add description
+     *
+     * @param notificationId
+     * @param content
+     */
+    private void endNotification(int notificationId, String content) {
+        mBuilder.setSmallIcon(R.drawable.ic_done_white_24dp)
+                .setContentText(content)
+                .setAutoCancel(true)
+                // Removes the progress bar
+                .setProgress(0,0,false);
         PendingIntent contentIntent = PendingIntent.getActivity(
                 getApplicationContext(),
                 0,
                 new Intent(),
                 PendingIntent.FLAG_UPDATE_CURRENT);
-        builder.setContentIntent(contentIntent);
-        mNotificationManager.notify(notificationId, builder.build());
+        mBuilder.setContentIntent(contentIntent);
+        mNotificationManager.notify(notificationId, mBuilder.build());
     }
 
     /**
@@ -1162,7 +1183,7 @@ public class ZulipActivity extends BaseActivity implements
 
         // start notification
         // TODO: handle different notif ids
-        setNotification(100, getString(R.string.notif_title), getString(R.string.init_notif_title));
+        setNotification(100, getString(R.string.init_notif_title));
 
         // finally, execute the request
         // create upload service client
@@ -1174,7 +1195,7 @@ public class ZulipActivity extends BaseActivity implements
                 UploadResponse uploadResponse = response.body();
                 filePathOnServer = uploadResponse.getUri();
                 if (!filePathOnServer.equals("")) {
-                    endNotification(100, getString(R.string.notif_title), getString(R.string.finish_notif_title));
+                    endNotification(100, getString(R.string.finish_notif_title));
                     // remove loading message from the screen
                     sendingMessage(false, loadingMsg);
 
