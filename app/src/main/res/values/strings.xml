@@ -171,4 +171,9 @@
     <string name="notif_title">Upload to Zulip</string>
     <string name="init_notif_title">Starting upload</string>
     <string name="finish_notif_title">Complete</string>
+    <string name="upload_big_file">Yowza, that’s a big file.</string>
+    <string name="photo_dialog">Take photo</string>
+    <string name="pick_dialog">Pick a file</string>
+    <string name="to_string">" to "</string>
+    <string name="upload_started_str">Upload started</string>
 </resources>
