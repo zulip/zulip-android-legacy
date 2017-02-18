@@ -151,4 +151,6 @@
     <string name="connecting_to_server">Connecting to server</string>
     <string name="refreshing">Refreshing</string>
     <string name="logging_out">Logging out</string>
+    <string name="fetch_edit_message">Preparing Message for edit</string>
+    <string name="no_edit">No edits detected</string>
 </resources>

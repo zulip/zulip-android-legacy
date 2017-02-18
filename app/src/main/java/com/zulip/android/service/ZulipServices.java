@@ -4,6 +4,7 @@ import com.zulip.android.filters.NarrowFilter;
 import com.zulip.android.networking.response.EditResponse;
 import com.zulip.android.networking.response.GetMessagesResponse;
 import com.zulip.android.networking.response.LoginResponse;
+import com.zulip.android.networking.response.RawMessageResponse;
 import com.zulip.android.networking.response.UploadResponse;
 import com.zulip.android.networking.response.UserConfigurationResponse;
 import com.zulip.android.networking.response.ZulipBackendResponse;
@@ -65,4 +66,7 @@ public interface ZulipServices {
     @FormUrlEncoded
     @PATCH("v1/messages/{id}")
     Call<EditResponse> editMessage(@Path("id") String messageId, @Field("content") String messageContent);
+
+    @GET("v1/messages/{id}")
+    Call<RawMessageResponse> fetchRawMessage(@Path("id") int messageId);
 }

@@ -13,6 +13,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -39,6 +40,9 @@ import com.zulip.android.models.Stream;
 import com.zulip.android.networking.AsyncGetOldMessages;
 import com.zulip.android.networking.ZulipAsyncPushTask;
 import com.zulip.android.networking.response.EditResponse;
+import com.zulip.android.networking.response.RawMessageResponse;
+import com.zulip.android.networking.util.DefaultCallback;
+import com.zulip.android.util.CommonProgressDialog;
 import com.zulip.android.util.Constants;
 import com.zulip.android.util.MessageListener;
 import com.zulip.android.util.MutedTopics;
@@ -174,7 +178,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
                 }
             }
         });
-        mListener.setLayoutBehaviour(linearLayoutManager,adapter);
+        mListener.setLayoutBehaviour(linearLayoutManager, adapter);
         return view;
     }
 
@@ -398,68 +402,110 @@ public class MessageListFragment extends Fragment implements MessageListener {
         if (timeSinceMessageSend > maxMessageContentEditLimit) {
             Toast.makeText(getContext(), R.string.maximum_time_limit_error, Toast.LENGTH_SHORT).show();
         } else {
-            final View dialogView = View.inflate(getContext(),
-                    R.layout.message_edit_dialog, null);
-            //Pop up a dialog box with previous message content
-            final AlertDialog dialog = new AlertDialog.Builder(getContext())
-                    .setTitle(R.string.edit_message)
-                    .setView(dialogView)
-                    .setPositiveButton(android.R.string.ok, null)
-                    .setNegativeButton(android.R.string.cancel, null)
-                    .create();
-            dialog.getWindow().setSoftInputMode(
-                    WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-            dialog.show();
+            final CommonProgressDialog commonProgressDialog = new CommonProgressDialog(getContext());
+            commonProgressDialog.showWithMessage(getString(R.string.fetch_edit_message));
+            app.getZulipServices()
+                    .fetchRawMessage(message.getID())
+                    .enqueue(new DefaultCallback<RawMessageResponse>() {
+                        @Override
+                        public void onSuccess(Call<RawMessageResponse> call, Response<RawMessageResponse> response) {
+                            RawMessageResponse messageResponse = response.body();
+                            commonProgressDialog.dismiss();
+                            showEditMessageDialog(message, messageResponse.getRawContent(), position);
+                        }
 
-            final EditText dialogMessageEditText = (EditText) dialogView.findViewById(R.id.message_content);
-            dialogMessageEditText.setText(message.getContent().trim());
+                        @Override
+                        public void onError(Call<RawMessageResponse> call, Response<RawMessageResponse> response) {
+                            RawMessageResponse messageResponse = response.body();
+                            if (messageResponse != null) {
+                                Toast.makeText(getActivity(), (TextUtils.isEmpty(messageResponse.getMsg())) ? getString(R.string.message_edit_failed) :
+                                        messageResponse.getMsg(), Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(getActivity(), R.string.message_edit_failed, Toast.LENGTH_SHORT).show();
+                            }
+                            //If something fails msg will have something to display
+                            commonProgressDialog.dismiss();
+                        }
 
-            //Move cursor to end of text
-            dialogMessageEditText.setSelection(dialogMessageEditText.getText().length());
+                        @Override
+                        public void onFailure(Call<RawMessageResponse> call, Throwable t) {
+                            super.onFailure(call, t);
+                            commonProgressDialog.dismiss();
+                            Toast.makeText(getActivity(), R.string.message_edit_failed, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        }
+    }
 
-            //OK button listener
-            dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
-                //Show edit option only on if current user send it.
-                @Override
-                public void onClick(View view) {
-                    dialog.cancel();
-                    InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                    //Start a progress dialog indicating editing message
-                    final ProgressDialog progress = new ProgressDialog(getActivity());
-                    progress.setCancelable(false);
-                    progress.setMessage(app.getString(R.string.editing_message));
-                    progress.show();
-                    final String editedMessageContent =
-                            dialogMessageEditText.getText().toString().length() == 0 ? getString(R.string.default_delete_text) : dialogMessageEditText.getText().toString();
+    private void showEditMessageDialog(final Message message, final String rawContent, final int position) {
 
-                    app.getZulipServices()
-                            .editMessage(String.valueOf(message.getID()), editedMessageContent)
-                            .enqueue(new Callback<EditResponse>() {
-                                @Override
-                                public void onResponse(Call<EditResponse> call, Response<EditResponse> response) {
-                                    if (response.isSuccessful()) {
-                                        message.setContent(editedMessageContent);
-                                        message.setFormattedContent(editedMessageContent);
-                                        adapter.notifyItemChanged(position);
-                                        progress.dismiss();
-                                        Toast.makeText(getActivity(), R.string.message_edited, Toast.LENGTH_SHORT).show();
-                                    } else {
-                                        progress.dismiss();
-                                        Toast.makeText(getActivity(), R.string.message_edit_failed, Toast.LENGTH_SHORT).show();
-                                    }
-                                }
+        final View dialogView = View.inflate(getContext(),
+                R.layout.message_edit_dialog, null);
+        //Pop up a dialog box with previous message content
+        final AlertDialog dialog = new AlertDialog.Builder(getContext())
+                .setTitle(R.string.edit_message)
+                .setView(dialogView)
+                .setPositiveButton(android.R.string.ok, null)
+                .setNegativeButton(android.R.string.cancel, null)
+                .create();
+        dialog.getWindow().setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+        dialog.show();
 
-                                @Override
-                                public void onFailure(Call<EditResponse> call, Throwable t) {
+        final EditText dialogMessageEditText = (EditText) dialogView.findViewById(R.id.message_content);
+        dialogMessageEditText.setText(rawContent);
+
+        //Move cursor to end of text
+        dialogMessageEditText.setSelection(dialogMessageEditText.getText().length());
+
+        //OK button listener
+        dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            //Show edit option only on if current user send it.
+            @Override
+            public void onClick(View view) {
+                dialog.cancel();
+                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                //Start a progress dialog indicating editing message
+                final ProgressDialog progress = new ProgressDialog(getActivity());
+                progress.setCancelable(false);
+                progress.setMessage(app.getString(R.string.editing_message));
+                progress.show();
+                final String editedMessageContent =
+                        dialogMessageEditText.getText().toString().length() == 0 ? getString(R.string.default_delete_text) : dialogMessageEditText.getText().toString();
+
+                if (editedMessageContent.equals(rawContent)) {
+                    Toast.makeText(getActivity(), R.string.no_edit, Toast.LENGTH_SHORT).show();
+                    progress.dismiss();
+                    return;
+                }
+
+                app.getZulipServices()
+                        .editMessage(String.valueOf(message.getID()), editedMessageContent)
+                        .enqueue(new Callback<EditResponse>() {
+                            @Override
+                            public void onResponse(Call<EditResponse> call, Response<EditResponse> response) {
+                                if (response.isSuccessful()) {
+                                    message.setContent(editedMessageContent);
+                                    message.setFormattedContent(editedMessageContent);
+                                    adapter.notifyItemChanged(position);
                                     progress.dismiss();
-                                    ZLog.logException(t);
+                                    Toast.makeText(getActivity(), R.string.message_edited, Toast.LENGTH_SHORT).show();
+                                } else {
+                                    progress.dismiss();
                                     Toast.makeText(getActivity(), R.string.message_edit_failed, Toast.LENGTH_SHORT).show();
                                 }
-                            });
-                }
-            });
-        }
+                            }
+
+                            @Override
+                            public void onFailure(Call<EditResponse> call, Throwable t) {
+                                progress.dismiss();
+                                ZLog.logException(t);
+                                Toast.makeText(getActivity(), R.string.message_edit_failed, Toast.LENGTH_SHORT).show();
+                            }
+                        });
+            }
+        });
     }
 
     @SuppressWarnings("deprecation")
@@ -713,7 +759,8 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
         void clearChatBox();
 
-        void setLayoutBehaviour(LinearLayoutManager linearLayoutManager , RecyclerMessageAdapter adapter);
+        void setLayoutBehaviour(LinearLayoutManager linearLayoutManager, RecyclerMessageAdapter adapter);
+
     }
 
     public void showLatestMessages() {
