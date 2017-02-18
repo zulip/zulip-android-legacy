@@ -1094,16 +1094,15 @@ public class ZulipActivity extends BaseActivity implements
     }
 
     @NonNull
-    private MultipartBody.Part prepareFilePart(String partName, File file) {
+    private MultipartBody.Part prepareFilePart(String partName, File file, int notificationId) {
         // create UploadProgressRequest instance from file
-        // TODO: change for multiple uploads
         UploadProgressRequest request = new UploadProgressRequest(file, new UploadProgressRequest.UploadCallbacks() {
             @Override
             public void onProgressUpdate(int percentage, String progress, int notificationId) {
                 // update notification
                 progressNotification(notificationId, percentage, progress);
             }
-        }, 100);
+        }, notificationId);
 
         // MultipartBody.Part is used to send also the actual file name
         return MultipartBody.Part.createFormData(partName, file.getName(), request);
@@ -1175,15 +1174,15 @@ public class ZulipActivity extends BaseActivity implements
      * @param file on local storage
      */
     private void uploadFile(final File file) {
+        final int notifId = (int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
 
         // MultipartBody.Part is used to send also the actual file name
-        MultipartBody.Part body = prepareFilePart("file", file);
+        MultipartBody.Part body = prepareFilePart("file", file, notifId);
 
         final String loadingMsg = getResources().getString(R.string.uploading_message);
 
         // start notification
-        // TODO: handle different notif ids
-        setNotification(100, getString(R.string.init_notif_title));
+        setNotification(notifId, getString(R.string.init_notif_title));
 
         // finally, execute the request
         // create upload service client
@@ -1195,7 +1194,7 @@ public class ZulipActivity extends BaseActivity implements
                 UploadResponse uploadResponse = response.body();
                 filePathOnServer = uploadResponse.getUri();
                 if (!filePathOnServer.equals("")) {
-                    endNotification(100, getString(R.string.finish_notif_title));
+                    endNotification(notifId, getString(R.string.finish_notif_title));
                     // remove loading message from the screen
                     sendingMessage(false, loadingMsg);
 
