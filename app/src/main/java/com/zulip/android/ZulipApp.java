@@ -289,9 +289,9 @@ public class ZulipApp extends Application {
                         if (BuildConfig.DEBUG) {
                             Log.d("RAW EVENTS", json.toString());
                         }
-                        Class<? extends EventsBranch> t = EventsBranch.BranchType.fromRawType(invalid);
-                        if (t != null) {
-                            if (t.getSimpleName().equalsIgnoreCase("SubscriptionWrapper")) {
+                        Class<? extends EventsBranch> event = EventsBranch.BranchType.fromRawType(invalid);
+                        if (event != null) {
+                            if (event.getSimpleName().equalsIgnoreCase("SubscriptionWrapper")) {
                                 // check operation
                                 if (SubscriptionWrapper.OPERATION_ADD.equalsIgnoreCase(json.getAsJsonObject().get("op").getAsString()) ||
                                         SubscriptionWrapper.OPERATION_REMOVE.equalsIgnoreCase(json.getAsJsonObject().get("op").getAsString()) ||
@@ -303,7 +303,7 @@ public class ZulipApp extends Application {
                                     return nestedGson.fromJson(json, type);
                                 }
                             }
-                            return nestedGson.fromJson(json, t);
+                            return nestedGson.fromJson(json, event);
                         }
                         Log.w("GSON", "Attempted to deserialize and unregistered EventBranch... See EventBranch.BranchType");
                         return invalid;
