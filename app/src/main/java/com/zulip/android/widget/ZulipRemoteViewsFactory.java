@@ -10,11 +10,14 @@ import android.widget.RemoteViewsService;
 import com.j256.ormlite.stmt.QueryBuilder;
 import com.zulip.android.R;
 import com.zulip.android.ZulipApp;
+import com.zulip.android.filters.NarrowFilter;
+import com.zulip.android.filters.NarrowFilterByDate;
 import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageType;
 import com.zulip.android.util.ZLog;
 
 import java.sql.SQLException;
+import java.util.Calendar;
 import java.util.List;
 
 import static com.zulip.android.widget.WidgetPreferenceFragment.FROM_PREFERENCE;
@@ -34,32 +37,35 @@ public class ZulipRemoteViewsFactory implements RemoteViewsService.RemoteViewsFa
 
     }
 
-    private String setupWhere() {
+    private Calendar getMinDate() {
+        Calendar calendar = Calendar.getInstance();
         switch (from) {
             //These values present in R.arrays.from_values
             case "today":
-                return "timestamp BETWEEN DATE('now') AND DATE('now', '+1 day')";
+                break;
             case "yesterday":
-                return "DATE(timestamp) >= DATE('now',  '-1 days')";
+                calendar.add(Calendar.DATE, -1);
+                break;
             case "week":
-                return "DATE(timestamp) >= DATE('now', 'weekday 0', '-7 days')";
+                calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+                break;
             case "all":
             default:
-                return "";
+                calendar = null;
         }
+        return calendar;
     }
 
     @Override
     public void onDataSetChanged() {
-        Log.i("ZULIP_WIDGET", "onDataSetChanged() = Data reloaded");
-        QueryBuilder<Message, Object> queryBuilder = ZulipApp.get().getDao(Message.class).queryBuilder();
-        String filter;
-        filter = setupWhere();
-        if (!filter.equals("")) {
-            queryBuilder.where().raw(filter);
-        }
-
         try {
+            Log.i("ZULIP_WIDGET", "onDataSetChanged() = Data reloaded");
+            QueryBuilder<Message, Object> queryBuilder = ZulipApp.get().getDao(Message.class).queryBuilder();
+            Calendar minDate = getMinDate();
+            if (minDate != null) {
+                NarrowFilter minDateFilter = new NarrowFilterByDate(minDate.getTime(), true);
+                minDateFilter.modWhere(queryBuilder.where());
+            }
             messageList = queryBuilder.query();
         } catch (SQLException e) {
             ZLog.logException(e);

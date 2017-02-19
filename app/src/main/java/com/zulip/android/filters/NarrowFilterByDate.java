@@ -2,6 +2,7 @@ package com.zulip.android.filters;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import com.j256.ormlite.stmt.Where;
 import com.zulip.android.R;
@@ -30,6 +31,10 @@ public class NarrowFilterByDate implements NarrowFilter {
         }
     };
     private Date date = new Date();
+
+    //If true, then messages posted since the date variable should be shown
+    //If false, then only messages posted during the date variable should be shown
+    private boolean filterSince;
     private static Calendar calendar = Calendar.getInstance();
     private static Calendar calendar2 = Calendar.getInstance();
 
@@ -38,6 +43,11 @@ public class NarrowFilterByDate implements NarrowFilter {
 
     public NarrowFilterByDate(Date date) {
         this.date = date;
+    }
+
+    public NarrowFilterByDate(Date date, boolean filterSince) {
+        this.date = date;
+        this.filterSince = filterSince;
     }
 
     public int describeContents() {
@@ -66,7 +76,12 @@ public class NarrowFilterByDate implements NarrowFilter {
         calendar.add(Calendar.DAY_OF_MONTH, 1);
         Date toDate = calendar.getTime();
 
-        where.between(Message.TIMESTAMP_FIELD, fromDate, toDate);
+        if(filterSince) {
+            where.gt(Message.TIMESTAMP_FIELD, fromDate);
+        }
+        else {
+            where.between(Message.TIMESTAMP_FIELD, fromDate, toDate);
+        }
         return where;
     }
 
