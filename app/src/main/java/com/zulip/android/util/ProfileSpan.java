@@ -35,7 +35,10 @@ public class ProfileSpan extends ClickableSpan {
             }
         } else {
             for (String email : this.email.split(",")) {
-                people.add(Person.getByEmail(ZulipApp.get(), email));
+                Person person = Person.getByEmail(ZulipApp.get(), email);
+                if (person != null) {
+                    people.add(person);
+                }
             }
             people.add(ZulipApp.get().getYou());
         }
