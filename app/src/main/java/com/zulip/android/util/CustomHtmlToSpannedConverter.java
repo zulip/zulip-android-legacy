@@ -244,7 +244,7 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
     }
 
     private static void startSpan(SpannableStringBuilder text, Attributes attributes) {
-        String email;
+        String email = null;
         String stringId = attributes.getValue("data-user-id");
         if (stringId != null) {
             // in case of "@all"
@@ -252,7 +252,10 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
                 email = stringId;
             } else {
                 int id = Integer.parseInt(stringId);
-                email = Person.getById(ZulipApp.get(), id).getEmail();
+                Person person = Person.getById(ZulipApp.get(), id);
+                if (person != null) {
+                    email = person.getEmail();
+                }
             }
         } else {
             // for historical messages, revert to use of this attribute
