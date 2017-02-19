@@ -153,4 +153,6 @@
     <string name="logging_out">Logging out</string>
     <string name="fetch_edit_message">Preparing Message for edit</string>
     <string name="no_edit">No edits detected</string>
+    <string name="copy_message_fetch">Copying message to clipboard</string>
+    <string name="copy_failed">Copying to clipboard failed</string>
 </resources>
