@@ -234,7 +234,6 @@ public class MessageListFragment extends Fragment implements MessageListener {
                 return true;
             case R.id.copy_message:
                 copyMessage(message);
-                Toast.makeText(getContext(), R.string.message_copied, Toast.LENGTH_SHORT).show();
                 return true;
             case R.id.edit_message:
                 editMessage(message, adapter.getContextMenuItemSelectedPosition());
@@ -510,17 +509,49 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
     @SuppressWarnings("deprecation")
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    private void copyMessage(Message msg) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            android.content.ClipboardManager clipboard = (android.content.ClipboardManager) app
-                    .getSystemService(Context.CLIPBOARD_SERVICE);
-            clipboard.setPrimaryClip(ClipData.newPlainText("Zulip Message",
-                    msg.getContent()));
-        } else {
-            android.text.ClipboardManager clipboard = (android.text.ClipboardManager) app
-                    .getSystemService(Context.CLIPBOARD_SERVICE);
-            clipboard.setText(msg.getContent());
-        }
+    private void copyMessage(final Message message) {
+        final CommonProgressDialog commonProgressDialog = new CommonProgressDialog(getContext());
+        commonProgressDialog.showWithMessage(getString(R.string.copy_message_fetch));
+        app.getZulipServices()
+                .fetchRawMessage(message.getID())
+                .enqueue(new DefaultCallback<RawMessageResponse>() {
+                    @Override
+                    public void onSuccess(Call<RawMessageResponse> call, Response<RawMessageResponse> response) {
+                        RawMessageResponse messageResponse = response.body();
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                            android.content.ClipboardManager clipboard = (android.content.ClipboardManager) app
+                                    .getSystemService(Context.CLIPBOARD_SERVICE);
+                            clipboard.setPrimaryClip(ClipData.newPlainText("Zulip Message",
+                                    messageResponse.getRawContent()));
+                        } else {
+                            android.text.ClipboardManager clipboard = (android.text.ClipboardManager) app
+                                    .getSystemService(Context.CLIPBOARD_SERVICE);
+                            clipboard.setText(messageResponse.getRawContent());
+                        }
+                        Toast.makeText(getActivity(), R.string.message_copied, Toast.LENGTH_SHORT).show();
+                        commonProgressDialog.dismiss();
+                    }
+
+                    @Override
+                    public void onError(Call<RawMessageResponse> call, Response<RawMessageResponse> response) {
+                        RawMessageResponse messageResponse = response.body();
+                        if (messageResponse != null) {
+                            Toast.makeText(getActivity(), (TextUtils.isEmpty(messageResponse.getMsg())) ? getString(R.string.copy_failed) :
+                                    messageResponse.getMsg(), Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getActivity(), R.string.copy_failed, Toast.LENGTH_SHORT).show();
+                        }
+                        //If something fails msg will have something to display
+                        commonProgressDialog.dismiss();
+                    }
+
+                    @Override
+                    public void onFailure(Call<RawMessageResponse> call, Throwable t) {
+                        super.onFailure(call, t);
+                        commonProgressDialog.dismiss();
+                        Toast.makeText(getActivity(), R.string.copy_failed, Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     public void onNewMessages(Message[] messages) {
