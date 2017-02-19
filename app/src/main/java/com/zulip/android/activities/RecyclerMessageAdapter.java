@@ -21,9 +21,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.j256.ormlite.stmt.UpdateBuilder;
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.Picasso;
 import com.zulip.android.R;
 import com.zulip.android.ZulipApp;
 import com.zulip.android.filters.NarrowFilterPM;
@@ -120,7 +122,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                             Person[] recipientArray = messageHeaderParent.getRecipients(zulipApp);
                             narrowListener.onNarrow(new NarrowFilterPM(Arrays.asList(recipientArray)),
                                     messageHeaderParent.getMessageId());
-                            narrowListener.onNarrowFillSendBoxPrivate(recipientArray,false);
+                            narrowListener.onNarrowFillSendBoxPrivate(recipientArray, false);
                         } else {
                             narrowListener.onNarrow(new NarrowFilterStream(Stream.getByName(zulipApp,
                                     messageHeaderParent.getStream()), null),
@@ -386,7 +388,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 final String url = message.extractImageUrl(zulipApp);
                 if (url != null) {
                     messageHolder.contentImageContainer.setVisibility(View.VISIBLE);
-                    Picasso.with(context).load(url)
+                    Glide.with(context).load(url)
                             .into(messageHolder.contentImage);
 
                     messageHolder.contentImageContainer
@@ -395,7 +397,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                                 public void onClick(View view) {
                                     Intent i = new Intent(zulipApp.getApplicationContext(), PhotoViewActivity.class);
                                     i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                    i.putExtra(Intent.EXTRA_TEXT , url);
+                                    i.putExtra(Intent.EXTRA_TEXT, url);
                                     zulipApp.startActivity(i);
                                     ((Activity) context).overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                                 }
@@ -484,6 +486,27 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
 
     private void setUpGravatar(final Message message, final MessageHolder messageHolder) {
+
+        int hMapKey = message.getSender().getId();
+        int avatarColor;
+
+        // check if current sender has already been allotted a randomly generated color
+        if (defaultAvatarColorHMap.containsKey(hMapKey)) {
+
+            avatarColor = defaultAvatarColorHMap.get(hMapKey);
+
+        } else {
+            // generate a random color for current sender id
+            avatarColor = getRandomColor(Color.rgb(255, 255, 255));
+
+            // add sender id and randomly generated color to hashmap
+            defaultAvatarColorHMap.put(hMapKey, avatarColor);
+
+        }
+        // square default avatar drawable
+        final GradientDrawable defaultAvatar = (GradientDrawable) ContextCompat.getDrawable(context, R.drawable.default_avatar);
+        defaultAvatar.setColor(avatarColor);
+
         //Setup Gravatar
         Bitmap gravatarImg = ((ZulipActivity) context).getGravatars().get(message.getSender().getEmail());
         if (gravatarImg != null) {
@@ -495,41 +518,29 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                     35, resources.getDisplayMetrics());
 
-
             String url = message.getSender().getAvatarURL() + "&s=" + px;
             url = UrlHelper.addHost(url);
 
-            Picasso.with(context)
+            Glide
+                    .with(context)
                     .load(url)
                     .placeholder(android.R.drawable.stat_notify_error)
-                    .error(android.R.drawable.presence_online)
-                    .into(messageHolder.gravatar, new Callback() {
+                    .error(defaultAvatar)
+                    .listener(new RequestListener<String, GlideDrawable>() {
                         @Override
-                        public void onSuccess() {
+                        public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
 
+                            return false;
                         }
 
                         @Override
-                        public void onError() {
-                            int hMapKey = message.getSender().getId();
-                            int avatarColor;
+                        public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
 
-                            // check if current sender has already been allotted a randomly generated color
-                            if (defaultAvatarColorHMap.containsKey(hMapKey)) {
-                                avatarColor = defaultAvatarColorHMap.get(hMapKey);
-                            } else {
-                                // generate a random color for current sender id
-                                avatarColor = getRandomColor(Color.rgb(255, 255, 255));
-
-                                // add sender id and randomly generated color to hashmap
-                                defaultAvatarColorHMap.put(hMapKey, avatarColor);
-                            }
-                            // square default avatar drawable
-                            final GradientDrawable defaultAvatar = (GradientDrawable) ContextCompat.getDrawable(context, R.drawable.default_avatar);
-                            defaultAvatar.setColor(avatarColor);
-                            messageHolder.gravatar.setImageDrawable(defaultAvatar);
+                            return false;
                         }
-                    });
+                    })
+
+                    .into(messageHolder.gravatar);
         }
     }
 
