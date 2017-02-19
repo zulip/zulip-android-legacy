@@ -17,7 +17,7 @@
     <string name="open">Open</string>
     <string name="link_image">ImageView of link</string>
     <string name="permission_message">Zulip app needs storage permission.</string>
-    <string name="permission_title">Need Storage Permission</string>
+    <string name="permission_title">Need storage permission</string>
     <string name="downloading">Downloading..</string>
     <string name="topic">Topic</string>
     <string name="close">Close</string>
@@ -45,7 +45,7 @@
     <string name="invalid_url">Invalid URL</string>
     <string name="subject">Topic</string>
     <string name="reply_to_sender">Reply to sender</string>
-    <string name="google_app_login_failed">Google Apps login failed for unknown reasons, please contact your distributor.</string>
+    <string name="google_app_login_failed">Google apps login failed for unknown reasons, please contact your distributor.</string>
     <string name="signing_in">Signing in…</string>
     <string name="network_error">Network error</string>
     <string name="invalid_server_domain">Invalid server domain</string>
