@@ -530,9 +530,30 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
             case R.id.register:
                 openRegister();
                 break;
+            case R.id.forgot:
+                forgotPassword();
+                break;
             default:
                 break;
         }
+    }
+
+    private void forgotPassword() {
+
+        Uri uri;
+        if (serverIn == null || serverIn.getText().toString().isEmpty() || serverIn.getText().toString().equals("")) {
+            return;
+        } else {
+            uri = Uri.parse(serverIn.getText().toString() + "accounts/" + "password/" + "reset");
+        }
+        if (Build.VERSION.SDK_INT < 15) {
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            startActivity(intent);
+            return;
+        }
+        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+        CustomTabsIntent intent = builder.build();
+        intent.launchUrl(LoginActivity.this, uri);
     }
 
     private void openRegister() {
