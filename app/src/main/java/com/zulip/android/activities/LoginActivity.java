@@ -11,10 +11,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.Toolbar;
-import android.text.Editable;
-import android.text.InputType;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
@@ -70,7 +66,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     private EditText mServerEditText;
     private EditText mUserName;
     private EditText mPassword;
-    private ImageView mShowPassword;
+    private ImageView logo;
     private EditText serverIn;
     private boolean skipAnimations = false;
     //endregion
@@ -83,10 +79,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
 
         setContentView(R.layout.login);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle(R.string.title_login);
-        setSupportActionBar(toolbar);
-
         // Progress bar to be displayed if the connection failure is not resolved.
         commonProgressDialog = new CommonProgressDialog(this);
         mServerEditText = (EditText) findViewById(R.id.server_url);
@@ -95,7 +87,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         findViewById(R.id.zulip_login).setOnClickListener(this);
         mUserName = (EditText) findViewById(R.id.username);
         mPassword = (EditText) findViewById(R.id.password);
-        mShowPassword = (ImageView) findViewById(R.id.showPassword);
+        logo = (ImageView) findViewById(R.id.logo);
         serverIn = (EditText) findViewById(R.id.server_url_in);
         String serverUrl = getIntent().getStringExtra(Constants.SERVER_URL);
         if (serverUrl != null) {
@@ -118,6 +110,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                 findViewById(R.id.passwordAuthLayout).setVisibility(View.GONE);
                 findViewById(R.id.google_sign_in_button).setVisibility(View.GONE);
                 findViewById(R.id.local_server_button).setVisibility(View.GONE);
+                findViewById(R.id.forgotRegister).setVisibility(View.GONE);
+                findViewById(R.id.logo).setVisibility(View.VISIBLE);
                 //remove error from all editText as user now corrected serverUrl
                 mPassword.setError(null);
                 mUserName.setError(null);
@@ -134,49 +128,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
             mPassword.setText(savedInstanceState.getString(PASSWORD));
         }
 
-        mShowPassword.setVisibility(View.GONE);
-        mPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        mPassword.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-                if (mPassword.getText().length() > 0) {
-                    mShowPassword.setVisibility(View.VISIBLE);
-                } else {
-                    mShowPassword.setVisibility(View.GONE);
-                }
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
-
-
-        mShowPassword.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                if (mShowPassword.getTag().toString().equals("visible")) {
-                    mShowPassword.setTag("hide");
-                    mShowPassword.setImageResource(R.drawable.ic_visibility_off_black_24dp);
-                    mPassword.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-                    mPassword.setSelection(mPassword.length());
-                } else {
-                    mShowPassword.setTag("visible");
-                    mShowPassword.setImageResource(R.drawable.ic_visibility_black_24dp);
-                    mPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                    mPassword.setSelection(mPassword.length());
-                }
-            }
-        });
     }
 
     private void showLoginFields() {
@@ -313,6 +264,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
                         }
+
+                        findViewById(R.id.forgotRegister).setVisibility(View.VISIBLE);
+                        findViewById(R.id.logo).setVisibility(View.GONE);
 
                         if (response.body().isPassword()) {
                             findViewById(R.id.passwordAuthLayout).setVisibility(View.VISIBLE);
@@ -619,14 +573,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     private boolean isInputValid() {
         boolean isValid = true;
 
-        if (mPassword.length() == 0) {
+        if (mPassword.length() == 0 || mUserName.length() == 0) {
             isValid = false;
-            mPassword.setError(getString(R.string.password_required));
-        }
-
-        if (mUserName.length() == 0) {
-            isValid = false;
-            mUserName.setError(getString(R.string.username_required));
+            Toast.makeText(LoginActivity.this, R.string.email_or_password_empty, Toast.LENGTH_SHORT).show();
         }
 
         if (mServerEditText.length() == 0) {

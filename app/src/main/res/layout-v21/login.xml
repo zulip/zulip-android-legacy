@@ -1,179 +1,222 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/windowBackground"
-        android:gravity="center_horizontal"
-        android:orientation="vertical">
-
-        <android.support.design.widget.AppBarLayout
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:fitsSystemWindows="true"
-            android:stateListAnimator="@animator/appbar_always_elevated"
-            android:theme="@style/AppTheme.AppBarOverlay">
-
-            <include
-                android:id="@+id/toolbar"
-                layout="@layout/toolbar" />
-
-        </android.support.design.widget.AppBarLayout>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:gravity="center|center_horizontal"
-            android:padding="10dp"
-            android:text="@string/login_welcome_blurb"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
-
+        android:layout_height="match_parent">
 
         <LinearLayout
-            android:id="@+id/serverInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
+            android:background="@color/windowBackground"
+            android:gravity="center_horizontal"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:weightSum="1">
+
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
                 android:gravity="center|center_horizontal"
                 android:padding="10dp"
-                android:text="@string/enter_server"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
+                android:text="@string/login_welcome_blurb"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
 
-            <EditText
-                android:id="@+id/server_url_in"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:hint="@string/server_url"
-                android:inputType="textUri"
-                android:selectAllOnFocus="true">
-
-                <requestFocus />
-            </EditText>
-
-            <Button
-                android:id="@+id/server_btn"
-                style="android:buttonStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:text="@string/enter" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/serverFieldLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:padding="16dp"
-            android:visibility="gone">
-
-            <TextView
+            <ImageView
+                android:id="@+id/logo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="@string/auth_login" />
+                android:layout_gravity="center|center_horizontal"
+                android:layout_marginTop="2dp"
+                android:src="@drawable/logo" />
 
-            <EditText
-                android:id="@+id/server_url"
+            <LinearLayout
+                android:id="@+id/serverInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ems="10"
-                android:hint="@string/server_domain"
-                android:inputType="textUri"
-                android:selectAllOnFocus="true" />
-
-
-            <RelativeLayout
-                android:id="@+id/passwordAuthLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:gravity="center"
                 android:orientation="vertical"
-                android:paddingBottom="8dp"
-                android:paddingTop="8dp"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center|center_horizontal"
+                    android:padding="10dp"
+                    android:text="@string/enter_server"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <EditText
+                        android:id="@+id/server_url_in"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ems="10"
+                        android:hint="@string/server_url"
+                        android:inputType="textUri"
+                        android:selectAllOnFocus="true"
+                        android:textCursorDrawable="@null">
+
+                        <requestFocus />
+                    </EditText>
+
+                </android.support.design.widget.TextInputLayout>
+
+                <Button
+                    android:id="@+id/server_btn"
+                    style="android:buttonStyle"
+                    android:layout_width="176dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_margin="25dp"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/login_button"
+                    android:text="Enter"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                    android:textColor="#fff" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/serverFieldLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="16dp"
                 android:visibility="gone">
 
 
                 <EditText
-                    android:id="@+id/username"
+                    android:id="@+id/server_url"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:backgroundTint="#075818"
                     android:ems="10"
-                    android:hint="@string/username"
-                    android:inputType="textEmailAddress"
-                    android:selectAllOnFocus="true" />
+                    android:hint="@string/server_domain"
+                    android:inputType="textUri"
+                    android:selectAllOnFocus="true"
+                    android:textCursorDrawable="@null" />
 
-                <EditText
-                    android:id="@+id/password"
+
+                <LinearLayout
+                    android:id="@+id/passwordAuthLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/username"
-                    android:ems="10"
-                    android:hint="@string/password"
-                    android:inputType="textPassword"
-                    android:selectAllOnFocus="true" />
+                    android:orientation="vertical"
+                    android:paddingBottom="8dp"
+                    android:paddingTop="8dp"
+                    android:visibility="gone">
 
-                <ImageView
-                    android:id="@+id/showPassword"
+
+                    <android.support.design.widget.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:backgroundTint="#075818"
+                        android:textCursorDrawable="@null">
+
+                        <EditText
+                            android:id="@+id/username"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:ems="10"
+                            android:hint="@string/username"
+                            android:inputType="textEmailAddress"
+                            android:selectAllOnFocus="true" />
+
+                    </android.support.design.widget.TextInputLayout>
+
+                    <android.support.design.widget.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:backgroundTint="#075818"
+                        android:textCursorDrawable="@null"
+                        app:passwordToggleEnabled="true">
+
+                        <EditText
+                            android:id="@+id/password"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/password"
+                            android:imeOptions="actionUnspecified"
+                            android:inputType="textPassword"
+                            android:selectAllOnFocus="true" />
+
+                    </android.support.design.widget.TextInputLayout>
+
+
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/zulip_login"
+                    android:layout_width="176dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/password"
+                    android:layout_centerHorizontal="true"
+                    android:layout_margin="25dp"
+                    android:background="@drawable/login_button"
+                    android:text="@string/signin_button"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                    android:textColor="#fff" />
+
+
+                <RelativeLayout
+                    android:id="@+id/forgotRegister"
                     android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/register"
+                        style="@style/links"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentRight="true"
+                        android:gravity="center"
+                        android:text="@string/register_button"
+                        tools:ignore="ContentDescription" />
+
+                </RelativeLayout>
+
+                <View
+                    android:layout_width="270dp"
+                    android:layout_height="2dp"
+                    android:layout_gravity="center|center_horizontal"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/toolbar_shadow" />
+
+                <com.google.android.gms.common.SignInButton
+
+                    android:id="@+id/google_sign_in_button"
+                    android:layout_width="181dp"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
-                    android:layout_below="@+id/username"
-                    android:layout_marginEnd="11dp"
-                    android:layout_marginRight="11dp"
-                    android:src="@drawable/ic_visibility_black_24dp"
-                    android:tag="visible"
-                    tools:ignore="ContentDescription" />
+                    android:visibility="gone" />
 
+                <TextView
+                    android:id="@+id/local_server_button"
+                    style="@style/links.gone"
+                    android:text="@string/local_server" />
 
-            </RelativeLayout>
+                <TextView
+                    android:id="@+id/input_another_server"
+                    style="@style/links"
+                    android:text="@string/another_server" />
 
-            <Button
-                android:id="@+id/zulip_login"
-                style="android:buttonStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/login_button" />
-
-            <com.google.android.gms.common.SignInButton
-                android:id="@+id/google_sign_in_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="gone" />
-
-            <TextView
-                android:id="@+id/register"
-                style="@style/links"
-                android:text="@string/register_button" />
-
-            <TextView
-                android:id="@+id/local_server_button"
-                style="@style/links.gone"
-                android:text="@string/local_server" />
-
-            <TextView
-                android:id="@+id/input_another_server"
-                style="@style/links"
-                android:text="@string/another_server" />
-
-            <TextView
-                android:id="@+id/legal_button"
-                style="@style/links"
-                android:text="@string/legal" />
+                <TextView
+                    android:id="@+id/legal_button"
+                    style="@style/links"
+                    android:text="@string/legal" />
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
-</ScrollView>
+    </ScrollView>
+</android.support.design.widget.CoordinatorLayout>

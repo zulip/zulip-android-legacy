@@ -3,7 +3,7 @@
 
     <string name="app_name">Zulip</string>
     <string name="login_welcome_blurb">Welcome to Zulip!</string>
-    <string name="login_button">Log in</string>
+    <string name="signin_button">Sign in</string>
     <string name="username">Email</string>
     <string name="password">Password</string>
     <string name="server_url">Server URL</string>
@@ -28,6 +28,7 @@
     <string name="streams_open">Open stream sidebar</string>
     <string name="streams_close">Close stream sidebar</string>
     <string name="press_again_to_exit">Press again to exit</string>
+    <string name="email_or_password_empty">Email or password field is empty</string>
 
     <!-- Used on the indicator when loading messages -->
     <string name="editing_message">Editing message</string>
