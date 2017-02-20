@@ -215,6 +215,18 @@ If unclear you can follow tutorial here `Host Remapping`_
 
 -  Now configure your android device following `this`_ detailed tutorial
 
+Another way to connect android device to local server is via adb
+
+-  Run server on laptop(or Desktop)
+
+-  By default, it run's on port 9991
+
+-  Connect your Android device with laptop and enable usb debugging
+
+-  Run ``adb reverse tcp:9991 tcp:9991`` in terminal
+
+-  Connect to local server by entering url (**http://127.0.0.0.1:9991**) in app
+
 .. _here: https://github.com/zulip/zulip/blob/1c40df9363b70af0e275c44a03f9627808852616/Vagrantfile#L37
 .. _Host Remapping: http://docs.telerik.com/fiddler/KnowledgeBase/HOSTS
 .. _this one: https://play.google.com/store/apps/details?id=com.psiphon3&hl=en
