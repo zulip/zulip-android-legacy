@@ -422,7 +422,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
                 100, filter);
     }
 
-    private void selectPointer() {
+    public void selectPointer() {
         if (filter != null) {
             Where<Message, Object> filteredWhere;
             try {
@@ -440,16 +440,38 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
                 // use anchor message id if message was narrowed
                 if (anchorId != -1) {
-                    selectMessage(getMessageById(anchorId));
+                    if (app.getTempNarrowedViewPointer() != -1 && app.getTempNarrowedViewPointer() < anchorId) {
+                        //user have scrolled above before switching theme
+                        scrollWithZeroOffset(getMessageById(app.getTempNarrowedViewPointer()));
+                        app.setTempNarrowedViewPointer(-1);
+                    } else {
+                        selectMessage(getMessageById(anchorId));
+                    }
                 } else {
-                    recyclerView.scrollToPosition(adapter.getItemIndex(closestMessage));
+                    if (app.getTempNarrowedViewPointer() != -1 && adapter.getItemIndex(getMessageById(app.getTempNarrowedViewPointer())) < adapter.getItemIndex(closestMessage)) {
+                        //user have scrolled above before switching theme
+                        scrollWithZeroOffset(getMessageById(app.getTempNarrowedViewPointer()));
+                        app.setTempNarrowedViewPointer(-1);
+                    }else {
+                        recyclerView.scrollToPosition(adapter.getItemIndex(closestMessage));
+                    }
                 }
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         } else {
             int anc = app.getPointer();
-            selectMessage(getMessageById(anc));
+            int tempPointer = app.getTempHomeViewPointer();
+            if (tempPointer != -1 && tempPointer < anc) {
+                //user have scrolled above before switching theme
+                scrollWithZeroOffset(getMessageById(tempPointer));
+                //will be useful when user switch theme from narrowed view and back trace to home
+                if (app.isThemeSwitchedFromHome()) {
+                    app.setTempHomeViewPointer(-1);
+                }
+            } else {
+                selectMessage(getMessageById(anc));
+            }
         }
     }
 
@@ -849,6 +871,16 @@ public class MessageListFragment extends Fragment implements MessageListener {
         recyclerView.scrollToPosition(adapter.getItemIndex(message));
     }
 
+    /**
+     * scroll such that message comes to top of the view
+     *
+     * @param message that should come to top
+     * @see {@link <a href="http://stackoverflow.com/questions/26875061/scroll-recyclerview-to-show-selected-item-on-top"/>}
+     */
+    private void scrollWithZeroOffset(Message message) {
+        linearLayoutManager.scrollToPositionWithOffset(adapter.getItemIndex(message), 0);
+    }
+
     private Message getMessageById(int id) {
         return this.messageIndex.get(id);
     }
@@ -887,6 +919,28 @@ public class MessageListFragment extends Fragment implements MessageListener {
         void clearChatBox();
 
         void setLayoutBehaviour(LinearLayoutManager linearLayoutManager, RecyclerMessageAdapter adapter);
+
+    }
+
+    /**
+     * get messageId of FirstCompletelyVisibleItem
+     * loop until we get message
+     * skip message header
+     *
+     * @return messagedId of message which is at top
+     */
+    public int getTopMessageId() {
+        int position = linearLayoutManager.findFirstCompletelyVisibleItemPosition();
+        //if there aren't any visible items position = -1
+        if (position >= 0) {
+            for (int i = position; i < adapter.getItemCount(); i++) {
+                Object topObject = adapter.getItem(i);
+                if (topObject instanceof Message) {
+                    return ((Message) topObject).getID();
+                }
+            }
+        }
+        return -1;
 
     }
 }

@@ -642,10 +642,14 @@ public class ZulipActivity extends BaseActivity implements
                 if (menu == null)
                     return;
                 if (narrowedList == null) {
+                    //will be useful when user switch theme from narrowed view and back trace to home
+                    app.setThemeSwitchedFromHome(true);
                     calendar = Calendar.getInstance();
                     menu.getItem(2).getSubMenu().getItem(0).setTitle(R.string.menu_today);
                     switchToStream();
                     checkForChatBoxFocusRequest();
+                    //on narrowed view is restored after switching and coming back to homeView set pointer accordingly
+                    homeList.selectPointer();
                 } else if (narrowedList.filter instanceof NarrowFilterByDate) {
                     menu.getItem(2).getSubMenu().getItem(0).setTitle(R.string.menu_one_day_before);
                 }
@@ -930,6 +934,17 @@ public class ZulipActivity extends BaseActivity implements
                 // photo was deleted and camera is launched again to capture a new photo
                 dispatchTakePictureIntent();
             }
+        }
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        //check if it was narrowed before switching theme
+        if (app.getNarrowFilter() != null) {
+            //restore narrow
+            doNarrow(app.getNarrowFilter());
+            app.setNarrowFilter(null);
         }
     }
 
@@ -2061,7 +2076,12 @@ public class ZulipActivity extends BaseActivity implements
         transaction.replace(R.id.list_fragment_container, list);
         if (back != null) {
             transaction.addToBackStack(back);
-            clearSearch();
+            //searchView is in menu
+            //menu is inflated in onCreateOptionsMenu
+            //onCreateOptionsMenu is called somewhere in between onCreate is executing
+            if (searchView != null) {
+                clearSearch();
+            }
         }
         transaction.commit();
         getSupportFragmentManager().executePendingTransactions();
@@ -2355,6 +2375,16 @@ public class ZulipActivity extends BaseActivity implements
                 }
                 break;
             case R.id.daynight:
+                //for narrowed view
+                if (narrowedList != null) {
+                    app.setNarrowFilter(narrowedList.filter);
+                    app.setTempNarrowedViewPointer(narrowedList.getTopMessageId());
+                    app.setThemeSwitchedFromHome(false);
+                }
+                //for home view
+                if (app.getTempHomeViewPointer() == -1 || app.isThemeSwitchedFromHome()) {
+                    app.setTempHomeViewPointer(homeList.getTopMessageId());
+                }
                 switch (AppCompatDelegate.getDefaultNightMode()) {
                     case -1:
                     case AppCompatDelegate.MODE_NIGHT_NO:
