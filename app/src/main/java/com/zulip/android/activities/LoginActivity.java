@@ -552,6 +552,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
             return;
         }
         CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+        builder.setStartAnimations(LoginActivity.this, R.anim.slide_in_right, R.anim.slide_out_left);
+        builder.setExitAnimations(LoginActivity.this, R.anim.slide_in_left, R.anim.slide_out_right);
+        builder.setToolbarColor(getResources().getColor(R.color.colorPrimaryDark));
         CustomTabsIntent intent = builder.build();
         intent.launchUrl(LoginActivity.this, uri);
     }
@@ -569,6 +572,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
             return;
         }
         CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+        builder.setStartAnimations(LoginActivity.this, R.anim.slide_in_right, R.anim.slide_out_left);
+        builder.setExitAnimations(LoginActivity.this, R.anim.slide_in_left, R.anim.slide_out_right);
+        builder.setToolbarColor(getResources().getColor(R.color.colorPrimaryDark));
         CustomTabsIntent intent = builder.build();
         intent.launchUrl(LoginActivity.this, uri);
     }

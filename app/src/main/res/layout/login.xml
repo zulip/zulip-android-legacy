@@ -32,8 +32,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center|center_horizontal"
                 android:layout_marginTop="2dp"
-                android:src="@drawable/logo" />
-
+                android:src="@drawable/logo"
+                tools:ignore="ContentDescription" />
 
             <LinearLayout
                 android:id="@+id/serverInput"
@@ -75,7 +75,6 @@
                     style="android:buttonStyle"
                     android:layout_width="176dp"
                     android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
                     android:layout_margin="25dp"
                     android:layout_marginTop="20dp"
                     android:background="@drawable/login_button"
@@ -99,6 +98,7 @@
                     android:id="@+id/server_url"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:backgroundTint="#075818"
                     android:ems="10"
                     android:hint="@string/server_domain"
                     android:inputType="textUri"
@@ -119,6 +119,7 @@
                     <android.support.design.widget.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:backgroundTint="#075818"
                         android:textCursorDrawable="@null">
 
                         <EditText
@@ -135,6 +136,7 @@
                     <android.support.design.widget.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:backgroundTint="#075818"
                         android:textCursorDrawable="@null"
                         app:passwordToggleEnabled="true">
 
@@ -143,6 +145,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="@string/password"
+                            android:imeOptions="actionUnspecified"
                             android:inputType="textPassword"
                             android:selectAllOnFocus="true" />
 
@@ -155,14 +158,27 @@
                     android:id="@+id/zulip_login"
                     android:layout_width="176dp"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/password"
-                    android:layout_centerHorizontal="true"
                     android:layout_margin="25dp"
                     android:background="@drawable/login_button"
                     android:text="@string/signin_button"
                     android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
                     android:textColor="#fff" />
 
+
+                <com.google.android.gms.common.SignInButton
+
+                    android:id="@+id/google_sign_in_button"
+                    android:layout_width="181dp"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone" />
+
+                <View
+                    android:layout_width="270dp"
+                    android:layout_height="2dp"
+                    android:layout_gravity="center|center_horizontal"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/toolbar_shadow" />
 
                 <RelativeLayout
                     android:id="@+id/forgotRegister"
@@ -189,24 +205,9 @@
                         android:layout_alignParentRight="true"
                         android:gravity="center"
                         android:text="@string/register_button"
-                        tools:ignore="ContentDescription" />
+                        tools:ignore="RelativeOverlap" />
 
                 </RelativeLayout>
-
-                <View
-                    android:layout_width="270dp"
-                    android:layout_height="2dp"
-                    android:layout_gravity="center|center_horizontal"
-                    android:layout_marginBottom="20dp"
-                    android:layout_marginTop="20dp"
-                    android:background="@drawable/toolbar_shadow" />
-
-                <com.google.android.gms.common.SignInButton
-
-                    android:id="@+id/google_sign_in_button"
-                    android:layout_width="181dp"
-                    android:layout_height="wrap_content"
-                    android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/local_server_button"
