@@ -485,9 +485,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
                             @Override
                             public void onResponse(Call<EditResponse> call, Response<EditResponse> response) {
                                 if (response.isSuccessful()) {
-                                    message.setContent(editedMessageContent);
-                                    message.setFormattedContent(editedMessageContent);
-                                    adapter.notifyItemChanged(position);
+                                    //The message editing work in the list will be done by the AsyncGetEvents#processUpdateMessages
                                     progress.dismiss();
                                     Toast.makeText(getActivity(), R.string.message_edited, Toast.LENGTH_SHORT).show();
                                 } else {
