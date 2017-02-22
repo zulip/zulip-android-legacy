@@ -357,8 +357,11 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                     if (!isCurrentThemeNight) {
                         messageHeaderHolder.streamTextView.setBackgroundColor(messageHeaderParent.getColor());
                         ViewCompat.setBackgroundTintList(messageHeaderHolder.arrowHead, ColorStateList.valueOf(messageHeaderParent.getColor()));
+                        messageHeaderHolder.streamTextView.setBackgroundColor(messageHeaderParent.getColor());
                     }
-                    messageHeaderHolder.streamTextView.setBackgroundColor(messageHeaderParent.getColor());
+                    else {
+                        messageHeaderHolder.streamTextView.setBackgroundColor(mDefaultStreamHeaderColor);
+                    }
 
                     if (messageHeaderParent.isMute()) {
                         messageHeaderHolder.muteMessageImage.setVisibility(View.VISIBLE);
