@@ -1218,6 +1218,7 @@ public class ZulipActivity extends BaseActivity implements
                     } else {
                         endNotification(notifId, getString(R.string.failed_to_upload));
                     }
+                    mNotificationManager.cancel(notifId);
                 }
             }
 
@@ -1225,6 +1226,7 @@ public class ZulipActivity extends BaseActivity implements
             public void onError(Call<UploadResponse> call, Response<UploadResponse> response) {
                 if (!isDestroyed()) {
                     endNotification(notifId, getString(R.string.failed_to_upload));
+                    mNotificationManager.cancel(notifId);
                 }
             }
 
@@ -1232,6 +1234,7 @@ public class ZulipActivity extends BaseActivity implements
             public void onFailure(Call<UploadResponse> call, Throwable t) {
                 if (!isDestroyed()) {
                     endNotification(notifId, getString(R.string.failed_to_upload));
+                    mNotificationManager.cancel(notifId);
                     ZLog.logException(t);
                 }
             }
