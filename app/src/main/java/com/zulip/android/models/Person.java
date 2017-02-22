@@ -109,7 +109,7 @@ public class Person {
     public static Person getByEmail(Dao<Person, ?> dao, String email) {
         try {
             return dao.queryBuilder().where()
-                    .eq(Person.EMAIL_FIELD, new SelectArg(email.toLowerCase()))
+                    .eq(Person.EMAIL_FIELD, new SelectArg(email))
                     .queryForFirst();
         } catch (SQLException e) {
             throw new RuntimeException(e);
