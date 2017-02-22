@@ -104,8 +104,8 @@ import com.zulip.android.networking.AsyncStatusUpdate;
 import com.zulip.android.networking.UploadProgressRequest;
 import com.zulip.android.networking.ZulipAsyncPushTask;
 import com.zulip.android.networking.response.UploadResponse;
-import com.zulip.android.util.ActivityTransitionAnim;
 import com.zulip.android.networking.util.DefaultCallback;
+import com.zulip.android.util.ActivityTransitionAnim;
 import com.zulip.android.util.AnimationHelper;
 import com.zulip.android.util.CommonProgressDialog;
 import com.zulip.android.util.Constants;
@@ -350,6 +350,9 @@ public class ZulipActivity extends BaseActivity implements
         etSearchPeople = (EditText) findViewById(R.id.people_drawer_search);
         ivSearchPeopleCancel = (ImageView) findViewById(R.id.iv_people__search_cancel_button);
         onTextChangeOfPeopleSearchEditText();
+        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        mBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(this)
+                .setColor(getColor(R.color.notif_background));
         ivSearchPeopleCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -559,11 +562,6 @@ public class ZulipActivity extends BaseActivity implements
         setupSnackBar();
         //Hides Keyboard if it was open with focus on an editText before restart of the activity
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
-
-        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        mBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(this)
-                .setContentTitle(getString(R.string.notif_title))
-                .setColor(getColor(R.color.notif_background));
     }
 
     /**
@@ -872,6 +870,15 @@ public class ZulipActivity extends BaseActivity implements
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
 
+        if (mNotificationManager == null) {
+            mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        }
+        if (mBuilder == null) {
+            mBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(this)
+                    .setContentTitle(getString(R.string.notif_title))
+                    .setColor(getColor(R.color.notif_background));
+        }
+
         // Get action and MIME type of intent
         String action = intent.getAction();
         String type = intent.getType();
@@ -891,13 +898,6 @@ public class ZulipActivity extends BaseActivity implements
 
         if (action == null) {
             if (!TextUtils.isEmpty(filePath)) {
-                // Update UI to indicate image is being loaded
-                // hide fab and display chatbox
-                displayFAB(false);
-                displayChatBox(true);
-                String loadingMsg = getResources().getString(R.string.uploading_message);
-                sendingMessage(true, loadingMsg);
-
                 // start upload of photo
                 File photoFile = new File(filePath);
                 uploadFile(photoFile);
@@ -1094,13 +1094,13 @@ public class ZulipActivity extends BaseActivity implements
     }
 
     @NonNull
-    private MultipartBody.Part prepareFilePart(String partName, File file, int notificationId) {
+    private MultipartBody.Part prepareFilePart(String partName, final File file, int notificationId) {
         // create UploadProgressRequest instance from file
         UploadProgressRequest request = new UploadProgressRequest(file, new UploadProgressRequest.UploadCallbacks() {
             @Override
             public void onProgressUpdate(int percentage, String progress, int notificationId) {
                 // update notification
-                progressNotification(notificationId, percentage, progress);
+                progressNotification(notificationId, percentage, progress, file.getName());
             }
         }, notificationId);
 
@@ -1119,10 +1119,12 @@ public class ZulipActivity extends BaseActivity implements
      */
     private void setNotification(int notificationId, String content) {
         mBuilder.setSmallIcon(android.R.drawable.stat_sys_upload)
+                .setContentTitle(getString(R.string.notif_title))
                 .setContentText(content)
                 .setAutoCancel(false)
+                .setOngoing(false)
                 // Removes the progress bar
-                .setProgress(0,0,false);
+                .setProgress(0, 0, false);
         PendingIntent contentIntent = PendingIntent.getActivity(
                 getApplicationContext(),
                 0,
@@ -1138,10 +1140,12 @@ public class ZulipActivity extends BaseActivity implements
      * @param notificationId
      * @param percentage
      */
-    private void progressNotification(int notificationId, int percentage, String progress) {
+    private void progressNotification(int notificationId, int percentage, String progress, String title) {
         mBuilder.setSmallIcon(android.R.drawable.stat_sys_upload)
+                .setContentTitle(title)
                 .setContentText(progress)
                 .setAutoCancel(false)
+                .setOngoing(true)
                 .setProgress(100, percentage, false);
         mNotificationManager.notify(notificationId, mBuilder.build());
     }
@@ -1154,10 +1158,12 @@ public class ZulipActivity extends BaseActivity implements
      */
     private void endNotification(int notificationId, String content) {
         mBuilder.setSmallIcon(R.drawable.ic_done_white_24dp)
+                .setContentTitle(getString(R.string.notif_title))
                 .setContentText(content)
                 .setAutoCancel(true)
+                .setOngoing(false)
                 // Removes the progress bar
-                .setProgress(0,0,false);
+                .setProgress(0, 0, false);
         PendingIntent contentIntent = PendingIntent.getActivity(
                 getApplicationContext(),
                 0,
@@ -1174,7 +1180,14 @@ public class ZulipActivity extends BaseActivity implements
      * @param file on local storage
      */
     private void uploadFile(final File file) {
-        final int notifId = (int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
+        // check if file size is greater than 10MB
+        if (file.length() / Math.pow(1024, 2) > 10) {
+            Toast.makeText(this, R.string.upload_big_file, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // generate unique notification Id for this upload
+        final int notifId = (int) (new Date().getTime() % Integer.MAX_VALUE);
 
         // MultipartBody.Part is used to send also the actual file name
         MultipartBody.Part body = prepareFilePart("file", file, notifId);
@@ -1190,36 +1203,37 @@ public class ZulipActivity extends BaseActivity implements
         call.enqueue(new DefaultCallback<UploadResponse>() {
             @Override
             public void onSuccess(Call<UploadResponse> call, Response<UploadResponse> response) {
-                String filePathOnServer = "";
-                UploadResponse uploadResponse = response.body();
-                filePathOnServer = uploadResponse.getUri();
-                if (!filePathOnServer.equals("")) {
-                    endNotification(notifId, getString(R.string.finish_notif_title));
-                    // remove loading message from the screen
-                    sendingMessage(false, loadingMsg);
+                if (!isDestroyed()) {
+                    String filePathOnServer = "";
+                    UploadResponse uploadResponse = response.body();
+                    filePathOnServer = uploadResponse.getUri();
+                    if (!filePathOnServer.equals("")) {
+                        endNotification(notifId, getString(R.string.finish_notif_title));
 
-                    // print message to compose box
-                    messageEt.append(" [" + file.getName() + "](" +
-                            UrlHelper.addHost(filePathOnServer) + ")");
-                } else {
-                    // remove loading message from the screen
-                    sendingMessage(false, loadingMsg);
-                    Toast.makeText(ZulipActivity.this, R.string.failed_to_upload, Toast.LENGTH_SHORT).show();
+                        // add uploaded file url on server to composed message
+                        messageEt.append("\n[" + file.getName() + "](" +
+                                UrlHelper.addHost(filePathOnServer) + ")");
+                        displayFAB(false);
+                        displayChatBox(true);
+                    } else {
+                        endNotification(notifId, getString(R.string.failed_to_upload));
+                    }
                 }
             }
 
             @Override
             public void onError(Call<UploadResponse> call, Response<UploadResponse> response) {
-                // remove loading message from the screen
-                sendingMessage(false, loadingMsg);
-                Toast.makeText(ZulipActivity.this, R.string.failed_to_upload, Toast.LENGTH_SHORT).show();
+                if (!isDestroyed()) {
+                    endNotification(notifId, getString(R.string.failed_to_upload));
+                }
             }
 
             @Override
             public void onFailure(Call<UploadResponse> call, Throwable t) {
-                // remove loading message from the screen
-                sendingMessage(false, loadingMsg);
-                ZLog.logException(t);
+                if (!isDestroyed()) {
+                    endNotification(notifId, getString(R.string.failed_to_upload));
+                    ZLog.logException(t);
+                }
             }
         });
     }
