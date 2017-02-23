@@ -120,7 +120,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                             Person[] recipientArray = messageHeaderParent.getRecipients(zulipApp);
                             narrowListener.onNarrow(new NarrowFilterPM(Arrays.asList(recipientArray)),
                                     messageHeaderParent.getMessageId());
-                            narrowListener.onNarrowFillSendBoxPrivate(recipientArray,false);
+                            narrowListener.onNarrowFillSendBoxPrivate(recipientArray, false);
                         } else {
                             narrowListener.onNarrow(new NarrowFilterStream(Stream.getByName(zulipApp,
                                     messageHeaderParent.getStream()), null),
@@ -354,10 +354,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                     messageHeaderHolder.streamTextView.setText(messageHeaderParent.getStream());
                     messageHeaderHolder.topicTextView.setText(messageHeaderParent.getSubject());
 
-                    if (!isCurrentThemeNight) {
-                        messageHeaderHolder.streamTextView.setBackgroundColor(messageHeaderParent.getColor());
-                        ViewCompat.setBackgroundTintList(messageHeaderHolder.arrowHead, ColorStateList.valueOf(messageHeaderParent.getColor()));
-                    }
+                    ViewCompat.setBackgroundTintList(messageHeaderHolder.arrowHead, ColorStateList.valueOf(messageHeaderParent.getColor()));
                     messageHeaderHolder.streamTextView.setBackgroundColor(messageHeaderParent.getColor());
 
                     if (messageHeaderParent.isMute()) {
@@ -395,7 +392,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                                 public void onClick(View view) {
                                     Intent i = new Intent(zulipApp.getApplicationContext(), PhotoViewActivity.class);
                                     i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                    i.putExtra(Intent.EXTRA_TEXT , url);
+                                    i.putExtra(Intent.EXTRA_TEXT, url);
                                     zulipApp.startActivity(i);
                                     ((Activity) context).overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                                 }
