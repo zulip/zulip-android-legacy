@@ -86,7 +86,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     @ColorInt
     private int privateMessageBackground;
     private OnItemClickListener onItemClickListener;
-    private int contextMenuItemSelectedPosition;
+    private int contextMenuItemSelectedPosition = RecyclerView.NO_POSITION;
     private View footerView;
     private View headerView;
     private UpdateBuilder<Message, Object> updateBuilder;
