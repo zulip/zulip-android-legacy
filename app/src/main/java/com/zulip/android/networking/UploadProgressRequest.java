@@ -12,7 +12,8 @@ import okhttp3.RequestBody;
 import okio.BufferedSink;
 
 /**
- * TODO: add description
+ * Decorated retrofit RequestBody to intercept progress during network call.
+ * Implement UploadCallbacks interface {@link UploadCallbacks} to receive progress update.
  */
 
 public class UploadProgressRequest extends RequestBody {

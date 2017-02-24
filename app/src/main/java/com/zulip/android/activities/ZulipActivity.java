@@ -942,9 +942,6 @@ public class ZulipActivity extends BaseActivity implements
             // activity transition animation
             ActivityTransitionAnim.transition(ZulipActivity.this);
         }
-
-        // TODO: rearrange code
-        // in else if upload file sent and show notification for it
         else if (requestCode == REQUEST_PICK_FILE && resultCode == RESULT_OK) {
             List<Uri> fileUris = new ArrayList<>();
             if (data.getData() != null) {
@@ -1135,7 +1132,8 @@ public class ZulipActivity extends BaseActivity implements
     private NotificationCompat.Builder mBuilder;
 
     /**
-     * TODO: add description
+     * Modifies notification {@link Notifications} of specifies {@param notificationId}
+     * and sets its {@param content}.
      *
      * @param notificationId
      * @param content
@@ -1158,7 +1156,8 @@ public class ZulipActivity extends BaseActivity implements
     }
 
     /**
-     * TODO: add description
+     * Updates upload notification with passed percentage {@param percentage} and progress string
+     * {@param progress} as content.
      *
      * @param notificationId
      * @param percentage
@@ -1174,7 +1173,7 @@ public class ZulipActivity extends BaseActivity implements
     }
 
     /**
-     * TODO: add description
+     * Shows success notification.
      *
      * @param notificationId
      * @param content
