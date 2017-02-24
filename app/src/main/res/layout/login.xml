@@ -98,7 +98,6 @@
                     android:id="@+id/server_url"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:backgroundTint="#075818"
                     android:ems="10"
                     android:hint="@string/server_domain"
                     android:inputType="textUri"
@@ -119,7 +118,6 @@
                     <android.support.design.widget.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:backgroundTint="#075818"
                         android:textCursorDrawable="@null">
 
                         <EditText
@@ -136,7 +134,6 @@
                     <android.support.design.widget.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:backgroundTint="#075818"
                         android:textCursorDrawable="@null"
                         app:passwordToggleEnabled="true">
 
