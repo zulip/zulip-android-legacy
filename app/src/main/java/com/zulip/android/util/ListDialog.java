@@ -12,14 +12,15 @@ import android.view.View;
 import com.zulip.android.R;
 
 /**
- * TODO: add description
+ * List dialog for picking option of upload (camera or file).
+ *
+ * The activity that creates an instance of this dialog fragment must
+ * implement ListDialogListener interface {@link ListDialogListener} in order to receive event callbacks.
+ * Each method passes the DialogFragment in case the host needs to query it.
  */
 
 public class ListDialog extends DialogFragment {
 
-    /* The activity that creates an instance of this dialog fragment must
-     * implement this interface in order to receive event callbacks.
-     * Each method passes the DialogFragment in case the host needs to query it. */
     public interface ListDialogListener {
         void onDialogPhotoClick(DialogFragment dialog);
         void onDialogFileClick(DialogFragment dialog);
