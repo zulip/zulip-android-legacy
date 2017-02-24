@@ -6,6 +6,7 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.DialogFragment;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.SearchManager;
@@ -110,6 +111,7 @@ import com.zulip.android.util.AnimationHelper;
 import com.zulip.android.util.CommonProgressDialog;
 import com.zulip.android.util.Constants;
 import com.zulip.android.util.FileUtils;
+import com.zulip.android.util.ListDialog;
 import com.zulip.android.util.MutedTopics;
 import com.zulip.android.util.RemoveViewsOnScroll;
 import com.zulip.android.util.SwipeRemoveLinearLayout;
@@ -143,7 +145,8 @@ import retrofit2.Response;
  * messages
  */
 public class ZulipActivity extends BaseActivity implements
-        MessageListFragment.Listener, NarrowListener, SwipeRemoveLinearLayout.leftToRightSwipeListener {
+        MessageListFragment.Listener, NarrowListener, SwipeRemoveLinearLayout.leftToRightSwipeListener,
+        ListDialog.ListDialogListener {
 
     private static final String NARROW = "narrow";
     private static final String PARAMS = "params";
@@ -209,7 +212,6 @@ public class ZulipActivity extends BaseActivity implements
     private List<PeopleDrawerList> recentPeopleDrawerList;
     private List<PeopleDrawerList> filteredRecentPeopleDrawerList;
     private Uri mFileUri;
-    private ImageView cameraBtn;
     private String mCurrentPhotoPath;
     private Menu menu;
     private Calendar calendar;
@@ -220,6 +222,7 @@ public class ZulipActivity extends BaseActivity implements
     private Toast toast;
     private RecyclerView peopleDrawer;
     private List<PeopleDrawerList> peopleDrawerList;
+    private ImageView addFileBtn;
     //
     private String streamSearchFilterKeyword = "";
     private RefreshableCursorAdapter peopleAdapter;
@@ -344,7 +347,7 @@ public class ZulipActivity extends BaseActivity implements
         messageEt = (AutoCompleteTextView) findViewById(R.id.message_et);
         textView = (TextView) findViewById(R.id.textView);
         sendBtn = (ImageView) findViewById(R.id.send_btn);
-        cameraBtn = (ImageView) findViewById(R.id.camera_btn);
+        addFileBtn = (ImageView) findViewById(R.id.add_btn);
         appBarLayout = (AppBarLayout) findViewById(R.id.appBarLayout);
         boolean isCurrentThemeNight = (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES);
         etSearchPeople = (EditText) findViewById(R.id.people_drawer_search);
@@ -443,14 +446,15 @@ public class ZulipActivity extends BaseActivity implements
             }
         });
 
-        // set onClick listener on camera button to dispatch camera intent when clicked
-        cameraBtn.setOnClickListener(new View.OnClickListener() {
+        /**
+         *  set click listener on add file button to open custom list dialog {@link ListDialog}
+         */
+        addFileBtn.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                dispatchTakePictureIntent();
+            public void onClick(View v) {
+                showListDialog();
             }
         });
-
         composeStatus = (LinearLayout) findViewById(R.id.composeStatus);
         setUpAdapter();
         streamActv.setAdapter(streamActvAdapter);
@@ -553,15 +557,34 @@ public class ZulipActivity extends BaseActivity implements
                 handleSentFile((Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM));
             }
         }
-        // if device doesn't have camera, disable camera button
-        if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
-            cameraBtn.setEnabled(false);
-        }
         handleOnFragmentChange();
         calendar = Calendar.getInstance();
         setupSnackBar();
         //Hides Keyboard if it was open with focus on an editText before restart of the activity
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+    }
+
+    public void showListDialog() {
+        // Create an instance of the dialog fragment and show it
+        DialogFragment dialog = new ListDialog();
+        dialog.show(getFragmentManager(), "ListDialogFragment");
+    }
+
+    // The dialog fragment receives a reference to this Activity through the
+    // Fragment.onAttach() callback, which it uses to call the following methods
+    // defined by the ListDialogFragment.ListDialogListener interface
+    @Override
+    public void onDialogPhotoClick(DialogFragment dialog) {
+        // User touched the dialog's "Take picture" button
+        dialog.dismiss();
+        dispatchTakePictureIntent();
+    }
+
+    @Override
+    public void onDialogFileClick(DialogFragment dialog) {
+        // User touched the dialog's "Pick a file" button
+        dialog.dismiss();
+        dispatchPickIntent();
     }
 
     /**
@@ -1632,7 +1655,7 @@ public class ZulipActivity extends BaseActivity implements
         messageEt.setEnabled(!isSending);
         topicActv.setEnabled(!isSending);
         sendBtn.setEnabled(!isSending);
-        cameraBtn.setEnabled(!isSending);
+        addFileBtn.setEnabled(!isSending);
         togglePrivateStreamBtn.setEnabled(!isSending);
         if (isSending) {
             TextView msg = (TextView) composeStatus.findViewById(R.id.sending_message);
@@ -2319,9 +2342,6 @@ public class ZulipActivity extends BaseActivity implements
             case R.id.legal:
                 openLegal();
                 break;
-            case R.id.attach:
-                dispatchPickIntent();
-                break;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -2341,6 +2361,8 @@ public class ZulipActivity extends BaseActivity implements
 
         if (intent.resolveActivity(getPackageManager()) != null) {
             startActivityForResult(intent, REQUEST_PICK_FILE);
+            // activity transition animation
+            ActivityTransitionAnim.transition(ZulipActivity.this);
         }
     }
 
