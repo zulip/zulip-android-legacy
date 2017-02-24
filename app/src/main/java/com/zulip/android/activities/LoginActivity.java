@@ -278,6 +278,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
 
         if (!isUrlValid(serverURL)) {
             Toast.makeText(LoginActivity.this, R.string.invalid_url, Toast.LENGTH_SHORT).show();
+            commonProgressDialog.dismiss();
             return;
         }
 
