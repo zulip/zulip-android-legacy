@@ -202,7 +202,14 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        Message message = (Message) adapter.getItem(adapter.getContextMenuItemSelectedPosition());
+        // fragment replace transaction can be committed during long press on a message
+        int position = adapter.getContextMenuItemSelectedPosition();
+        if (position == RecyclerView.NO_POSITION) {
+            Toast.makeText(getContext(), R.string.try_again_error_msg, Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        Message message = (Message) adapter.getItem(position);
         switch (item.getItemId()) {
             case R.id.reply_to_stream:
                 ((NarrowListener) getActivity()).onNarrowFillSendBox(message, true);
