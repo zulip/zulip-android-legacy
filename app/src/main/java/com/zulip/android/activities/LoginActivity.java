@@ -19,7 +19,6 @@ import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.webkit.URLUtil;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -41,8 +40,8 @@ import com.zulip.android.networking.response.ZulipBackendResponse;
 import com.zulip.android.networking.util.DefaultCallback;
 import com.zulip.android.util.ActivityTransitionAnim;
 import com.zulip.android.util.AnimationHelper;
-import com.zulip.android.util.Constants;
 import com.zulip.android.util.CommonProgressDialog;
+import com.zulip.android.util.Constants;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -263,10 +262,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
 
     private boolean isUrlValid(String url) {
         if (BuildConfig.DEBUG) {
-            return URLUtil.isValidUrl(String.valueOf(url)) ||
+            return Patterns.WEB_URL.matcher(String.valueOf(url)).matches() ||
                     Patterns.IP_ADDRESS.matcher(url).matches();
         } else {
-            return URLUtil.isValidUrl(String.valueOf(url));
+            return Patterns.WEB_URL.matcher(String.valueOf(url)).matches();
         }
     }
 
