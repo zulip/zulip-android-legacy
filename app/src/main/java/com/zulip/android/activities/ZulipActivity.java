@@ -672,9 +672,11 @@ public class ZulipActivity extends BaseActivity implements
                 String query = "SELECT s.id as _id,  s.name, s.color, count(case when m.id > " + pointer + " or m." + Message.MESSAGE_READ_FIELD
                         + " = 0 then 1 end) as " + ExpandableStreamDrawerAdapter.UNREAD_TABLE_NAME
                         + " FROM streams as s LEFT JOIN messages as m ON s.id=m.stream ";
+                String selectArg = null;
                 if (!etSearchStream.getText().toString().equals("") && !etSearchStream.getText().toString().isEmpty()) {
                     //append where clause
-                    query += " WHERE s.name LIKE '%" + etSearchStream.getText().toString() + "%'" + " and s." + Stream.SUBSCRIBED_FIELD + " = " + "1 ";
+                    selectArg = etSearchStream.getText().toString() + '%';
+                    query += " WHERE s.name LIKE ? " + " and s." + Stream.SUBSCRIBED_FIELD + " = " + "1 ";
                     //set visibility of this image false
                     ivSearchStreamCancel.setVisibility(View.VISIBLE);
                 } else {
@@ -685,7 +687,11 @@ public class ZulipActivity extends BaseActivity implements
                 //append group by
                 query += " group by s.name order by s.name COLLATE NOCASE";
 
-                return ((AndroidDatabaseResults) app.getDao(Stream.class).queryRaw(query).closeableIterator().getRawResults()).getRawCursor();
+                if (selectArg != null) {
+                    return ((AndroidDatabaseResults) app.getDao(Stream.class).queryRaw(query, selectArg).closeableIterator().getRawResults()).getRawCursor();
+                } else {
+                    return ((AndroidDatabaseResults) app.getDao(Stream.class).queryRaw(query).closeableIterator().getRawResults()).getRawCursor();
+                }
             }
         };
         return steamCursorGenerator;
