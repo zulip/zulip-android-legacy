@@ -166,4 +166,5 @@
     <string name="people_drawer_active_label">Active</string>
     <string name="people_drawer_recent_pm_label">Recent Private Messages</string>
     <string name="people_drawer_others_label">New Private Message</string>
+    <string name="mentions">\@-mentions</string>
 </resources>

@@ -86,6 +86,7 @@ import com.zulip.android.database.DatabaseHelper;
 import com.zulip.android.filters.NarrowFilter;
 import com.zulip.android.filters.NarrowFilterAllPMs;
 import com.zulip.android.filters.NarrowFilterByDate;
+import com.zulip.android.filters.NarrowFilterMentioned;
 import com.zulip.android.filters.NarrowFilterPM;
 import com.zulip.android.filters.NarrowFilterSearch;
 import com.zulip.android.filters.NarrowFilterStar;
@@ -722,6 +723,8 @@ public class ZulipActivity extends BaseActivity implements
                     resetPeopleSearch();
                     if (id == Constants.ALL_PEOPLE_ID) {
                         openAllPrivateMessages();
+                    } else if (id == Constants.MENTIONS) {
+                        doNarrow(new NarrowFilterMentioned());
                     } else {
                         Person person = Person.getById(app, id);
                         narrowPMWith(person);
