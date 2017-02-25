@@ -66,8 +66,20 @@ public abstract class RefreshableCursorAdapter extends RecyclerView.Adapter<Recy
                     }
                 });
                 return;
+            } else if (position == 1) {
+                tileHolder.tvName.setText(R.string.mentions);
+                tileHolder.ivDot.setVisibility(View.VISIBLE);
+                tileHolder.ivDot.setBackgroundResource(R.drawable.ic_mentions);
+                holder.itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        onPeopleSelect(Constants.MENTIONS);
+                    }
+                });
+                return;
             }
-            position = tileHolder.getLayoutPosition() - 1;
+            //first two are narrow to all private message and mentions
+            position = tileHolder.getLayoutPosition() - 2;
             tileHolder.tvName.setText(mList.get(position).getPerson().getName());
             //app is passed as parameter from ZulipActivity
             //presence of all persons are in ZulipApp
@@ -118,14 +130,15 @@ public abstract class RefreshableCursorAdapter extends RecyclerView.Adapter<Recy
 
     @Override
     public int getItemCount() {
-        return mList.size() + 1;
+        //first two are narrow to all private message and mentions
+        return mList.size() + 2;
     }
 
     @Override
     public long getHeaderId(int position) {
-        if (position == 0)
+        if (position == 0 || position == 1)
             return FloatingHeaderDecoration.NO_HEADER_ID;
-        return (long) mList.get(position - 1).getGroupId();
+        return (long) mList.get(position - 2).getGroupId();
     }
 
     @Override
@@ -136,7 +149,8 @@ public abstract class RefreshableCursorAdapter extends RecyclerView.Adapter<Recy
 
     @Override
     public void onBindHeaderViewHolder(HeaderHolder headerHolder, int position) {
-        headerHolder.tvHeading.setText(mList.get(position - 1).getGroupName());
+        //first two are narrow to all private message and mentions
+        headerHolder.tvHeading.setText(mList.get(position - 2).getGroupName());
     }
 
     private static class TileHolder extends RecyclerView.ViewHolder {

@@ -22,4 +22,6 @@ public class Constants {
     public static final int PEOPLE_DRAWER_OTHERS_GROUP_ID = 2;
     // row number which is used to differentiate the 'All private messages' in people drawer
     public static final int ALL_PEOPLE_ID = -1;
+    // row number which is used to differentiate the '@-mentions' in people drawer
+    public static int MENTIONS = -2;
 }
