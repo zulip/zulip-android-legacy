@@ -108,7 +108,6 @@
     <string name="star_message">Star message</string>
     <string name="un_star_message">Unstar message</string>
     <string name="login_failed">Unable to login</string>
-    <string name="uploading_message">Uploading</string>
     <string name="cannot_upload_file">Cannot upload file</string>
     <string name="cannot_find_file">Cannot find requested file</string>
     <string name="failed_to_upload">Failed</string>
@@ -167,7 +166,6 @@
     <string name="people_drawer_recent_pm_label">Recent Private Messages</string>
     <string name="people_drawer_others_label">New Private Message</string>
     <string name="mentions">\@-mentions</string>
-    <string name="attach">Attach</string>
     <string name="notif_title">Upload to Zulip</string>
     <string name="init_notif_title">Starting upload</string>
     <string name="finish_notif_title">Complete</string>
