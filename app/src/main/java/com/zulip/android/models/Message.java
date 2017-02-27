@@ -116,7 +116,7 @@ public class Message {
     @DatabaseField(foreign = true, columnName = STREAM_FIELD, foreignAutoRefresh = true)
     private Stream stream;
     @DatabaseField(columnName = MESSAGE_READ_FIELD)
-    private Boolean messageRead;
+    private boolean messageRead;
     @DatabaseField(columnDefinition = MESSAGE_EDITED)
     private Boolean hasBeenEdited;
     //endregion
@@ -371,11 +371,11 @@ public class Message {
         return schema;
     }
 
-    public Boolean getMessageRead() {
+    public boolean getMessageRead() {
         return messageRead;
     }
 
-    public void setMessageRead(Boolean messageRead) {
+    public void setMessageRead(boolean messageRead) {
         this.messageRead = messageRead;
     }
 

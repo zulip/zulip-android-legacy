@@ -7,7 +7,6 @@ import android.widget.SimpleCursorTreeAdapter;
 
 import com.zulip.android.ZulipApp;
 import com.zulip.android.models.Message;
-import com.zulip.android.models.Stream;
 import com.zulip.android.util.ZLog;
 
 import java.sql.SQLException;

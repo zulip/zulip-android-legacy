@@ -671,8 +671,10 @@ public class ZulipActivity extends BaseActivity implements
         Callable<Cursor> steamCursorGenerator = new Callable<Cursor>() {
             @Override
             public Cursor call() throws Exception {
-                String query = "SELECT s.id as _id,  s.name, s.color"
-                        + " FROM streams as s LEFT JOIN messages as m ON s.id=m.stream ";
+                int pointer = app.getPointer();
+                String query = "SELECT s.id as _id,  s.name, s.color, count(case when m.id > " + pointer + " and (m." + Message.MESSAGE_READ_FIELD
+                        + " = 0)"+ " then 1 end) as " + ExpandableStreamDrawerAdapter.UNREAD_TABLE_NAME
+                        + " FROM streams as s LEFT JOIN messages as m ON s." + Stream.NAME_FIELD + " = m." + Message.RECIPIENTS_FIELD;
                 String selectArg = null;
                 if (!etSearchStream.getText().toString().equals("") && !etSearchStream.getText().toString().isEmpty()) {
                     //append where clause
@@ -1257,14 +1259,6 @@ public class ZulipActivity extends BaseActivity implements
                         } else {
                             name.setTextColor(ContextCompat.getColor(ZulipActivity.this, R.color.colorTextPrimary));
                         }
-                        view.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                resetStreamSearch();
-                                doNarrowToLastRead(streamName);
-                                onNarrowFillSendBoxStream(streamName, "", false);
-                            }
-                        });
                         return true;
                     case R.id.stream_dot:
                         // Set the color of the (currently white) dot
