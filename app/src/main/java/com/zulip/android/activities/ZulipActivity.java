@@ -1113,15 +1113,9 @@ public class ZulipActivity extends BaseActivity implements
     }
 
     @NonNull
-    private MultipartBody.Part prepareFilePart(String partName, final File file, int notificationId) {
+    private MultipartBody.Part prepareFilePart(String partName, final File file, int notificationId, UploadProgressRequest.UploadCallbacks callbacks) {
         // create UploadProgressRequest instance from file
-        UploadProgressRequest request = new UploadProgressRequest(file, new UploadProgressRequest.UploadCallbacks() {
-            @Override
-            public void onProgressUpdate(int percentage, String progress, int notificationId) {
-                // update notification
-                progressNotification(notificationId, percentage, progress, file.getName());
-            }
-        }, notificationId);
+        UploadProgressRequest request = new UploadProgressRequest(file, callbacks, notificationId);
 
         // MultipartBody.Part is used to send also the actual file name
         return MultipartBody.Part.createFormData(partName, file.getName(), request);
@@ -1210,8 +1204,22 @@ public class ZulipActivity extends BaseActivity implements
         // generate unique notification Id for this upload
         final int notifId = (int) (new Date().getTime() % Integer.MAX_VALUE);
 
+        // update notification after every one second
+        final long startTime = System.currentTimeMillis();
+        final int[] counter = {0};
+        UploadProgressRequest.UploadCallbacks progressListener = new UploadProgressRequest.UploadCallbacks() {
+            @Override
+            public void onProgressUpdate(int percentage, String progress, int notificationId) {
+                if (System.currentTimeMillis() - startTime >= 1000 * counter[0]) {
+                    // update notification
+                    progressNotification(notificationId, percentage, progress, file.getName());
+                    counter[0]++;
+                }
+            }
+        };
+
         // MultipartBody.Part is used to send also the actual file name
-        MultipartBody.Part body = prepareFilePart("file", file, notifId);
+        MultipartBody.Part body = prepareFilePart("file", file, notifId, progressListener);
 
         // start notification
         setNotification(notifId, getString(R.string.init_notif_title));
