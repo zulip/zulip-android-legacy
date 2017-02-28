@@ -25,7 +25,7 @@ or by using Android Studio.
 -  `Build instructions (Android Studio)`_)
 -  `Build instructions (without Android Studio)`_)
 -  `Running server on device`_
--  `Coding Style`_
+-  `Contributing`_
 -  `Mailing List`_
 -  `Export`_
 -  `License`_
@@ -35,7 +35,7 @@ or by using Android Studio.
 .. _Build instructions (Android Studio): #build-instructions-android-studio
 .. _Build instructions (without Android Studio): #build-instructions-without-android-studio
 .. _Running server on device: #browsing-server-on-device
-.. _Coding Style: #coding-style
+.. _Contributing: #contributing
 .. _Mailing List: #mailing-list
 .. _Export: #export
 .. _License: #license
@@ -233,12 +233,19 @@ Another way to connect android device to local server is via adb
 .. _this: http://docs.telerik.com/fiddler/Configure-Fiddler/Tasks/ConfigureForAndroid
 
 
-Coding Style
+Contributing
 ------------
 
-Please read the Zulip coding style conventions documented at
-https://zulip.readthedocs.org/en/latest/code-style.html#version-control
-carefully.
+* If you're excited about helping with an open issue, make sure to claim the issue by commenting the following in the comment section: "**@zulipbot** claim". **@zulipbot** will assign you to the issue and label the issue as **in progress**. For more details, check out |@zulipbot|_.
+
+* For commit messages, be sure to checkout our `commit message style guidelines`_.
+
+* For code style, please read the `Zulip coding style`_ conventions carefully.
+ 
+.. |@zulipbot| replace:: **@zulipbot** 
+.. _@zulipbot: https://github.com/zulip/zulipbot
+.. _commit message style guidelines: https://zulip.readthedocs.io/en/latest/version-control.html#commit-messages
+.. _Zulip coding style: https://zulip.readthedocs.org/en/latest/code-style.html#version-control
 
 Mailing List
 ------------
