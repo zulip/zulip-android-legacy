@@ -591,7 +591,7 @@ public class AsyncGetEvents extends Thread {
             if (id != null) {
                 try {
                     UpdateBuilder<Message, Integer> updateBuilder = messageDao.updateBuilder();
-                    updateBuilder.where().eq(Message.ID_FIELD, id);
+                    updateBuilder.where().eq(Message.ID_FIELD, id).and().eq(Message.MESSAGE_READ_FIELD, false);
                     updateBuilder.updateColumnValue(Message.MESSAGE_READ_FIELD, true);
                     updateBuilder.update();
                 } catch (SQLException e) {
@@ -599,5 +599,13 @@ public class AsyncGetEvents extends Thread {
                 }
             }
         }
+
+        // update streams and people drawers to reflect updated unread counts
+        mActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mActivity.checkAndSetupStreamsDrawer();
+            }
+        });
     }
 }
