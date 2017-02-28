@@ -28,7 +28,8 @@ public class EventsBranch {
         MUTED_TOPICS(MutedTopicsWrapper.class, "muted_topics"),
         EDIT_MESSAGE_TIME_LIMIT(EditMessageWrapper.class, "realm"),
         UPDATE_MESSAGE(UpdateMessageWrapper.class, "update_message"),
-        STREAM(StreamWrapper.class, "stream");
+        STREAM(StreamWrapper.class, "stream"),
+        UPDATE_MESSAGE_FLAGS(UpdateMessageFlagsWrapper.class, "update_message_flags");
 
 
         private final Class<? extends EventsBranch> klazz;

@@ -10,6 +10,7 @@ import android.widget.Toast;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.misc.TransactionManager;
+import com.j256.ormlite.stmt.UpdateBuilder;
 import com.zulip.android.R;
 import com.zulip.android.ZulipApp;
 import com.zulip.android.activities.LoginActivity;
@@ -27,6 +28,7 @@ import com.zulip.android.networking.response.events.MessageWrapper;
 import com.zulip.android.networking.response.events.MutedTopicsWrapper;
 import com.zulip.android.networking.response.events.StreamWrapper;
 import com.zulip.android.networking.response.events.SubscriptionWrapper;
+import com.zulip.android.networking.response.events.UpdateMessageFlagsWrapper;
 import com.zulip.android.networking.response.events.UpdateMessageWrapper;
 import com.zulip.android.util.MutedTopics;
 import com.zulip.android.util.TypeSwapper;
@@ -366,12 +368,12 @@ public class AsyncGetEvents extends Thread {
             processUpdateMessages(updateMessageEvents);
         }
 
-        // get message time limit events
-        List<EventsBranch> messageTimeLimit = events.getEventsOfBranchType(EventsBranch.BranchType.EDIT_MESSAGE_TIME_LIMIT);
-        if (!messageTimeLimit.isEmpty()) {
-            Log.i("AsyncGetEvents", "Received " + messageTimeLimit.size()
-                    + " realm event");
-            processMessageEditParam(messageTimeLimit);
+        // update message flags
+        List<EventsBranch> updateMessageFlags = events.getEventsOfBranchType(EventsBranch.BranchType.UPDATE_MESSAGE_FLAGS);
+        if (!updateMessageFlags.isEmpty()) {
+            Log.i("AsyncGetEvents", "Received " + updateMessageFlags.size()
+                    + " update message flags");
+            processUpdateMessageFlags(updateMessageFlags);
         }
 
         // get stream events
@@ -382,6 +384,13 @@ public class AsyncGetEvents extends Thread {
             processStreams(streamEvents);
         }
 
+        // get message time limit events
+        List<EventsBranch> messageTimeLimit = events.getEventsOfBranchType(EventsBranch.BranchType.EDIT_MESSAGE_TIME_LIMIT);
+        if (!messageTimeLimit.isEmpty()) {
+            Log.i("AsyncGetEvents", "Received " + messageTimeLimit.size()
+                    + " realm event");
+            processMessageEditParam(messageTimeLimit);
+        }
     }
 
     /**
@@ -556,6 +565,38 @@ public class AsyncGetEvents extends Thread {
                 // TODO: handle other operations of stream event
                 Log.d("AsyncEvents", "unhandled operation for stream type event");
                 return;
+            }
+        }
+    }
+
+    private void processUpdateMessageFlags(List<EventsBranch> eventList) {
+        for (EventsBranch event : eventList) {
+            UpdateMessageFlagsWrapper updateMsgFlag = (UpdateMessageFlagsWrapper) event;
+            switch (updateMsgFlag.getFlag()) {
+                case "read":
+                    markMessagesAsRead(updateMsgFlag.getMessageIds());
+                    break;
+                default:
+                    Log.d("AsyncEvents", "unhandled update_message_flags event");
+            }
+        }
+    }
+
+    private void markMessagesAsRead(List<Integer> messageIds) {
+        Dao<Message, Integer> messageDao = app.getDao(Message.class);
+        if (messageDao == null) {
+            return;
+        }
+        for (Integer id : messageIds) {
+            if (id != null) {
+                try {
+                    UpdateBuilder<Message, Integer> updateBuilder = messageDao.updateBuilder();
+                    updateBuilder.where().eq(Message.ID_FIELD, id);
+                    updateBuilder.updateColumnValue(Message.MESSAGE_READ_FIELD, true);
+                    updateBuilder.update();
+                } catch (SQLException e) {
+                    ZLog.logException(e);
+                }
             }
         }
     }
