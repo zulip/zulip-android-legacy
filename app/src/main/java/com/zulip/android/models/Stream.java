@@ -175,6 +175,7 @@ public class Stream {
             // query for message in given stream and orderby timestamp decreasingly
             return messageDao.queryBuilder().orderBy(Message.TIMESTAMP_FIELD, false)
                     .where().eq(Message.RECIPIENTS_FIELD, new SelectArg(Message.RECIPIENTS_FIELD, streamName))
+                    .and().eq(Message.MESSAGE_READ_FIELD, true)
                     .queryForFirst();
         } catch (SQLException e) {
             ZLog.logException(e);
