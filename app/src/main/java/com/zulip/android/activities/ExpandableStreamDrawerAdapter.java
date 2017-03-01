@@ -31,20 +31,19 @@ public class ExpandableStreamDrawerAdapter extends SimpleCursorTreeAdapter {
 
     @Override
     public Cursor getChildrenCursor(Cursor groupCursor) {
-        int pointer = zulipApp.getPointer();
         List<String[]> results = new ArrayList<>();
         try {
-            results = ZulipApp.get().getDao(Message.class).queryRaw("SELECT DISTINCT subject, count(case when messages.id > " + pointer + " or messages." + Message.MESSAGE_READ_FIELD + " = 0 then 1 end) as unreadcount FROM messages " +
+            results = ZulipApp.get().getDao(Message.class).queryRaw("SELECT DISTINCT subject FROM messages " +
                     "JOIN streams ON streams.id=messages.stream " +
                     "WHERE streams.id=" + groupCursor.getInt(0) + " and streams." + Stream.SUBSCRIBED_FIELD + " = " + "1 group by subject").getResults();
         } catch (SQLException e) {
             ZLog.logException(e);
         }
-        MatrixCursor matrixCursor = new MatrixCursor(new String[]{"subject", "_id", UNREAD_TABLE_NAME});
+        MatrixCursor matrixCursor = new MatrixCursor(new String[]{"subject", "_id"});
 
         for (String[] result : results) {
             try {
-                matrixCursor.addRow(new String[]{result[0], String.valueOf(groupCursor.getInt(0)), result[1]});
+                matrixCursor.addRow(new String[]{result[0], String.valueOf(groupCursor.getInt(0))});
             } catch (Exception e) {
                 ZLog.logException(e);
             }
