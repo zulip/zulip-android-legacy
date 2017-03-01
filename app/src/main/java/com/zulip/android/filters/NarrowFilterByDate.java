@@ -29,15 +29,29 @@ public class NarrowFilterByDate implements NarrowFilter {
             return new NarrowFilterByDate[size];
         }
     };
-    private Date date = new Date();
     private static Calendar calendar = Calendar.getInstance();
     private static Calendar calendar2 = Calendar.getInstance();
+    private Date date = new Date();
 
     public NarrowFilterByDate() {
     }
 
     public NarrowFilterByDate(Date date) {
         this.date = date;
+    }
+
+    /**
+     * Checks two dates are of same day or not
+     *
+     * @param date1 Date date1 to be compared with date2
+     * @param date2 Date date2 to be compared with date1
+     * @return boolean
+     */
+    private static boolean isSameDay(Date date1, Date date2) {
+        calendar.setTime(date1);
+        calendar2.setTime(date2);
+        return calendar.get(Calendar.YEAR) == calendar2.get(Calendar.YEAR) &&
+                calendar.get(Calendar.DAY_OF_YEAR) == calendar2.get(Calendar.DAY_OF_YEAR);
     }
 
     public int describeContents() {
@@ -115,19 +129,5 @@ public class NarrowFilterByDate implements NarrowFilter {
     @Override
     public String toString() {
         return "{}";
-    }
-
-    /**
-     * Checks two dates are of same day or not
-     *
-     * @param date1 Date date1 to be compared with date2
-     * @param date2 Date date2 to be compared with date1
-     * @return boolean
-     */
-    private static boolean isSameDay(Date date1, Date date2) {
-        calendar.setTime(date1);
-        calendar2.setTime(date2);
-        return calendar.get(Calendar.YEAR) == calendar2.get(Calendar.YEAR) &&
-                calendar.get(Calendar.DAY_OF_YEAR) == calendar2.get(Calendar.DAY_OF_YEAR);
     }
 }

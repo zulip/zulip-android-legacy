@@ -26,10 +26,10 @@ import com.zulip.android.util.RemoveViewsOnScroll;
 
 public class TopSnackBar {
 
-    private Context context;
     public static final int LENGTH_SHORT = 2000; //2 seconds
     public static final int LENGTH_LONG = 4000; //4 seconds
     public static final int LENGTH_INDEFINITE = -1; //shows until it manually dismissed
+    private Context context;
     private LinearLayoutManager linearLayoutManager;
     private RecyclerMessageAdapter adapter;
     private TextView tvText;
@@ -37,17 +37,16 @@ public class TopSnackBar {
     private CountDownTimer countDownTimer;
 
     private boolean isShown = false;
-
-    public LinearLayout getLinearLayout() {
-        return linearLayout;
-    }
-
     private LinearLayout linearLayout;
 
     public TopSnackBar(Context context) {
         linearLayout = new LinearLayout(context);
         this.context = context;
         make();
+    }
+
+    public LinearLayout getLinearLayout() {
+        return linearLayout;
     }
 
     /**
@@ -59,11 +58,12 @@ public class TopSnackBar {
 
     /**
      * Show snackBar
+     *
      * @param topMargin margin of top
-     * @param message to be shown in snackBar
-     * @param duration auto dismiss duration
+     * @param message   to be shown in snackBar
+     * @param duration  auto dismiss duration
      */
-    public void show(int topMargin,String message ,int duration) {
+    public void show(int topMargin, String message, int duration) {
         setText(message);
         if (isShown()) {
             countDownTimer.cancel();
@@ -82,6 +82,7 @@ public class TopSnackBar {
 
     /**
      * start timer to dismiss after duration
+     *
      * @param duration time after which it is automatically dismissed
      */
     private void startTimer(int duration) {
@@ -159,7 +160,7 @@ public class TopSnackBar {
         tvText = new TextView(context);
         tvText.setLayoutParams(tvLayoutParams);
         tvText.setTextColor(ContextCompat.getColor(context, R.color.top_snackbar_text_color));
-        tvText.setPadding(24,0,0,0);
+        tvText.setPadding(24, 0, 0, 0);
         linearLayout.addView(tvText);
 
         showButton = new Button(context);
@@ -175,6 +176,7 @@ public class TopSnackBar {
 
     /**
      * Get status of snackBar
+     *
      * @return whether snackBar is in view or not currently
      */
     public boolean isShown() {
@@ -183,6 +185,7 @@ public class TopSnackBar {
 
     /**
      * Set status of snackBar
+     *
      * @param shown is true if snackBar is in view currently
      */
     private void setShown(boolean shown) {
@@ -198,6 +201,7 @@ public class TopSnackBar {
 
     /**
      * Fet LayoutParams of LinearLayout
+     *
      * @return LayoutParams
      */
     private CoordinatorLayout.LayoutParams getLLLayoutParams() {
@@ -206,6 +210,7 @@ public class TopSnackBar {
 
     /**
      * Set LinearLayoutManager
+     *
      * @param linearLayoutManager LinearLayoutManager
      */
     public void setMessagesLayoutManager(LinearLayoutManager linearLayoutManager) {
@@ -215,6 +220,7 @@ public class TopSnackBar {
 
     /**
      * Set Adapter
+     *
      * @param adapter RecyclerMessageAdapter
      */
     public void setMessagesAdapter(RecyclerMessageAdapter adapter) {
@@ -223,6 +229,7 @@ public class TopSnackBar {
 
     /**
      * Set Message to SnackBar
+     *
      * @param quantityString message
      */
     public void setText(String quantityString) {
@@ -231,7 +238,8 @@ public class TopSnackBar {
 
     /**
      * Set Actions button attributes
-     * @param string button text
+     *
+     * @param string          button text
      * @param onClickListener of button
      */
     public void setAction(int string, View.OnClickListener onClickListener) {

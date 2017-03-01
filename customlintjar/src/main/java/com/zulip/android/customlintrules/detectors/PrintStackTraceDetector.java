@@ -34,7 +34,7 @@ public class PrintStackTraceDetector extends Detector
     private static final String ISSUE_ID = "ZLog";
     private static final String ISSUE_DESCRIPTION = "Use `ZLog.logException(e);` instead of `e.printStackTrace();` ";
     private static final String ISSUE_EXPLANATION = "`ZLog.logException(e);` print stacktrace as well as report that to the Crashlytics. " +
-            "It provides real-time crash reporting, down to the exact line of code that caused the crash and we can start work as soon as it is reported. "+
+            "It provides real-time crash reporting, down to the exact line of code that caused the crash and we can start work as soon as it is reported. " +
             "All logged exceptions are appeared as 'non-fatal' issue in the Fabric dashboard. It helps in knowing when app gone to unexpected state like" +
             " malformed network data, misunderstanding of requirements, a logic error etc. Whenever exception is caught it prevent app to crash and continue the app flow(as well as report to Dashboard)";
     private static final Category ISSUE_CATEGORY = Category.USABILITY;

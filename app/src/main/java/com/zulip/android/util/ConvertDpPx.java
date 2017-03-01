@@ -15,9 +15,9 @@ public class ConvertDpPx {
      * @param dp A value in dp (density independent pixels) unit. Which we need to convert into pixels
      * @return A float value to represent px equivalent to dp depending on device density
      */
-    public static int convertDpToPixel(float dp){
+    public static int convertDpToPixel(float dp) {
         DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
-        float px = dp * ((float)metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
+        float px = dp * ((float) metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
         return Math.round(px);
     }
 
@@ -27,9 +27,9 @@ public class ConvertDpPx {
      * @param px A value in px (pixels) unit. Which we need to convert into db
      * @return A float value to represent dp equivalent to px value
      */
-    public static float convertPixelsToDp(float px){
+    public static float convertPixelsToDp(float px) {
         DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
-        float dp = px / ((float)metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
+        float dp = px / ((float) metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
         return dp;
     }
 }

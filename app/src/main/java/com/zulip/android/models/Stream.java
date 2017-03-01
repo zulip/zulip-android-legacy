@@ -140,6 +140,48 @@ public class Stream {
         }
     }
 
+    /**
+     * Checks stream name is valid or not
+     *
+     * @param app        ZulipApp
+     * @param streamName Checks this stream name is valid or not
+     * @return null if stream does not exist else cursor
+     */
+    public static Stream streamCheckBeforeMessageSend(ZulipApp app, CharSequence streamName) {
+        if (streamName == null) {
+            return null;
+        }
+        try {
+            return app.getDao(Stream.class)
+                    .queryBuilder().where()
+                    .eq(Stream.NAME_FIELD, new SelectArg(Stream.NAME_FIELD, streamName)).queryForFirst();
+        } catch (SQLException e) {
+            ZLog.logException(e);
+        }
+        return null;
+    }
+
+    /**
+     * This function returns the last message read in {@param streamName} stream.
+     *
+     * @param app        {@link ZulipApp}
+     * @param streamName name of stream
+     * @return last message {@link Message} read
+     */
+    public static Message getLastMessageRead(ZulipApp app, String streamName) {
+        try {
+            Dao<Message, Integer> messageDao = app.getDatabaseHelper().getDao(Message.class);
+
+            // query for message in given stream and orderby timestamp decreasingly
+            return messageDao.queryBuilder().orderBy(Message.TIMESTAMP_FIELD, false)
+                    .where().eq(Message.RECIPIENTS_FIELD, new SelectArg(Message.RECIPIENTS_FIELD, streamName))
+                    .queryForFirst();
+        } catch (SQLException e) {
+            ZLog.logException(e);
+        }
+        return null;
+    }
+
     public String getName() {
         return name;
     }
@@ -153,6 +195,10 @@ public class Stream {
 
     public Boolean getInHomeView() {
         return inHomeView;
+    }
+
+    public void setInHomeView(boolean inHomeView) {
+        this.inHomeView = inHomeView;
     }
 
     public Boolean getInviteOnly() {
@@ -191,57 +237,12 @@ public class Stream {
         return id;
     }
 
-    /**
-     * Checks stream name is valid or not
-     * @param app ZulipApp
-     * @param streamName Checks this stream name is valid or not
-     * @return null if stream does not exist else cursor
-     */
-    public static Stream streamCheckBeforeMessageSend(ZulipApp app, CharSequence streamName) {
-        if (streamName == null) {
-            return null;
-        }
-        try {
-            return app.getDao(Stream.class)
-                    .queryBuilder().where()
-                    .eq(Stream.NAME_FIELD, new SelectArg(Stream.NAME_FIELD, streamName)).queryForFirst();
-        } catch (SQLException e) {
-            ZLog.logException(e);
-        }
-        return null;
-    }
-
     public void setFetchColor(String fetchedColor) {
         this.fetchedColor = fetchedColor;
         getParsedColor();
     }
 
-    public void setInHomeView(boolean inHomeView) {
-        this.inHomeView = inHomeView;
-    }
-
     public void setDefaultColor() {
         this.parsedColor = DEFAULT_COLOR;
-    }
-
-    /**
-     * This function returns the last message read in {@param streamName} stream.
-     *
-     * @param app {@link ZulipApp}
-     * @param streamName name of stream
-     * @return last message {@link Message} read
-     */
-    public static Message getLastMessageRead(ZulipApp app, String streamName) {
-        try {
-            Dao<Message, Integer> messageDao = app.getDatabaseHelper().getDao(Message.class);
-
-            // query for message in given stream and orderby timestamp decreasingly
-            return messageDao.queryBuilder().orderBy(Message.TIMESTAMP_FIELD, false)
-                    .where().eq(Message.RECIPIENTS_FIELD, new SelectArg(Message.RECIPIENTS_FIELD, streamName))
-                    .queryForFirst();
-        } catch (SQLException e) {
-            ZLog.logException(e);
-        }
-        return null;
     }
 }

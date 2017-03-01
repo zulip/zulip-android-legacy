@@ -176,7 +176,7 @@ public class Person {
      * It is used to get current user person {@link Person} object if it exists in the database
      * or create a new object using {@param email}.
      *
-     * @param app {@link ZulipApp}
+     * @param app   {@link ZulipApp}
      * @param email Person email id {@link Person#email}
      * @return {@link Person} object
      */
@@ -194,13 +194,13 @@ public class Person {
      * with no cache.
      * Note: always call this method with valid Person id {@link Person#id} passed as argument.
      *
-     * @param app Zulip god object {@link ZulipApp}
-     * @param email person email {@link Person#email}
-     * @param name person name {@link Person#name}
+     * @param app       Zulip god object {@link ZulipApp}
+     * @param email     person email {@link Person#email}
+     * @param name      person name {@link Person#name}
      * @param avatarURL person avatar url {@link Person#avatarURL}
-     * @param personId person id {@link Person#id}
+     * @param personId  person id {@link Person#id}
      * @return {@link Person} object
-     * */
+     */
     public static Person getOrUpdate(ZulipApp app, String email, String name,
                                      String avatarURL, int personId) {
         return getOrUpdate(app, email, name, avatarURL, personId, null);

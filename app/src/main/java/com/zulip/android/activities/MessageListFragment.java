@@ -779,6 +779,23 @@ public class MessageListFragment extends Fragment implements MessageListener {
         return this.messageIndex.get(id);
     }
 
+    public void showLatestMessages() {
+        if (listHasMostRecent()) {
+            recyclerView.scrollToPosition(adapter.getItemCount() - 1);
+        } else {
+            loadMessageId(app.getMaxMessageId());
+        }
+    }
+
+    public boolean scrolledToLastMessage() {
+        Object object = adapter.getItem(linearLayoutManager.findLastVisibleItemPosition());
+        return object instanceof Message && (((Message) object).getId() >= app.getMaxMessageId() - 2);
+    }
+
+    public RecyclerMessageAdapter getAdapter() {
+        return this.adapter;
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated to
@@ -797,22 +814,5 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
         void setLayoutBehaviour(LinearLayoutManager linearLayoutManager, RecyclerMessageAdapter adapter);
 
-    }
-
-    public void showLatestMessages() {
-        if (listHasMostRecent()) {
-            recyclerView.scrollToPosition(adapter.getItemCount() - 1);
-        } else {
-            loadMessageId(app.getMaxMessageId());
-        }
-    }
-
-    public boolean scrolledToLastMessage() {
-        Object object = adapter.getItem(linearLayoutManager.findLastVisibleItemPosition());
-        return object instanceof Message && (((Message) object).getId() >= app.getMaxMessageId() - 2);
-    }
-
-    public RecyclerMessageAdapter getAdapter() {
-        return this.adapter;
     }
 }

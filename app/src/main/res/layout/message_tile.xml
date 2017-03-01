@@ -46,7 +46,8 @@
                 android:text="@string/message_edited_tag"
                 android:textColor="@color/colorTextTertiary"
                 android:textSize="12sp"
-                android:visibility="gone"/>
+                android:visibility="gone" />
+
             <TextView
                 android:id="@+id/timestamp"
                 android:layout_width="wrap_content"
@@ -62,11 +63,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
+            android:paddingBottom="8dp"
             android:paddingEnd="16dp"
             android:paddingLeft="8dp"
             android:paddingRight="16dp"
             android:paddingStart="8dp"
-            android:paddingBottom="8dp"
             tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam mollis pretium purus, faucibus accumsan enim placerat non. " />
 
         <FrameLayout
