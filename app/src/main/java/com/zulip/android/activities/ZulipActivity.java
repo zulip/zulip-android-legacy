@@ -668,9 +668,7 @@ public class ZulipActivity extends BaseActivity implements
         Callable<Cursor> steamCursorGenerator = new Callable<Cursor>() {
             @Override
             public Cursor call() throws Exception {
-                int pointer = app.getPointer();
-                String query = "SELECT s.id as _id,  s.name, s.color, count(case when m.id > " + pointer + " or m." + Message.MESSAGE_READ_FIELD
-                        + " = 0 then 1 end) as " + ExpandableStreamDrawerAdapter.UNREAD_TABLE_NAME
+                String query = "SELECT s.id as _id,  s.name, s.color"
                         + " FROM streams as s LEFT JOIN messages as m ON s.id=m.stream ";
                 String selectArg = null;
                 if (!etSearchStream.getText().toString().equals("") && !etSearchStream.getText().toString().isEmpty()) {
@@ -1192,11 +1190,11 @@ public class ZulipActivity extends BaseActivity implements
      */
     private void setupListViewAdapter() {
         streamsDrawerAdapter = null;
-        String[] groupFrom = {Stream.NAME_FIELD, Stream.COLOR_FIELD, ExpandableStreamDrawerAdapter.UNREAD_TABLE_NAME};
-        int[] groupTo = {R.id.name, R.id.stream_dot, R.id.unread_group};
+        String[] groupFrom = {Stream.NAME_FIELD, Stream.COLOR_FIELD};
+        int[] groupTo = {R.id.name, R.id.stream_dot};
         // Comparison of data elements and View
-        String[] childFrom = {Message.SUBJECT_FIELD, ExpandableStreamDrawerAdapter.UNREAD_TABLE_NAME};
-        int[] childTo = {R.id.name_child, R.id.unread_child};
+        String[] childFrom = {Message.SUBJECT_FIELD};
+        int[] childTo = {R.id.name_child};
         final ExpandableListView streamsDrawer = (ExpandableListView) findViewById(R.id.streams_drawer);
         streamsDrawer.setGroupIndicator(null);
         try {
