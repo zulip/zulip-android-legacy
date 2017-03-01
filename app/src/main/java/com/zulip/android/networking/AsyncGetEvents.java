@@ -222,7 +222,8 @@ public class AsyncGetEvents extends Thread {
                     @Override
                     public void run() {
                         mActivity.getPeopleAdapter().refresh();
-                        mActivity.onReadyToDisplay(true);
+                        // fetch 1000 messages on startup
+                        mActivity.onReadyToDisplay(true, true);
                         mActivity.checkAndSetupStreamsDrawer();
                         if (mActivity.commonProgressDialog != null && mActivity.commonProgressDialog.isShowing()) {
                             mActivity.commonProgressDialog.dismiss();
@@ -292,7 +293,7 @@ public class AsyncGetEvents extends Thread {
                             mActivity.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mActivity.onReadyToDisplay(false);
+                                    mActivity.onReadyToDisplay(false, false);
                                 }
                             });
                         }
@@ -465,7 +466,7 @@ public class AsyncGetEvents extends Thread {
         mActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mActivity.onReadyToDisplay(true);
+                mActivity.onReadyToDisplay(true, false);
                 mActivity.checkAndSetupStreamsDrawer();
             }
         });
@@ -487,7 +488,7 @@ public class AsyncGetEvents extends Thread {
         mActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mActivity.onReadyToDisplay(true);
+                mActivity.onReadyToDisplay(true, false);
                 mActivity.checkAndSetupStreamsDrawer();
             }
         });

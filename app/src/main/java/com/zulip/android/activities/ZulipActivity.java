@@ -1847,7 +1847,7 @@ public class ZulipActivity extends BaseActivity implements
         narrowedList = MessageListFragment.newInstance(filter);
         // Push to the back stack if we are not already narrowed
         pushListFragment(narrowedList, NARROW);
-        narrowedList.onReadyToDisplay(true);
+        narrowedList.onReadyToDisplay(true, false);
         showView(appBarLayout);
     }
 
@@ -2244,10 +2244,10 @@ public class ZulipActivity extends BaseActivity implements
 
     }
 
-    public void onReadyToDisplay(boolean registered) {
-        homeList.onReadyToDisplay(registered);
+    public void onReadyToDisplay(boolean registered, boolean startup) {
+        homeList.onReadyToDisplay(registered, startup);
         if (narrowedList != null) {
-            narrowedList.onReadyToDisplay(registered);
+            narrowedList.onReadyToDisplay(registered, startup);
         }
     }
 
