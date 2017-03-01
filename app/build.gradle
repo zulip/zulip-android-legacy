@@ -43,7 +43,7 @@ android {
     buildTypes {
         debug {
             applicationIdSuffix '.dev'
-            manifestPlaceholders = [ fabricKey : ""]
+            manifestPlaceholders = [fabricKey: ""]
             ext.enableCrashlytics = false
             buildConfigField "String", "GOOGLE_CLIENT_ID", "\"835904834568-77mtr5mtmpgspj9b051del9i9r5t4g4n.apps.googleusercontent.com\""
         }

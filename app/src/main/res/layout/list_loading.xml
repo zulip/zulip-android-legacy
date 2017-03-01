@@ -32,10 +32,10 @@ per http://pivotallabs.com/android-tidbits-6-22-2011-hiding-header-views/
         <ImageView
             android:layout_width="20dp"
             android:layout_height="20dp"
-            android:layout_centerVertical="true"
             android:layout_centerHorizontal="true"
-            android:src="@drawable/zulip_notification"
-            android:contentDescription="@string/progress_bar_description" />
+            android:layout_centerVertical="true"
+            android:contentDescription="@string/progress_bar_description"
+            android:src="@drawable/zulip_notification" />
     </RelativeLayout>
 
 </LinearLayout>

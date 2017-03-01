@@ -8,25 +8,25 @@ import java.util.List;
 
 /**
  * This class is used to deserialize the subscription type events {@link EventsBranch.BranchType#SUBSCRIPTIONS}.
- *
+ * <p>
  * example : Add operation  {"subscriptions":[{"desktop_notifications":true,"description":"For sales discussion",
- *      "color":"#f4ae55","name":"sales","stream_id":11,"subscribers":["emailgateway@zulip.com",
- *      "webhook-bot@zulip.com","welcome-bot@zulip.com","notification-bot@zulip.com",
- *      "new-user-bot@zulip.com","nagios-send-bot@zulip.com","nagios-receive-bot@zulip.com",
- *      "error-bot@zulip.com","default-bot@zulip.com","iago@zulip.com","prospero@zulip.com",
- *      "othello@zulip.com","AARON@zulip.com"],"invite_only":false,"audible_notifications":true,"email_address":"sales+51d742945283fef74dc08bdd4d251dde@localhost:9991",
- *      "pin_to_top":false,"in_home_view":true}],"type":"subscription","id":14,"op":"add"}
- *
+ * "color":"#f4ae55","name":"sales","stream_id":11,"subscribers":["emailgateway@zulip.com",
+ * "webhook-bot@zulip.com","welcome-bot@zulip.com","notification-bot@zulip.com",
+ * "new-user-bot@zulip.com","nagios-send-bot@zulip.com","nagios-receive-bot@zulip.com",
+ * "error-bot@zulip.com","default-bot@zulip.com","iago@zulip.com","prospero@zulip.com",
+ * "othello@zulip.com","AARON@zulip.com"],"invite_only":false,"audible_notifications":true,"email_address":"sales+51d742945283fef74dc08bdd4d251dde@localhost:9991",
+ * "pin_to_top":false,"in_home_view":true}],"type":"subscription","id":14,"op":"add"}
+ * <p>
  * UPDATE operation {"name":"sales","id":15,"property":"color","type":"subscription",
- *      "email":"AARON@zulip.com","value":"#c2c2c2","op":"update"}
- *
+ * "email":"AARON@zulip.com","value":"#c2c2c2","op":"update"}
+ * <p>
  * REMOVE operation {"subscriptions":[{"stream_id":7,"name":"design"}],"type":"subscription","id":16,"op":"remove"}
- *
+ * <p>
  * {@link SubscriptionWrapper#operation} signifies the operation of the event
  * namely : add {@link SubscriptionWrapper#OPERATION_ADD},
  * update {@link SubscriptionWrapper#OPERATION_UPDATE} and
  * remove {@link SubscriptionWrapper#OPERATION_REMOVE}.
- *
+ * <p>
  * {@link SubscriptionWrapper#property} holds the property updated and {@link SubscriptionWrapper#value}
  * holds the updated value of this property.
  */

@@ -11,11 +11,11 @@ import java.util.List;
 
 /**
  * This class is used to deserialize the update_message type events {@link EventsBranch.BranchType#UPDATE_MESSAGE}.
- *
+ * <p>
  * example: {"rendered_content":"<p>(deleted</p>","sender":"example@gmail.com",
- *      "edit_timestamp":1485954038,"orig_content":"(deleted)","message_ids":[142650],
- *      "content":"(deleted","orig_rendered_content":"<p>(deleted)</p>","flags":["read"],"id":31,
- *      "type":"update_message","message_id":142650}
+ * "edit_timestamp":1485954038,"orig_content":"(deleted)","message_ids":[142650],
+ * "content":"(deleted","orig_rendered_content":"<p>(deleted)</p>","flags":["read"],"id":31,
+ * "type":"update_message","message_id":142650}
  */
 
 public class UpdateMessageWrapper extends EventsBranch {

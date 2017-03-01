@@ -5,9 +5,9 @@ import com.zulip.android.models.Presence;
 
 /**
  * This class is used to deserialize the presence type event {@link EventsBranch.BranchType#PRESENCE}
- *
+ * <p>
  * example : {"id":0,"server_timestamp":1485171896.1950330734,"type":"presence","email":"example@gmail.com",
- *      "presence":{"ZulipAndroid":{"status":"active","timestamp":1485171896,"client":"ZulipAndroid","pushable":null}}}
+ * "presence":{"ZulipAndroid":{"status":"active","timestamp":1485171896,"client":"ZulipAndroid","pushable":null}}}
  */
 public class PresenceWrapper extends EventsBranch {
 

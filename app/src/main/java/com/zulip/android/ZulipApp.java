@@ -296,10 +296,12 @@ public class ZulipApp extends Application {
                                 if (SubscriptionWrapper.OPERATION_ADD.equalsIgnoreCase(json.getAsJsonObject().get("op").getAsString()) ||
                                         SubscriptionWrapper.OPERATION_REMOVE.equalsIgnoreCase(json.getAsJsonObject().get("op").getAsString()) ||
                                         SubscriptionWrapper.OPERATION_UPDATE.equalsIgnoreCase(json.getAsJsonObject().get("op").getAsString())) {
-                                    Type type = new TypeToken<SubscriptionWrapper<Stream>>(){}.getType();
+                                    Type type = new TypeToken<SubscriptionWrapper<Stream>>() {
+                                    }.getType();
                                     return nestedGson.fromJson(json, type);
                                 } else {
-                                    Type type = new TypeToken<SubscriptionWrapper<String>>(){}.getType();
+                                    Type type = new TypeToken<SubscriptionWrapper<String>>() {
+                                    }.getType();
                                     return nestedGson.fromJson(json, type);
                                 }
                             }

@@ -21,7 +21,7 @@ public class CommonProgressDialog {
         progressDialog.show();
     }
 
-    public void showWithMessage(String message){
+    public void showWithMessage(String message) {
         setMessage(message);
         show();
     }

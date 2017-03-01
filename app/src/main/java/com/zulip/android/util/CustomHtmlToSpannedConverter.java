@@ -48,13 +48,11 @@ import android.text.style.TypefaceSpan;
 import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
 import android.text.util.Linkify;
-import android.util.DisplayMetrics;
 import android.util.Pair;
 
 import com.zulip.android.R;
 import com.zulip.android.ZulipApp;
 import com.zulip.android.models.Person;
-import com.zulip.android.models.Stream;
 
 import org.ccil.cowan.tagsoup.Parser;
 import org.xml.sax.Attributes;
@@ -70,8 +68,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-
-import static android.R.attr.id;
 
 public class CustomHtmlToSpannedConverter implements ContentHandler {
 

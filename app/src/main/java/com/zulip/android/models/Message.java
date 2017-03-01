@@ -82,7 +82,7 @@ public class Message {
     @SerializedName("client")
     private String client;
 
-//    @SerializedName("type")
+    //    @SerializedName("type")
 //    private String _internal_type;
     @SerializedName("content_type")
     private String contentType;

@@ -24,7 +24,6 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
-
 /*
  * rules for including "lint.jar" in aar
  */
@@ -37,7 +36,7 @@ dependencies {
 }
 
 task copyLintJar(type: Copy) {
-    from (configurations.lintJarImport) {
+    from(configurations.lintJarImport) {
         rename {
             String fileName ->
                 'lint.jar'

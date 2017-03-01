@@ -39,7 +39,7 @@ public class AsyncDevGetEmails extends ZulipAsyncPushTask {
                 Intent intent = new Intent(context, DevAuthActivity.class);
                 intent.putExtra(EMAIL_JSON, result);
                 context.startActivity(intent);
-                ((LoginActivity)context).finish();
+                ((LoginActivity) context).finish();
             }
         } catch (JSONException e) {
             ZLog.logException(e);
