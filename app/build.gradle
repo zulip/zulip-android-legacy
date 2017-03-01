@@ -25,8 +25,8 @@ android {
         //noinspection OldTargetApi
         targetSdkVersion 23
 
-        versionCode 26
-        versionName "1.2.0"
+        versionCode 27
+        versionName "1.2.1"
 
         testApplicationId "com.zulip.android.test"
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
