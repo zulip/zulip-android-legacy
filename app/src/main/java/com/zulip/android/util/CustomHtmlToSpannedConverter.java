@@ -103,7 +103,7 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
         mEmojiGetter = emojiGetter;
         mBaseUri = baseUri;
         userMentionColor = ContextCompat.getColor(context, R.color.dark_red);
-        userMentionSelfColor = ContextCompat.getColor(context, R.color.dark_blue);
+        userMentionSelfColor = ContextCompat.getColor(context, R.color.bright_blue);
     }
 
     private static void handleP(SpannableStringBuilder text) {
