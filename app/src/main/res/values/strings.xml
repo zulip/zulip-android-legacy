@@ -154,7 +154,6 @@
     <string name="no_edit">No edits detected</string>
     <string name="copy_message_fetch">Copying message to clipboard</string>
     <string name="copy_failed">Copying to clipboard failed</string>
-    <string name="try_again_error_msg">Something went wrong, try again</string>
     <string name="empty_string"> </string>
     <string name="cancel">Cancel</string>
     <string name="todays_message">Today's Messages</string>
@@ -165,5 +164,6 @@
     <string name="my_stream">MyStream</string>
     <string name="subject">Subject</string>
     <string name="text_view">TextView</string>
+    <string name="try_again_error_msg">Something went wrong, try again</string>
     <string name="crop">CROP</string>
 </resources>
