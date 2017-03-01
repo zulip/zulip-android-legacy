@@ -19,7 +19,7 @@
         android:layout_gravity="center_vertical"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="48dp"
-        android:text="MyStream"
+        android:text="@string/my_stream"
         android:textColor="@color/colorTextPrimary"
         android:textSize="18sp" />
 

@@ -19,5 +19,5 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:layout_marginLeft="8dp"
-        android:text="TextView" />
+        android:text="@string/text_view" />
 </LinearLayout>

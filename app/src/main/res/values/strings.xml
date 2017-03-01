@@ -43,7 +43,6 @@
     <string name="arrow">❯</string>
     <string name="toast_no_internet_connection">No internet connection</string>
     <string name="invalid_url">Invalid URL</string>
-    <string name="subject">Topic</string>
     <string name="reply_to_sender">Reply to sender</string>
     <string name="google_app_login_failed">Google apps login failed for unknown reasons, please contact your distributor.</string>
     <string name="signing_in">Signing in…</string>
@@ -156,4 +155,15 @@
     <string name="copy_message_fetch">Copying message to clipboard</string>
     <string name="copy_failed">Copying to clipboard failed</string>
     <string name="try_again_error_msg">Something went wrong, try again</string>
+    <string name="empty_string"> </string>
+    <string name="cancel">Cancel</string>
+    <string name="todays_message">Today's Messages</string>
+    <string name="no_message_to_display">Sorry, no messages to display!</string>
+    <string name="message_here">Message Here</string>
+    <string name="sender_name">Sender name</string>
+    <string name="social">Social</string>
+    <string name="my_stream">MyStream</string>
+    <string name="subject">Subject</string>
+    <string name="text_view">TextView</string>
+    <string name="crop">CROP</string>
 </resources>

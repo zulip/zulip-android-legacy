@@ -37,7 +37,7 @@
         android:layout_toEndOf="@+id/stream_dot"
         android:layout_toRightOf="@+id/stream_dot"
         android:padding="5dp"
-        android:text="MyStream"
+        android:text="@string/my_stream"
         android:textColor="@color/colorTextPrimary"
         android:textSize="18sp" />
 </RelativeLayout>

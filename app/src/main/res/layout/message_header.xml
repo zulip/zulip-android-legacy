@@ -27,7 +27,7 @@
         android:layout_height="match_parent"
         android:background="@drawable/triangle"
         android:padding="4dp"
-        android:text=" " />
+        android:text="@string/empty_string" />
 
     <TextView
         android:id="@+id/instance"

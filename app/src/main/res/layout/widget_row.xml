@@ -15,7 +15,7 @@
         android:layout_alignParentTop="true"
         android:paddingBottom="5dp"
         android:paddingTop="5dp"
-        android:text="Social"
+        android:text="@string/social"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         android:textColor="@color/indigo_material_500" />
 
@@ -27,7 +27,7 @@
         android:layout_alignParentStart="true"
         android:layout_below="@+id/widget_header"
         android:paddingTop="3dp"
-        android:text="Sender name"
+        android:text="@string/sender_name"
         android:textColor="@android:color/black" />
 
     <TextView
@@ -39,7 +39,7 @@
         android:layout_below="@+id/widget_sendername"
         android:paddingBottom="3dp"
         android:paddingTop="3dp"
-        android:text="Message Here"
+        android:text="@string/message_here"
         android:textColor="@android:color/black" />
 
     <TextView
