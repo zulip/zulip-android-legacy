@@ -156,4 +156,8 @@
     <string name="copy_message_fetch">Copying message to clipboard</string>
     <string name="copy_failed">Copying to clipboard failed</string>
     <string name="try_again_error_msg">Something went wrong, try again</string>
+    <string name="bankruptcy">Declare bankruptcy</string>
+    <string name="bankruptcy_alert_message">Are you sure you want to skip all messages?</string>
+    <string name="bankruptcy_progress_dialog">Skipping messages</string>
+    <string name="bankruptcy_confirmation_msg">Marked all messages as read!</string>
 </resources>

@@ -33,6 +33,11 @@
         android:title="@string/switch_theme" />
 
     <item
+        android:id="@+id/bankruptcy"
+        android:title="@string/bankruptcy" />
+
+
+    <item
         android:id="@+id/logout"
         android:title="@string/logout" />
     <item

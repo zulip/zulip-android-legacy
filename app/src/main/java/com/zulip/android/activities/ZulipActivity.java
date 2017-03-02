@@ -2101,6 +2101,9 @@ public class ZulipActivity extends BaseActivity implements
                 datePickerDialog.getDatePicker().setMaxDate(new Date().getTime());
                 datePickerDialog.show();
                 break;
+            case R.id.bankruptcy:
+                declareBankruptcy();
+                break;
             case R.id.logout:
                 logout();
                 break;
@@ -2111,6 +2114,30 @@ public class ZulipActivity extends BaseActivity implements
                 return super.onOptionsItemSelected(item);
         }
         return true;
+    }
+
+    private void declareBankruptcy() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final CommonProgressDialog progressDialog = new CommonProgressDialog(this);
+        progressDialog.showWithMessage(getString(R.string.bankruptcy_progress_dialog));
+        builder.setMessage(R.string.bankruptcy_alert_message)
+                .setTitle(R.string.bankruptcy);
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // fetch all messages past current pointer
+                if (narrowedList != null) {
+                    onBackPressed();
+                }
+                homeList.fetchAllMessages(0, progressDialog);
+            }
+        });
+        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+               // do nothing
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     /**

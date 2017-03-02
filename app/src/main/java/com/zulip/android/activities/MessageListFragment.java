@@ -26,7 +26,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.stmt.QueryBuilder;
+import com.j256.ormlite.stmt.UpdateBuilder;
 import com.j256.ormlite.stmt.Where;
 import com.zulip.android.R;
 import com.zulip.android.ZulipApp;
@@ -65,6 +67,7 @@ import retrofit2.Response;
  * initiated and called by {@link ZulipActivity}
  */
 public class MessageListFragment extends Fragment implements MessageListener {
+    public static final String LOG_TAG = MessageListFragment.class.getSimpleName();
     private static final String PARAM_FILTER = "filter";
     public NarrowFilter filter;
     public ZulipApp app;
@@ -270,11 +273,13 @@ public class MessageListFragment extends Fragment implements MessageListener {
             Log.i("onReadyToDisplay", "just a resume");
             return;
         }
-
         initializeNarrow();
-
-        // 1000 messages in a loop on startup
-        fetch(startup);
+        if (startup) {
+            // fetch 1000 messages after pointer on startup
+            fetch(app.getPointer(), 1000);
+        } else {
+            fetch(app.getPointer(), 100);
+        }
         initialized = true;
     }
 
@@ -295,10 +300,9 @@ public class MessageListFragment extends Fragment implements MessageListener {
         }
 
         initializeNarrow();
-        fetch(messageId);
+        fetch(messageId, 100);
         initialized = true;
     }
-
 
     private void showEmptyView() {
         Log.d("ErrorRecieving", "No Messages found for current list" + ((filter != null) ? ":" + filter.getTitle() : ""));
@@ -306,7 +310,13 @@ public class MessageListFragment extends Fragment implements MessageListener {
         emptyTextView.setVisibility(View.VISIBLE);
     }
 
-    private void fetch(boolean onStartup) {
+    /**
+     * Fetches all messages past current pointer and calls {@link #skipAllMessages()}
+     * to marks messages as read, update pointer and scroll to latest message.
+     *
+     * @param messagesFetched number of messages fetched in preceding call
+     */
+    public void fetchAllMessages(final int messagesFetched, final CommonProgressDialog dialog) {
         final AsyncGetOldMessages oldMessagesReq = new AsyncGetOldMessages(this);
         oldMessagesReq.setCallback(new ZulipAsyncPushTask.AsyncTaskCompleteListener() {
             @Override
@@ -314,7 +324,15 @@ public class MessageListFragment extends Fragment implements MessageListener {
                 loadingMessages = false;
                 adapter.setHeaderShowing(false);
                 if (result.equals("0")) {
-                    showEmptyView();
+                    skipAllMessages();
+                    dialog.dismiss();
+                    Toast.makeText(getContext(), R.string.bankruptcy_confirmation_msg, Toast.LENGTH_SHORT).show();
+                } else {
+                    try {
+                        fetchAllMessages(messagesFetched + Integer.parseInt(result), dialog);
+                    } catch (NumberFormatException e) {
+                        Log.e(LOG_TAG, "fetchAllMessages()", e);
+                    }
                 }
             }
 
@@ -324,8 +342,52 @@ public class MessageListFragment extends Fragment implements MessageListener {
                 adapter.setHeaderShowing(false);
             }
         });
-        oldMessagesReq.execute(app.getPointer(), LoadPosition.INITIAL, 100,
-                (onStartup ? 1000 : 100), filter);
+        oldMessagesReq.execute(app.getPointer() + messagesFetched, LoadPosition.INITIAL, 0,
+                200, filter);
+    }
+
+    /**
+     * Marks all messages as read, updates pointer and scrolls to last message.
+     */
+    private void skipAllMessages() {
+        // mark all messages as read
+        try {
+            markAllMessagesAsRead();
+        } catch (SQLException e) {
+            Toast.makeText(getContext(), R.string.try_again_error_msg, Toast.LENGTH_SHORT).show();
+            ZLog.logException(e);
+        }
+
+        // sync pointer to latest message
+        int lastMessageId = app.getMaxMessageId();
+        app.syncPointer(lastMessageId);
+
+        // scroll to latest message
+        try {
+            RecyclerMessageAdapter adapter = getAdapter();
+            int lastMsgIndex = adapter.getItemIndex(lastMessageId);
+            if (lastMsgIndex != -1) {
+                recyclerView.scrollToPosition(lastMsgIndex);
+            } else {
+                // when the current narrow doesn't contain the latest message
+                // do nothing
+            }
+        } catch (NullPointerException e) {
+            Toast.makeText(getContext(), R.string.try_again_error_msg, Toast.LENGTH_SHORT).show();
+            ZLog.logException(e);
+        }
+    }
+
+    /**
+     * Marks all messages as read after current pointer.
+     * @throws SQLException
+     */
+    private void markAllMessagesAsRead() throws SQLException {
+        Dao<Message, Integer> messageDao = app.getDao(Message.class);
+        UpdateBuilder builder = messageDao.updateBuilder();
+        builder.where().ge(Message.ID_FIELD, app.getPointer());
+        builder.updateColumnValue(Message.MESSAGE_READ_FIELD, true);
+        builder.update();
     }
 
     /**
@@ -334,8 +396,8 @@ public class MessageListFragment extends Fragment implements MessageListener {
      *
      * @param messageID anchor message id
      */
-    private void fetch(int messageID) {
-        // set the achor for fetching messages as the message clicked
+    private void fetch(int messageID, int messages) {
+        // set the anchor for fetching messages as the message clicked
         this.anchorId = messageID;
 
         final AsyncGetOldMessages oldMessagesReq = new AsyncGetOldMessages(this);
@@ -356,7 +418,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
             }
         });
         oldMessagesReq.execute(messageID, LoadPosition.INITIAL, 100,
-                100, filter);
+                messages, filter);
     }
 
     private void selectPointer() {
