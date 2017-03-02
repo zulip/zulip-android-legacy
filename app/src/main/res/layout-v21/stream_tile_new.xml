@@ -31,6 +31,7 @@
             android:gravity="center"
             android:textColor="@android:color/white"
             android:textAppearance="?android:attr/textAppearanceSmall"
+            android:elevation="2dp"
             android:visibility="visible" />
     </FrameLayout>
 

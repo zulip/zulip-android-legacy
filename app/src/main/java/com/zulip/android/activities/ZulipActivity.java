@@ -20,8 +20,10 @@ import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.database.MergeCursor;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -1268,7 +1270,12 @@ public class ZulipActivity extends BaseActivity implements
                         return true;
                     case R.id.unread_group:
                         TextView unreadGroupTextView = (TextView) view;
+                        // set appropriate size for background drawable
+                        GradientDrawable backgroundGroup = (GradientDrawable) unreadGroupTextView.getBackground();
+                        backgroundGroup.mutate();
                         final String unreadGroupCount = cursor.getString(columnIndex);
+                        int groupSize = findBubbleSize(unreadGroupCount);
+                        backgroundGroup.setSize(groupSize, groupSize);
                         if (unreadGroupCount.equals("0")) {
                             unreadGroupTextView.setVisibility(View.GONE);
                         } else {
@@ -1278,7 +1285,15 @@ public class ZulipActivity extends BaseActivity implements
                         return true;
                     case R.id.unread_child:
                         TextView unreadChildTextView = (TextView) view;
+                        // change background drawable color of child unread count to faint gray
+                        GradientDrawable backgroundChild = (GradientDrawable) unreadChildTextView.getBackground();
+                        backgroundChild.mutate();
+                        backgroundChild.setColor(Color.LTGRAY);
+
+                        // set appropriate size for background of drawable
                         final String unreadChildNumber = cursor.getString(columnIndex);
+                        int childSize = findBubbleSize(unreadChildNumber);
+                        backgroundChild.setSize(childSize, childSize);
                         if (unreadChildNumber.equals("0")) {
                             unreadChildTextView.setVisibility(View.GONE);
                         } else {
@@ -1298,6 +1313,28 @@ public class ZulipActivity extends BaseActivity implements
             }
         });
         streamsDrawer.setAdapter(streamsDrawerAdapter);
+    }
+
+    private int findBubbleSize(String strCounts) {
+        int counts = 0;
+        try {
+            counts = Integer.parseInt(strCounts);
+        } catch (NumberFormatException e) {
+            ZLog.logException(e);
+            return counts;
+        }
+
+        int size;
+        if (counts / 10 == 0) {
+            size = (int) getResources().getDimension(R.dimen.small_bubble);
+        } else if (counts / 100 == 0) {
+            size = (int) getResources().getDimension(R.dimen.medium_bubble);
+        } else if (counts / 1000 == 0) {
+            size = (int) getResources().getDimension(R.dimen.large_bubble);
+        } else {
+            size = (int) getResources().getDimension(R.dimen.extra_large_bubble);
+        }
+        return size;
     }
 
     /**

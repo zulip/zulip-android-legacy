@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="small_bubble">18dp</dimen>
+    <dimen name="medium_bubble">22dp</dimen>
+    <dimen name="large_bubble">26dp</dimen>
+    <dimen name="extra_large_bubble">30dp</dimen>
+</resources>
