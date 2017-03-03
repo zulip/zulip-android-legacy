@@ -19,9 +19,21 @@
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:onClick">onClick</item>
-        <item name="android:padding">8dp</item>
+        <item name="android:padding">18dp</item>
+        <item name="android:textSize">22dp</item>
         <item name="android:layout_gravity">center_horizontal</item>
-        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:layout_marginTop">18dp</item>
+        <item name="android:textColor">#ff0099cc</item>
+    </style>
+
+    <style name="linksxLarge">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:onClick">onClick</item>
+        <item name="android:padding">28dp</item>
+        <item name="android:textSize">28dp</item>
+        <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:layout_marginTop">28dp</item>
         <item name="android:textColor">#ff0099cc</item>
     </style>
 </resources>
