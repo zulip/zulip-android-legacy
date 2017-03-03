@@ -90,6 +90,8 @@ public class Message {
     private String senderShortName;
     @SerializedName("subject_links")
     private List<?> subjectLinks;
+    @SerializedName("flags")
+    private List<String> flags;
     @DatabaseField(foreign = true, columnName = SENDER_FIELD, foreignAutoRefresh = true)
     private Person sender;
     @SerializedName("type")
@@ -116,7 +118,7 @@ public class Message {
     @DatabaseField(foreign = true, columnName = STREAM_FIELD, foreignAutoRefresh = true)
     private Stream stream;
     @DatabaseField(columnName = MESSAGE_READ_FIELD)
-    private Boolean messageRead;
+    private boolean messageRead;
     @DatabaseField(columnDefinition = MESSAGE_EDITED)
     private Boolean hasBeenEdited;
     //endregion
@@ -243,6 +245,9 @@ public class Message {
                             stream = Stream.getByName(app, m.getRecipients());
                         }
                         m.setStream(stream);
+                        if (m.getFlags() != null) {
+                            m.setMessageRead(m.getFlags().contains(Message.MESSAGE_READ_FIELD));
+                        }
                         messageDao.createOrUpdate(m);
                     }
                     return null;
@@ -371,11 +376,11 @@ public class Message {
         return schema;
     }
 
-    public Boolean getMessageRead() {
+    public boolean getMessageRead() {
         return messageRead;
     }
 
-    public void setMessageRead(Boolean messageRead) {
+    public void setMessageRead(boolean messageRead) {
         this.messageRead = messageRead;
     }
 
@@ -756,5 +761,9 @@ public class Message {
         public String getDisplayRecipient() {
             return displayRecipient;
         }
+    }
+
+    public List<String> getFlags() {
+        return this.flags;
     }
 }

@@ -42,7 +42,6 @@ import com.zulip.android.viewholders.LoadingHolder;
 import com.zulip.android.viewholders.MessageHeaderParent;
 import com.zulip.android.viewholders.MessageHolder;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -449,19 +448,8 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             if (!startedFromFilter && zulipApp.getPointer() < mID) {
                 zulipApp.syncPointer(mID);
             }
-
-            boolean isMessageRead = false;
-            if (message.getMessageRead() != null) {
-                isMessageRead = message.getMessageRead();
-            }
-            if (!isMessageRead) {
-                try {
-                    updateBuilder.where().eq(Message.ID_FIELD, message.getID());
-                    updateBuilder.updateColumnValue(Message.MESSAGE_READ_FIELD, true);
-                    updateBuilder.update();
-                } catch (SQLException e) {
-                    ZLog.logException(e);
-                }
+            if (!message.getMessageRead()) {
+                // leaving message update to "update_message_flag" event
                 zulipApp.markMessageAsRead(message);
             }
         } catch (NullPointerException e) {

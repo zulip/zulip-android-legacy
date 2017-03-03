@@ -20,8 +20,10 @@ import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.database.MergeCursor;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -671,8 +673,10 @@ public class ZulipActivity extends BaseActivity implements
         Callable<Cursor> steamCursorGenerator = new Callable<Cursor>() {
             @Override
             public Cursor call() throws Exception {
-                String query = "SELECT s.id as _id,  s.name, s.color"
-                        + " FROM streams as s LEFT JOIN messages as m ON s.id=m.stream ";
+                int pointer = app.getPointer();
+                String query = "SELECT s.id as _id,  s.name, s.color, count(case when m.id > " + pointer + " and (m." + Message.MESSAGE_READ_FIELD
+                        + " = 0)"+ " then 1 end) as " + ExpandableStreamDrawerAdapter.UNREAD_TABLE_NAME
+                        + " FROM streams as s LEFT JOIN messages as m ON s." + Stream.NAME_FIELD + " = m." + Message.RECIPIENTS_FIELD;
                 String selectArg = null;
                 if (!etSearchStream.getText().toString().equals("") && !etSearchStream.getText().toString().isEmpty()) {
                     //append where clause
@@ -1193,11 +1197,11 @@ public class ZulipActivity extends BaseActivity implements
      */
     private void setupListViewAdapter() {
         streamsDrawerAdapter = null;
-        String[] groupFrom = {Stream.NAME_FIELD, Stream.COLOR_FIELD};
-        int[] groupTo = {R.id.name, R.id.stream_dot};
+        String[] groupFrom = {Stream.NAME_FIELD, Stream.COLOR_FIELD, ExpandableStreamDrawerAdapter.UNREAD_TABLE_NAME};
+        int[] groupTo = {R.id.name, R.id.stream_dot, R.id.unread_group};;
         // Comparison of data elements and View
-        String[] childFrom = {Message.SUBJECT_FIELD};
-        int[] childTo = {R.id.name_child};
+        String[] childFrom = {Message.SUBJECT_FIELD, ExpandableStreamDrawerAdapter.UNREAD_TABLE_NAME};
+        int[] childTo = {R.id.name_child, R.id.unread_child};
         final ExpandableListView streamsDrawer = (ExpandableListView) findViewById(R.id.streams_drawer);
         streamsDrawer.setGroupIndicator(null);
         try {
@@ -1257,14 +1261,6 @@ public class ZulipActivity extends BaseActivity implements
                         } else {
                             name.setTextColor(ContextCompat.getColor(ZulipActivity.this, R.color.colorTextPrimary));
                         }
-                        view.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                resetStreamSearch();
-                                doNarrowToLastRead(streamName);
-                                onNarrowFillSendBoxStream(streamName, "", false);
-                            }
-                        });
                         return true;
                     case R.id.stream_dot:
                         // Set the color of the (currently white) dot
@@ -1274,17 +1270,30 @@ public class ZulipActivity extends BaseActivity implements
                         return true;
                     case R.id.unread_group:
                         TextView unreadGroupTextView = (TextView) view;
+                        // set appropriate size for background drawable
+                        GradientDrawable backgroundGroup = (GradientDrawable) unreadGroupTextView.getBackground();
+                        backgroundGroup.mutate();
                         final String unreadGroupCount = cursor.getString(columnIndex);
-//                        if (unreadGroupCount.equals("0")) {
-//                            unreadGroupTextView.setVisibility(View.GONE);
-//                        } else {
-//                            unreadGroupTextView.setText(unreadGroupCount);
-//                            unreadGroupTextView.setVisibility(View.VISIBLE);
-//                        }
+                        int groupSize = findBubbleSize(unreadGroupCount);
+                        backgroundGroup.setSize(groupSize, groupSize);
+                        if (unreadGroupCount.equals("0")) {
+                            unreadGroupTextView.setVisibility(View.GONE);
+                        } else {
+                            unreadGroupTextView.setText(unreadGroupCount);
+                            unreadGroupTextView.setVisibility(View.VISIBLE);
+                        }
                         return true;
                     case R.id.unread_child:
                         TextView unreadChildTextView = (TextView) view;
+                        // change background drawable color of child unread count to faint gray
+                        GradientDrawable backgroundChild = (GradientDrawable) unreadChildTextView.getBackground();
+                        backgroundChild.mutate();
+                        backgroundChild.setColor(Color.LTGRAY);
+
+                        // set appropriate size for background of drawable
                         final String unreadChildNumber = cursor.getString(columnIndex);
+                        int childSize = findBubbleSize(unreadChildNumber);
+                        backgroundChild.setSize(childSize, childSize);
                         if (unreadChildNumber.equals("0")) {
                             unreadChildTextView.setVisibility(View.GONE);
                         } else {
@@ -1304,6 +1313,28 @@ public class ZulipActivity extends BaseActivity implements
             }
         });
         streamsDrawer.setAdapter(streamsDrawerAdapter);
+    }
+
+    private int findBubbleSize(String strCounts) {
+        int counts = 0;
+        try {
+            counts = Integer.parseInt(strCounts);
+        } catch (NumberFormatException e) {
+            ZLog.logException(e);
+            return counts;
+        }
+
+        int size;
+        if (counts / 10 == 0) {
+            size = (int) getResources().getDimension(R.dimen.small_bubble);
+        } else if (counts / 100 == 0) {
+            size = (int) getResources().getDimension(R.dimen.medium_bubble);
+        } else if (counts / 1000 == 0) {
+            size = (int) getResources().getDimension(R.dimen.large_bubble);
+        } else {
+            size = (int) getResources().getDimension(R.dimen.extra_large_bubble);
+        }
+        return size;
     }
 
     /**
@@ -1853,7 +1884,7 @@ public class ZulipActivity extends BaseActivity implements
         narrowedList = MessageListFragment.newInstance(filter);
         // Push to the back stack if we are not already narrowed
         pushListFragment(narrowedList, NARROW);
-        narrowedList.onReadyToDisplay(true);
+        narrowedList.onReadyToDisplay(true, false);
         showView(appBarLayout);
     }
 
@@ -2107,6 +2138,9 @@ public class ZulipActivity extends BaseActivity implements
                 datePickerDialog.getDatePicker().setMaxDate(new Date().getTime());
                 datePickerDialog.show();
                 break;
+            case R.id.bankruptcy:
+                declareBankruptcy();
+                break;
             case R.id.logout:
                 logout();
                 break;
@@ -2117,6 +2151,30 @@ public class ZulipActivity extends BaseActivity implements
                 return super.onOptionsItemSelected(item);
         }
         return true;
+    }
+
+    private void declareBankruptcy() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final CommonProgressDialog progressDialog = new CommonProgressDialog(this);
+        progressDialog.showWithMessage(getString(R.string.bankruptcy_progress_dialog));
+        builder.setMessage(R.string.bankruptcy_alert_message)
+                .setTitle(R.string.bankruptcy);
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // fetch all messages past current pointer
+                if (narrowedList != null) {
+                    onBackPressed();
+                }
+                homeList.fetchAllMessages(0, progressDialog);
+            }
+        });
+        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+               // do nothing
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     /**
@@ -2250,10 +2308,10 @@ public class ZulipActivity extends BaseActivity implements
 
     }
 
-    public void onReadyToDisplay(boolean registered) {
-        homeList.onReadyToDisplay(registered);
+    public void onReadyToDisplay(boolean registered, boolean startup) {
+        homeList.onReadyToDisplay(registered, startup);
         if (narrowedList != null) {
-            narrowedList.onReadyToDisplay(registered);
+            narrowedList.onReadyToDisplay(registered, startup);
         }
     }
 

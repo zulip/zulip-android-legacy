@@ -7,7 +7,6 @@ import android.widget.SimpleCursorTreeAdapter;
 
 import com.zulip.android.ZulipApp;
 import com.zulip.android.models.Message;
-import com.zulip.android.models.Stream;
 import com.zulip.android.util.ZLog;
 
 import java.sql.SQLException;
@@ -31,19 +30,22 @@ public class ExpandableStreamDrawerAdapter extends SimpleCursorTreeAdapter {
 
     @Override
     public Cursor getChildrenCursor(Cursor groupCursor) {
+        int pointer = zulipApp.getPointer();
         List<String[]> results = new ArrayList<>();
         try {
-            results = ZulipApp.get().getDao(Message.class).queryRaw("SELECT DISTINCT subject FROM messages " +
-                    "JOIN streams ON streams.id=messages.stream " +
-                    "WHERE streams.id=" + groupCursor.getInt(0) + " and streams." + Stream.SUBSCRIBED_FIELD + " = " + "1 group by subject").getResults();
+            results = zulipApp.getDao(Message.class).queryRaw("SELECT DISTINCT subject, " +
+                    "count(case when messages.id > " + pointer + " and (messages." +
+                    Message.MESSAGE_READ_FIELD + " = 0) then 1 end) as unreadcount FROM messages " +
+                    "JOIN streams ON streams.name=messages.recipients " +
+                    "WHERE streams.name LIKE ? group by subject", groupCursor.getString(1)).getResults();
         } catch (SQLException e) {
             ZLog.logException(e);
         }
-        MatrixCursor matrixCursor = new MatrixCursor(new String[]{"subject", "_id"});
+        MatrixCursor matrixCursor = new MatrixCursor(new String[]{"subject", "_id", UNREAD_TABLE_NAME});
 
         for (String[] result : results) {
             try {
-                matrixCursor.addRow(new String[]{result[0], String.valueOf(groupCursor.getInt(0))});
+                matrixCursor.addRow(new String[]{result[0], String.valueOf(groupCursor.getInt(0)), result[1]});
             } catch (Exception e) {
                 ZLog.logException(e);
             }
