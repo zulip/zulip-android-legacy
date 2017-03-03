@@ -2081,6 +2081,7 @@ public class ZulipActivity extends BaseActivity implements
             case R.id.refresh:
                 Log.w("menu", "Refreshed manually by user. We shouldn't need this.");
                 commonProgressDialog.showWithMessage(getString(R.string.refreshing));
+                commonProgressDialog.setCancelable(false);
                 onRefresh();
                 break;
             case R.id.today:
@@ -2137,6 +2138,7 @@ public class ZulipActivity extends BaseActivity implements
      */
     private void logout() {
         commonProgressDialog.showWithMessage(getString(R.string.logging_out));
+        commonProgressDialog.setCancelable(false);
         this.logged_in = false;
         final String serverUrl = app.getServerHostUri();
 

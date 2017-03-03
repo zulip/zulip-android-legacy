@@ -271,6 +271,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
 
     private void showBackends(String httpScheme, String serverURL) {
         commonProgressDialog.showWithMessage(getString(R.string.connecting_to_server));
+        commonProgressDialog.setCancelable(false);
         // if server url does not end with "/", then append it
         if (!serverURL.endsWith("/")) {
             serverURL = serverURL + "/";
@@ -498,6 +499,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         switch (v.getId()) {
             case R.id.google_sign_in_button:
                 commonProgressDialog.showWithMessage(getString(R.string.signing_in));
+                commonProgressDialog.setCancelable(false);
                 setupGoogleSignIn();
                 break;
             case R.id.zulip_login:
@@ -505,6 +507,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                     return;
                 }
                 commonProgressDialog.showWithMessage(getString(R.string.signing_in));
+                commonProgressDialog.setCancelable(false);
                 String username = mUserName.getText().toString();
                 String password = mPassword.getText().toString();
                 getServices()
@@ -559,6 +562,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
             case R.id.local_server_button:
                 if (!isInputValidForDevAuth()) return;
                 commonProgressDialog.showWithMessage(getString(R.string.signing_in));
+                commonProgressDialog.setCancelable(false);
                 AsyncDevGetEmails asyncDevGetEmails = new AsyncDevGetEmails(LoginActivity.this);
                 asyncDevGetEmails.setCallback(new ZulipAsyncPushTask.AsyncTaskCompleteListener() {
                     @Override
