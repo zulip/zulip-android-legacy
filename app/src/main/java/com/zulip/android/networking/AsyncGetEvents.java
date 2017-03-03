@@ -10,6 +10,7 @@ import android.widget.Toast;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.misc.TransactionManager;
+import com.j256.ormlite.stmt.UpdateBuilder;
 import com.zulip.android.R;
 import com.zulip.android.ZulipApp;
 import com.zulip.android.activities.LoginActivity;
@@ -26,6 +27,7 @@ import com.zulip.android.networking.response.events.GetEventResponse;
 import com.zulip.android.networking.response.events.MessageWrapper;
 import com.zulip.android.networking.response.events.MutedTopicsWrapper;
 import com.zulip.android.networking.response.events.StreamWrapper;
+import com.zulip.android.networking.response.events.StarWrapper;
 import com.zulip.android.networking.response.events.SubscriptionWrapper;
 import com.zulip.android.networking.response.events.UpdateMessageWrapper;
 import com.zulip.android.util.MutedTopics;
@@ -382,6 +384,11 @@ public class AsyncGetEvents extends Thread {
             processStreams(streamEvents);
         }
 
+        //get star events
+        List<EventsBranch> starEvents = events.getEventsOfBranchType(EventsBranch.BranchType.STAR_MESSAGE);
+        if (!starEvents.isEmpty()) {
+            processStarEvents(starEvents);
+        }
     }
 
     /**
@@ -489,6 +496,7 @@ public class AsyncGetEvents extends Thread {
      *
      * @param messageEditLimitEvents list of events {@link EventsBranch}
      */
+
     private void processMessageEditParam(List<EventsBranch> messageEditLimitEvents) {
         for (EventsBranch wrapper : messageEditLimitEvents) {
             EditMessageWrapper timeLimitResponse = (EditMessageWrapper) wrapper;
@@ -552,10 +560,45 @@ public class AsyncGetEvents extends Thread {
                         ZLog.logException(e);
                     }
                 }
+
             } else {
                 // TODO: handle other operations of stream event
                 Log.d("AsyncEvents", "unhandled operation for stream type event");
                 return;
+            }
+        }
+    }
+
+    private void processStarEvents(List<EventsBranch> starEvents) {
+        for (EventsBranch wrapper : starEvents) {
+            StarWrapper starResponse = (StarWrapper) wrapper;
+
+            if (starResponse.getFlag().equals("starred")) {
+                UpdateBuilder<Message, Object> updateBuilder =
+                        app.getDao(Message.class).updateBuilder();
+                if (starResponse.getOperation().equals("add")) {
+                    try {
+                        Log.i("AsyncGetEvents", "Star add: " + starResponse.getMessageId().get(0) +
+                                " || " + starResponse.getOperation() +
+                                " || " + starResponse.getFlag());
+                        updateBuilder.where().eq(Message.ID_FIELD, starResponse.getMessageId().get(0));
+                        updateBuilder.updateColumnValue(Message.MESSAGE_STAR_FIELD, true);
+                        updateBuilder.update();
+                    } catch (SQLException e) {
+                        ZLog.logException(e);
+                    }
+                } else if (starResponse.getOperation().equals("remove")) {
+                    try {
+                        Log.i("AsyncGetEvents", "Star remove: " + starResponse.getMessageId().get(0) +
+                                " || " + starResponse.getOperation() +
+                                " || " + starResponse.getFlag());
+                        updateBuilder.where().eq(Message.ID_FIELD, starResponse.getMessageId().get(0));
+                        updateBuilder.updateColumnValue(Message.MESSAGE_STAR_FIELD, false);
+                        updateBuilder.update();
+                    } catch (SQLException e) {
+                        ZLog.logException(e);
+                    }
+                }
             }
         }
     }
