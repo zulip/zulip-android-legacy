@@ -17,4 +17,11 @@ public class ZLog {
         }
     }
 
+    public static void log(String message) {
+        if (!BuildHelper.shouldLogToCrashlytics()) {
+            Log.e("Error", message);
+        } else {
+            Crashlytics.log(message);
+        }
+    }
 }

@@ -8,6 +8,9 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.zulip.android.ZulipApp;
+import com.zulip.android.util.Constants;
+import com.zulip.android.util.ZLog;
 
 // This class receives GCM messages from the cloud. It then passes them through a series of steps
 // to get a notification on the menu bar. See
@@ -22,13 +25,24 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 public class GcmBroadcastReceiver extends BroadcastReceiver {
 
     private static final String TAG = "GCM";
-
     public static String getGCMReceiverAction(Context appContext) {
         return appContext.getPackageName() + ".PushMessage.BROADCAST";
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        // handle cancel notification action on uploads
+        final String action = intent.getAction();
+        if (Constants.CANCEL.equals(action)) {
+            int notifId = intent.getIntExtra("id", 0);
+            try {
+                ZulipApp.get().getZulipActivity().cancelRequest(notifId);
+            } catch (NullPointerException e) {
+                ZLog.log("onReceive: app destroyed but notification visible");
+                return;
+            }
+        }
+
         Bundle extras = intent.getExtras();
         GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(context);
         // The getMessageType() intent parameter must be the intent you received

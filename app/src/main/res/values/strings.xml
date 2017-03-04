@@ -173,4 +173,5 @@
     <string name="photo_dialog">Take photo</string>
     <string name="pick_dialog">Pick a file</string>
     <string name="to_string">" to "</string>
+    <string name="upload_started_str">Upload started</string>
 </resources>
