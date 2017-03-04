@@ -1,5 +1,7 @@
 package com.zulip.android.util;
 
+import static android.R.string.cancel;
+
 /**
  * List of all Constants used in the projects
  */
@@ -16,7 +18,6 @@ public class Constants {
     public static String DATE_FORMAT = "dd/MM/yyyy";
     public static final int HIDE_FAB_AFTER_SEC = 5;
     public static final int REQUEST_PICK_FILE = 3;
-
     public static final long STATUS_UPDATER_INTERVAL = 25 * 1000; //in milliseconds
     public static final int INACTIVE_TIME_OUT = 2 * 60; //in milliseconds
     public static final int PEOPLE_DRAWER_ACTIVE_GROUP_ID = 0;
@@ -26,4 +27,5 @@ public class Constants {
     public static final int ALL_PEOPLE_ID = -1;
     // row number which is used to differentiate the '@-mentions' in people drawer
     public static int MENTIONS = -2;
+    public static final String CANCEL = "Cancel";
 }

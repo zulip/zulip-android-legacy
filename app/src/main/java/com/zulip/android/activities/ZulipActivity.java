@@ -1127,6 +1127,16 @@ public class ZulipActivity extends BaseActivity implements
     private NotificationManager mNotificationManager;
     private NotificationCompat.Builder mBuilder;
 
+    private HashMap<Integer, Call<UploadResponse>> mCancelHashMap;
+
+    public void cancelRequest(int notificationId) throws NullPointerException{
+        Call<UploadResponse> call = mCancelHashMap.get(notificationId);
+        if (call != null) {
+            call.cancel();
+            mCancelHashMap.remove(notificationId);
+        }
+    }
+
     /**
      * Modifies notification {@link Notifications} of specifies {@param notificationId}
      * and sets its {@param content}.
@@ -1142,6 +1152,7 @@ public class ZulipActivity extends BaseActivity implements
                 .setOngoing(false)
                 // Removes the progress bar
                 .setProgress(0, 0, false);
+        mBuilder.mActions.clear();
         PendingIntent contentIntent = PendingIntent.getActivity(
                 getApplicationContext(),
                 0,
@@ -1158,13 +1169,15 @@ public class ZulipActivity extends BaseActivity implements
      * @param notificationId
      * @param percentage
      */
-    private void progressNotification(int notificationId, int percentage, String progress, String title) {
+    private void progressNotification(int notificationId, int percentage, String progress, String title, PendingIntent pendingIntent) {
         mBuilder.setSmallIcon(android.R.drawable.stat_sys_upload)
                 .setContentTitle(title)
                 .setContentText(progress)
                 .setAutoCancel(false)
                 .setOngoing(true)
                 .setProgress(100, percentage, false);
+        mBuilder.mActions.clear();
+        mBuilder.addAction(R.drawable.ic_cancel_black_24dp, getString(R.string.cancel_content_desp), pendingIntent);
         mNotificationManager.notify(notificationId, mBuilder.build());
     }
 
@@ -1188,6 +1201,7 @@ public class ZulipActivity extends BaseActivity implements
                 new Intent(),
                 PendingIntent.FLAG_UPDATE_CURRENT);
         mBuilder.setContentIntent(contentIntent);
+        mBuilder.mActions.clear();
         mNotificationManager.notify(notificationId, mBuilder.build());
     }
 
@@ -1207,6 +1221,12 @@ public class ZulipActivity extends BaseActivity implements
         // generate unique notification Id for this upload
         final int notifId = (int) (new Date().getTime() % Integer.MAX_VALUE);
 
+        // cancel pending intent
+        Intent actionIntent = new Intent(this, GcmBroadcastReceiver.class);
+        actionIntent.putExtra("id", notifId);
+        actionIntent.setAction(Constants.CANCEL);
+        final PendingIntent piAction = PendingIntent.getBroadcast(this, notifId, actionIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
         // update notification after every one second
         final long startTime = System.currentTimeMillis();
         final int[] counter = {0};
@@ -1215,7 +1235,7 @@ public class ZulipActivity extends BaseActivity implements
             public void onProgressUpdate(int percentage, String progress, int notificationId) {
                 if (System.currentTimeMillis() - startTime >= 1000 * counter[0]) {
                     // update notification
-                    progressNotification(notificationId, percentage, progress, file.getName());
+                    progressNotification(notificationId, percentage, progress, file.getName(), piAction);
                     counter[0]++;
                 }
             }
@@ -1224,12 +1244,16 @@ public class ZulipActivity extends BaseActivity implements
         // MultipartBody.Part is used to send also the actual file name
         MultipartBody.Part body = prepareFilePart("file", file, notifId, progressListener);
 
-        // start notification
-        setNotification(notifId, getString(R.string.init_notif_title) + getString(R.string.to_string) + getNotifTitle());
-
         // finally, execute the request
         // create upload service client
         Call<UploadResponse> call = ((ZulipApp) getApplicationContext()).getUploadServices().upload(body);
+        if (mCancelHashMap == null) {
+            mCancelHashMap = new HashMap<>();
+        }
+        mCancelHashMap.put(notifId, call);
+        Toast.makeText(this, R.string.upload_started_str, Toast.LENGTH_SHORT).show();
+        // start notification
+        setNotification(notifId, getString(R.string.init_notif_title) + getString(R.string.to_string) + getNotifTitle());
         call.enqueue(new DefaultCallback<UploadResponse>() {
             @Override
             public void onSuccess(Call<UploadResponse> call, Response<UploadResponse> response) {
@@ -1250,8 +1274,13 @@ public class ZulipActivity extends BaseActivity implements
                 } else {
                     endNotification(notifId, getString(R.string.failed_to_upload));
                 }
-                mNotificationManager.cancel(notifId);
-
+                if (!(mCancelHashMap != null && mCancelHashMap.size() == 1)) {
+                    mNotificationManager.cancel(notifId);
+                }
+                if (mCancelHashMap != null) {
+                    mCancelHashMap.remove(notifId);
+                    mCancelHashMap = mCancelHashMap.isEmpty() ? null : mCancelHashMap;
+                }
             }
 
             @Override
@@ -1266,6 +1295,10 @@ public class ZulipActivity extends BaseActivity implements
             @Override
             public void onFailure(Call<UploadResponse> call, Throwable t) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 && isDestroyed()) {
+                    return;
+                }
+                if (call.isCanceled()) {
+                    mNotificationManager.cancel(notifId);
                     return;
                 }
                 endNotification(notifId, getString(R.string.failed_to_upload));
@@ -2501,6 +2534,11 @@ public class ZulipActivity extends BaseActivity implements
             mNotificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
         }
         mNotificationManager.cancelAll();
+        if (mCancelHashMap != null) {
+            for (Call call : mCancelHashMap.values()) {
+                call.cancel();
+            }
+        }
     }
 
     /**
