@@ -14,6 +14,8 @@ public class Constants {
     public final static String SERVER_URL = "SERVER_URL";
     public static int MILLISECONDS_IN_A_MINUTE = 1000;
     public static String DATE_FORMAT = "dd/MM/yyyy";
+    public static final int HIDE_FAB_AFTER_SEC = 5;
+    public static final int REQUEST_PICK_FILE = 3;
 
     public static final long STATUS_UPDATER_INTERVAL = 25 * 1000; //in milliseconds
     public static final int INACTIVE_TIME_OUT = 2 * 60; //in milliseconds
