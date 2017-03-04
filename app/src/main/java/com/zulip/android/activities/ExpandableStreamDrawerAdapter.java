@@ -40,12 +40,19 @@ public class ExpandableStreamDrawerAdapter extends SimpleCursorTreeAdapter {
             ZLog.logException(e);
         }
         MatrixCursor matrixCursor = new MatrixCursor(new String[]{"subject", "_id"});
-
-        for (String[] result : results) {
-            try {
-                matrixCursor.addRow(new String[]{result[0], String.valueOf(groupCursor.getInt(0))});
-            } catch (Exception e) {
-                ZLog.logException(e);
+        if (results.size() == 0){
+                try {
+                    matrixCursor.addRow(new String[]{"(no topic)", String.valueOf(0)});
+                } catch (Exception e) {
+                    ZLog.logException(e);
+                }
+        }else{
+            for (String[] result: results){
+                try {
+                    matrixCursor.addRow(new String[]{result[0], String.valueOf(0)});
+                } catch (Exception e) {
+                    ZLog.logException(e);
+                }
             }
         }
         return matrixCursor;
