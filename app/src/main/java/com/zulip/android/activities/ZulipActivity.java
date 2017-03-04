@@ -1225,7 +1225,7 @@ public class ZulipActivity extends BaseActivity implements
         MultipartBody.Part body = prepareFilePart("file", file, notifId, progressListener);
 
         // start notification
-        setNotification(notifId, getString(R.string.init_notif_title));
+        setNotification(notifId, getString(R.string.init_notif_title) + getString(R.string.to_string) + getNotifTitle());
 
         // finally, execute the request
         // create upload service client
@@ -1273,6 +1273,26 @@ public class ZulipActivity extends BaseActivity implements
                 ZLog.logException(t);
             }
         });
+    }
+
+    private String getNotifTitle() {
+        String title = "";
+        MessageType messageType = isCurrentModeStream() ? MessageType.STREAM_MESSAGE : MessageType.PRIVATE_MESSAGE;
+        if (messageType == MessageType.STREAM_MESSAGE) {
+            title += streamActv.getText().toString();
+            title += " > " + topicActv.getText().toString();
+        }
+
+        if (TextUtils.isEmpty(title) || title.equals(" > ")) {
+            NarrowFilter filter = getCurrentMessageList().filter;
+            if (filter == null) {
+                title = getString(R.string.app_name);
+            } else {
+                title = filter.getTitle() + (filter.getSubtitle() != null ?  " > " + filter.getSubtitle() : "");
+            }
+        }
+
+        return title;
     }
 
     /**

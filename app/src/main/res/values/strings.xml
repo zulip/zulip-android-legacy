@@ -172,4 +172,5 @@
     <string name="upload_big_file">Yowza, that’s a big file.</string>
     <string name="photo_dialog">Take photo</string>
     <string name="pick_dialog">Pick a file</string>
+    <string name="to_string">" to "</string>
 </resources>
