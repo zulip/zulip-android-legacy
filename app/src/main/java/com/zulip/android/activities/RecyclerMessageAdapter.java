@@ -388,6 +388,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 final Message message = ((Message) items.get(position));
 
                 messageHolder.contentView.setText(message.getFormattedContent(zulipApp));
+                messageHolder.contentView.setLinkTextColor(ContextCompat.getColor(context, R.color.link_color));
                 messageHolder.contentView.setMovementMethod(LinkMovementMethod.getInstance());
 
                 int padding = convertDpToPixel(4);

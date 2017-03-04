@@ -2,6 +2,7 @@
 <resources>
     <color name="colorPrimary">#212121</color>
     <color name="colorAccent">#eeeeee</color>
+    <color name="link_color">#73a7f7</color>
     <color name="colorPrimaryDark">#000000</color>
     <color name="dev_auth_admin">#f44336</color>
     <color name="dev_auth_user">#1e88e5</color>
@@ -15,6 +16,7 @@
     <color name="color_text_black">#000000</color>
     <color name="windowBackground">#616161</color>
     <color name="listBackground">#262626</color>
+    <color name="self_mention_color">#5ebcff</color>
     <color name="loadingBackground">#757575</color>
     <color name="photo_buttons">#ff33b5e5</color>
     <color name="marker_palette">#212121</color>
