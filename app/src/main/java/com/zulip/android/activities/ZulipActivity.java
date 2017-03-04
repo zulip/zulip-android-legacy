@@ -1226,7 +1226,7 @@ public class ZulipActivity extends BaseActivity implements
 
         // finally, execute the request
         // create upload service client
-        Call<UploadResponse> call = ((ZulipApp) getApplicationContext()).getZulipServices().upload(body);
+        Call<UploadResponse> call = ((ZulipApp) getApplicationContext()).getUploadServices().upload(body);
         call.enqueue(new DefaultCallback<UploadResponse>() {
             @Override
             public void onSuccess(Call<UploadResponse> call, Response<UploadResponse> response) {
@@ -2476,8 +2476,8 @@ public class ZulipActivity extends BaseActivity implements
         }
         if (mNotificationManager == null) {
             mNotificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
-            mNotificationManager.cancelAll();
         }
+        mNotificationManager.cancelAll();
     }
 
     /**
