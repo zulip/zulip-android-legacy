@@ -2,6 +2,7 @@
 <resources>
     <color name="colorPrimary">#efefef</color>
     <color name="colorAccent">#899ab4</color>
+    <color name="link_color">#73a7f7</color>
     <color name="colorPrimaryDark">#747474</color>
     <color name="dev_auth_admin">#ff4136</color>
     <color name="dev_auth_user">#428bca</color>
@@ -17,7 +18,7 @@
     <color name="loadingBackground">#eeeeee</color>
     <color name="indigo_material_500">#3F51B5</color>
     <color name="dark_red">#d14444</color>
-    <color name="dark_blue">#303F9F</color>
+    <color name="self_mention_color">#d14444</color>
     <color name="photo_buttons">#ff33b5e5</color>
     <color name="marker_palette">#212121</color>
     <color name="red_marker_tool">#ffff5252</color>
