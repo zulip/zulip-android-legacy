@@ -140,6 +140,8 @@ import okhttp3.MultipartBody;
 import retrofit2.Call;
 import retrofit2.Response;
 
+import static com.zulip.android.util.Constants.REQUEST_PICK_FILE;
+
 /**
  * The main Activity responsible for holding the {@link MessageListFragment} which has the list to the
  * messages
@@ -157,8 +159,6 @@ public class ZulipActivity extends BaseActivity implements
     private static final int PERMISSION_REQUEST_READ_STORAGE = 1;
     private static final int REQUEST_TAKE_PHOTO = 2;
     private static final Interpolator FAST_OUT_SLOW_IN_INTERPOLATOR = new FastOutSlowInInterpolator();
-    private static final int HIDE_FAB_AFTER_SEC = 5;
-    private static final int REQUEST_PICK_FILE = 3;
     // row number which is used to differentiate the 'All private messages'
     // row from the people
     final int allPeopleId = -1;
@@ -570,9 +570,11 @@ public class ZulipActivity extends BaseActivity implements
         dialog.show(getFragmentManager(), "ListDialogFragment");
     }
 
-    // The dialog fragment receives a reference to this Activity through the
-    // Fragment.onAttach() callback, which it uses to call the following methods
-    // defined by the ListDialogFragment.ListDialogListener interface
+    /**
+     * The dialog fragment receives a reference to this Activity through the
+     * Fragment.onAttach() callback, which it uses to call the following methods
+     * defined by the ListDialogFragment.ListDialogListener interface.
+     */
     @Override
     public void onDialogPhotoClick(DialogFragment dialog) {
         // User touched the dialog's "Take picture" button
@@ -946,6 +948,7 @@ public class ZulipActivity extends BaseActivity implements
             if (data.getData() != null) {
                 fileUris.add(data.getData());
             }
+            // intent.getClipData was added in api 16
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                 ClipData clipData = data.getClipData();
                 if (clipData != null) {
@@ -1309,7 +1312,7 @@ public class ZulipActivity extends BaseActivity implements
         fab = (FloatingActionButton) findViewById(R.id.fab);
         chatBox = (SwipeRemoveLinearLayout) findViewById(R.id.messageBoxContainer);
         chatBox.registerToSwipeEvents(this);
-        fabHidder = new CountDownTimer(HIDE_FAB_AFTER_SEC * 1000, HIDE_FAB_AFTER_SEC * 1000) {
+        fabHidder = new CountDownTimer(Constants.HIDE_FAB_AFTER_SEC * 1000, Constants.HIDE_FAB_AFTER_SEC * 1000) {
             public void onTick(long millisUntilFinished) {
             }
 
@@ -2368,7 +2371,7 @@ public class ZulipActivity extends BaseActivity implements
         }
 
         if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(intent, REQUEST_PICK_FILE);
+            startActivityForResult(intent, Constants.REQUEST_PICK_FILE);
             // activity transition animation
             ActivityTransitionAnim.transition(ZulipActivity.this);
         }
