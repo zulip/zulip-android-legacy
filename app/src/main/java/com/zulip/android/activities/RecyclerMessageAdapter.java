@@ -49,6 +49,8 @@ import com.zulip.android.util.ZLog;
 import com.zulip.android.viewholders.LoadingHolder;
 import com.zulip.android.viewholders.MessageHeaderParent;
 import com.zulip.android.viewholders.MessageHolder;
+import com.zulip.android.viewholders.stickyheaders.interfaces.RetrieveHeaderView;
+import com.zulip.android.viewholders.stickyheaders.interfaces.StickyHeaderHandler;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -75,7 +77,7 @@ import static com.zulip.android.util.ConvertDpPx.convertDpToPixel;
  * headerParents are created if it doesn't matches the current header where the adding is being placed, this is done to match the UI as the web.
  * In addNewMessages the messages are loaded in the bottom and new headers are created if it does not matches the last header.
  */
-public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements StickyHeaderHandler{
 
     public static final int VIEWTYPE_MESSAGE_HEADER = 1;
     public static final int VIEWTYPE_HEADER = 3; //At position 0
@@ -107,6 +109,9 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     private boolean isCurrentThemeNight;
     private HashMap<Integer, Integer> defaultAvatarColorHMap;
 
+    // position of view (MessageHeaderParent) which float's on top
+    private int attachedHeaderAdapterPosition = RetrieveHeaderView.DEFAULT_VIEW_TYPE;
+
     RecyclerMessageAdapter(List<Message> messageList, final Context context, boolean startedFromFilter) {
         super();
         items = new ArrayList<>();
@@ -128,6 +133,14 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             public void onItemClick(int viewId, int position) {
                 switch (viewId) {
                     case R.id.displayRecipient: //StreamTV
+                        if (position == RetrieveHeaderView.DEFAULT_VIEW_TYPE) {
+                            //clicked on floating header
+                            if (attachedHeaderAdapterPosition != RetrieveHeaderView.DEFAULT_VIEW_TYPE) {
+                                position = attachedHeaderAdapterPosition;
+                            } else {
+                                return;
+                            }
+                        }
                         MessageHeaderParent messageHeaderParent = (MessageHeaderParent) getItem(position);
                         if (messageHeaderParent.getMessageType() == MessageType.PRIVATE_MESSAGE) {
                             Person[] recipientArray = messageHeaderParent.getRecipients(zulipApp);
@@ -142,6 +155,14 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                         }
                         break;
                     case R.id.instance: //Topic
+                        if (position == RetrieveHeaderView.DEFAULT_VIEW_TYPE) {
+                            //clicked on floating header
+                            if (attachedHeaderAdapterPosition != RetrieveHeaderView.DEFAULT_VIEW_TYPE) {
+                                position = attachedHeaderAdapterPosition;
+                            } else {
+                                return;
+                            }
+                        }
                         MessageHeaderParent messageParent = (MessageHeaderParent) getItem(position);
                         if (messageParent.getMessageType() == MessageType.STREAM_MESSAGE) {
                             narrowListener.onNarrow(new NarrowFilterStream(Stream.getByName(zulipApp,
@@ -740,5 +761,16 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             hashMap.put(reaction.getEmoji(), (count != null) ? count + 1 : 1);
         }
         return hashMap;
+    }
+
+    @Override
+    public List<?> getAdapterData() {
+        return items;
+    }
+
+    @Override
+    public void setAttachedHeader(int adapterPosition) {
+        this.attachedHeaderAdapterPosition = adapterPosition;
+
     }
 }

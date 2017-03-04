@@ -50,6 +50,9 @@ import com.zulip.android.util.MessageListener;
 import com.zulip.android.util.MutedTopics;
 import com.zulip.android.util.ZLog;
 import com.zulip.android.viewholders.HeaderSpaceItemDecoration;
+import com.zulip.android.viewholders.stickyheaders.StickyLayoutManager;
+import com.zulip.android.viewholders.stickyheaders.interfaces.RetrieveHeaderView;
+import com.zulip.android.viewholders.stickyheaders.interfaces.StickyHeaderListener;
 
 import org.json.JSONObject;
 
@@ -72,7 +75,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
     public ZulipApp app;
     RecyclerMessageAdapter adapter;
     TextView emptyTextView;
-    private LinearLayoutManager linearLayoutManager;
+    private StickyLayoutManager stickyLayoutManager;
     private MutedTopics mMutedTopics;
     private Listener mListener;
     private RecyclerView recyclerView;
@@ -152,8 +155,6 @@ public class MessageListFragment extends Fragment implements MessageListener {
         else if (actionBar != null)
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_24dp);
         recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
-        linearLayoutManager = new LinearLayoutManager(getContext());
-        recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.addItemDecoration(new HeaderSpaceItemDecoration(getContext()));
         //as onCreateView is even called when fragment is popped from stack
         //if adapter is null then create new instance else use the previous one
@@ -164,22 +165,37 @@ public class MessageListFragment extends Fragment implements MessageListener {
             //but now setupLists is not called so hide footer here
             adapter.setFooterShowing(false);
         }
+        stickyLayoutManager = new StickyLayoutManager(getContext(),adapter);
+        stickyLayoutManager.setStickyHeaderListener(new StickyHeaderListener() {
+            @Override
+            public void headerAttached(int adapterPosition) {
+                //update attached header
+                adapter.setAttachedHeader(adapterPosition);
+            }
+
+            @Override
+            public void headerDetached(int adapterPosition) {
+                //update attached header
+                adapter.setAttachedHeader(RetrieveHeaderView.DEFAULT_VIEW_TYPE);
+            }
+        });
+        recyclerView.setLayoutManager(stickyLayoutManager);
         recyclerView.setAdapter(adapter);
         registerForContextMenu(recyclerView);
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 //check if scrolled at last
-                mListener.recyclerViewScrolled(linearLayoutManager.findLastCompletelyVisibleItemPosition() == adapter.getItemCount() - 2);
+                mListener.recyclerViewScrolled(stickyLayoutManager.findLastCompletelyVisibleItemPosition() == adapter.getItemCount() - 2);
                 final int near = 6;
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     if (!paused && !loadingMessages && firstMessageId > 0 && lastMessageId > 0) {
-                        int lastVisiblePosition = linearLayoutManager.findLastVisibleItemPosition();
+                        int lastVisiblePosition = stickyLayoutManager.findLastVisibleItemPosition();
                         if (lastVisiblePosition > adapter.getItemCount(false) - near) { // At the bottom of the list
                             Log.i("scroll", "Starting request below");
                             loadMoreMessages(LoadPosition.BELOW);
                         }
-                        if (linearLayoutManager.findFirstVisibleItemPosition() < near && !loadedToTop) {
+                        if (stickyLayoutManager.findFirstVisibleItemPosition() < near && !loadedToTop) {
                             // At the top of the list
                             Log.i("scroll", "Starting request above");
                             loadMoreMessages(LoadPosition.ABOVE);
@@ -188,7 +204,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
                 }
             }
         });
-        mListener.setLayoutBehaviour(linearLayoutManager, adapter);
+        mListener.setLayoutBehaviour(stickyLayoutManager, adapter);
         return view;
     }
 
@@ -646,7 +662,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
             return;
         }
         Log.i("onMessages", "Adding " + messages.length + " messages at " + pos);
-        int topPosBefore = linearLayoutManager.findFirstVisibleItemPosition();
+        int topPosBefore = stickyLayoutManager.findFirstVisibleItemPosition();
         int addedCount = 0;
         int headerParents = 0;
         StringBuilder stringBuilder = new StringBuilder();
@@ -864,7 +880,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
     }
 
     public boolean isScrolledToLastMessage() {
-        int index = linearLayoutManager.findLastVisibleItemPosition();
+        int index = stickyLayoutManager.findLastVisibleItemPosition();
         if (index == -1) return false;
         Object object = adapter.getItem(index);
         if (object instanceof Integer) {
