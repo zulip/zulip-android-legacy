@@ -105,6 +105,7 @@ public class ZulipApp extends Application {
     private int max_message_id;
     private DatabaseHelper databaseHelper;
     private ZulipServices zulipServices;
+    private ZulipServices uploadServices;
     private ReferenceObjectCache objectCache;
     private ZulipActivity zulipActivity;
     /**
@@ -210,6 +211,22 @@ public class ZulipApp extends Application {
                     .create(ZulipServices.class);
         }
         return zulipServices;
+    }
+
+    public ZulipServices getUploadServices() {
+        if (uploadServices == null) {
+            HttpLoggingInterceptor logging = new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.HEADERS);
+            uploadServices = new Retrofit.Builder()
+                    .client(new OkHttpClient.Builder().readTimeout(60, TimeUnit.SECONDS)
+                            .addInterceptor(new ZulipInterceptor())
+                            .addInterceptor(logging)
+                            .build())
+                    .addConverterFactory(GsonConverterFactory.create(getGson()))
+                    .baseUrl(getServerURI())
+                    .build()
+                    .create(ZulipServices.class);
+        }
+        return uploadServices;
     }
 
     public void setZulipServices(ZulipServices zulipServices) {

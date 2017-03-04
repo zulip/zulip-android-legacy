@@ -20,7 +20,6 @@ public class UploadProgressRequest extends RequestBody {
     private File mFile;
     private UploadCallbacks mListener;
     private int mNotificationId;
-    int counter = 0;
 
     private static final int DEFAULT_BUFFER_SIZE = 2048;
 
@@ -46,9 +45,6 @@ public class UploadProgressRequest extends RequestBody {
         FileInputStream in = new FileInputStream(mFile);
         long uploaded = 0;
 
-        // workaround logging interceptor disturbing progress update
-        counter++;
-
         try {
             int read;
             Handler handler = new Handler(Looper.getMainLooper());
@@ -56,11 +52,8 @@ public class UploadProgressRequest extends RequestBody {
                 uploaded += read;
                 sink.write(buffer, 0, read);
 
-                // update progress on UI thread only when httpLoggingInterceptor
-                // is not calling writeTo()
-                if (counter % 2 == 0) {
-                    handler.post(new ProgressUpdater(uploaded, fileLength));
-                }
+                // update progress on UI thread only
+                handler.post(new ProgressUpdater(uploaded, fileLength));
             }
         } finally {
             in.close();
