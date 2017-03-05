@@ -225,7 +225,7 @@ Another way to connect android device to local server is via adb
 
 -  Run ``adb reverse tcp:9991 tcp:9991`` in terminal
 
--  Connect to local server by entering url (**http://127.0.0.0.1:9991**) in app
+-  Connect to local server by entering url (**http://127.0.0.1:9991**) in app
 
 .. _here: https://github.com/zulip/zulip/blob/1c40df9363b70af0e275c44a03f9627808852616/Vagrantfile#L37
 .. _Host Remapping: http://docs.telerik.com/fiddler/KnowledgeBase/HOSTS
