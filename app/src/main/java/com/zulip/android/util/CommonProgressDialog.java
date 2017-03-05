@@ -37,4 +37,8 @@ public class CommonProgressDialog {
     public void setMessage(String message) {
         progressDialog.setMessage(message);
     }
+
+    public void setCancelable(boolean cancelable) {
+        progressDialog.setCancelable(cancelable);
+    }
 }
