@@ -15,6 +15,7 @@ import android.util.Log;
 import com.google.gson.annotations.SerializedName;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.misc.TransactionManager;
 import com.j256.ormlite.stmt.DeleteBuilder;
 import com.j256.ormlite.table.DatabaseTable;
@@ -40,6 +41,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +63,7 @@ public class Message {
     private static final String FORMATTED_CONTENT_FIELD = "formattedContent";
     private static final String MESSAGE_EDITED = "MESSAGE_EDITED";
     private static final String MESSAGE_EDIT_DATE = "MESSAGE_EDIT_DATE";
+    private static final String REACTIONS_FIELD = "reactions";
     private static final HTMLSchema schema = new HTMLSchema();
     //IGNORE - This will always be empty due to persistence
     @SerializedName("edit_history")
@@ -127,6 +130,9 @@ public class Message {
     //endregion
     @DatabaseField(columnDefinition = MESSAGE_EDIT_DATE)
     private Date editDate;
+    @SerializedName("reactions")
+    @ForeignCollectionField(eager = true, columnName = REACTIONS_FIELD)
+    private Collection<Reaction> reactions = new ArrayList<>();
 
     /**
      * Construct an empty Message object.
@@ -445,6 +451,10 @@ public class Message {
             }
         }
         return recipientsCache;
+    }
+
+    public List<Reaction> getReactions() {
+        return new ArrayList<>(this.reactions);
     }
 
     public void setRecipients(Person[] list) {

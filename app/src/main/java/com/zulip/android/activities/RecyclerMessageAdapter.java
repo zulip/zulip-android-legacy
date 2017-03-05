@@ -6,6 +6,8 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.support.annotation.ColorInt;
 import android.support.v4.content.ContextCompat;
@@ -19,6 +21,10 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TableRow;
+import android.widget.TextView;
 
 import com.j256.ormlite.stmt.UpdateBuilder;
 import com.squareup.picasso.Callback;
@@ -31,6 +37,7 @@ import com.zulip.android.filters.NarrowListener;
 import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageType;
 import com.zulip.android.models.Person;
+import com.zulip.android.models.Reaction;
 import com.zulip.android.models.Stream;
 import com.zulip.android.util.ActivityTransitionAnim;
 import com.zulip.android.util.ConvertDpPx;
@@ -42,12 +49,15 @@ import com.zulip.android.viewholders.LoadingHolder;
 import com.zulip.android.viewholders.MessageHeaderParent;
 import com.zulip.android.viewholders.MessageHolder;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+
+import static com.zulip.android.util.ConvertDpPx.convertDpToPixel;
 
 /**
  * An adapter to bind the messages to a RecyclerView.
@@ -377,7 +387,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 messageHolder.contentView.setText(message.getFormattedContent(zulipApp));
                 messageHolder.contentView.setMovementMethod(LinkMovementMethod.getInstance());
 
-                int padding = ConvertDpPx.convertDpToPixel(4);
+                int padding = convertDpToPixel(4);
                 messageHolder.contentView.setShadowLayer(padding, 0, 0, 0);
 
                 final String url = message.extractImageUrl(zulipApp);
@@ -427,6 +437,42 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 setUpGravatar(message, messageHolder);
                 setUpTime(message, messageHolder);
                 setUpStar(message, messageHolder);
+                try {
+                    if (message.getReactions().isEmpty()) {
+                        messageHolder.reactionsTable.removeAllViews();
+                        return;
+                    }
+                    /**
+                     * Calculate number of reactions per row
+                     */
+                // TODO: use when using multiple rows
+                    int numOfReactions = messageHolder.reactionsTable.getWidth() / context.getResources().getDimensionPixelSize(R.dimen.reaction_background_w);
+                    TableRow row = new TableRow(messageHolder.messageTile.getContext());
+                    TableRow.LayoutParams layoutParams = new TableRow.LayoutParams();
+                    int margin = ConvertDpPx.convertDpToPixel(4);
+                    layoutParams.setMargins(margin, margin, margin, margin);
+                    for (Reaction reaction : message.getReactions()) {
+                        LinearLayout reactionTile = (LinearLayout) LayoutInflater.from(messageHolder.messageTile.getContext()).inflate(R.layout.reaction_tile, null);
+                        reactionTile.setLayoutParams(layoutParams);
+                        ImageView imageView = (ImageView) reactionTile.findViewById(R.id.reaction_emoji);
+                        TextView textView = (TextView) reactionTile.findViewById(R.id.reaction_count);
+                        String emojiName = reaction.getEmoji() + ".png";
+                        Drawable drawable = Drawable.createFromStream(zulipApp.getAssets().open("emoji/" + emojiName),
+                                "emoji/" + emojiName);
+                        Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
+                        int size = ConvertDpPx.convertDpToPixel(20);
+                        drawable = new BitmapDrawable(context.getResources(), Bitmap.createScaledBitmap(bitmap, size, size, true));
+                        imageView.setImageDrawable(drawable);
+                        // TODO: change when aggregating emojis
+                        textView.setText("1");
+                        row.addView(reactionTile);
+                    }
+                    messageHolder.reactionsTable.addView(row, 0);
+                } catch (NullPointerException e) {
+                    Log.e("adapter", "message reactions are null");
+                } catch (IOException e) {
+                    ZLog.logException(e);
+                }
                 break;
         }
     }
