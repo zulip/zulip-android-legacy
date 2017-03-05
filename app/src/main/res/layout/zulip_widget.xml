@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:text="Sorry, no messages to display!"
+        android:text="@string/no_message_to_display"
         android:textAlignment="center"
         android:textColor="@android:color/black"
         android:visibility="gone" />
@@ -50,7 +50,7 @@
         android:background="@color/indigo_material_500"
         android:minHeight="48dp"
         android:padding="10dp"
-        android:text="Today's Messages"
+        android:text="@string/todays_message"
         android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
         android:textColor="@android:color/white" />
 </RelativeLayout>
