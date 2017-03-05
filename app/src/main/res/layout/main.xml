@@ -52,7 +52,7 @@
             android:src="@drawable/ic_mode_edit_24dp"
             app:backgroundTint="@color/colorPrimary"
             app:borderWidth="0dp"
-            app:layout_behavior="com.zulip.android.util.RemoveViewsOnScroll" />
+            app:layout_behavior="com.zulip.android.util.ShrinkBehaviorOfFab" />
     </android.support.design.widget.CoordinatorLayout>
 
     <android.support.design.widget.NavigationView
