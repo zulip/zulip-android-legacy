@@ -4,10 +4,6 @@
     <string name="app_name">Zulip</string>
     <string name="login_welcome_blurb">Welcome to Zulip!</string>
     <string name="login_button">Log in</string>
-    <string name="username">Email</string>
-    <string name="password">Password</string>
-    <string name="server_url">Server URL</string>
-    <string name="server_domain">Server domain</string>
     <string name="legal">Legal information</string>
     <string name="logout">Log out</string>
     <string name="force_logged_out">You\'ve been logged out</string>
@@ -19,7 +15,6 @@
     <string name="permission_message">Zulip app needs storage permission.</string>
     <string name="permission_title">Need storage permission</string>
     <string name="downloading">Downloading..</string>
-    <string name="topic">Topic</string>
     <string name="close">Close</string>
     <string name="refresh">Refresh</string>
     <string name="toast_unable_to_load_image">Unable to load image</string>
@@ -32,7 +27,6 @@
     <!-- Used on the indicator when loading messages -->
     <string name="editing_message">Editing message</string>
     <string name="sending_message">Sending</string>
-    <string name="search">Search</string>
     <string name="reply_to_private_message">Reply to private message</string>
     <string name="narrow_to_this_conversation">Narrow to this conversation</string>
     <string name="copy_message">Copy message</string>
@@ -43,7 +37,7 @@
     <string name="arrow">❯</string>
     <string name="toast_no_internet_connection">No internet connection</string>
     <string name="invalid_url">Invalid URL</string>
-    <string name="subject">Topic</string>
+    <string name="topic">Topic</string>
     <string name="reply_to_sender">Reply to sender</string>
     <string name="google_app_login_failed">Google apps login failed for unknown reasons, please contact your distributor.</string>
     <string name="signing_in">Signing in…</string>
@@ -53,9 +47,6 @@
     <string name="username_required">Username required</string>
     <string name="server_domain_required">Server domain required</string>
     <string name="invalid_domain">Invalid domain</string>
-    <string name="hint_person">Person</string>
-    <string name="hint_subject">Topic</string>
-    <string name="hint_stream">Stream</string>
     <string name="message_sent">Message sent!</string>
     <string name="message_error">Error sending message</string>
     <string name="stream_error">Please specify stream.</string>
@@ -70,7 +61,6 @@
     <string name="normal_user">Normal users</string>
     <string name="method_null">Method should not be null</string>
     <string name="method_error">Method not supported</string>
-    <string name="tap_message">Tap on a message to compose reply</string>
     <string name="title_login">Login</string>
     <string name="enter">Enter</string>
     <string name="enter_server">Please enter your server URL</string>
@@ -110,8 +100,6 @@
     <string name="invalid_image">Unable to load that image</string>
     <string name="content_description_cancel_icon">cancel icon</string>
     <string name="content_description_search_icon">search icon</string>
-    <string name="hint_search_people">Search people</string>
-    <string name="hint_search_stream">Search stream</string>
     <string name="register_button">Register</string>
     <string name="image_content_desp">image</string>
     <string name="stream_private_content_desp">stream/private</string>
@@ -156,4 +144,27 @@
     <string name="copy_message_fetch">Copying message to clipboard</string>
     <string name="copy_failed">Copying to clipboard failed</string>
     <string name="try_again_error_msg">Something went wrong, try again</string>
+
+    <string name="cancel">Cancel</string>
+    <string name="message_here">Message here</string>
+    <string name="sender_name">Sender name</string>
+    <string name="social">Social</string>
+    <string name="my_stream">MyStream</string>
+    <string name="subject">Subject</string>
+    <string name="crop">CROP</string>
+
+    <!--Placeholder strings-->
+    <string name="hint_person">Person</string>
+    <string name="username">Email</string>
+    <string name="password">Password</string>
+    <string name="tap_message">Tap on a message to compose reply</string>
+    <string name="hint_subject">Topic</string>
+    <string name="hint_stream">Stream</string>
+    <string name="search">Search</string>
+    <string name="hint_search_people">Search people</string>
+    <string name="hint_search_stream">Search stream</string>
+    <string name="topic">Topic</string>
+    <string name="server_url">Server URL</string>
+    <string name="server_domain">Server domain</string>
+    <!--Placeholder strings-->
 </resources>
