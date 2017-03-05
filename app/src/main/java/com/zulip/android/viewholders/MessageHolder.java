@@ -8,6 +8,7 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TableLayout;
 import android.widget.TextView;
 
 import com.zulip.android.R;
@@ -28,6 +29,9 @@ public class MessageHolder extends RecyclerView.ViewHolder implements View.OnCli
     public ImageView contentImage;
     public ImageView starImage;
     public View contentImageContainer;
+    public TableLayout reactionsTable;
+    // TODO: remove
+    public ImageView reaction;
     public OnItemClickListener onItemClickListener;
 
     public MessageHolder(final View itemView) {
@@ -43,6 +47,7 @@ public class MessageHolder extends RecyclerView.ViewHolder implements View.OnCli
         contentImage = (ImageView) itemView.findViewById(R.id.load_image);
         starImage = (ImageView) itemView.findViewById(R.id.star_image);
         contentImageContainer = itemView.findViewById(R.id.load_image_container);
+        reactionsTable = (TableLayout) itemView.findViewById(R.id.reactions_table);
         contentView.setOnClickListener(this);
         contentView.setLongClickable(true);
         itemView.setOnCreateContextMenuListener(this);
