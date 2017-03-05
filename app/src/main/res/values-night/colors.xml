@@ -27,4 +27,6 @@
     <color name="top_snackbar_show_button_text_color">#d26811</color>
     <color name="top_snackbar_bg_color">#ffffff</color>
     <color name="top_snackbar_text_color">#131313</color>
+    <color name="solid_color">#262626</color>
+    <color name="stroke_color">#FFF</color>
 </resources>

@@ -30,4 +30,6 @@
     <color name="top_snackbar_bg_color">#000000</color>
     <color name="top_snackbar_text_color">#ffffff</color>
     <color name="progress_background_color">#444444</color>
+    <color name="solid_color">#FFF</color>
+    <color name="stroke_color">#000</color>
 </resources>
