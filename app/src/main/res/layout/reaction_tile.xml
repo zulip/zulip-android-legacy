@@ -16,5 +16,6 @@
         android:layout_marginLeft="8dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        tools:text="1"/>
+        tools:text="1"
+        android:textColor="@color/dev_auth_user"/>
 </LinearLayout>
