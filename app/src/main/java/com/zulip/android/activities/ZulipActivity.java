@@ -1,14 +1,6 @@
 package com.zulip.android.activities;
 
 import android.Manifest;
-import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.Callable;
-import java.util.ArrayList;
-
 import android.animation.Animator;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -34,10 +26,12 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
@@ -97,9 +91,9 @@ import com.zulip.android.gcm.Notifications;
 import com.zulip.android.models.Emoji;
 import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageType;
+import com.zulip.android.models.PeopleDrawerList;
 import com.zulip.android.models.Person;
 import com.zulip.android.models.Presence;
-import com.zulip.android.models.PeopleDrawerList;
 import com.zulip.android.models.Stream;
 import com.zulip.android.networking.AsyncGetEvents;
 import com.zulip.android.networking.AsyncSend;
@@ -112,6 +106,7 @@ import com.zulip.android.util.CommonProgressDialog;
 import com.zulip.android.util.Constants;
 import com.zulip.android.util.FilePathHelper;
 import com.zulip.android.util.MutedTopics;
+import com.zulip.android.util.RemoveFabOnScroll;
 import com.zulip.android.util.RemoveViewsOnScroll;
 import com.zulip.android.util.SwipeRemoveLinearLayout;
 import com.zulip.android.util.UrlHelper;
@@ -124,9 +119,16 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.Callable;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -154,6 +156,7 @@ public class ZulipActivity extends BaseActivity implements
     private static final int HIDE_FAB_AFTER_SEC = 5;
     public MessageListFragment currentList;
     public CommonProgressDialog commonProgressDialog;
+    private Snackbar connectivitySnackbar;
     FloatingActionButton fab;
     NarrowFilter narrowFilter;
     String prevId = null;
@@ -162,6 +165,7 @@ public class ZulipActivity extends BaseActivity implements
     private boolean logged_in = false;
     private boolean backPressedOnce = false;
     private boolean inSearch = false;
+    private String networkStatus = Constants.STATUS_CONNECTING;
     private ZulipActivity that = this; // self-ref
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
@@ -229,8 +233,8 @@ public class ZulipActivity extends BaseActivity implements
         AnimationHelper.hideViewX(chatBox, animToRight);
         //show fab button
         CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) fab.getLayoutParams();
-        RemoveViewsOnScroll removeViewsOnScroll = (RemoveViewsOnScroll) layoutParams.getBehavior();
-        removeViewsOnScroll.showView(fab);
+        RemoveFabOnScroll removeFabOnScroll = (RemoveFabOnScroll) layoutParams.getBehavior();
+        removeFabOnScroll.showView(fab);
     }
 
     public HashMap<String, Bitmap> getGravatars() {
@@ -775,6 +779,7 @@ public class ZulipActivity extends BaseActivity implements
 
     /**
      * Filter'keyWords people drawer according to name
+     *
      * @param keyWords removes names which don't contain keyWords
      */
     private void filterPeopleDrawer(String keyWords) {
@@ -800,6 +805,7 @@ public class ZulipActivity extends BaseActivity implements
 
     /**
      * Refreshes recyclerView of people drawer
+     *
      * @throws SQLException
      */
     public void refreshPeopleDrawer() throws SQLException {
@@ -842,6 +848,7 @@ public class ZulipActivity extends BaseActivity implements
 
     /**
      * Combine list of recent private messages persons and persons with no recent messages
+     *
      * @param drawerLists persons with whom no recent messages
      */
     private void combineList(List<PeopleDrawerList> drawerLists) {
@@ -1751,7 +1758,7 @@ public class ZulipActivity extends BaseActivity implements
         appBarLayout.requestLayout();
 
         layoutParams = (CoordinatorLayout.LayoutParams) fab.getLayoutParams();
-        layoutParams.setBehavior(new RemoveViewsOnScroll(linearLayoutManager, adapter));
+        layoutParams.setBehavior(new RemoveFabOnScroll(linearLayoutManager, adapter));
         fab.setLayoutParams(layoutParams);
 
         topSnackBar.setMessagesLayoutManager(linearLayoutManager);
@@ -2423,5 +2430,52 @@ public class ZulipActivity extends BaseActivity implements
     // Intent Extra constants
     public enum Flag {
         RESET_DATABASE,
+    }
+
+    /**
+     * This function shows the snackbar stating the connectivity status of the device and also changes the behaviour of the
+     * fab.
+     */
+    public void showConnectivitySnackBar(final String networkState) {
+        final CoordinatorLayout coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout);
+        final Handler handler = new Handler(Looper.getMainLooper()) {
+            @Override
+            public void handleMessage(android.os.Message msg) {
+                if (networkState.equals(Constants.STATUS_CONNECTING)) {
+                    networkStatus = Constants.STATUS_CONNECTING;
+                    connectivitySnackbar = Snackbar.make(coordinatorLayout, R.string.connecting, Snackbar.LENGTH_INDEFINITE);
+                    connectivitySnackbar.show();
+
+                } else if (networkState.equals(Constants.STATUS_CONNECTED)) {
+                    if (connectivitySnackbar != null) {
+                        connectivitySnackbar.dismiss();
+                    }
+                    //Starts a network request only when there is an active network connection
+                    startRequests();
+                    networkStatus = Constants.STATUS_CONNECTED;
+                } else {
+                    displayChatBox(false);
+                    displayFAB(true);
+                    //Displays old offline messages
+                    if (!networkStatus.equals(Constants.STATUS_CONNECTED))
+                        onReadyToDisplay(true);
+                    networkStatus = Constants.STATUS_NOT_CONNECTED;
+                    connectivitySnackbar = Snackbar.make(coordinatorLayout, R.string.no_connection, Snackbar.LENGTH_INDEFINITE);
+                    connectivitySnackbar.setAction("RETRY", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            showConnectivitySnackBar(Constants.STATUS_CONNECTING);
+                            startRequests();
+                        }
+                    });
+                    connectivitySnackbar.setActionTextColor(getResources().getColor(R.color.top_snackbar_show_button_text_color));
+                    connectivitySnackbar.show();
+                }
+                Log.d("NetworkStatus", networkState);
+                super.handleMessage(msg);
+            }
+        };
+
+        handler.sendEmptyMessage(0);
     }
 }
