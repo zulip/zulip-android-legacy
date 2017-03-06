@@ -351,6 +351,8 @@ public class ZulipApp extends Application {
                     new Callable<Void>() {
                         public Void call() throws Exception {
                             for (String newEmoji : emojis) {
+                                //currently emojis are in png format
+                                newEmoji = newEmoji.replace(".png", "");
                                 dao.create(new Emoji(newEmoji));
                             }
                             return null;
