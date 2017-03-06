@@ -1,14 +1,6 @@
 package com.zulip.android.activities;
 
 import android.Manifest;
-import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.Callable;
-import java.util.ArrayList;
-
 import android.animation.Animator;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -99,9 +91,9 @@ import com.zulip.android.gcm.Notifications;
 import com.zulip.android.models.Emoji;
 import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageType;
+import com.zulip.android.models.PeopleDrawerList;
 import com.zulip.android.models.Person;
 import com.zulip.android.models.Presence;
-import com.zulip.android.models.PeopleDrawerList;
 import com.zulip.android.models.Stream;
 import com.zulip.android.networking.AsyncGetEvents;
 import com.zulip.android.networking.AsyncSend;
@@ -127,9 +119,16 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.Callable;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -779,6 +778,7 @@ public class ZulipActivity extends BaseActivity implements
 
     /**
      * Filter'keyWords people drawer according to name
+     *
      * @param keyWords removes names which don't contain keyWords
      */
     private void filterPeopleDrawer(String keyWords) {
@@ -804,6 +804,7 @@ public class ZulipActivity extends BaseActivity implements
 
     /**
      * Refreshes recyclerView of people drawer
+     *
      * @throws SQLException
      */
     public void refreshPeopleDrawer() throws SQLException {
@@ -846,6 +847,7 @@ public class ZulipActivity extends BaseActivity implements
 
     /**
      * Combine list of recent private messages persons and persons with no recent messages
+     *
      * @param drawerLists persons with whom no recent messages
      */
     private void combineList(List<PeopleDrawerList> drawerLists) {
@@ -2428,6 +2430,7 @@ public class ZulipActivity extends BaseActivity implements
     public enum Flag {
         RESET_DATABASE,
     }
+
     /**
      * This function shows the snackbar stating the connectivity status of the device and also changes the behaviour of the
      * fab.
@@ -2449,6 +2452,9 @@ public class ZulipActivity extends BaseActivity implements
                 } else {
                     displayChatBox(false);
                     displayFAB(true);
+                    //Displays old offline messages
+                    if (!networkStatus.equals(Constants.STATUS_CONNECTED))
+                        onReadyToDisplay(true);
                     networkStatus = Constants.STATUS_NOT_CONNECTED;
                     Snackbar.make(coordinatorLayout, R.string.no_connection, Snackbar.LENGTH_INDEFINITE).show();
                 }
