@@ -30,6 +30,7 @@ import com.zulip.android.networking.response.events.StreamWrapper;
 import com.zulip.android.networking.response.events.StarWrapper;
 import com.zulip.android.networking.response.events.SubscriptionWrapper;
 import com.zulip.android.networking.response.events.UpdateMessageWrapper;
+import com.zulip.android.util.Constants;
 import com.zulip.android.util.MutedTopics;
 import com.zulip.android.util.TypeSwapper;
 import com.zulip.android.util.ZLog;
@@ -107,6 +108,10 @@ public class AsyncGetEvents extends Thread {
         long backoff = (long) (Math.exp(failures / 2.0) * 1000);
         Log.e(ASYNC_GET_EVENTS, "Failure " + failures + ", sleeping for "
                 + backoff);
+        //MAX_CONNECTION_FAILURE_COUNT failures represent loss in network connectivity
+        if (failures == Constants.MAX_CONNECTION_FAILURE_COUNT) {
+            mActivity.showConnectivitySnackBar(Constants.STATUS_NOT_CONNECTED);
+        }
         SystemClock.sleep(backoff);
     }
 
@@ -288,6 +293,9 @@ public class AsyncGetEvents extends Thread {
                         if (body.getEvents().size() > 0) {
                             this.processEvents(body);
                             app.setLastEventId(body.getEvents().get(body.getEvents().size() - 1).getId());
+                            //Shows connected status on receiving data
+                            if (failures > 0)
+                                mActivity.showConnectivitySnackBar(Constants.STATUS_CONNECTED);
                             failures = 0;
                         }
 

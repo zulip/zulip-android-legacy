@@ -34,10 +34,12 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
@@ -112,6 +114,7 @@ import com.zulip.android.util.CommonProgressDialog;
 import com.zulip.android.util.Constants;
 import com.zulip.android.util.FilePathHelper;
 import com.zulip.android.util.MutedTopics;
+import com.zulip.android.util.RemoveFabOnScroll;
 import com.zulip.android.util.RemoveViewsOnScroll;
 import com.zulip.android.util.SwipeRemoveLinearLayout;
 import com.zulip.android.util.UrlHelper;
@@ -162,6 +165,7 @@ public class ZulipActivity extends BaseActivity implements
     private boolean logged_in = false;
     private boolean backPressedOnce = false;
     private boolean inSearch = false;
+    private String networkStatus = Constants.STATUS_CONNECTING;
     private ZulipActivity that = this; // self-ref
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
@@ -229,8 +233,8 @@ public class ZulipActivity extends BaseActivity implements
         AnimationHelper.hideViewX(chatBox, animToRight);
         //show fab button
         CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) fab.getLayoutParams();
-        RemoveViewsOnScroll removeViewsOnScroll = (RemoveViewsOnScroll) layoutParams.getBehavior();
-        removeViewsOnScroll.showView(fab);
+        RemoveFabOnScroll removeFabOnScroll = (RemoveFabOnScroll) layoutParams.getBehavior();
+        removeFabOnScroll.showView(fab);
     }
 
     public HashMap<String, Bitmap> getGravatars() {
@@ -1751,7 +1755,7 @@ public class ZulipActivity extends BaseActivity implements
         appBarLayout.requestLayout();
 
         layoutParams = (CoordinatorLayout.LayoutParams) fab.getLayoutParams();
-        layoutParams.setBehavior(new RemoveViewsOnScroll(linearLayoutManager, adapter));
+        layoutParams.setBehavior(new RemoveFabOnScroll(linearLayoutManager, adapter));
         fab.setLayoutParams(layoutParams);
 
         topSnackBar.setMessagesLayoutManager(linearLayoutManager);
@@ -2423,5 +2427,36 @@ public class ZulipActivity extends BaseActivity implements
     // Intent Extra constants
     public enum Flag {
         RESET_DATABASE,
+    }
+    /**
+     * This function shows the snackbar stating the connectivity status of the device and also changes the behaviour of the
+     * fab.
+     */
+    public void showConnectivitySnackBar(final String networkState) {
+        final CoordinatorLayout coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout);
+        final Handler handler = new Handler(Looper.getMainLooper()) {
+            @Override
+            public void handleMessage(android.os.Message msg) {
+                if (networkState.equals(Constants.STATUS_CONNECTING)) {
+                    networkStatus = Constants.STATUS_CONNECTING;
+                    Snackbar.make(coordinatorLayout, R.string.connecting, Snackbar.LENGTH_INDEFINITE).show();
+
+                } else if (networkState.equals(Constants.STATUS_CONNECTED)) {
+                    //Starts a network request only when there is an active network connection
+                    startRequests();
+                    networkStatus = Constants.STATUS_CONNECTED;
+                    Snackbar.make(coordinatorLayout, R.string.connection_established, Snackbar.LENGTH_SHORT).show();
+                } else {
+                    displayChatBox(false);
+                    displayFAB(true);
+                    networkStatus = Constants.STATUS_NOT_CONNECTED;
+                    Snackbar.make(coordinatorLayout, R.string.no_connection, Snackbar.LENGTH_INDEFINITE).show();
+                }
+                Log.d("NetworkStatus", networkState);
+                super.handleMessage(msg);
+            }
+        };
+
+        handler.sendEmptyMessage(0);
     }
 }

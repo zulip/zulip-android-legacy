@@ -24,4 +24,9 @@ public class Constants {
     public static final int ALL_PEOPLE_ID = -1;
     // row number which is used to differentiate the '@-mentions' in people drawer
     public static int MENTIONS = -2;
+    //Connection States
+    public static final String STATUS_CONNECTED = "connected";
+    public static final String STATUS_CONNECTING = "connecting";
+    public static final String STATUS_NOT_CONNECTED = "no_connection";
+    public static final int MAX_CONNECTION_FAILURE_COUNT = 2;
 }
