@@ -156,6 +156,7 @@ public class ZulipActivity extends BaseActivity implements
     private static final int HIDE_FAB_AFTER_SEC = 5;
     public MessageListFragment currentList;
     public CommonProgressDialog commonProgressDialog;
+    private Snackbar connectivitySnackbar;
     FloatingActionButton fab;
     NarrowFilter narrowFilter;
     String prevId = null;
@@ -2442,13 +2443,16 @@ public class ZulipActivity extends BaseActivity implements
             public void handleMessage(android.os.Message msg) {
                 if (networkState.equals(Constants.STATUS_CONNECTING)) {
                     networkStatus = Constants.STATUS_CONNECTING;
-                    Snackbar.make(coordinatorLayout, R.string.connecting, Snackbar.LENGTH_INDEFINITE).show();
+                    connectivitySnackbar = Snackbar.make(coordinatorLayout, R.string.connecting, Snackbar.LENGTH_INDEFINITE);
+                    connectivitySnackbar.show();
 
                 } else if (networkState.equals(Constants.STATUS_CONNECTED)) {
+                    if (connectivitySnackbar != null) {
+                        connectivitySnackbar.dismiss();
+                    }
                     //Starts a network request only when there is an active network connection
                     startRequests();
                     networkStatus = Constants.STATUS_CONNECTED;
-                    Snackbar.make(coordinatorLayout, R.string.connection_established, Snackbar.LENGTH_SHORT).show();
                 } else {
                     displayChatBox(false);
                     displayFAB(true);
@@ -2456,7 +2460,16 @@ public class ZulipActivity extends BaseActivity implements
                     if (!networkStatus.equals(Constants.STATUS_CONNECTED))
                         onReadyToDisplay(true);
                     networkStatus = Constants.STATUS_NOT_CONNECTED;
-                    Snackbar.make(coordinatorLayout, R.string.no_connection, Snackbar.LENGTH_INDEFINITE).show();
+                    connectivitySnackbar = Snackbar.make(coordinatorLayout, R.string.no_connection, Snackbar.LENGTH_INDEFINITE);
+                    connectivitySnackbar.setAction("RETRY", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            showConnectivitySnackBar(Constants.STATUS_CONNECTING);
+                            startRequests();
+                        }
+                    });
+                    connectivitySnackbar.setActionTextColor(getResources().getColor(R.color.top_snackbar_show_button_text_color));
+                    connectivitySnackbar.show();
                 }
                 Log.d("NetworkStatus", networkState);
                 super.handleMessage(msg);

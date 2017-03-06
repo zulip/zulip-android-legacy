@@ -167,7 +167,6 @@
     <string name="people_drawer_recent_pm_label">Recent Private Messages</string>
     <string name="people_drawer_others_label">New Private Message</string>
     <string name="mentions">\@-mentions</string>
-    <string name="connection_established">Connection Established</string>
     <string name="no_connection">Waiting for Connection</string>
     <string name="connecting">Connecting ...</string>
 </resources>

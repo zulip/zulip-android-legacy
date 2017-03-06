@@ -26,8 +26,8 @@ import com.zulip.android.networking.response.events.EventsBranch;
 import com.zulip.android.networking.response.events.GetEventResponse;
 import com.zulip.android.networking.response.events.MessageWrapper;
 import com.zulip.android.networking.response.events.MutedTopicsWrapper;
-import com.zulip.android.networking.response.events.StreamWrapper;
 import com.zulip.android.networking.response.events.StarWrapper;
+import com.zulip.android.networking.response.events.StreamWrapper;
 import com.zulip.android.networking.response.events.SubscriptionWrapper;
 import com.zulip.android.networking.response.events.UpdateMessageWrapper;
 import com.zulip.android.util.Constants;
@@ -293,9 +293,8 @@ public class AsyncGetEvents extends Thread {
                         if (body.getEvents().size() > 0) {
                             this.processEvents(body);
                             app.setLastEventId(body.getEvents().get(body.getEvents().size() - 1).getId());
-                            //Shows connected status on receiving data
-                            if (failures > 0)
-                                mActivity.showConnectivitySnackBar(Constants.STATUS_CONNECTED);
+                            //Dismiss Snackbar on Connecting
+                            mActivity.showConnectivitySnackBar(Constants.STATUS_CONNECTED);
                             failures = 0;
                         }
 
