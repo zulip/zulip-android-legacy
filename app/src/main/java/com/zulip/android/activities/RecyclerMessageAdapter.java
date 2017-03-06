@@ -34,6 +34,7 @@ import com.zulip.android.models.Person;
 import com.zulip.android.models.Stream;
 import com.zulip.android.util.ActivityTransitionAnim;
 import com.zulip.android.util.ConvertDpPx;
+import com.zulip.android.util.ActivityTransitionAnim;
 import com.zulip.android.util.MutedTopics;
 import com.zulip.android.util.OnItemClickListener;
 import com.zulip.android.util.UrlHelper;
