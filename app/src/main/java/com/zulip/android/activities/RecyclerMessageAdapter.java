@@ -55,6 +55,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Random;
 
 import static com.zulip.android.util.ConvertDpPx.convertDpToPixel;
@@ -438,8 +440,8 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 setUpTime(message, messageHolder);
                 setUpStar(message, messageHolder);
                 try {
+                    messageHolder.reactionsTable.removeAllViews();
                     if (message.getReactions().isEmpty()) {
-                        messageHolder.reactionsTable.removeAllViews();
                         return;
                     }
 
@@ -456,7 +458,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
                     // table row index
                     int index = 0;
-                    for (Reaction reaction : message.getReactions()) {
+                    for (Map.Entry<String, Integer> reaction : getDisplayReactions(message.getReactions()).entrySet()) {
                         if (numOfReactions == 0) {
                             // current row is full
                             messageHolder.reactionsTable.addView(row, index++);
@@ -474,7 +476,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                         TextView textView = (TextView) reactionTile.findViewById(R.id.reaction_count);
 
                         // get emoji drawable from assets
-                        String emojiName = reaction.getEmoji() + ".png";
+                        String emojiName = reaction.getKey() + ".png";
                         Drawable drawable = Drawable.createFromStream(zulipApp.getAssets().open("emoji/" + emojiName),
                                 "emoji/" + emojiName);
 
@@ -484,8 +486,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                         drawable = new BitmapDrawable(context.getResources(), Bitmap.createScaledBitmap(bitmap, size, size, true));
 
                         imageView.setImageDrawable(drawable);
-                        // TODO: change when aggregating emojis
-                        textView.setText("1");
+                        textView.setText(String.format(Locale.getDefault(), "%d", reaction.getValue()));
                         row.addView(reactionTile);
 
                         numOfReactions--;
@@ -699,5 +700,15 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             headerView.getLayoutParams().height = 0;
             headerView.setVisibility(View.GONE);
         }
+    }
+
+
+    public HashMap<String, Integer> getDisplayReactions(List<Reaction> reactions) {
+        HashMap<String, Integer> hashMap = new HashMap<>();
+        for (Reaction reaction : reactions) {
+            Integer count = hashMap.get(reaction.getEmoji());
+            hashMap.put(reaction.getEmoji(), (count != null) ? count + 1 : 1);
+        }
+        return hashMap;
     }
 }
