@@ -489,8 +489,8 @@ public class ZulipActivity extends BaseActivity implements
                             view.setVisibility(View.GONE);
                         } else {
                             try {
-                                Drawable drawable = Drawable.createFromStream(getApplicationContext().getAssets().open("emoji/" + name),
-                                        "emoji/" + name);
+                                Drawable drawable = Drawable.createFromStream(getApplicationContext().getAssets().open("emoji/" + name + ".png"),
+                                        "emoji/" + name + ".png");
                                 ((ImageView) view).setImageDrawable(drawable);
                             } catch (Exception e) {
                                 ZLog.logException(e);
