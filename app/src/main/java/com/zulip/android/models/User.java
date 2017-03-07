@@ -22,6 +22,11 @@ public class User {
     @DatabaseField(columnName = EMAIL_FIELD)
     private String email;
 
+    /**
+     * Used in reaction type event {@link com.zulip.android.networking.response.events.ReactionWrapper}
+     */
+    @SerializedName("user_id")
+    private int alternateId;
 
     /**
      * Construct an empty User object.
@@ -41,5 +46,23 @@ public class User {
 
     public String getEmail() {
         return this.email;
+    }
+
+    public int getAlternateId() {
+        return this.alternateId;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof User) {
+            User user = (User) obj;
+            return this.getId() == user.getId();
+        } else {
+            return false;
+        }
     }
 }

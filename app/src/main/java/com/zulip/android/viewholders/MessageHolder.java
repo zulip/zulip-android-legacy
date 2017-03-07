@@ -30,8 +30,6 @@ public class MessageHolder extends RecyclerView.ViewHolder implements View.OnCli
     public ImageView starImage;
     public View contentImageContainer;
     public TableLayout reactionsTable;
-    // TODO: remove
-    public ImageView reaction;
     public OnItemClickListener onItemClickListener;
 
     public MessageHolder(final View itemView) {

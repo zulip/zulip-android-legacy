@@ -29,7 +29,8 @@ public class EventsBranch {
         EDIT_MESSAGE_TIME_LIMIT(EditMessageWrapper.class, "realm"),
         UPDATE_MESSAGE(UpdateMessageWrapper.class, "update_message"),
         STREAM(StreamWrapper.class, "stream"),
-        STAR_MESSAGE(StarWrapper.class, "update_message_flags");
+        STAR_MESSAGE(StarWrapper.class, "update_message_flags"),
+        REACTION(ReactionWrapper.class, "reaction");
 
         private final Class<? extends EventsBranch> klazz;
         private final String key;
