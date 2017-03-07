@@ -35,12 +35,30 @@ public class Reaction {
         return this.emojiName;
     }
 
+    public void setEmoji(String name) {
+        this.emojiName = name;
+    }
+
     public User getUser() {
         return this.user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     @Override
     public String toString() {
         return ":" + getEmoji() + ":";
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Reaction) {
+            Reaction reaction = (Reaction) obj;
+            return this.emojiName.equals(reaction.emojiName) && this.user.equals(reaction.user);
+        } else {
+            return false;
+        }
     }
 }

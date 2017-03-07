@@ -795,4 +795,12 @@ public class Message {
             return displayRecipient;
         }
     }
+
+    public void addReaction(Reaction reaction) {
+        this.reactions.add(reaction);
+    }
+
+    public boolean removeReaction(Reaction reaction) {
+        return this.reactions.remove(reaction);
+    }
 }

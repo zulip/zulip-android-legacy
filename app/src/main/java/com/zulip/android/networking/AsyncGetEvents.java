@@ -19,6 +19,7 @@ import com.zulip.android.activities.ZulipActivity;
 import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageRange;
 import com.zulip.android.models.Person;
+import com.zulip.android.models.Reaction;
 import com.zulip.android.models.Stream;
 import com.zulip.android.networking.response.UserConfigurationResponse;
 import com.zulip.android.networking.response.events.EditMessageWrapper;
@@ -26,6 +27,7 @@ import com.zulip.android.networking.response.events.EventsBranch;
 import com.zulip.android.networking.response.events.GetEventResponse;
 import com.zulip.android.networking.response.events.MessageWrapper;
 import com.zulip.android.networking.response.events.MutedTopicsWrapper;
+import com.zulip.android.networking.response.events.ReactionWrapper;
 import com.zulip.android.networking.response.events.StarWrapper;
 import com.zulip.android.networking.response.events.StreamWrapper;
 import com.zulip.android.networking.response.events.SubscriptionWrapper;
@@ -389,6 +391,12 @@ public class AsyncGetEvents extends Thread {
         if (!starEvents.isEmpty()) {
             processStarEvents(starEvents);
         }
+
+        // get reaction events
+        List<EventsBranch> reactionEvents = events.getEventsOfBranchType(EventsBranch.BranchType.REACTION);
+        if (!reactionEvents.isEmpty()) {
+            processReactionEvents(reactionEvents);
+        }
     }
 
     /**
@@ -601,5 +609,55 @@ public class AsyncGetEvents extends Thread {
                 }
             }
         }
+    }
+
+    public void processReactionEvents(List<EventsBranch> genEvents) {
+        final List<Integer> messageIds = new ArrayList<>();
+        for (EventsBranch event : genEvents) {
+            ReactionWrapper reactionWrapper = (ReactionWrapper) event;
+
+            Dao<Message, Integer> dao = app.getDao(Message.class);
+            try {
+                Message msg = dao.queryForId(reactionWrapper.getMessageId());
+
+                if (msg == null) {
+                    // If we don't have the message in cache, do nothing; if we
+                    // ever fetch it from the server, it'll come with the
+                    // latest reactions attached
+                    continue;
+                }
+                Reaction reaction = reactionWrapper.getReaction();
+
+                switch (reactionWrapper.getOperation()) {
+                    case ReactionWrapper.OPERATION_ADD:
+                        msg.addReaction(reaction);
+                        break;
+                    case ReactionWrapper.OPERATION_REMOVE:
+                        msg.removeReaction(reaction);
+                        break;
+                    default:
+                        Log.d("AsyncEvents", "unhandled operation for reaction type event");
+                        return;
+                }
+                dao.update(msg);
+            } catch (SQLException e) {
+                ZLog.logException(e);
+                continue;
+            }
+            // update only when a successful database update has been made
+            messageIds.add(reactionWrapper.getMessageId());
+        }
+
+        mActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                RecyclerMessageAdapter adapter = mActivity.getCurrentMessageList().getAdapter();
+                for (int id : messageIds) {
+                    // notify adapter data item changed
+                    adapter.getItemIndex(id);
+                    adapter.notifyItemChanged(adapter.getItemIndex(id));
+                }
+            }
+        });
     }
 }
