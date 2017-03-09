@@ -1365,6 +1365,9 @@ public class ZulipActivity extends BaseActivity implements
         fab = (FloatingActionButton) findViewById(R.id.fab);
         chatBox = (SwipeRemoveLinearLayout) findViewById(R.id.messageBoxContainer);
         chatBox.registerToSwipeEvents(this);
+        addFileBtn.setColorFilter(getResources().getColorStateList(R.color.colorTextSecondary).getColorForState(addFileBtn.getDrawableState(), 0));
+        sendBtn.setColorFilter(getResources().getColorStateList(R.color.colorTextSecondary).getColorForState(sendBtn.getDrawableState(), 0));
+        togglePrivateStreamBtn.setColorFilter(getResources().getColorStateList(R.color.colorTextSecondary).getColorForState(togglePrivateStreamBtn.getDrawableState(), 0));
         fabHidder = new CountDownTimer(Constants.HIDE_FAB_AFTER_SEC * 1000, Constants.HIDE_FAB_AFTER_SEC * 1000) {
             public void onTick(long millisUntilFinished) {
             }
