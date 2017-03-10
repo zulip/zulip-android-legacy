@@ -2,7 +2,6 @@ package com.zulip.android.viewholders.floatingRecyclerViewLables;
 
 import android.graphics.Canvas;
 import android.graphics.Rect;
-import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,16 +24,14 @@ public class FloatingHeaderDecoration extends RecyclerView.ItemDecoration {
     private boolean mRenderInline;
 
     /**
-     * @param adapter
-     *         the sticky header adapter to use
+     * @param adapter the sticky header adapter to use
      */
     public FloatingHeaderDecoration(FloatingHeaderAdapter adapter) {
         this(adapter, false);
     }
 
     /**
-     * @param adapter
-     *         the sticky header adapter to use
+     * @param adapter the sticky header adapter to use
      */
     private FloatingHeaderDecoration(FloatingHeaderAdapter adapter, boolean renderInline) {
         mAdapter = adapter;

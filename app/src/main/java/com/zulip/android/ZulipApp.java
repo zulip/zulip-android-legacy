@@ -30,10 +30,10 @@ import com.zulip.android.database.DatabaseHelper;
 import com.zulip.android.models.Emoji;
 import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageType;
+import com.zulip.android.models.PeopleDrawerList;
 import com.zulip.android.models.Person;
 import com.zulip.android.models.Presence;
 import com.zulip.android.models.Stream;
-import com.zulip.android.models.PeopleDrawerList;
 import com.zulip.android.networking.AsyncUnreadMessagesUpdate;
 import com.zulip.android.networking.ZulipInterceptor;
 import com.zulip.android.networking.response.UserConfigurationResponse;
@@ -94,7 +94,7 @@ public class ZulipApp extends Application {
      * Map of recent PM person with their email
      * Updated when new private message is arrived
      */
-    public final Map<String,PeopleDrawerList> recentPMPersons = new ConcurrentHashMap<>();
+    public final Map<String, PeopleDrawerList> recentPMPersons = new ConcurrentHashMap<>();
     // This object's intrinsic lock is used to prevent multiple threads from
     // making conflicting updates to ranges
     public Object updateRangeLock = new Object();
@@ -213,6 +213,10 @@ public class ZulipApp extends Application {
         return zulipServices;
     }
 
+    public void setZulipServices(ZulipServices zulipServices) {
+        this.zulipServices = zulipServices;
+    }
+
     public ZulipServices getUploadServices() {
         if (uploadServices == null) {
             HttpLoggingInterceptor logging = new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.HEADERS);
@@ -227,10 +231,6 @@ public class ZulipApp extends Application {
                     .create(ZulipServices.class);
         }
         return uploadServices;
-    }
-
-    public void setZulipServices(ZulipServices zulipServices) {
-        this.zulipServices = zulipServices;
     }
 
     public Gson getGson() {
