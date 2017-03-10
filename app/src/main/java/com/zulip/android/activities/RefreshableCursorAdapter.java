@@ -31,13 +31,13 @@ public abstract class RefreshableCursorAdapter extends RecyclerView.Adapter<Recy
     private Context mContext;
     private ZulipApp mApp;
 
-    protected abstract void onPeopleSelect(int id);
-
     RefreshableCursorAdapter(Context context, List<PeopleDrawerList> list, ZulipApp app) {
         this.mList = list;
         this.mContext = context;
         this.mApp = app;
     }
+
+    protected abstract void onPeopleSelect(int id);
 
     void filterList(List<PeopleDrawerList> list) {
         this.mList = list;

@@ -1,25 +1,18 @@
 package com.zulip.android.filters;
 
 import android.os.Parcel;
-import android.support.v4.content.ContextCompat;
-import android.text.TextUtils;
 
-import com.j256.ormlite.stmt.SelectArg;
 import com.j256.ormlite.stmt.Where;
 import com.zulip.android.R;
 import com.zulip.android.ZulipApp;
 import com.zulip.android.models.Message;
-import com.zulip.android.models.MessageType;
-import com.zulip.android.models.Person;
 import com.zulip.android.models.Stream;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class NarrowFilterMentioned implements NarrowFilter {
     public static final Creator<NarrowFilterMentioned> CREATOR = new Creator<NarrowFilterMentioned>() {

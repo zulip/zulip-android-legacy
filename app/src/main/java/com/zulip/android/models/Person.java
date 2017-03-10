@@ -255,6 +255,10 @@ public class Person {
         });
     }
 
+    public static boolean checkIsActive(Presence presence) {
+        return presence != null && !(presence.getAge() > Constants.INACTIVE_TIME_OUT) && (presence.getStatus() != PresenceType.ACTIVE || presence.getStatus() != PresenceType.IDLE);
+    }
+
     public int getId() {
         return id;
     }
@@ -343,9 +347,5 @@ public class Person {
 
     public void setRecipientId(int id) {
         this.recipientId = id;
-    }
-
-    public static boolean checkIsActive(Presence presence) {
-        return presence != null && !(presence.getAge() > Constants.INACTIVE_TIME_OUT) && (presence.getStatus() != PresenceType.ACTIVE || presence.getStatus() != PresenceType.IDLE);
     }
 }

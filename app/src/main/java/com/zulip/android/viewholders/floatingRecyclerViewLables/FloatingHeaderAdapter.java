@@ -7,8 +7,8 @@ import android.view.ViewGroup;
  * The adapter to assist the {@link FloatingHeaderDecoration} in creating and binding the header views.
  *
  * @param <T> the header view holder
- * This file has been modified from
- * https://github.com/edubarr/header-decor/blob/master/lib/src/main/java/ca/barrenechea/widget/recyclerview/decoration/StickyHeaderAdapter.java
+ *            This file has been modified from
+ *            https://github.com/edubarr/header-decor/blob/master/lib/src/main/java/ca/barrenechea/widget/recyclerview/decoration/StickyHeaderAdapter.java
  */
 public interface FloatingHeaderAdapter<T extends RecyclerView.ViewHolder> {
 
@@ -30,8 +30,9 @@ public interface FloatingHeaderAdapter<T extends RecyclerView.ViewHolder> {
 
     /**
      * Updates the header view to reflect the header data for the given position
+     *
      * @param viewholder the header view holder
-     * @param position the header's item position
+     * @param position   the header's item position
      */
     void onBindHeaderViewHolder(T viewholder, int position);
 }

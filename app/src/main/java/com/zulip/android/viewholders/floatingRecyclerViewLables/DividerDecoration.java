@@ -1,14 +1,8 @@
 package com.zulip.android.viewholders.floatingRecyclerViewLables;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Rect;
-import android.support.annotation.ColorInt;
-import android.support.annotation.ColorRes;
-import android.support.annotation.DimenRes;
 import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
 import android.view.View;
@@ -51,8 +45,10 @@ public class DividerDecoration extends RecyclerView.ItemDecoration {
         public Builder(Context context) {
             mHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, 1f, context.getResources().getDisplayMetrics());
         }
+
         /**
          * Instantiates a DividerDecoration with the specified parameters.
+         *
          * @return a properly initialized DividerDecoration instance
          */
         public DividerDecoration build() {

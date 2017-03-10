@@ -14,18 +14,13 @@ import com.zulip.android.R;
 
 /**
  * List dialog for picking option of upload (camera or file).
- *
+ * <p>
  * The activity that creates an instance of this dialog fragment must
  * implement ListDialogListener interface {@link ListDialogListener} in order to receive event callbacks.
  * Each method passes the DialogFragment in case the host needs to query it.
  */
 
 public class ListDialog extends DialogFragment {
-
-    public interface ListDialogListener {
-        void onDialogPhotoClick(DialogFragment dialog);
-        void onDialogFileClick(DialogFragment dialog);
-    }
 
     // Use this instance of the interface to deliver action events
     ListDialogListener mListener;
@@ -56,8 +51,8 @@ public class ListDialog extends DialogFragment {
         View rootView = inflater.inflate(R.layout.list_dialog, null);
         View cameraListItem = rootView.findViewById(R.id.picture_dialog);
         View fileListItem = rootView.findViewById(R.id.pick_file_dialog);
-        ImageView cameraImage =(ImageView) rootView.findViewById(R.id.camera_share_icon);
-        ImageView fileImage =(ImageView) rootView.findViewById(R.id.file_share_icon);
+        ImageView cameraImage = (ImageView) rootView.findViewById(R.id.camera_share_icon);
+        ImageView fileImage = (ImageView) rootView.findViewById(R.id.file_share_icon);
 
         //Add proper colorState tinting to the camera and fileList Icons
         cameraImage.setColorFilter(getResources().getColorStateList(R.color.colorTextSecondary).getColorForState(cameraImage.getDrawableState(), 0));
@@ -83,5 +78,11 @@ public class ListDialog extends DialogFragment {
         });
         builder.setView(rootView);
         return builder.create();
+    }
+
+    public interface ListDialogListener {
+        void onDialogPhotoClick(DialogFragment dialog);
+
+        void onDialogFileClick(DialogFragment dialog);
     }
 }

@@ -229,6 +229,9 @@ public class ZulipActivity extends BaseActivity implements
     private LinearLayout composeStatus;
     private String tempStreamSave = null;
     private TopSnackBar topSnackBar;
+    private NotificationManager mNotificationManager;
+    private NotificationCompat.Builder mBuilder;
+    private HashMap<Integer, Call<UploadResponse>> mCancelHashMap;
 
     @Override
     public void removeChatBox(boolean animToRight) {
@@ -812,6 +815,7 @@ public class ZulipActivity extends BaseActivity implements
 
     /**
      * Filter'keyWords people drawer according to name
+     *
      * @param keyWords removes names which don't contain keyWords
      */
     private void filterPeopleDrawer(String keyWords) {
@@ -837,6 +841,7 @@ public class ZulipActivity extends BaseActivity implements
 
     /**
      * Refreshes recyclerView of people drawer
+     *
      * @throws SQLException
      */
     public void refreshPeopleDrawer() throws SQLException {
@@ -879,6 +884,7 @@ public class ZulipActivity extends BaseActivity implements
 
     /**
      * Combine list of recent private messages persons and persons with no recent messages
+     *
      * @param drawerLists persons with whom no recent messages
      */
     private void combineList(List<PeopleDrawerList> drawerLists) {
@@ -1124,12 +1130,7 @@ public class ZulipActivity extends BaseActivity implements
         return MultipartBody.Part.createFormData(partName, file.getName(), request);
     }
 
-    private NotificationManager mNotificationManager;
-    private NotificationCompat.Builder mBuilder;
-
-    private HashMap<Integer, Call<UploadResponse>> mCancelHashMap;
-
-    public void cancelRequest(int notificationId) throws NullPointerException{
+    public void cancelRequest(int notificationId) throws NullPointerException {
         Call<UploadResponse> call = mCancelHashMap.get(notificationId);
         if (call != null) {
             call.cancel();
@@ -1321,7 +1322,7 @@ public class ZulipActivity extends BaseActivity implements
             if (filter == null) {
                 title = getString(R.string.app_name);
             } else {
-                title = filter.getTitle() + (filter.getSubtitle() != null ?  " > " + filter.getSubtitle() : "");
+                title = filter.getTitle() + (filter.getSubtitle() != null ? " > " + filter.getSubtitle() : "");
             }
         }
 

@@ -40,12 +40,12 @@ public class PeopleDrawerList {
         return groupId;
     }
 
-    public String getGroupName() {
-        return groupName;
-    }
-
     public void setGroupId(int groupId) {
         this.groupId = groupId;
+    }
+
+    public String getGroupName() {
+        return groupName;
     }
 
     public void setGroupName(String groupName) {
