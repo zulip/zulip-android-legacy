@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 
 import com.zulip.android.R;
 
@@ -55,6 +56,12 @@ public class ListDialog extends DialogFragment {
         View rootView = inflater.inflate(R.layout.list_dialog, null);
         View cameraListItem = rootView.findViewById(R.id.picture_dialog);
         View fileListItem = rootView.findViewById(R.id.pick_file_dialog);
+        ImageView cameraImage =(ImageView) rootView.findViewById(R.id.camera_share_icon);
+        ImageView fileImage =(ImageView) rootView.findViewById(R.id.file_share_icon);
+
+        //Add proper colorState tinting to the camera and fileList Icons
+        cameraImage.setColorFilter(getResources().getColorStateList(R.color.colorTextSecondary).getColorForState(cameraImage.getDrawableState(), 0));
+        fileImage.setColorFilter(getResources().getColorStateList(R.color.colorTextSecondary).getColorForState(fileImage.getDrawableState(), 0));
 
         // if device doesn't have camera, disable camera option
         if (!getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
