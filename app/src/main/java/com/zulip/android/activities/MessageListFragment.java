@@ -42,10 +42,10 @@ import com.zulip.android.networking.AsyncGetOldMessages;
 import com.zulip.android.networking.ZulipAsyncPushTask;
 import com.zulip.android.networking.response.EditResponse;
 import com.zulip.android.networking.response.RawMessageResponse;
+import com.zulip.android.networking.response.StarResponse;
 import com.zulip.android.networking.util.DefaultCallback;
 import com.zulip.android.util.CommonProgressDialog;
 import com.zulip.android.util.Constants;
-import com.zulip.android.networking.response.StarResponse;
 import com.zulip.android.util.MessageListener;
 import com.zulip.android.util.MutedTopics;
 import com.zulip.android.util.ZLog;
@@ -271,6 +271,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
     /**
      * Stars a message passed as parameter
+     *
      * @param message Message to be starred
      */
     private void starMessage(final Message message, final int position) {
@@ -299,6 +300,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
     /**
      * Unstars a message passed as parameter
+     *
      * @param message Message to be unstarred
      */
     private void unStarMessage(final Message message, final int position) {

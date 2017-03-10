@@ -25,6 +25,7 @@ import com.zulip.android.util.ZLog;
 public class GcmBroadcastReceiver extends BroadcastReceiver {
 
     private static final String TAG = "GCM";
+
     public static String getGCMReceiverAction(Context appContext) {
         return appContext.getPackageName() + ".PushMessage.BROADCAST";
     }
