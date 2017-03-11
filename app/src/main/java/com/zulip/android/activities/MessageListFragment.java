@@ -246,6 +246,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
                 return true;
             case R.id.edit_message:
                 editMessage(message, adapter.getContextMenuItemSelectedPosition());
+                return true;
             case R.id.star_message:
                 starMessage(message, adapter.getContextMenuItemSelectedPosition());
                 return true;
