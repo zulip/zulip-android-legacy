@@ -15,6 +15,8 @@ import com.zulip.android.models.Person;
 import com.zulip.android.util.OnItemClickListener;
 import com.zulip.android.util.ZLog;
 
+import java.util.Date;
+
 /**
  * A wrapper class for storing the information about the MessageHeader.
  */
@@ -28,6 +30,8 @@ public class MessageHeaderParent {
     private String displayRecipent;
     @ColorInt
     private int color;
+    //all messages below this header will be of same day as date of this timestamp
+    private Date messagesTimestamp;
 
 
     /**
@@ -125,11 +129,20 @@ public class MessageHeaderParent {
         return recipientsCache;
     }
 
+    public void setMessagesDate(Date timestamp) {
+        this.messagesTimestamp = timestamp;
+    }
+
+    public Date getMessagesTimestamp() {
+        return messagesTimestamp;
+    }
+
     public static class MessageHeaderHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public TextView streamTextView;
         public TextView topicTextView;
         public ImageView muteMessageImage;
         public TextView arrowHead;
+        public TextView timestamp;
         public OnItemClickListener onItemClickListener;
 
         public MessageHeaderHolder(View itemView) {
@@ -138,6 +151,7 @@ public class MessageHeaderParent {
             topicTextView = (TextView) itemView.findViewById(R.id.instance);
             arrowHead = (TextView) itemView.findViewById(R.id.sep);
             muteMessageImage = (ImageView) itemView.findViewById(R.id.muteMessageImage);
+            timestamp = (TextView) itemView.findViewById(R.id.timestamp);
             streamTextView.setOnClickListener(this);
             topicTextView.setOnClickListener(this);
         }

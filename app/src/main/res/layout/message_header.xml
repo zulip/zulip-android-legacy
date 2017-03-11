@@ -40,6 +40,17 @@
         android:padding="4dp"
         tools:text="This is a very very very long topic that is so long that it wraps" />
 
+    <TextView
+        android:id="@+id/timestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorTextTertiary"
+        tools:text="17:45"
+        android:paddingEnd="4dp"
+        android:paddingRight="4dp"
+        android:textStyle="bold"
+        android:textSize="8sp"/>
+
     <ImageView
         android:id="@+id/muteMessageImage"
         android:layout_width="wrap_content"

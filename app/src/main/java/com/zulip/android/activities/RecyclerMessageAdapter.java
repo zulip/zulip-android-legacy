@@ -317,9 +317,10 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         if (dateSeparator != null) {
             addNewDateSeparator(dateSeparator, messageAndHeadersCount + 1); //1 for LoadingHeader
         }
-        if (!lastHolderId.toString().equals(message.getIdForHolder()) || lastHolderId.toString().equals("")) {
+        if (!lastHolderId.toString().equals(message.getIdForHolder()) || lastHolderId.toString().equals("") || dateSeparator != null) {
             MessageHeaderParent messageHeaderParent = new MessageHeaderParent((message.getStream() == null) ? null : message.getStream().getName(), message.getSubject(), message.getIdForHolder(), message);
             messageHeaderParent.setMessageType(message.getType());
+            messageHeaderParent.setMessagesDate(message.getTimestamp());
             messageHeaderParent.setDisplayRecipent(message.getDisplayRecipient(zulipApp));
             if (message.getType() == MessageType.STREAM_MESSAGE) {
                 messageHeaderParent.setMute(mMutedTopics.isTopicMute(message));
@@ -335,8 +336,8 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             lastHolderId.append(messageHeaderParent.getId());
             return true;
         } else {
-            items.add((dateSeparator != null) ? messageAndHeadersCount + 2 : messageAndHeadersCount + 1, message);
-            notifyItemInserted((dateSeparator != null) ? messageAndHeadersCount + 2 : messageAndHeadersCount + 1);
+            items.add(messageAndHeadersCount + 1, message);
+            notifyItemInserted(messageAndHeadersCount + 1);
             return false;
         }
     }
@@ -348,12 +349,19 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
      * @param message Message to be added
      */
     public void addNewMessage(Message message) {
+        //check for date separator
+        Date lastSeparatorDate = getLastSeparatorRightDate();
+        if (lastSeparatorDate == null || !DateMethods.isSameDay(lastSeparatorDate, message.getTimestamp())) {
+            addNewDateSeparator(new MessageDateSeparator(lastSeparatorDate, message.getTimestamp()), getItemCount(true) - 1);
+        }
         MessageHeaderParent item = null;
         for (int i = getItemCount(false) - 1; i >= 1; i--) {
             //Find the last header and check if it belongs to this message!
             if (items.get(i) instanceof MessageHeaderParent) {
                 item = (MessageHeaderParent) items.get(i);
-                if (!item.getId().equals(message.getIdForHolder())) {
+                if (!item.getId().equals(message.getIdForHolder())
+                        || item.getMessagesTimestamp() == null
+                        || !DateMethods.isSameDay(item.getMessagesTimestamp(), message.getTimestamp())) {
                     item = null;
                 }
                 break;
@@ -364,16 +372,10 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             items.add(getItemCount(true) - 1, item);
             notifyItemInserted(getItemCount(true) - 1);
         }
-        //check for date separator
-        Date lastSeparatorDate = getLastSeparatorRightDate();
-        if (lastSeparatorDate == null || !DateMethods.isSameDay(lastSeparatorDate, message.getTimestamp())) {
-            addNewDateSeparator(new MessageDateSeparator(lastSeparatorDate, message.getTimestamp()), getItemCount(true) - 1);
-        }
         items.add(getItemCount(true) - 1, message);
         notifyItemInserted(getItemCount(true) - 1);
     }
 
-<<<<<<< cff39ac20b1c0ad9a8cb4c523adeec137aa33cd7
     public void addNewHeader(int position, Message message) {
         MessageHeaderParent item = createMessageHeader(message);
         items.add(position, item);
@@ -393,6 +395,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 message.getStream().getName(), message.getSubject(), message.getIdForHolder(), message);
         header.setMessageType(message.getType());
         header.setDisplayRecipent(message.getDisplayRecipient(zulipApp));
+        header.setMessagesDate(message.getTimestamp());
         if (message.getType() == MessageType.STREAM_MESSAGE)
             header.setMute(mMutedTopics.isTopicMute(message));
         header.setColor((message.getStream() == null) ? mDefaultStreamHeaderColor : message.getStream().getParsedColor());
@@ -461,6 +464,8 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 final MessageHeaderParent messageHeaderParent = (MessageHeaderParent) getItem(position);
                 final MessageHeaderParent.MessageHeaderHolder messageHeaderHolder = ((MessageHeaderParent.MessageHeaderHolder) holder);
 
+                //set date
+                messageHeaderHolder.timestamp.setText(DateMethods.getStringDate(messageHeaderParent.getMessagesTimestamp()));
                 if (messageHeaderParent.getMessageType() == MessageType.STREAM_MESSAGE) {
                     messageHeaderHolder.streamTextView.setText(messageHeaderParent.getStream());
 
