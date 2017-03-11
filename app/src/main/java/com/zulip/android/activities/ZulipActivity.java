@@ -6,7 +6,7 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
-import android.app.DialogFragment;
+import android.support.v4.app.DialogFragment;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.SearchManager;
@@ -570,7 +570,7 @@ public class ZulipActivity extends BaseActivity implements
     public void showListDialog() {
         // Create an instance of the dialog fragment and show it
         DialogFragment dialog = new ListDialog();
-        dialog.show(getFragmentManager(), "ListDialogFragment");
+        dialog.show(getSupportFragmentManager(), "ListDialogFragment");
     }
 
     /**
