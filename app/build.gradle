@@ -16,14 +16,14 @@ repositories {
 
 
 android {
-    compileSdkVersion 24
+    compileSdkVersion 25
     //noinspection GradleDependency
-    buildToolsVersion "23.0.2"
+    buildToolsVersion "25.0.2"
     defaultConfig {
         applicationId "com.zulip.android"
         minSdkVersion 13
         //noinspection OldTargetApi
-        targetSdkVersion 23
+        targetSdkVersion 25
 
         versionCode 27
         versionName "1.2.1"
@@ -67,9 +67,9 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:24.1.1'
-    compile 'com.android.support:design:24.1.1'
-    compile 'com.android.support:recyclerview-v7:24.1.1'
+    compile 'com.android.support:appcompat-v7:25.1.1'
+    compile 'com.android.support:design:25.1.1'
+    compile 'com.android.support:recyclerview-v7:25.1.1'
     compile 'com.google.android.gms:play-services-gcm:8.4.0'
     compile 'com.google.android.gms:play-services-auth:8.4.0'
     compile 'com.squareup.retrofit2:retrofit:2.2.0'
@@ -82,9 +82,9 @@ dependencies {
     compile 'org.ccil.cowan.tagsoup:tagsoup:1.2.1'
     compile 'com.squareup.picasso:picasso:2.5.2'
     //noinspection GradleCompatible
-    compile 'com.android.support:customtabs:23.3.0'
+    compile 'com.android.support:customtabs:25.1.1'
     compile 'com.github.bumptech.glide:glide:3.7.0'
-    compile 'com.android.support:support-v4:24.1.0'
+    compile 'com.android.support:support-v4:25.1.1'
     compile 'com.theartofdev.edmodo:android-image-cropper:2.3.+'
     compile('com.crashlytics.sdk.android:crashlytics:2.6.6@aar') {
         transitive = true;
@@ -102,7 +102,7 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-contrib:2.2.2') {
         exclude group: 'com.android.support'
     }
-    androidTestCompile('com.android.support:support-annotations:24.1.1') {
+    androidTestCompile('com.android.support:support-annotations:25.1.1') {
         exclude group: 'com.android.support'
     }
 
