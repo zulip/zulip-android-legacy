@@ -462,30 +462,67 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                     messageHolder.contentImageContainer.setVisibility(View.GONE);
                     messageHolder.contentImage.setImageDrawable(null);
                 }
+                boolean differentSender = isSenderDifferentFromPreviousMessage(position);
                 if (message.getType() == MessageType.STREAM_MESSAGE) {
-                    messageHolder.senderName.setText(message.getSender().getName());
+                    if (differentSender) {
+                        messageHolder.senderName.setVisibility(View.VISIBLE);
+                        messageHolder.senderName.setText(message.getSender().getName());
+                    } else {
+                        messageHolder.senderName.setVisibility(View.GONE);
+                    }
                     if (!isCurrentThemeNight)
                         messageHolder.leftBar.setBackgroundColor(message.getStream().getParsedColor());
                     messageHolder.messageTile.setBackgroundColor(streamMessageBackground);
                 } else {
-                    messageHolder.senderName.setText(message.getSender().getName());
+                    if (differentSender) {
+                        messageHolder.senderName.setVisibility(View.VISIBLE);
+                        messageHolder.senderName.setText(message.getSender().getName());
+                    } else {
+                        messageHolder.senderName.setVisibility(View.GONE);
+                    }
                     if (!isCurrentThemeNight) {
                         messageHolder.leftBar.setBackgroundColor(privateMessageBackground);
                     }
                     messageHolder.messageTile.setBackgroundColor(privateMessageBackground);
                 }
 
-                // set visibility of edited tag
                 Boolean isEdited = message.isHasBeenEdited();
-                if (isEdited != null && isEdited) {
-                    messageHolder.edited.setVisibility(View.VISIBLE);
-                } else {
-                    messageHolder.edited.setVisibility(View.GONE);
-                }
+                if (differentSender) {
+                    messageHolder.gravatar.setVisibility(View.VISIBLE);
+                    setUpGravatar(message, messageHolder);
 
-                setUpGravatar(message, messageHolder);
-                setUpTime(message, messageHolder);
-                setUpStar(message, messageHolder);
+                    // set visibility of edited tag
+                    if (isEdited != null && isEdited) {
+                        messageHolder.edited.setVisibility(View.VISIBLE);
+                    } else {
+                        messageHolder.edited.setVisibility(View.GONE);
+                    }
+                    messageHolder.leftEdited.setVisibility(View.GONE);
+
+                    setUpTime(message, messageHolder.timestamp);
+                    setUpStar(message, messageHolder.starImage);
+
+                    //hide other one's
+                    messageHolder.leftTimestamp.setVisibility(View.GONE);
+                    messageHolder.leftStarImage.setVisibility(View.GONE);
+                } else {
+                    messageHolder.gravatar.setVisibility(View.GONE);
+
+                    // set visibility of edited tag
+                    if (isEdited != null && isEdited) {
+                        messageHolder.leftEdited.setVisibility(View.VISIBLE);
+                    } else {
+                        messageHolder.leftEdited.setVisibility(View.GONE);
+                    }
+                    messageHolder.edited.setVisibility(View.GONE);
+
+                    setUpTime(message, messageHolder.leftTimestamp);
+                    setUpStar(message, messageHolder.leftStarImage);
+
+                    //hide other one's
+                    messageHolder.timestamp.setVisibility(View.GONE);
+                    messageHolder.starImage.setVisibility(View.GONE);
+                }
                 setUpReactions(messageHolder, message);
                 break;
         }
@@ -530,19 +567,19 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         }
     }
 
-    private void setUpTime(Message message, MessageHolder messageHolder) {
+    private void setUpTime(Message message, TextView timestamp) {
         if (DateUtils.isToday(message.getTimestamp().getTime())) {
-            messageHolder.timestamp.setText(DateUtils.formatDateTime(context, message
+            timestamp.setText(DateUtils.formatDateTime(context, message
                     .getTimestamp().getTime(), DateUtils.FORMAT_SHOW_TIME));
         } else {
-            messageHolder.timestamp.setText(DateUtils.formatDateTime(context, message
+            timestamp.setText(DateUtils.formatDateTime(context, message
                     .getTimestamp().getTime(), DateUtils.FORMAT_SHOW_DATE
                     | DateUtils.FORMAT_ABBREV_MONTH
                     | DateUtils.FORMAT_SHOW_TIME));
         }
     }
 
-    private void setUpStar(Message message, MessageHolder messageHolder) {
+    private void setUpStar(Message message, ImageView starImage) {
         if (message.getFlags() != null) {
             if (message.getFlags().contains("starred")) {
                 message.setMessageStar(true);
@@ -551,10 +588,10 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         //Checking for a starred message
         if (message.getMessageStar()) {
             //Make star's imageView visibility to VISIBLE
-            messageHolder.starImage.setVisibility(View.VISIBLE);
+            starImage.setVisibility(View.VISIBLE);
         } else {
             //Make star's imageView visibility to GONE
-            messageHolder.starImage.setVisibility(View.GONE);
+            starImage.setVisibility(View.GONE);
         }
     }
 
@@ -772,5 +809,17 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     public void setAttachedHeader(int adapterPosition) {
         this.attachedHeaderAdapterPosition = adapterPosition;
 
+    }
+
+    private boolean isSenderDifferentFromPreviousMessage(int position) {
+        if (position == 0)
+            return true;
+        Object object = getItem(position - 1);
+        if (object instanceof Message) {
+            Message message = (Message) object;
+            return !message.getSender().equals(((Message) getItem(position)).getSender());
+        } else {
+            return true;
+        }
     }
 }

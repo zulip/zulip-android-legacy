@@ -21,13 +21,13 @@ public class MessageHolder extends RecyclerView.ViewHolder implements View.OnCli
 
     public ImageView gravatar;
     public TextView senderName;
-    public TextView timestamp;
-    public TextView edited;
+    public TextView timestamp,leftTimestamp;
+    public TextView edited, leftEdited;
     public TextView contentView;
     public View leftBar;
     public RelativeLayout messageTile;
     public ImageView contentImage;
-    public ImageView starImage;
+    public ImageView starImage, leftStarImage;
     public View contentImageContainer;
     public TableLayout reactionsTable;
     public OnItemClickListener onItemClickListener;
@@ -37,13 +37,16 @@ public class MessageHolder extends RecyclerView.ViewHolder implements View.OnCli
         gravatar = (ImageView) itemView.findViewById(R.id.gravatar);
         senderName = (TextView) itemView.findViewById(R.id.senderName);
         timestamp = (TextView) itemView.findViewById(R.id.timestamp);
+        leftTimestamp = (TextView) itemView.findViewById(R.id.left_timestamp);
         edited = (TextView) itemView.findViewById(R.id.message_edit_tag);
+        leftEdited = (TextView) itemView.findViewById(R.id.left_message_edit_tag);
         contentView = (TextView) itemView.findViewById(R.id.contentView);
         contentView.setMovementMethod(LinkMovementMethod.getInstance());
         leftBar = itemView.findViewById(R.id.leftBar);
         messageTile = (RelativeLayout) itemView.findViewById(R.id.messageTile);
         contentImage = (ImageView) itemView.findViewById(R.id.load_image);
         starImage = (ImageView) itemView.findViewById(R.id.star_image);
+        leftStarImage = (ImageView) itemView.findViewById(R.id.left_star_image);
         contentImageContainer = itemView.findViewById(R.id.load_image_container);
         reactionsTable = (TableLayout) itemView.findViewById(R.id.reactions_table);
         contentView.setOnClickListener(this);
