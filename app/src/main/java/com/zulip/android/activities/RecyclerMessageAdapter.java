@@ -525,9 +525,10 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                     messageHolder.contentImageContainer.setVisibility(View.GONE);
                     messageHolder.contentImage.setImageDrawable(null);
                 }
-                boolean differentSender = isSenderDifferentFromPreviousMessage(position);
+                Message lastMessage = getLastMessage(position);
+                boolean isDifferentSender = (position == 0 || lastMessage == null || !lastMessage.getSender().equals(message.getSender()));
                 if (message.getType() == MessageType.STREAM_MESSAGE) {
-                    if (differentSender) {
+                    if (isDifferentSender) {
                         messageHolder.senderName.setVisibility(View.VISIBLE);
                         messageHolder.senderName.setText(message.getSender().getName());
                     } else {
@@ -537,7 +538,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                         messageHolder.leftBar.setBackgroundColor(message.getStream().getParsedColor());
                     messageHolder.messageTile.setBackgroundColor(streamMessageBackground);
                 } else {
-                    if (differentSender) {
+                    if (isDifferentSender) {
                         messageHolder.senderName.setVisibility(View.VISIBLE);
                         messageHolder.senderName.setText(message.getSender().getName());
                     } else {
@@ -550,7 +551,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 }
 
                 Boolean isEdited = message.isHasBeenEdited();
-                if (differentSender) {
+                if (isDifferentSender) {
                     messageHolder.gravatar.setVisibility(View.VISIBLE);
                     setUpGravatar(message, messageHolder);
 
@@ -579,7 +580,12 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                     }
                     messageHolder.edited.setVisibility(View.GONE);
 
-                    setUpTime(message, messageHolder.leftTimestamp);
+                    //check if duration between last and this message is less then hide
+                    if (Math.abs(message.getTimestamp().getTime() - lastMessage.getTimestamp().getTime()) < Constants.HIDE_TIMESTAMP_THRESHOLD) {
+                        messageHolder.leftTimestamp.setVisibility(View.GONE);
+                    } else {
+                        setUpTime(message, messageHolder.leftTimestamp);
+                    }
                     setUpStar(message, messageHolder.leftStarImage);
 
                     //hide other one's
@@ -881,15 +887,14 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
     }
 
-    private boolean isSenderDifferentFromPreviousMessage(int position) {
+    private Message getLastMessage(int position) {
         if (position == 0)
-            return true;
+            return null;
         Object object = getItem(position - 1);
         if (object instanceof Message) {
-            Message message = (Message) object;
-            return !message.getSender().equals(((Message) getItem(position)).getSender());
+            return (Message) object;
         } else {
-            return true;
+            return null;
         }
     }
 
