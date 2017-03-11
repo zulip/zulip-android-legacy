@@ -14,6 +14,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
@@ -35,6 +36,7 @@ import com.zulip.android.filters.NarrowFilterPM;
 import com.zulip.android.filters.NarrowFilterStream;
 import com.zulip.android.filters.NarrowListener;
 import com.zulip.android.models.Message;
+import com.zulip.android.models.MessageDateSeparator;
 import com.zulip.android.models.MessageType;
 import com.zulip.android.models.Person;
 import com.zulip.android.models.Reaction;
@@ -42,6 +44,7 @@ import com.zulip.android.models.Stream;
 import com.zulip.android.util.ActivityTransitionAnim;
 import com.zulip.android.util.Constants;
 import com.zulip.android.util.ConvertDpPx;
+import com.zulip.android.util.DateMethods;
 import com.zulip.android.util.MutedTopics;
 import com.zulip.android.util.OnItemClickListener;
 import com.zulip.android.util.UrlHelper;
@@ -56,6 +59,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -70,7 +75,7 @@ import static com.zulip.android.util.ConvertDpPx.convertDpToPixel;
  * Each Message is inserted to its MessageHeader which are distinguished by the {@link Message#getIdForHolder()}
  * saved in {@link MessageHeaderParent#getId()}
  * <p>
- * There are two ways to insert a message in this adapter one {@link RecyclerMessageAdapter#addOldMessage(Message, int, StringBuilder)}
+ * There are two ways to insert a message in this adapter one {@link RecyclerMessageAdapter#addOldMessage(Message, int, StringBuilder,MessageDateSeparator)}
  * and second one {@link RecyclerMessageAdapter#addNewMessage(Message)}
  * The first one is used to add old messages from the databases with {@link com.zulip.android.util.MessageListener.LoadPosition#BELOW}
  * and {@link com.zulip.android.util.MessageListener.LoadPosition#INITIAL}. Messages are added from 1st index of the adapter and new
@@ -83,6 +88,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     public static final int VIEWTYPE_HEADER = 3; //At position 0
     private static final int VIEWTYPE_MESSAGE = 2;
     private static final int VIEWTYPE_FOOTER = 4; //At end position
+    private static final int VIEWTYPE_DATE_SEPARATOR = 5;
     private static final float HEIGHT_IN_DP = 48;
     private static String privateHuddleText;
     private boolean startedFromFilter;
@@ -258,10 +264,22 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
     private void setupLists(List<Message> messageList) {
         int headerParents = 0;
+        int dateSeparator = 0;
+        Calendar calendar = null;
         StringBuilder stringBuilder = new StringBuilder();
         for (int i = 0; i < messageList.size() - 1; i++) {
             Message message = messageList.get(i);
-            headerParents = (addOldMessage(message, i + headerParents, stringBuilder)) ? headerParents + 1 : headerParents;
+            //check for date separator
+            if (calendar == null || !DateMethods.isSameDay(calendar.getTime(), message.getTimestamp())) {
+                MessageDateSeparator separator = new MessageDateSeparator((calendar == null) ? null : calendar.getTime(), message.getTimestamp());
+                calendar = Calendar.getInstance();
+                calendar.setTime(message.getTimestamp());
+                headerParents = (addOldMessage(message, dateSeparator + i + headerParents, stringBuilder, separator)) ? headerParents + 1 : headerParents;
+                dateSeparator++;
+            } else {
+                headerParents = (addOldMessage(message, dateSeparator + i + headerParents, stringBuilder, null)) ? headerParents + 1 : headerParents;
+            }
+
         }
         setFooterShowing(false);
         setHeaderShowing(false);
@@ -277,6 +295,8 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             return VIEWTYPE_HEADER;
         else if (getItem(position) instanceof Integer && (Integer) getItem(position) == VIEWTYPE_FOOTER)
             return VIEWTYPE_FOOTER;
+        else if (items.get(position) instanceof MessageDateSeparator)
+            return VIEWTYPE_DATE_SEPARATOR;
         else {
             Log.e("ItemError", "object: " + items.get(position).toString());
             throw new RuntimeException("MESSAGE TYPE NOT KNOWN & Position:" + position);
@@ -292,7 +312,11 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
      * @param lastHolderId           This is StringBuilder so as to make pass by reference work, the new lastHolderId is saved here if the value changes
      * @return returns true if a new messageHeaderParent is created for this message so as to increment the count by where this function is being called.
      */
-    public boolean addOldMessage(Message message, int messageAndHeadersCount, StringBuilder lastHolderId) {
+    public boolean addOldMessage(Message message, int messageAndHeadersCount, StringBuilder lastHolderId, MessageDateSeparator dateSeparator) {
+        //check for date separator
+        if (dateSeparator != null) {
+            addNewDateSeparator(dateSeparator, messageAndHeadersCount + 1); //1 for LoadingHeader
+        }
         if (!lastHolderId.toString().equals(message.getIdForHolder()) || lastHolderId.toString().equals("")) {
             MessageHeaderParent messageHeaderParent = new MessageHeaderParent((message.getStream() == null) ? null : message.getStream().getName(), message.getSubject(), message.getIdForHolder(), message);
             messageHeaderParent.setMessageType(message.getType());
@@ -301,16 +325,18 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 messageHeaderParent.setMute(mMutedTopics.isTopicMute(message));
             }
             messageHeaderParent.setColor((message.getStream() == null) ? mDefaultStreamHeaderColor : message.getStream().getParsedColor());
-            items.add(messageAndHeadersCount + 1, messageHeaderParent); //1 for LoadingHeader
-            notifyItemInserted(messageAndHeadersCount + 1);
-            items.add(messageAndHeadersCount + 2, message);
-            notifyItemInserted(messageAndHeadersCount + 2);
+            //1 for LoadingHeader
+            //check for date separator
+            items.add((dateSeparator != null) ? messageAndHeadersCount + 2 : messageAndHeadersCount + 1, messageHeaderParent);
+            notifyItemInserted((dateSeparator != null) ? messageAndHeadersCount + 2 : messageAndHeadersCount + 1);
+            items.add((dateSeparator != null) ? messageAndHeadersCount + 3 : messageAndHeadersCount + 2, message);
+            notifyItemInserted((dateSeparator != null) ? messageAndHeadersCount + 3 : messageAndHeadersCount + 2);
             lastHolderId.setLength(0);
             lastHolderId.append(messageHeaderParent.getId());
             return true;
         } else {
-            items.add(messageAndHeadersCount + 1, message);
-            notifyItemInserted(messageAndHeadersCount + 1);
+            items.add((dateSeparator != null) ? messageAndHeadersCount + 2 : messageAndHeadersCount + 1, message);
+            notifyItemInserted((dateSeparator != null) ? messageAndHeadersCount + 2 : messageAndHeadersCount + 1);
             return false;
         }
     }
@@ -338,10 +364,16 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             items.add(getItemCount(true) - 1, item);
             notifyItemInserted(getItemCount(true) - 1);
         }
+        //check for date separator
+        Date lastSeparatorDate = getLastSeparatorRightDate();
+        if (lastSeparatorDate == null || !DateMethods.isSameDay(lastSeparatorDate, message.getTimestamp())) {
+            addNewDateSeparator(new MessageDateSeparator(lastSeparatorDate, message.getTimestamp()), getItemCount(true) - 1);
+        }
         items.add(getItemCount(true) - 1, message);
         notifyItemInserted(getItemCount(true) - 1);
     }
 
+<<<<<<< cff39ac20b1c0ad9a8cb4c523adeec137aa33cd7
     public void addNewHeader(int position, Message message) {
         MessageHeaderParent item = createMessageHeader(message);
         items.add(position, item);
@@ -368,6 +400,29 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         return header;
     }
 
+    /**
+     * Add's date separator at position
+     *
+     * @param separator which we want to add
+     * @param position  add separator at this position in list
+     */
+    private void addNewDateSeparator(MessageDateSeparator separator, int position) {
+        items.add(position, separator);
+        notifyItemInserted(position);
+    }
+
+    private Date getLastSeparatorRightDate() {
+        //get last date separator
+        MessageDateSeparator separator;
+        for (int i = items.size() - 1; i >= 0; i--) {
+            if (items.get(i) instanceof MessageDateSeparator) {
+                separator = (MessageDateSeparator) items.get(i);
+                return separator.getBelowMessageDate();
+            }
+        }
+        return null;
+    }
+
     public RecyclerView.ViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
         switch (viewType) {
             case VIEWTYPE_MESSAGE_HEADER:
@@ -392,6 +447,9 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 LoadingHolder headerLoadingHolder = new LoadingHolder(headerView);
                 setHeaderShowing(false);
                 return headerLoadingHolder;
+            case VIEWTYPE_DATE_SEPARATOR:
+                View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.message_date_separator, parent, false);
+                return new DateSeparatorHolder(view);
         }
         return null;
     }
@@ -525,6 +583,19 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 }
                 setUpReactions(messageHolder, message);
                 break;
+            case VIEWTYPE_DATE_SEPARATOR:
+                MessageDateSeparator messageDateSeparator = (MessageDateSeparator) items.get(position);
+                DateSeparatorHolder dateSeparatorHolder = (DateSeparatorHolder) holder;
+                if (!TextUtils.isEmpty(messageDateSeparator.getRightText())) {
+                    dateSeparatorHolder.tvBelowMessagesDate.setText(messageDateSeparator.getRightText());
+                } else {
+                    dateSeparatorHolder.tvBelowMessagesDate.setVisibility(View.GONE);
+                }
+                if (!TextUtils.isEmpty(messageDateSeparator.getLeftText())) {
+                    dateSeparatorHolder.tvAboveMessagesDate.setText(messageDateSeparator.getLeftText());
+                } else {
+                    dateSeparatorHolder.tvAboveMessagesDate.setVisibility(View.GONE);
+                }
         }
     }
 
@@ -568,15 +639,9 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     }
 
     private void setUpTime(Message message, TextView timestamp) {
-        if (DateUtils.isToday(message.getTimestamp().getTime())) {
-            timestamp.setText(DateUtils.formatDateTime(context, message
-                    .getTimestamp().getTime(), DateUtils.FORMAT_SHOW_TIME));
-        } else {
-            timestamp.setText(DateUtils.formatDateTime(context, message
-                    .getTimestamp().getTime(), DateUtils.FORMAT_SHOW_DATE
-                    | DateUtils.FORMAT_ABBREV_MONTH
-                    | DateUtils.FORMAT_SHOW_TIME));
-        }
+        timestamp.setText(DateUtils.formatDateTime(context, message
+                .getTimestamp().getTime(), DateUtils.FORMAT_SHOW_TIME));
+        timestamp.setVisibility(View.VISIBLE);
     }
 
     private void setUpStar(Message message, ImageView starImage) {
@@ -820,6 +885,17 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             return !message.getSender().equals(((Message) getItem(position)).getSender());
         } else {
             return true;
+        }
+    }
+
+    private class DateSeparatorHolder extends RecyclerView.ViewHolder {
+
+        private TextView tvAboveMessagesDate, tvBelowMessagesDate;
+
+        DateSeparatorHolder(View itemView) {
+            super(itemView);
+            tvAboveMessagesDate = (TextView) itemView.findViewById(R.id.tvAboveMessagesDate);
+            tvBelowMessagesDate = (TextView) itemView.findViewById(R.id.tvBelowMessagesDate);
         }
     }
 }

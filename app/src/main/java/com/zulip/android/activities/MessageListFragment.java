@@ -36,6 +36,7 @@ import com.zulip.android.filters.NarrowFilterPM;
 import com.zulip.android.filters.NarrowFilterStream;
 import com.zulip.android.filters.NarrowListener;
 import com.zulip.android.models.Message;
+import com.zulip.android.models.MessageDateSeparator;
 import com.zulip.android.models.Person;
 import com.zulip.android.models.Stream;
 import com.zulip.android.networking.AsyncGetOldMessages;
@@ -46,6 +47,7 @@ import com.zulip.android.networking.response.StarResponse;
 import com.zulip.android.networking.util.DefaultCallback;
 import com.zulip.android.util.CommonProgressDialog;
 import com.zulip.android.util.Constants;
+import com.zulip.android.util.DateMethods;
 import com.zulip.android.util.MessageListener;
 import com.zulip.android.util.MutedTopics;
 import com.zulip.android.util.ZLog;
@@ -59,6 +61,8 @@ import org.json.JSONObject;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import retrofit2.Call;
@@ -664,8 +668,10 @@ public class MessageListFragment extends Fragment implements MessageListener {
         Log.i("onMessages", "Adding " + messages.length + " messages at " + pos);
         int topPosBefore = stickyLayoutManager.findFirstVisibleItemPosition();
         int addedCount = 0;
+        int separatorAddedCount = 0;
         int headerParents = 0;
         StringBuilder stringBuilder = new StringBuilder();
+        Calendar calendar = null;
         if (pos == LoadPosition.NEW && !loadedToBottom) {
             // If we don't have intermediate messages loaded, don't add new
             // messages -- they'll be loaded when we scroll down.
@@ -704,7 +710,15 @@ public class MessageListFragment extends Fragment implements MessageListener {
                 this.adapter.addNewMessage(message);
                 messageList.add(message);
             } else if (pos == LoadPosition.ABOVE || pos == LoadPosition.INITIAL) {
-                headerParents = (this.adapter.addOldMessage(message, addedCount + headerParents, stringBuilder)) ? headerParents + 1 : headerParents;
+                if (calendar == null || !DateMethods.isSameDay(calendar.getTime(), message.getTimestamp())) {
+                    MessageDateSeparator separator = new MessageDateSeparator((calendar == null) ? null : calendar.getTime(), message.getTimestamp());
+                    calendar = Calendar.getInstance();
+                    calendar.setTime(message.getTimestamp());
+                    headerParents = (this.adapter.addOldMessage(message, separatorAddedCount + addedCount + headerParents, stringBuilder, separator)) ? headerParents+1 : headerParents;
+                    separatorAddedCount++;
+                } else {
+                    headerParents = (this.adapter.addOldMessage(message, separatorAddedCount + addedCount + headerParents, stringBuilder, null)) ? headerParents+1 : headerParents;
+                }
                 messageList.add(addedCount, message);
                 addedCount++;
             }
