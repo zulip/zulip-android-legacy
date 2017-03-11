@@ -40,3 +40,9 @@ android:
 script:
   - ./gradlew lintDebug
   - ./gradlew assembleDebug
+notifications:
+  webhooks:
+    urls:
+      - https://zulip.org/zulipbot/travis
+    on_success: always
+    on_failure: always
