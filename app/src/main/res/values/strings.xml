@@ -174,4 +174,15 @@
     <string name="pick_dialog">Pick a file</string>
     <string name="to_string">" to "</string>
     <string name="upload_started_str">Upload started</string>
+    <string name="next">NEXT</string>
+    <string name="skip">SKIP</string>
+    <string name="start">GOT IT</string>
+    <string name="people_drawer">Slide left to open the people drawer to message anyone</string>
+    <string name="people_drawer_title">Slide left to open the people drawer</string>
+    <string name="stream_drawer">Slide right to open the stream drawer to narrow to any stream</string>
+    <string name="stream_drawer_title">Slide right to open the stream drawer</string>
+    <string name="switch_day_night_theme">Switch between Day/Night theme from the overflow menu anytime.</string>
+    <string name="switch_theme_title">Switch between day/night theme</string>
+    <string name="swipe_to_remove">Swipe to remove the chatBox anytime you want</string>
+    <string name="swipe_to_remove_title">Swipe to remove</string>
 </resources>
