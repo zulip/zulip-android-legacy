@@ -13,6 +13,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
@@ -50,6 +51,7 @@ import com.zulip.android.util.MessageListener;
 import com.zulip.android.util.MutedTopics;
 import com.zulip.android.util.ZLog;
 import com.zulip.android.viewholders.HeaderSpaceItemDecoration;
+import com.zulip.android.viewholders.MessageHeaderParent;
 
 import org.json.JSONObject;
 
@@ -89,6 +91,9 @@ public class MessageListFragment extends Fragment implements MessageListener {
     private boolean initialized = false;
     private List<Message> messageList;
 
+    private NarrowListener narrowListener;
+    private ZulipApp zulipApp;
+
     public MessageListFragment() {
         app = ZulipApp.get();
         mMutedTopics = MutedTopics.get();
@@ -112,6 +117,8 @@ public class MessageListFragment extends Fragment implements MessageListener {
         messageIndex = new SparseArray<>();
         messageList = new ArrayList<>();
         adapter = new RecyclerMessageAdapter(messageList, getActivity(), (filter != null));
+        narrowListener = (NarrowListener) getActivity();
+        zulipApp = ZulipApp.get();
     }
 
     public void onPause() {
@@ -181,6 +188,44 @@ public class MessageListFragment extends Fragment implements MessageListener {
             }
         });
         mListener.setLayoutBehaviour(linearLayoutManager, adapter);
+
+
+        ItemTouchHelper mItouch = new ItemTouchHelper(
+                new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+                    @Override
+                    public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                        return false;
+                    }
+
+                    @Override
+                    public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                        int i = viewHolder.getAdapterPosition();
+                        if(direction == ItemTouchHelper.LEFT) {
+                        /* find the message parent when swipe occurs */
+                            // Would like suggestions for doing this better
+                            while (i > 0 && !(adapter.getItem(i) instanceof MessageHeaderParent))
+                                i--;
+
+                            //Essetially what we are doing in
+                            MessageHeaderParent messageParent = (MessageHeaderParent) adapter.getItem(i);
+                            if (messageParent.getMessageType() == MessageType.STREAM_MESSAGE) {
+                                narrowListener.onNarrow(new NarrowFilterStream(Stream.getByName(zulipApp,
+                                        messageParent.getStream()), messageParent.getSubject()),
+                                        messageParent.getMessageId());
+                                narrowListener.onNarrowFillSendBoxStream(messageParent.getStream(), messageParent.getSubject(), false);
+                            } else {
+                                Person[] recipentArray = messageParent.getRecipients(zulipApp);
+                                narrowListener.onNarrow(new NarrowFilterPM(Arrays.asList(recipentArray)),
+                                        messageParent.getMessageId());
+                                narrowListener.onNarrowFillSendBoxPrivate(recipentArray, false);
+                            }
+                        } else if (direction == ItemTouchHelper.RIGHT) {
+                            getActivity().onBackPressed();
+                        }
+                        adapter.notifyItemChanged(i);
+                    }
+                });
+        mItouch.attachToRecyclerView(recyclerView);
         return view;
     }
 
