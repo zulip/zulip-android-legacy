@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -138,10 +139,18 @@ public class MessageListFragment extends Fragment implements MessageListener {
                 false);
 
         emptyTextView = (TextView) view.findViewById(R.id.emptyList);
-        if (filter != null && ((AppCompatActivity) getActivity()).getSupportActionBar() != null)
-            ((AppCompatActivity) getActivity()).getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_arrow_back_24dp);
-        else
-            ((AppCompatActivity) getActivity()).getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_24dp);
+        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+
+        if (ZulipActivity.isTablet(getContext()) && filter != null && actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        } else if (ZulipActivity.isTablet(getContext()) && filter == null && actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(false);
+        }
+
+        if ((ZulipActivity.isTablet(getContext()) || filter != null) && actionBar != null)
+            actionBar.setHomeAsUpIndicator(R.drawable.ic_arrow_back_24dp);
+        else if (actionBar != null)
+            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_24dp);
         recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
         linearLayoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(linearLayoutManager);

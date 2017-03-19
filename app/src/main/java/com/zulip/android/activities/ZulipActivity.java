@@ -49,6 +49,7 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.LinearLayoutManager;
@@ -87,7 +88,6 @@ import com.zulip.android.database.DatabaseHelper;
 import com.zulip.android.filters.NarrowFilter;
 import com.zulip.android.filters.NarrowFilterAllPMs;
 import com.zulip.android.filters.NarrowFilterByDate;
-import com.zulip.android.filters.NarrowFilterMentioned;
 import com.zulip.android.filters.NarrowFilterPM;
 import com.zulip.android.filters.NarrowFilterSearch;
 import com.zulip.android.filters.NarrowFilterStar;
@@ -227,45 +227,45 @@ public class ZulipActivity extends BaseActivity implements
     private String streamSearchFilterKeyword = "";
 
     private SimpleCursorAdapter.ViewBinder peopleBinder = new SimpleCursorAdapter.ViewBinder() {
-           @Override
-           public boolean setViewValue(View view, Cursor cursor, int i) {
-               switch (view.getId()) {
-                   case R.id.name:
-                       TextView name = (TextView) view;
-                       name.setText(cursor.getString(i));
-                       return true;
-                   case R.id.stream_dot:
-                       String email = cursor.getString(i);
-                       if (app == null || email == null) {
-                           view.setVisibility(View.INVISIBLE);
-                       } else {
-                           Presence presence = app.presences.get(email);
-                           if (presence == null) {
-                               view.setVisibility(View.INVISIBLE);
-                           } else {
-                               PresenceType status = presence.getStatus();
-                               long age = presence.getAge();
-                               if (age > 2 * 60) {
-                                   view.setVisibility(View.VISIBLE);
-                                   view.setBackgroundResource(R.drawable.presence_inactive);
-                               } else if (PresenceType.ACTIVE == status) {
-                                   view.setVisibility(View.VISIBLE);
-                                   view.setBackgroundResource(R.drawable.presence_active);
-                               } else if (PresenceType.IDLE == status) {
-                                   view.setVisibility(View.VISIBLE);
-                                   view.setBackgroundResource(R.drawable.presence_away);
-                               } else {
-                                   view.setVisibility(View.INVISIBLE);
-                               }
-                           }
-                       }
-                       return true;
-                   default:
-                       break;
-               }
-               return false;
-           }
-       };
+        @Override
+        public boolean setViewValue(View view, Cursor cursor, int i) {
+            switch (view.getId()) {
+                case R.id.name:
+                    TextView name = (TextView) view;
+                    name.setText(cursor.getString(i));
+                    return true;
+                case R.id.stream_dot:
+                    String email = cursor.getString(i);
+                    if (app == null || email == null) {
+                        view.setVisibility(View.INVISIBLE);
+                    } else {
+                        Presence presence = app.presences.get(email);
+                        if (presence == null) {
+                            view.setVisibility(View.INVISIBLE);
+                        } else {
+                            PresenceType status = presence.getStatus();
+                            long age = presence.getAge();
+                            if (age > 2 * 60) {
+                                view.setVisibility(View.VISIBLE);
+                                view.setBackgroundResource(R.drawable.presence_inactive);
+                            } else if (PresenceType.ACTIVE == status) {
+                                view.setVisibility(View.VISIBLE);
+                                view.setBackgroundResource(R.drawable.presence_active);
+                            } else if (PresenceType.IDLE == status) {
+                                view.setVisibility(View.VISIBLE);
+                                view.setBackgroundResource(R.drawable.presence_away);
+                            } else {
+                                view.setVisibility(View.INVISIBLE);
+                            }
+                        }
+                    }
+                    return true;
+                default:
+                    break;
+            }
+            return false;
+        }
+    };
     private RefreshableCursorAdapter peopleAdapter;
     private LinearLayout composeStatus;
     private String tempStreamSave = null;
@@ -273,6 +273,7 @@ public class ZulipActivity extends BaseActivity implements
     private NotificationManager mNotificationManager;
     private NotificationCompat.Builder mBuilder;
     private HashMap<Integer, Call<UploadResponse>> mCancelHashMap;
+    private ActionBar actionBar;
 
     @Override
     public void removeChatBox(boolean animToRight) {
@@ -356,10 +357,14 @@ public class ZulipActivity extends BaseActivity implements
         commonProgressDialog = new CommonProgressDialog(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
-        getSupportActionBar().setTitle(R.string.app_name);
-        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_24dp);
+        actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_24dp);
+            actionBar.setHomeButtonEnabled(true);
+            actionBar.setTitle(R.string.app_name);
+        }
+
         streamActv = (AutoCompleteTextView) findViewById(R.id.stream_actv);
         topicActv = (AutoCompleteTextView) findViewById(R.id.topic_actv);
         messageEt = (AutoCompleteTextView) findViewById(R.id.message_et);
@@ -758,7 +763,7 @@ public class ZulipActivity extends BaseActivity implements
         } catch (Exception e) {
             ZLog.logException(e);
         }
-}
+    }
 
     private void onTextChangeOfPeopleSearchEditText() {
         etSearchPeople.addTextChangedListener(new TextWatcher() {
@@ -784,56 +789,56 @@ public class ZulipActivity extends BaseActivity implements
     }
 
     private Callable<Cursor> getPeopleCursorGenerator() {
-            Callable<Cursor> peopleGenerator = new Callable<Cursor>() {
+        Callable<Cursor> peopleGenerator = new Callable<Cursor>() {
 
-                @Override
-                public Cursor call() throws Exception {
-                    // TODO Auto-generated method stub
-                    List<Person> people;
-                    if (etSearchPeople.getText().toString().equals("") || etSearchPeople.getText().toString().isEmpty()) {
-                        people = app.getDao(Person.class).queryBuilder()
-                                .where().eq(Person.ISBOT_FIELD, false).and()
-                                .eq(Person.ISACTIVE_FIELD, true).query();
-                        //set visibility of this image false
-                        ivSearchPeopleCancel.setVisibility(View.GONE);
-                    } else {
-                        people = app.getDao(Person.class).queryBuilder()
-                                .where().eq(Person.ISBOT_FIELD, false).and()
-                                .like(Person.NAME_FIELD, "%" + etSearchPeople.getText().toString() + "%").and()
-                                .eq(Person.ISACTIVE_FIELD, true).query();
-                        //set visibility of this image false
-                        ivSearchPeopleCancel.setVisibility(View.VISIBLE);
-                    }
-
-                    Person.sortByPresence(app, people);
-
-                    String[] columnsWithPresence = new String[]{"_id",
-                            Person.EMAIL_FIELD, Person.NAME_FIELD};
-
-                    MatrixCursor sortedPeopleCursor = new MatrixCursor(
-                            columnsWithPresence);
-                    for (Person person : people) {
-                        Object[] row = new Object[]{person.getId(), person.getEmail(),
-                                person.getName()};
-                        sortedPeopleCursor.addRow(row);
-                    }
-
-                    // add private messages row
-                    MatrixCursor allPrivateMessages = new MatrixCursor(
-                            sortedPeopleCursor.getColumnNames());
-                    Object[] row = new Object[]{allPeopleId, "",
-                            "All private messages"};
-
-                    allPrivateMessages.addRow(row);
-
-                    return new MergeCursor(new Cursor[]{
-                            allPrivateMessages, sortedPeopleCursor});
-
+            @Override
+            public Cursor call() throws Exception {
+                // TODO Auto-generated method stub
+                List<Person> people;
+                if (etSearchPeople.getText().toString().equals("") || etSearchPeople.getText().toString().isEmpty()) {
+                    people = app.getDao(Person.class).queryBuilder()
+                            .where().eq(Person.ISBOT_FIELD, false).and()
+                            .eq(Person.ISACTIVE_FIELD, true).query();
+                    //set visibility of this image false
+                    ivSearchPeopleCancel.setVisibility(View.GONE);
+                } else {
+                    people = app.getDao(Person.class).queryBuilder()
+                            .where().eq(Person.ISBOT_FIELD, false).and()
+                            .like(Person.NAME_FIELD, "%" + etSearchPeople.getText().toString() + "%").and()
+                            .eq(Person.ISACTIVE_FIELD, true).query();
+                    //set visibility of this image false
+                    ivSearchPeopleCancel.setVisibility(View.VISIBLE);
                 }
 
-            };
-            return peopleGenerator;
-        }
+                Person.sortByPresence(app, people);
+
+                String[] columnsWithPresence = new String[]{"_id",
+                        Person.EMAIL_FIELD, Person.NAME_FIELD};
+
+                MatrixCursor sortedPeopleCursor = new MatrixCursor(
+                        columnsWithPresence);
+                for (Person person : people) {
+                    Object[] row = new Object[]{person.getId(), person.getEmail(),
+                            person.getName()};
+                    sortedPeopleCursor.addRow(row);
+                }
+
+                // add private messages row
+                MatrixCursor allPrivateMessages = new MatrixCursor(
+                        sortedPeopleCursor.getColumnNames());
+                Object[] row = new Object[]{allPeopleId, "",
+                        "All private messages"};
+
+                allPrivateMessages.addRow(row);
+
+                return new MergeCursor(new Cursor[]{
+                        allPrivateMessages, sortedPeopleCursor});
+
+            }
+
+        };
+        return peopleGenerator;
+    }
 
 
     @Override
@@ -1462,7 +1467,8 @@ public class ZulipActivity extends BaseActivity implements
                 resetStreamSearch();
                 String streamName = ((TextView) view.findViewById(R.id.name)).getText().toString();
                 doNarrowToLastRead(streamName);
-                drawerLayout.openDrawer(GravityCompat.START);
+                if (!isTablet())
+                    drawerLayout.openDrawer(GravityCompat.START);
                 if (previousClick != -1 && expandableListView.getCount() > previousClick) {
                     expandableListView.collapseGroup(previousClick);
                 }
@@ -1938,7 +1944,8 @@ public class ZulipActivity extends BaseActivity implements
 
             //Clears search if already open
             if (!searchView.isIconified()) {
-                getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_24dp);
+                if (actionBar != null)
+                    actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_24dp);
                 clearSearch();
                 return;
             }
@@ -2069,9 +2076,9 @@ public class ZulipActivity extends BaseActivity implements
     }
 
     private void setupTitleBar(String title, String subtitle) {
-        if (android.os.Build.VERSION.SDK_INT >= 11 && getSupportActionBar() != null) {
-            if (title != null) getSupportActionBar().setTitle(title);
-            getSupportActionBar().setSubtitle(subtitle);
+        if (actionBar != null) {
+            if (title != null) actionBar.setTitle(title);
+            actionBar.setSubtitle(subtitle);
         }
     }
 
@@ -2172,6 +2179,7 @@ public class ZulipActivity extends BaseActivity implements
 
     public void onNarrow(NarrowFilter narrowFilter) {
         if (narrowedList == null || !narrowedList.filter.equals(narrowFilter)) {
+            Log.d("ZulipLog", "inside onNarrow1");
             doNarrow(narrowFilter);
         }
     }
@@ -2238,7 +2246,7 @@ public class ZulipActivity extends BaseActivity implements
             @Override
             public void onClick(View view) {
                 //Change the NavigationDrawer Icon to back on starting search
-                getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_arrow_back_24dp);
+                actionBar.setHomeAsUpIndicator(R.drawable.ic_arrow_back_24dp);
                 inSearch = true;
             }
         });
@@ -2249,13 +2257,13 @@ public class ZulipActivity extends BaseActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         //Check if the search is open then close the search
         if (inSearch) {
-            getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_24dp);
+            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_24dp);
             clearSearch();
             return true;
         }
         // Pass the event to ActionBarDrawerToggle, if it returns
         // true, then it has handled the app icon touch event
-        if (drawerToggle.onOptionsItemSelected(item)) {
+        if (!isTablet() && drawerToggle.onOptionsItemSelected(item)) {
             // Close the right drawer if we opened the left one
             drawerLayout.closeDrawer(GravityCompat.END);
             return true;
@@ -2264,6 +2272,9 @@ public class ZulipActivity extends BaseActivity implements
         // Handle item selection
         switch (item.getItemId()) {
             case android.R.id.home:
+                if (isTablet() && narrowedList == null) {
+                    onBackPressed();
+                }
                 narrowedList = null;
                 getSupportFragmentManager().popBackStack(NARROW,
                         FragmentManager.POP_BACK_STACK_INCLUSIVE);
@@ -2356,9 +2367,10 @@ public class ZulipActivity extends BaseActivity implements
 
     /**
      * Open's url in custom tabs if API >= 15 else in browser
+     *
      * @param endPoint of the url
      */
-    private void  openUrl(String endPoint){
+    private void openUrl(String endPoint) {
         Uri uri;
         uri = Uri.parse(app.getServerHostUri() + endPoint);
         if (Build.VERSION.SDK_INT < 15) {
@@ -2628,4 +2640,14 @@ public class ZulipActivity extends BaseActivity implements
     public enum Flag {
         RESET_DATABASE,
     }
+
+    private boolean isTablet() {
+        return isTablet(this);
+    }
+
+    public static boolean isTablet(Context context) {
+        return context.getResources().getBoolean(R.bool.isTablet);
+    }
+
 }
+
