@@ -164,9 +164,14 @@
                 android:text="@string/another_server" />
 
             <TextView
-                android:id="@+id/legal_button"
+                android:id="@+id/terms"
                 style="@style/links"
-                android:text="@string/legal" />
+                android:text="@string/terms" />
+
+            <TextView
+                android:id="@+id/privacy"
+                style="@style/links"
+                android:text="@string/privacy" />
 
         </LinearLayout>
     </LinearLayout>

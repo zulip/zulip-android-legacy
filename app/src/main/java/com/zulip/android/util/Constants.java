@@ -20,4 +20,8 @@ public class Constants {
     // row number which is used to differentiate the '@-mentions' in people drawer
     public static int MENTIONS = -2;
     public static int REACTION_MARGIN = 64;
+    //end points
+    public static String END_POINT_TERMS_OF_SERVICE = "terms";
+    public static String END_POINT_PRIVACY = "privacy";
+    public static String END_POINT_REGISTER = "register";
 }

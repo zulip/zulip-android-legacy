@@ -38,6 +38,9 @@
         android:id="@+id/logout"
         android:title="@string/logout" />
     <item
-        android:id="@+id/legal"
-        android:title="@string/legal" />
+        android:id="@+id/privacy"
+        android:title="@string/privacy" />
+    <item
+        android:id="@+id/terms"
+        android:title="@string/terms" />
 </menu>
