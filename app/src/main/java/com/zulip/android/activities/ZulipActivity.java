@@ -6,7 +6,6 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
-import android.support.v4.app.DialogFragment;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.SearchManager;
@@ -32,11 +31,13 @@ import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.customtabs.CustomTabsIntent;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
@@ -2407,13 +2408,33 @@ public class ZulipActivity extends BaseActivity implements
             case R.id.logout:
                 logout();
                 break;
-            case R.id.legal:
-                openLegal();
+            case R.id.terms:
+                openUrl(Constants.END_POINT_TERMS_OF_SERVICE);
+                break;
+            case R.id.privacy:
+                openUrl(Constants.END_POINT_PRIVACY);
                 break;
             default:
                 return super.onOptionsItemSelected(item);
         }
         return true;
+    }
+
+    /**
+     * Open's url in custom tabs if API >= 15 else in browser
+     * @param endPoint of the url
+     */
+    private void  openUrl(String endPoint){
+        Uri uri;
+        uri = Uri.parse(app.getServerHostUri() + endPoint);
+        if (Build.VERSION.SDK_INT < 15) {
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            startActivity(intent);
+            return;
+        }
+        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+        CustomTabsIntent intent = builder.build();
+        intent.launchUrl(ZulipActivity.this, uri);
     }
 
     private void dispatchPickIntent() {
@@ -2478,11 +2499,6 @@ public class ZulipActivity extends BaseActivity implements
         ActivityTransitionAnim.transition(this);
 
         finish();
-    }
-
-    private void openLegal() {
-        Intent i = new Intent(this, LegalActivity.class);
-        startActivityForResult(i, 0);
     }
 
     public void onConfigurationChanged(Configuration newConfig) {

@@ -68,9 +68,6 @@
             android:name=".activities.PhotoViewActivity"
             android:parentActivityName=".activities.ZulipActivity"
             tools:ignore="UnusedAttribute"></activity>
-        <activity
-            android:name=".activities.LegalActivity"
-            android:label="@string/title_activity_legal" />
 
         <receiver
             android:name=".gcm.GcmBroadcastReceiver"
