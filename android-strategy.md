@@ -62,7 +62,7 @@ Logistical details checklist for migration:
 * [x] Announce on chat.zulip.org
 * [ ] Update GSoC ideas page to clarify the plan
 * [ ] Update zulip/zulip-mobile README.md
-* [ ] Update zulip/zulip-android README.md
+* [x] Update zulip/zulip-android README.md
 * [ ] Update zulip/zulip README.md
 * [ ] Email zulip-devel@ and zulip-ios@ and zulip-android@ with the
   announcement
