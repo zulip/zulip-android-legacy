@@ -7,6 +7,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.stmt.SelectArg;
 import com.j256.ormlite.table.DatabaseTable;
 import com.zulip.android.ZulipApp;
+import com.zulip.android.util.Constants;
 import com.zulip.android.util.ZLog;
 
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -71,6 +72,12 @@ public class Person {
     public Person(String name, String email) {
         this.setName(name);
         this.setEmail(email);
+    }
+
+    public Person(int id, String email, String name) {
+        this.id = id;
+        this.email = email;
+        this.name = name;
     }
 
     public Person(String name, String email, String avatarURL) {
@@ -153,6 +160,7 @@ public class Person {
             // use the person id passed to generate person skeleton object which is consistent
             // with server id.
             person.setId(personId);
+            person.setActive(true);
             app.getDao(Person.class).createOrUpdate(person);
         } else {
             boolean changed = false;
@@ -165,6 +173,7 @@ public class Person {
                 changed = true;
             }
             if (changed) {
+                person.setActive(true);
                 app.getDao(Person.class).update(person);
             }
         }
@@ -216,43 +225,38 @@ public class Person {
         return dao.queryBuilder().where().eq(Person.ISBOT_FIELD, false).query();
     }
 
-    public static void sortByPresence(ZulipApp app, List<Person> people) {
+    public static void sortByPresence(ZulipApp app, List<PeopleDrawerList> people) {
         final Map<String, Presence> presenceCopy = new HashMap<>(
                 app.presences);
 
-        Collections.sort(people, new Comparator<Person>() {
+        Collections.sort(people, new Comparator<PeopleDrawerList>() {
             @Override
-            public int compare(Person a, Person b) {
-                Presence aPresence = presenceCopy.get(a.getEmail());
-                Presence bPresence = presenceCopy.get(b.getEmail());
-
-                final int inactiveTimeout = 2 * 60;
-
-                if (aPresence == null && bPresence == null) {
-                    return a.getName().toLowerCase(Locale.US)
-                            .compareTo(b.getName().toLowerCase(Locale.US));
-                } else if (aPresence == null) {
-                    return 1;
-                } else if (bPresence == null) {
-                    return -1;
-                } else if (aPresence.getAge() > inactiveTimeout
-                        && bPresence.getAge() > inactiveTimeout) {
-                    return a.getName().toLowerCase(Locale.US)
-                            .compareTo(b.getName().toLowerCase(Locale.US));
-                } else if (aPresence.getAge() > inactiveTimeout) {
-                    return 1;
-                } else if (bPresence.getAge() > inactiveTimeout) {
-                    return -1;
-                } else if (aPresence.getStatus() == bPresence.getStatus()) {
-                    return a.getName().toLowerCase(Locale.US)
-                            .compareTo(b.getName().toLowerCase(Locale.US));
-                } else if (aPresence.getStatus() == PresenceType.ACTIVE) {
-                    return -1;
+            public int compare(PeopleDrawerList o1, PeopleDrawerList o2) {
+                if (o1.getGroupId() == Constants.PEOPLE_DRAWER_ACTIVE_GROUP_ID && o2.getGroupId() == Constants.PEOPLE_DRAWER_ACTIVE_GROUP_ID) {
+                    if (presenceCopy.get(o1.getPerson().getEmail()).getStatus() == presenceCopy.get(o2.getPerson().getEmail()).getStatus()) {
+                        return o1.getPerson().getName().toLowerCase(Locale.US)
+                                .compareTo(o2.getPerson().getName().toLowerCase(Locale.US));
+                    }
+                    if (presenceCopy.get(o1.getPerson().getEmail()).getStatus() != presenceCopy.get(o2.getPerson().getEmail()).getStatus()
+                            && presenceCopy.get(o1.getPerson().getEmail()).getStatus() == PresenceType.ACTIVE) {
+                        return -1;
+                    } else {
+                        return 1;
+                    }
+                } else if (o1.getGroupId() == Constants.PEOPLE_DRAWER_RECENT_PM_GROUP_ID && o1.getGroupId() == Constants.PEOPLE_DRAWER_RECENT_PM_GROUP_ID) {
+                    return o1.getOrder() > o2.getOrder() ? 1 : -1;
+                } else if (o1.getGroupId() == o2.getGroupId()) {
+                    return o1.getPerson().getName().toLowerCase(Locale.US)
+                            .compareTo(o2.getPerson().getName().toLowerCase(Locale.US));
                 } else {
-                    return 1;
+                    return o1.getGroupId() > o2.getGroupId() ? 1 : -1;
                 }
             }
         });
+    }
+
+    public static boolean checkIsActive(Presence presence) {
+        return presence != null && !(presence.getAge() > Constants.INACTIVE_TIME_OUT) && (presence.getStatus() != PresenceType.ACTIVE || presence.getStatus() != PresenceType.IDLE);
     }
 
     public int getId() {

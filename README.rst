@@ -4,7 +4,20 @@
 Zulip for Android
 =================
 
-This is the Android client for `Zulip <http://www.zulip.org>`_.  It is
+**Note**: We've decided that our `React Native app`_ is far enough
+along that it makes sense to focus our efforts on making the React
+Native app better on Android and iOS rather than continuing to split
+our effort developing two similar apps in parallel. Hence, for GSoC we
+will be focused on making the React Native app awesome. The plan is in
+this `document`_, which also covers important FAQ for anyone
+interested in doing GSoC on Zulip mobile apps.
+
+.. _React Native app: https://github.com/zulip/zulip-mobile
+.. _document: https://github.com/zulip/zulip-android/blob/master/android-strategy.md
+
+---------------
+
+This is the native Android client for `Zulip <http://www.zulip.org>`_.  It is
 available `in the Google Play store
 <https://play.google.com/store/apps/details?id=com.zulip.android>`_.
 If you have a taste for adventure, you can also `join our beta channel
@@ -225,7 +238,7 @@ Another way to connect android device to local server is via adb
 
 -  Run ``adb reverse tcp:9991 tcp:9991`` in terminal
 
--  Connect to local server by entering url (**http://127.0.0.0.1:9991**) in app
+-  Connect to local server by entering url (**http://127.0.0.1:9991**) in app
 
 .. _here: https://github.com/zulip/zulip/blob/1c40df9363b70af0e275c44a03f9627808852616/Vagrantfile#L37
 .. _Host Remapping: http://docs.telerik.com/fiddler/KnowledgeBase/HOSTS
@@ -241,8 +254,8 @@ Contributing
 * For commit messages, be sure to checkout our `commit message style guidelines`_.
 
 * For code style, please read the `Zulip coding style`_ conventions carefully.
- 
-.. |@zulipbot| replace:: **@zulipbot** 
+
+.. |@zulipbot| replace:: **@zulipbot**
 .. _@zulipbot: https://github.com/zulip/zulipbot
 .. _commit message style guidelines: https://zulip.readthedocs.io/en/latest/version-control.html#commit-messages
 .. _Zulip coding style: https://zulip.readthedocs.org/en/latest/code-style.html#version-control
@@ -290,4 +303,3 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-

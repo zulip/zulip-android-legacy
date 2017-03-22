@@ -24,6 +24,7 @@ import retrofit2.http.PUT;
 import retrofit2.http.Part;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
+import retrofit2.http.Streaming;
 
 
 public interface ZulipServices {
@@ -60,6 +61,7 @@ public interface ZulipServices {
     @POST("v1/dev_fetch_api_key")
     Call<LoginResponse> loginDEV(@Field("username") String username);
 
+    @Streaming
     @Multipart
     @POST("v1/user_uploads")
     Call<UploadResponse> upload(@Part MultipartBody.Part file);

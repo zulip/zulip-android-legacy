@@ -35,16 +35,17 @@ import com.zulip.android.filters.NarrowFilterPM;
 import com.zulip.android.filters.NarrowFilterStream;
 import com.zulip.android.filters.NarrowListener;
 import com.zulip.android.models.Message;
+import com.zulip.android.models.MessageType;
 import com.zulip.android.models.Person;
 import com.zulip.android.models.Stream;
 import com.zulip.android.networking.AsyncGetOldMessages;
 import com.zulip.android.networking.ZulipAsyncPushTask;
 import com.zulip.android.networking.response.EditResponse;
 import com.zulip.android.networking.response.RawMessageResponse;
+import com.zulip.android.networking.response.StarResponse;
 import com.zulip.android.networking.util.DefaultCallback;
 import com.zulip.android.util.CommonProgressDialog;
 import com.zulip.android.util.Constants;
-import com.zulip.android.networking.response.StarResponse;
 import com.zulip.android.util.MessageListener;
 import com.zulip.android.util.MutedTopics;
 import com.zulip.android.util.ZLog;
@@ -245,6 +246,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
                 return true;
             case R.id.edit_message:
                 editMessage(message, adapter.getContextMenuItemSelectedPosition());
+                return true;
             case R.id.star_message:
                 starMessage(message, adapter.getContextMenuItemSelectedPosition());
                 return true;
@@ -270,6 +272,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
     /**
      * Stars a message passed as parameter
+     *
      * @param message Message to be starred
      */
     private void starMessage(final Message message, final int position) {
@@ -298,6 +301,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
     /**
      * Unstars a message passed as parameter
+     *
      * @param message Message to be unstarred
      */
     private void unStarMessage(final Message message, final int position) {
@@ -647,6 +651,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
             return;
         }
 
+        boolean isNewPM = false;
         for (int i = 0; i < messages.length; i++) {
             Message message = messages[i];
 
@@ -688,6 +693,14 @@ public class MessageListFragment extends Fragment implements MessageListener {
             if (message.getID() < firstMessageId || firstMessageId == -1) {
                 firstMessageId = message.getID();
             }
+
+            if (!isNewPM && message.getType() == MessageType.PRIVATE_MESSAGE) {
+                isNewPM = true;
+            }
+        }
+
+        if (isNewPM) {
+            app.getZulipActivity().updateRecentPMHashMap();
         }
 
         if (pos == LoadPosition.ABOVE) {

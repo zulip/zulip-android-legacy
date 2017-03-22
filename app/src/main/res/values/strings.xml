@@ -108,11 +108,10 @@
     <string name="star_message">Star message</string>
     <string name="un_star_message">Unstar message</string>
     <string name="login_failed">Unable to login</string>
-    <string name="uploading_message">Uploading</string>
-    <string name="cannot_upload_image">Cannot upload image</string>
-    <string name="cannot_find_image">Could not find the image</string>
-    <string name="failed_to_upload">Failed to upload</string>
-    <string name="invalid_image">Unable to load that image</string>
+    <string name="cannot_upload_file">Cannot upload file</string>
+    <string name="cannot_find_file">Cannot find requested file</string>
+    <string name="failed_to_upload">Failed</string>
+    <string name="invalid_file">Invalid file</string>
     <string name="content_description_cancel_icon">cancel icon</string>
     <string name="content_description_search_icon">search icon</string>
     <string name="hint_search_people">Search people</string>
@@ -145,6 +144,7 @@
     <string name="today_messages">Today\'s messages</string>
     <string name="messages">Messages</string>
     <string name="starred_messages">Starred Messages</string>
+    <string name="all_private_messages">All Private Messages</string>
     <plurals name="new_message_mul_sender">
         <item quantity="one">%d new message</item>
         <item quantity="other">%d new messages</item>
@@ -162,4 +162,16 @@
     <string name="copy_message_fetch">Copying message to clipboard</string>
     <string name="copy_failed">Copying to clipboard failed</string>
     <string name="try_again_error_msg">Something went wrong, try again</string>
+    <string name="people_drawer_active_label">Active</string>
+    <string name="people_drawer_recent_pm_label">Recent Private Messages</string>
+    <string name="people_drawer_others_label">New Private Message</string>
+    <string name="mentions">\@-mentions</string>
+    <string name="notif_title">Upload to Zulip</string>
+    <string name="init_notif_title">Starting upload</string>
+    <string name="finish_notif_title">Complete</string>
+    <string name="upload_big_file">Yowza, that’s a big file.</string>
+    <string name="photo_dialog">Take photo</string>
+    <string name="pick_dialog">Pick a file</string>
+    <string name="to_string">" to "</string>
+    <string name="upload_started_str">Upload started</string>
 </resources>

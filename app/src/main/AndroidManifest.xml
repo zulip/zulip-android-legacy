@@ -22,16 +22,18 @@
     <uses-permission android:name="android.permission.USE_CREDENTIALS" />
     <uses-permission android:name="android.permission.VIBRATE" />
 
-    <uses-sdk android:targetSdkVersion="23" android:minSdkVersion="13"
-        tools:overrideLibrary="com.android.support:customtabs:23.3.0,android.support.customtabs"/>
+    <uses-sdk
+        android:minSdkVersion="13"
+        android:targetSdkVersion="23"
+        tools:overrideLibrary="com.android.support:customtabs:23.3.0,android.support.customtabs" />
 
     <application
         android:name=".ZulipApp"
         android:allowBackup="false"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme.DayNight.NoActionBar"
         android:supportsRtl="false"
+        android:theme="@style/AppTheme.DayNight.NoActionBar"
         tools:ignore="GoogleAppIndexingWarning">
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -50,27 +52,22 @@
             android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
-
                 <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:mimeType="image/*" />
+                <data android:mimeType="*/*" />
             </intent-filter>
         </activity>
         <activity
             android:name=".activities.LoginActivity"
-            android:label="@string/app_name"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
-        </activity>
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            android:label="@string/app_name"></activity>
         <activity
             android:name=".activities.PhotoViewActivity"
             android:parentActivityName=".activities.ZulipActivity"
-            tools:ignore="UnusedAttribute">
-        </activity>
+            tools:ignore="UnusedAttribute"></activity>
         <activity
             android:name=".activities.LegalActivity"
             android:label="@string/title_activity_legal" />

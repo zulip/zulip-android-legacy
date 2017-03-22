@@ -6,8 +6,12 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.support.v4.app.DialogFragment;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
+import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -17,8 +21,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
-import android.database.MatrixCursor;
-import android.database.MergeCursor;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -29,6 +31,7 @@ import android.os.CountDownTimer;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -44,7 +47,9 @@ import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AppCompatDelegate;
+import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -59,8 +64,6 @@ import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AutoCompleteTextView;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -68,12 +71,13 @@ import android.widget.ExpandableListView;
 import android.widget.FilterQueryProvider;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.SimpleCursorTreeAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.j256.ormlite.android.AndroidDatabaseResults;
+import com.j256.ormlite.stmt.SelectArg;
+import com.j256.ormlite.stmt.Where;
 import com.zulip.android.BuildConfig;
 import com.zulip.android.R;
 import com.zulip.android.ZulipApp;
@@ -81,6 +85,7 @@ import com.zulip.android.database.DatabaseHelper;
 import com.zulip.android.filters.NarrowFilter;
 import com.zulip.android.filters.NarrowFilterAllPMs;
 import com.zulip.android.filters.NarrowFilterByDate;
+import com.zulip.android.filters.NarrowFilterMentioned;
 import com.zulip.android.filters.NarrowFilterPM;
 import com.zulip.android.filters.NarrowFilterSearch;
 import com.zulip.android.filters.NarrowFilterStar;
@@ -91,26 +96,31 @@ import com.zulip.android.gcm.Notifications;
 import com.zulip.android.models.Emoji;
 import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageType;
+import com.zulip.android.models.PeopleDrawerList;
 import com.zulip.android.models.Person;
 import com.zulip.android.models.Presence;
-import com.zulip.android.models.PresenceType;
 import com.zulip.android.models.Stream;
 import com.zulip.android.networking.AsyncGetEvents;
 import com.zulip.android.networking.AsyncSend;
 import com.zulip.android.networking.AsyncStatusUpdate;
+import com.zulip.android.networking.UploadProgressRequest;
 import com.zulip.android.networking.ZulipAsyncPushTask;
 import com.zulip.android.networking.response.UploadResponse;
+import com.zulip.android.networking.util.DefaultCallback;
 import com.zulip.android.util.ActivityTransitionAnim;
 import com.zulip.android.util.AnimationHelper;
 import com.zulip.android.util.CommonProgressDialog;
 import com.zulip.android.util.Constants;
-import com.zulip.android.util.FilePathHelper;
+import com.zulip.android.util.FileUtils;
+import com.zulip.android.util.ListDialog;
 import com.zulip.android.util.MutedTopics;
 import com.zulip.android.util.RemoveViewsOnScroll;
 import com.zulip.android.util.SwipeRemoveLinearLayout;
 import com.zulip.android.util.UrlHelper;
 import com.zulip.android.util.ZLog;
 import com.zulip.android.viewholders.TopSnackBar;
+import com.zulip.android.viewholders.floatingRecyclerViewLables.DividerDecoration;
+import com.zulip.android.viewholders.floatingRecyclerViewLables.FloatingHeaderDecoration;
 
 import org.json.JSONObject;
 
@@ -124,21 +134,22 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.Callable;
 
-import okhttp3.MediaType;
 import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
 import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
+
+import static com.zulip.android.util.Constants.REQUEST_PICK_FILE;
 
 /**
  * The main Activity responsible for holding the {@link MessageListFragment} which has the list to the
  * messages
  */
 public class ZulipActivity extends BaseActivity implements
-        MessageListFragment.Listener, NarrowListener, SwipeRemoveLinearLayout.leftToRightSwipeListener {
+        MessageListFragment.Listener, NarrowListener, SwipeRemoveLinearLayout.leftToRightSwipeListener,
+        ListDialog.ListDialogListener {
 
     private static final String NARROW = "narrow";
     private static final String PARAMS = "params";
@@ -146,10 +157,9 @@ public class ZulipActivity extends BaseActivity implements
     private static final int MAX_THRESOLD_EMOJI_HINT = 5;
     //At these many letters the emoji/person hint starts to show up
     private static final int MIN_THRESOLD_EMOJI_HINT = 1;
-    private static final int PERMISSION_REQUEST_READ_CONTACTS = 1;
+    private static final int PERMISSION_REQUEST_READ_STORAGE = 1;
     private static final int REQUEST_TAKE_PHOTO = 2;
     private static final Interpolator FAST_OUT_SLOW_IN_INTERPOLATOR = new FastOutSlowInInterpolator();
-    private static final int HIDE_FAB_AFTER_SEC = 5;
     // row number which is used to differentiate the 'All private messages'
     // row from the people
     final int allPeopleId = -1;
@@ -200,66 +210,29 @@ public class ZulipActivity extends BaseActivity implements
         }
     };
     private ExpandableStreamDrawerAdapter streamsDrawerAdapter;
-    private Uri mImageUri;
-    private ImageView cameraBtn;
+    private List<PeopleDrawerList> recentPeopleDrawerList;
+    private List<PeopleDrawerList> filteredRecentPeopleDrawerList;
+    private Uri mFileUri;
     private String mCurrentPhotoPath;
-    private Uri mPhotoURI;
     private Menu menu;
     private Calendar calendar;
     private EditText etSearchPeople;
     private ImageView ivSearchPeopleCancel;
     private EditText etSearchStream;
     private ImageView ivSearchStreamCancel;
-    private ListView peopleDrawer;
     private Toast toast;
     private boolean expanded_stream = false;
-
-    //
+    private RecyclerView peopleDrawer;
+    private List<PeopleDrawerList> peopleDrawerList;
+    private ImageView addFileBtn;
     private String streamSearchFilterKeyword = "";
-    private SimpleCursorAdapter.ViewBinder peopleBinder = new SimpleCursorAdapter.ViewBinder() {
-        @Override
-        public boolean setViewValue(View view, Cursor cursor, int i) {
-            switch (view.getId()) {
-                case R.id.name:
-                    TextView name = (TextView) view;
-                    name.setText(cursor.getString(i));
-                    return true;
-                case R.id.stream_dot:
-                    String email = cursor.getString(i);
-                    if (app == null || email == null) {
-                        view.setVisibility(View.INVISIBLE);
-                    } else {
-                        Presence presence = app.presences.get(email);
-                        if (presence == null) {
-                            view.setVisibility(View.INVISIBLE);
-                        } else {
-                            PresenceType status = presence.getStatus();
-                            long age = presence.getAge();
-                            if (age > 2 * 60) {
-                                view.setVisibility(View.VISIBLE);
-                                view.setBackgroundResource(R.drawable.presence_inactive);
-                            } else if (PresenceType.ACTIVE == status) {
-                                view.setVisibility(View.VISIBLE);
-                                view.setBackgroundResource(R.drawable.presence_active);
-                            } else if (PresenceType.IDLE == status) {
-                                view.setVisibility(View.VISIBLE);
-                                view.setBackgroundResource(R.drawable.presence_away);
-                            } else {
-                                view.setVisibility(View.INVISIBLE);
-                            }
-                        }
-                    }
-                    return true;
-                default:
-                    break;
-            }
-            return false;
-        }
-    };
     private RefreshableCursorAdapter peopleAdapter;
     private LinearLayout composeStatus;
     private String tempStreamSave = null;
     private TopSnackBar topSnackBar;
+    private NotificationManager mNotificationManager;
+    private NotificationCompat.Builder mBuilder;
+    private HashMap<Integer, Call<UploadResponse>> mCancelHashMap;
 
     @Override
     public void removeChatBox(boolean animToRight) {
@@ -325,7 +298,34 @@ public class ZulipActivity extends BaseActivity implements
         super.onCreate(savedInstanceState);
 
         app = (ZulipApp) getApplicationContext();
+        filteredRecentPeopleDrawerList = new ArrayList<>();
         processParams();
+
+        setContentView(R.layout.main);
+        peopleDrawer = (RecyclerView) findViewById(R.id.people_drawer);
+        etSearchPeople = (EditText) findViewById(R.id.people_drawer_search);
+        ivSearchPeopleCancel = (ImageView) findViewById(R.id.iv_people__search_cancel_button);
+        onTextChangeOfPeopleSearchEditText();
+        ivSearchPeopleCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //set default people list
+                resetPeopleSearch();
+            }
+        });
+        final DividerDecoration divider = new DividerDecoration.Builder(this).build();
+
+        peopleDrawer.setHasFixedSize(true);
+        peopleDrawer.setLayoutManager(new LinearLayoutManager(this));
+        peopleDrawer.addItemDecoration(divider);
+
+        peopleDrawerList = new ArrayList<>();
+
+        //set up people list
+        setUpPeopleDrawerAdapter();
+
+        //update recent chat person hashmap
+        updateRecentPMHashMap();
 
         if (!app.isLoggedIn()) {
             openLogin(null);
@@ -339,7 +339,6 @@ public class ZulipActivity extends BaseActivity implements
         this.logged_in = true;
         notifications = new Notifications(this);
         notifications.register();
-        setContentView(R.layout.main);
         commonProgressDialog = new CommonProgressDialog(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -352,12 +351,15 @@ public class ZulipActivity extends BaseActivity implements
         messageEt = (AutoCompleteTextView) findViewById(R.id.message_et);
         textView = (TextView) findViewById(R.id.textView);
         sendBtn = (ImageView) findViewById(R.id.send_btn);
-        cameraBtn = (ImageView) findViewById(R.id.camera_btn);
+        addFileBtn = (ImageView) findViewById(R.id.add_btn);
         appBarLayout = (AppBarLayout) findViewById(R.id.appBarLayout);
         boolean isCurrentThemeNight = (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES);
         etSearchPeople = (EditText) findViewById(R.id.people_drawer_search);
         ivSearchPeopleCancel = (ImageView) findViewById(R.id.iv_people__search_cancel_button);
         onTextChangeOfPeopleSearchEditText();
+        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        mBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(this)
+                .setColor(ContextCompat.getColor(this, R.color.notif_background));
         ivSearchPeopleCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -406,27 +408,6 @@ public class ZulipActivity extends BaseActivity implements
         // Set the drawer toggle as the DrawerListener
         drawerLayout.setDrawerListener(drawerToggle);
 
-
-        peopleDrawer = (ListView) findViewById(R.id.people_drawer);
-
-        //set up people list
-        setUpPeopleList();
-
-        peopleDrawer.setOnItemClickListener(new OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view,
-                                    int position, long id) {
-                resetPeopleSearch();
-                if (id == allPeopleId) {
-                    doNarrow(new NarrowFilterAllPMs(app.getYou()));
-                } else {
-                    Person person = Person.getById(app, (int) id);
-                    narrowPMWith(person);
-                    switchToPrivate();
-                }
-            }
-        });
-
         // send status update and check again every couple minutes
         statusUpdateHandler = new Handler();
         statusUpdateRunnable = new Runnable() {
@@ -437,7 +418,11 @@ public class ZulipActivity extends BaseActivity implements
                 task.setCallback(new ZulipAsyncPushTask.AsyncTaskCompleteListener() {
                     @Override
                     public void onTaskComplete(String result, JSONObject object) {
-                        peopleAdapter.refresh();
+                        try {
+                            refreshPeopleDrawer();
+                        } catch (SQLException e) {
+                            ZLog.logException(e);
+                        }
                     }
 
                     @Override
@@ -446,7 +431,7 @@ public class ZulipActivity extends BaseActivity implements
                     }
                 });
                 task.execute();
-                statusUpdateHandler.postDelayed(this, 2 * 60 * 1000);
+                statusUpdateHandler.postDelayed(this, Constants.STATUS_UPDATER_INTERVAL);
             }
         };
         statusUpdateHandler.post(statusUpdateRunnable);
@@ -465,14 +450,15 @@ public class ZulipActivity extends BaseActivity implements
             }
         });
 
-        // set onClick listener on camera button to dispatch camera intent when clicked
-        cameraBtn.setOnClickListener(new View.OnClickListener() {
+        /**
+         *  set click listener on add file button to open custom list dialog {@link ListDialog}
+         */
+        addFileBtn.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                dispatchTakePictureIntent();
+            public void onClick(View v) {
+                showListDialog();
             }
         });
-
         composeStatus = (LinearLayout) findViewById(R.id.composeStatus);
         setUpAdapter();
         streamActv.setAdapter(streamActvAdapter);
@@ -507,8 +493,8 @@ public class ZulipActivity extends BaseActivity implements
                             view.setVisibility(View.GONE);
                         } else {
                             try {
-                                Drawable drawable = Drawable.createFromStream(getApplicationContext().getAssets().open("emoji/" + name),
-                                        "emoji/" + name);
+                                Drawable drawable = Drawable.createFromStream(getApplicationContext().getAssets().open("emoji/" + name + ".png"),
+                                        "emoji/" + name + ".png");
                                 ((ImageView) view).setImageDrawable(drawable);
                             } catch (Exception e) {
                                 ZLog.logException(e);
@@ -567,20 +553,85 @@ public class ZulipActivity extends BaseActivity implements
         String type = intent.getType();
 
         if (Intent.ACTION_SEND.equals(action) && type != null) {
-            if (type.startsWith("image/")) {
-                // Handle single image being sent
-                handleSentImage(intent);
+            if ("text/plain".equals(type)) {
+                // Handle text being sent
+                handleSentText(intent);
+            } else {
+                // Handle single file being sent
+                handleSentFile((Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM));
             }
-        }
-        // if device doesn't have camera, disable camera button
-        if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
-            cameraBtn.setEnabled(false);
         }
         handleOnFragmentChange();
         calendar = Calendar.getInstance();
         setupSnackBar();
         //Hides Keyboard if it was open with focus on an editText before restart of the activity
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+    }
+
+    public void showListDialog() {
+        // Create an instance of the dialog fragment and show it
+        DialogFragment dialog = new ListDialog();
+        dialog.show(getSupportFragmentManager(), "ListDialogFragment");
+    }
+
+    /**
+     * The dialog fragment receives a reference to this Activity through the
+     * Fragment.onAttach() callback, which it uses to call the following methods
+     * defined by the ListDialogFragment.ListDialogListener interface.
+     */
+    @Override
+    public void onDialogPhotoClick(DialogFragment dialog) {
+        // User touched the dialog's "Take picture" button
+        dialog.dismiss();
+        dispatchTakePictureIntent();
+    }
+
+    @Override
+    public void onDialogFileClick(DialogFragment dialog) {
+        // User touched the dialog's "Pick a file" button
+        dialog.dismiss();
+        dispatchPickIntent();
+    }
+
+    /**
+     * Updates recentPMPersons in ZulipApp
+     */
+    public void updateRecentPMHashMap() {
+        if (app.getDatabaseHelper() == null)
+            return;
+        try {
+            int order;
+            recentPeopleDrawerList = new ArrayList<>();
+            app.recentPMPersons.clear();
+            //join people and messages table to get recent messages persons
+            String query = "SELECT DISTINCT people.id ,people.email, people.name FROM messages " +
+                    " JOIN people ON messages.recipients  LIKE ( people.id || ',%') OR messages.recipients  LIKE ('%,' || people.id)" +
+                    " WHERE (LTRIM(RTRIM(messages.recipients)) LIKE '%," + new SelectArg(app.getYou().getId()) + "' OR LTRIM(RTRIM(messages.recipients)) LIKE '" + new SelectArg(app.getYou().getId()) + ",%') AND "
+                    + Person.ISBOT_FIELD + " = 0 AND people.isActive = 1 ORDER BY messages.id DESC ;";
+
+            Cursor recentMessages = app.getDatabaseHelper().getReadableDatabase().rawQuery(query, null);
+            //add them to sortedPeopleCursor
+            if (recentMessages.moveToFirst()) {
+                order = 0;
+                do {
+                    PeopleDrawerList peopleDrawerList = new PeopleDrawerList(order, new Person(Integer.parseInt(recentMessages.getString(0))
+                            , recentMessages.getString(1), recentMessages.getString(2)), Constants.PEOPLE_DRAWER_RECENT_PM_GROUP_ID, getString(R.string.people_drawer_recent_pm_label));
+                    app.recentPMPersons.put(recentMessages.getString(1), peopleDrawerList);
+                    recentPeopleDrawerList.add(peopleDrawerList);
+                    order++;
+                } while (recentMessages.moveToNext());
+            }
+
+            try {
+                refreshPeopleDrawer();
+            } catch (SQLException e) {
+                ZLog.logException(e);
+            }
+
+            recentMessages.close();
+        } catch (NullPointerException e) {
+            ZLog.logException(e);
+        }
     }
 
     /**
@@ -623,7 +674,7 @@ public class ZulipActivity extends BaseActivity implements
      */
     private void resetPeopleSearch() {
         try {
-            peopleAdapter.changeCursor(getPeopleCursorGenerator().call());
+            refreshPeopleDrawer();
         } catch (Exception e) {
             ZLog.logException(e);
         }
@@ -677,8 +728,10 @@ public class ZulipActivity extends BaseActivity implements
             public Cursor call() throws Exception {
                 String query = "SELECT s.id as _id,  s.name, s.color"
                         + " FROM streams as s LEFT JOIN messages as m ON s.id=m.stream ";
+
                 String selectArg = null;
-                if (!etSearchStream.getText().toString().equals("") && !etSearchStream.getText().toString().isEmpty()) {
+
+                if (!TextUtils.isEmpty(etSearchStream.getText().toString())) {
                     //append where clause
                     selectArg = etSearchStream.getText().toString() + '%';
                     query += " WHERE s.name LIKE ? " + " and s." + Stream.SUBSCRIBED_FIELD + " = " + "1 ";
@@ -702,22 +755,40 @@ public class ZulipActivity extends BaseActivity implements
         return steamCursorGenerator;
     }
 
-    private void setUpPeopleList() {
+    private void setUpPeopleDrawerAdapter() {
         try {
-            this.peopleAdapter = new RefreshableCursorAdapter(
-                    this.getApplicationContext(), R.layout.stream_tile,
-                    getPeopleCursorGenerator().call(), getPeopleCursorGenerator(), new String[]{
-                    Person.NAME_FIELD, Person.EMAIL_FIELD}, new int[]{
-                    R.id.name, R.id.stream_dot}, 0);
-            peopleAdapter.setViewBinder(peopleBinder);
+            peopleDrawerList = new ArrayList<>();
+            this.peopleAdapter = new RefreshableCursorAdapter(ZulipActivity.this, peopleDrawerList, app) {
+                @Override
+                protected void onPeopleSelect(int id) {
+                    resetPeopleSearch();
+                    if (id == Constants.ALL_PEOPLE_ID) {
+                        openAllPrivateMessages();
+                    } else if (id == Constants.MENTIONS) {
+                        doNarrow(new NarrowFilterMentioned());
+                    } else {
+                        Person person = Person.getById(app, id);
+                        narrowPMWith(person);
+                        switchToPrivate();
+                    }
+                }
+            };
+            peopleDrawer.setAdapter(peopleAdapter);
+            FloatingHeaderDecoration decor = new FloatingHeaderDecoration(peopleAdapter);
 
             peopleDrawer.setAdapter(peopleAdapter);
-        } catch (SQLException e) {
-            ZLog.logException(e);
-            throw new RuntimeException(e);
+            peopleDrawer.addItemDecoration(decor, 1);
+
         } catch (Exception e) {
             ZLog.logException(e);
         }
+    }
+
+    /**
+     * Narrow to All Private Messages
+     */
+    private void openAllPrivateMessages() {
+        doNarrow(new NarrowFilterAllPMs(app.getYou()));
     }
 
     private void onTextChangeOfPeopleSearchEditText() {
@@ -730,7 +801,7 @@ public class ZulipActivity extends BaseActivity implements
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 try {
-                    peopleAdapter.changeCursor(getPeopleCursorGenerator().call());
+                    filterPeopleDrawer(s.toString().toLowerCase(Locale.getDefault()));
                 } catch (Exception e) {
                     ZLog.logException(e);
                 }
@@ -743,70 +814,114 @@ public class ZulipActivity extends BaseActivity implements
         });
     }
 
-    private Callable<Cursor> getPeopleCursorGenerator() {
-        Callable<Cursor> peopleGenerator = new Callable<Cursor>() {
-
-            @Override
-            public Cursor call() throws Exception {
-                // TODO Auto-generated method stub
-                List<Person> people;
-                if (etSearchPeople.getText().toString().equals("") || etSearchPeople.getText().toString().isEmpty()) {
-                    people = app.getDao(Person.class).queryBuilder()
-                            .where().eq(Person.ISBOT_FIELD, false).and()
-                            .eq(Person.ISACTIVE_FIELD, true).query();
-                    //set visibility of this image false
-                    ivSearchPeopleCancel.setVisibility(View.GONE);
-                } else {
-                    people = app.getDao(Person.class).queryBuilder()
-                            .where().eq(Person.ISBOT_FIELD, false).and()
-                            .like(Person.NAME_FIELD, "%" + etSearchPeople.getText().toString() + "%").and()
-                            .eq(Person.ISACTIVE_FIELD, true).query();
-                    //set visibility of this image false
-                    ivSearchPeopleCancel.setVisibility(View.VISIBLE);
+    /**
+     * Filter'keyWords people drawer according to name
+     *
+     * @param keyWords removes names which don't contain keyWords
+     */
+    private void filterPeopleDrawer(String keyWords) {
+        if (TextUtils.isEmpty(keyWords)) {
+            //set visibility of this image false
+            ivSearchPeopleCancel.setVisibility(View.GONE);
+        } else {
+            filteredRecentPeopleDrawerList = new ArrayList<>();
+            for (int i = 0; i < recentPeopleDrawerList.size(); i++) {
+                if (recentPeopleDrawerList.get(i).getPerson().getName().toLowerCase(Locale.getDefault()).contains(keyWords)) {
+                    filteredRecentPeopleDrawerList.add(recentPeopleDrawerList.get(i));
                 }
-
-                Person.sortByPresence(app, people);
-
-                String[] columnsWithPresence = new String[]{"_id",
-                        Person.EMAIL_FIELD, Person.NAME_FIELD};
-
-                MatrixCursor sortedPeopleCursor = new MatrixCursor(
-                        columnsWithPresence);
-                for (Person person : people) {
-                    Object[] row = new Object[]{person.getId(), person.getEmail(),
-                            person.getName()};
-                    sortedPeopleCursor.addRow(row);
-                }
-
-                // add private messages row
-                MatrixCursor allPrivateMessages = new MatrixCursor(
-                        sortedPeopleCursor.getColumnNames());
-                Object[] row = new Object[]{allPeopleId, "",
-                        "All private messages"};
-
-                allPrivateMessages.addRow(row);
-
-                return new MergeCursor(new Cursor[]{
-                        allPrivateMessages, sortedPeopleCursor});
-
             }
+            //set visibility of this image false
+            ivSearchPeopleCancel.setVisibility(View.VISIBLE);
+        }
+        try {
+            refreshPeopleDrawer();
+        } catch (SQLException e) {
+            ZLog.logException(e);
+        }
+    }
 
-        };
-        return peopleGenerator;
+    /**
+     * Refreshes recyclerView of people drawer
+     *
+     * @throws SQLException
+     */
+    public void refreshPeopleDrawer() throws SQLException {
+        // TODO Auto-generated method stub
+        List<Person> people;
+        Where<Person, Object> where = app.getDao(Person.class).queryBuilder()
+                .where().eq(Person.ISBOT_FIELD, false).and()
+                .eq(Person.ISACTIVE_FIELD, true);
+        List<PeopleDrawerList> drawerLists = new ArrayList<>();
+        if (!TextUtils.isEmpty(etSearchPeople.getText().toString())) {
+            where.and().like(Person.NAME_FIELD, "%" + etSearchPeople.getText().toString() + "%");
+        }
+
+        people = where.query();
+
+        for (int i = 0; i < people.size(); i++) {
+            Presence presence = app.presences.get(people.get(i).getEmail());
+            if (!app.recentPMPersons.containsKey(people.get(i).getEmail())) {
+                PeopleDrawerList peopleDrawerList;
+                if (Person.checkIsActive(presence)) {
+                    peopleDrawerList = new PeopleDrawerList(people.get(i), getString(R.string.people_drawer_active_label), Constants.PEOPLE_DRAWER_ACTIVE_GROUP_ID);
+                } else {
+                    peopleDrawerList = new PeopleDrawerList(people.get(i), getString(R.string.people_drawer_others_label), Constants.PEOPLE_DRAWER_OTHERS_GROUP_ID);
+                }
+                drawerLists.add(peopleDrawerList);
+            } else if (Person.checkIsActive(presence)) {
+                int position = app.recentPMPersons.get(people.get(i).getEmail()).getOrder();
+                recentPeopleDrawerList.get(position).setGroupName(getString(R.string.people_drawer_active_label));
+                recentPeopleDrawerList.get(position).setGroupId(Constants.PEOPLE_DRAWER_ACTIVE_GROUP_ID);
+            } else {
+                int position = app.recentPMPersons.get(people.get(i).getEmail()).getOrder();
+                recentPeopleDrawerList.get(position).setGroupName(getString(R.string.people_drawer_recent_pm_label));
+                recentPeopleDrawerList.get(position).setGroupId(Constants.PEOPLE_DRAWER_RECENT_PM_GROUP_ID);
+            }
+        }
+        combineList(drawerLists);
+        Person.sortByPresence(app, peopleDrawerList);
+        peopleAdapter.filterList(peopleDrawerList);
+    }
+
+    /**
+     * Combine list of recent private messages persons and persons with no recent messages
+     *
+     * @param drawerLists persons with whom no recent messages
+     */
+    private void combineList(List<PeopleDrawerList> drawerLists) {
+        peopleDrawerList.clear();
+        if (TextUtils.isEmpty(etSearchPeople.getText().toString())) {
+            peopleDrawerList.addAll(recentPeopleDrawerList);
+        } else {
+            peopleDrawerList.addAll(filteredRecentPeopleDrawerList);
+        }
+        peopleDrawerList.addAll(drawerLists);
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
 
+        if (mNotificationManager == null) {
+            mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        }
+        if (mBuilder == null) {
+            mBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(this)
+                    .setContentTitle(getString(R.string.notif_title))
+                    .setColor(ContextCompat.getColor(this, R.color.notif_background));
+        }
+
         // Get action and MIME type of intent
         String action = intent.getAction();
         String type = intent.getType();
 
         if (Intent.ACTION_SEND.equals(action) && type != null) {
-            if (type.startsWith("image/")) {
-                // Handle single image being sent
-                handleSentImage(intent);
+            if ("text/plain".equals(type)) {
+                // Handle text being sent
+                handleSentText(intent);
+            } else {
+                // Handle single file being sent
+                handleSentFile((Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM));
             }
         }
 
@@ -815,13 +930,6 @@ public class ZulipActivity extends BaseActivity implements
 
         if (action == null) {
             if (!TextUtils.isEmpty(filePath)) {
-                // Update UI to indicate image is being loaded
-                // hide fab and display chatbox
-                displayFAB(false);
-                displayChatBox(true);
-                String loadingMsg = getResources().getString(R.string.uploading_message);
-                sendingMessage(true, loadingMsg);
-
                 // start upload of photo
                 File photoFile = new File(filePath);
                 uploadFile(photoFile);
@@ -842,18 +950,50 @@ public class ZulipActivity extends BaseActivity implements
 
             // activity transition animation
             ActivityTransitionAnim.transition(ZulipActivity.this);
+        } else if (requestCode == REQUEST_PICK_FILE && resultCode == RESULT_OK) {
+            List<Uri> fileUris = new ArrayList<>();
+            if (data.getData() != null) {
+                fileUris.add(data.getData());
+            }
+            // intent.getClipData was added in api 16
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                ClipData clipData = data.getClipData();
+                if (clipData != null) {
+                    for (int i = 0; i < clipData.getItemCount(); i++) {
+                        fileUris.add(clipData.getItemAt(i).getUri());
+                    }
+                }
+            }
+            for (Uri file : fileUris) {
+                handleSentFile(file);
+            }
+        }
+    }
+
+    /**
+     * Function invoked when a user shares a text with the zulip app
+     *
+     * @param intent passed to the activity with action SEND
+     */
+    private void handleSentText(Intent intent) {
+        String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
+        if (sharedText != null) {
+            // Update UI to reflect text being shared
+            displayFAB(false);
+            displayChatBox(true);
+            messageEt.append(" " + sharedText);
         }
     }
 
     /**
      * Function invoked when a user shares an image with the zulip app
      *
-     * @param intent passed to the activity with action SEND
+     * @param fileUri obtained from intent passed to the activity
      */
     @SuppressLint("InlinedApi")
-    private void handleSentImage(Intent intent) {
-        mImageUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
-        if (mImageUri != null) {
+    private void handleSentFile(Uri fileUri) {
+        mFileUri = fileUri;
+        if (mFileUri != null) {
             // check if user has granted read external storage permission
             // for Android 6.0 or higher
             if (ContextCompat.checkSelfPermission(this,
@@ -862,14 +1002,14 @@ public class ZulipActivity extends BaseActivity implements
                 // we need to request the permission.
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                        PERMISSION_REQUEST_READ_CONTACTS);
+                        PERMISSION_REQUEST_READ_STORAGE);
             } else {
                 // permission already granted
                 // start with file upload
                 startFileUpload();
             }
         } else {
-            Toast.makeText(this, R.string.cannot_find_image, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.cannot_find_file, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -878,7 +1018,7 @@ public class ZulipActivity extends BaseActivity implements
                                            String permissions[], int[] grantResults) {
 
         switch (requestCode) {
-            case PERMISSION_REQUEST_READ_CONTACTS: {
+            case PERMISSION_REQUEST_READ_STORAGE: {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -887,7 +1027,7 @@ public class ZulipActivity extends BaseActivity implements
                     startFileUpload();
                 } else {
                     // permission denied
-                    Toast.makeText(this, R.string.cannot_upload_image, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.cannot_upload_file, Toast.LENGTH_SHORT).show();
                 }
             }
             break;
@@ -914,16 +1054,16 @@ public class ZulipActivity extends BaseActivity implements
 
             // Continue only if the File was successfully created
             if (photoFile != null) {
-                mPhotoURI = FileProvider.getUriForFile(this,
+                mFileUri = FileProvider.getUriForFile(this,
                         "com.zulip.fileprovider",
                         photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mPhotoURI);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mFileUri);
 
                 // grant uri permissions for lower api levels
                 List<ResolveInfo> resInfoList = this.getPackageManager().queryIntentActivities(takePictureIntent, PackageManager.MATCH_DEFAULT_ONLY);
                 for (ResolveInfo resolveInfo : resInfoList) {
                     String packageName = resolveInfo.activityInfo.packageName;
-                    this.grantUriPermission(packageName, mPhotoURI, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    this.grantUriPermission(packageName, mFileUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 }
 
                 startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
@@ -957,36 +1097,114 @@ public class ZulipActivity extends BaseActivity implements
     }
 
     /**
-     * Helper function to update UI to indicate image is being uploaded and call
-     * {@link ZulipActivity#uploadFile(File)} to upload the image.
+     * Helper function to update UI to indicate file is being uploaded and call
+     * {@link #uploadFile(File)} to upload the image.
      */
     private void startFileUpload() {
-        // Update UI to indicate image is being loaded
-        // hide fab and display chatbox
-        displayFAB(false);
-        displayChatBox(true);
-        String loadingMsg = getResources().getString(R.string.uploading_message);
-        sendingMessage(true, loadingMsg);
-
         File file = null;
-        if (FilePathHelper.isLegacy(mImageUri)) {
-            file = FilePathHelper.getTempFileFromContentUri(this, mImageUri);
+        if (FileUtils.isLegacy(mFileUri)) {
+            file = FileUtils.getTempFileFromContentUri(this, mFileUri);
         } else {
             // get actual file path
-            String imageFilePath = FilePathHelper.getPath(this, mImageUri);
-            if (imageFilePath != null) {
-                file = new File(imageFilePath);
-            } else if ("content".equalsIgnoreCase(mImageUri.getScheme())) {
-                file = FilePathHelper.getTempFileFromContentUri(this, mImageUri);
+            String filePath = FileUtils.getPath(this, mFileUri);
+            if (filePath != null) {
+                file = new File(filePath);
+            } else if ("content".equalsIgnoreCase(mFileUri.getScheme())) {
+                file = FileUtils.getTempFileFromContentUri(this, mFileUri);
             }
         }
 
         if (file == null) {
-            Toast.makeText(this, R.string.invalid_image, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.invalid_file, Toast.LENGTH_SHORT).show();
             return;
         }
         // upload the file asynchronously to the server
         uploadFile(file);
+    }
+
+    @NonNull
+    private MultipartBody.Part prepareFilePart(String partName, final File file, int notificationId, UploadProgressRequest.UploadCallbacks callbacks) {
+        // create UploadProgressRequest instance from file
+        UploadProgressRequest request = new UploadProgressRequest(file, callbacks, notificationId);
+
+        // MultipartBody.Part is used to send also the actual file name
+        return MultipartBody.Part.createFormData(partName, file.getName(), request);
+    }
+
+    public void cancelRequest(int notificationId) throws NullPointerException {
+        Call<UploadResponse> call = mCancelHashMap.get(notificationId);
+        if (call != null) {
+            call.cancel();
+            mCancelHashMap.remove(notificationId);
+        }
+    }
+
+    /**
+     * Modifies notification {@link Notifications} of specifies {@param notificationId}
+     * and sets its {@param content}.
+     *
+     * @param notificationId
+     * @param content
+     */
+    private void setNotification(int notificationId, String content) {
+        mBuilder.setSmallIcon(android.R.drawable.stat_sys_upload)
+                .setContentTitle(getString(R.string.notif_title))
+                .setContentText(content)
+                .setAutoCancel(false)
+                .setOngoing(false)
+                // Removes the progress bar
+                .setProgress(0, 0, false);
+        mBuilder.mActions.clear();
+        PendingIntent contentIntent = PendingIntent.getActivity(
+                getApplicationContext(),
+                0,
+                new Intent(),
+                PendingIntent.FLAG_UPDATE_CURRENT);
+        mBuilder.setContentIntent(contentIntent);
+        mNotificationManager.notify(notificationId, mBuilder.build());
+    }
+
+    /**
+     * Updates upload notification with passed percentage {@param percentage} and progress string
+     * {@param progress} as content.
+     *
+     * @param notificationId
+     * @param percentage
+     */
+    private void progressNotification(int notificationId, int percentage, String progress, String title, PendingIntent pendingIntent) {
+        mBuilder.setSmallIcon(android.R.drawable.stat_sys_upload)
+                .setContentTitle(title)
+                .setContentText(progress)
+                .setAutoCancel(false)
+                .setOngoing(true)
+                .setProgress(100, percentage, false);
+        mBuilder.mActions.clear();
+        mBuilder.addAction(R.drawable.ic_cancel_black_24dp, getString(R.string.cancel_content_desp), pendingIntent);
+        mNotificationManager.notify(notificationId, mBuilder.build());
+    }
+
+    /**
+     * Shows success notification.
+     *
+     * @param notificationId
+     * @param content
+     */
+    private void endNotification(int notificationId, String content) {
+        mBuilder.setSmallIcon(R.drawable.ic_done_white_24dp)
+                .setContentTitle(getString(R.string.notif_title))
+                .setContentText(content)
+                .setAutoCancel(true)
+                .setOngoing(false)
+                // Removes the progress bar
+                .setProgress(0, 0, false);
+        PendingIntent contentIntent = PendingIntent.getActivity(
+                getApplicationContext(),
+                0,
+                new Intent(),
+                PendingIntent.FLAG_UPDATE_CURRENT);
+        mBuilder.setContentIntent(contentIntent);
+        mBuilder.mActions.clear();
+        mNotificationManager.notify(notificationId, mBuilder.build());
     }
 
     /**
@@ -995,55 +1213,121 @@ public class ZulipActivity extends BaseActivity implements
      *
      * @param file on local storage
      */
-    private void uploadFile(File file) {
+    private void uploadFile(final File file) {
+        // check if file size is greater than 10MB
+        if (file.length() / Math.pow(1024, 2) > 10) {
+            Toast.makeText(this, R.string.upload_big_file, Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        // create RequestBody instance from file
-        RequestBody requestFile =
-                RequestBody.create(MediaType.parse("multipart/form-data"), file);
+        // generate unique notification Id for this upload
+        final int notifId = (int) (new Date().getTime() % Integer.MAX_VALUE);
+
+        // cancel pending intent
+        Intent actionIntent = new Intent(this, GcmBroadcastReceiver.class);
+        actionIntent.putExtra("id", notifId);
+        actionIntent.setAction(Constants.CANCEL);
+        final PendingIntent piAction = PendingIntent.getBroadcast(this, notifId, actionIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        // update notification after every one second
+        final long startTime = System.currentTimeMillis();
+        final int[] counter = {0};
+        UploadProgressRequest.UploadCallbacks progressListener = new UploadProgressRequest.UploadCallbacks() {
+            @Override
+            public void onProgressUpdate(int percentage, String progress, int notificationId) {
+                if (System.currentTimeMillis() - startTime >= 1000 * counter[0]) {
+                    // update notification
+                    progressNotification(notificationId, percentage, progress, file.getName(), piAction);
+                    counter[0]++;
+                }
+            }
+        };
 
         // MultipartBody.Part is used to send also the actual file name
-        MultipartBody.Part body =
-                MultipartBody.Part.createFormData("picture", file.getName(), requestFile);
-
-        final String loadingMsg = getResources().getString(R.string.uploading_message);
+        MultipartBody.Part body = prepareFilePart("file", file, notifId, progressListener);
 
         // finally, execute the request
         // create upload service client
-        Call<UploadResponse> call = ((ZulipApp) getApplicationContext()).getZulipServices().upload(body);
-        call.enqueue(new Callback<UploadResponse>() {
+        Call<UploadResponse> call = ((ZulipApp) getApplicationContext()).getUploadServices().upload(body);
+        if (mCancelHashMap == null) {
+            mCancelHashMap = new HashMap<>();
+        }
+        mCancelHashMap.put(notifId, call);
+        Toast.makeText(this, R.string.upload_started_str, Toast.LENGTH_SHORT).show();
+        // start notification
+        setNotification(notifId, getString(R.string.init_notif_title) + getString(R.string.to_string) + getNotifTitle());
+        call.enqueue(new DefaultCallback<UploadResponse>() {
             @Override
-            public void onResponse(Call<UploadResponse> call,
-                                   Response<UploadResponse> response) {
-                if (response.isSuccessful()) {
-                    String filePathOnServer = "";
-                    UploadResponse uploadResponse = response.body();
-                    filePathOnServer = uploadResponse.getUri();
-                    if (!filePathOnServer.equals("")) {
-                        // remove loading message from the screen
-                        sendingMessage(false, loadingMsg);
-
-                        // print message to compose box
-                        messageEt.append(" " + UrlHelper.addHost(filePathOnServer));
-                    } else {
-                        // remove loading message from the screen
-                        sendingMessage(false, loadingMsg);
-                        Toast.makeText(ZulipActivity.this, R.string.failed_to_upload, Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    // remove loading message from the screen
-                    sendingMessage(false, loadingMsg);
-                    Toast.makeText(ZulipActivity.this, R.string.failed_to_upload, Toast.LENGTH_SHORT).show();
+            public void onSuccess(Call<UploadResponse> call, Response<UploadResponse> response) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 && isDestroyed()) {
+                    return;
                 }
+                String filePathOnServer = "";
+                UploadResponse uploadResponse = response.body();
+                filePathOnServer = uploadResponse.getUri();
+                if (!filePathOnServer.equals("")) {
+                    endNotification(notifId, getString(R.string.finish_notif_title));
 
+                    // add uploaded file url on server to composed message
+                    messageEt.append("\n[" + file.getName() + "](" +
+                            UrlHelper.addHost(filePathOnServer) + ")");
+                    displayFAB(false);
+                    displayChatBox(true);
+                } else {
+                    endNotification(notifId, getString(R.string.failed_to_upload));
+                }
+                if (!(mCancelHashMap != null && mCancelHashMap.size() == 1)) {
+                    mNotificationManager.cancel(notifId);
+                }
+                if (mCancelHashMap != null) {
+                    mCancelHashMap.remove(notifId);
+                    mCancelHashMap = mCancelHashMap.isEmpty() ? null : mCancelHashMap;
+                }
+            }
+
+            @Override
+            public void onError(Call<UploadResponse> call, Response<UploadResponse> response) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 && isDestroyed()) {
+                    return;
+                }
+                endNotification(notifId, getString(R.string.failed_to_upload));
+                mNotificationManager.cancel(notifId);
             }
 
             @Override
             public void onFailure(Call<UploadResponse> call, Throwable t) {
-                // remove loading message from the screen
-                sendingMessage(false, loadingMsg);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 && isDestroyed()) {
+                    return;
+                }
+                if (call.isCanceled()) {
+                    mNotificationManager.cancel(notifId);
+                    return;
+                }
+                endNotification(notifId, getString(R.string.failed_to_upload));
+                mNotificationManager.cancel(notifId);
                 ZLog.logException(t);
             }
         });
+    }
+
+    private String getNotifTitle() {
+        String title = "";
+        MessageType messageType = isCurrentModeStream() ? MessageType.STREAM_MESSAGE : MessageType.PRIVATE_MESSAGE;
+        if (messageType == MessageType.STREAM_MESSAGE) {
+            title += streamActv.getText().toString();
+            title += " > " + topicActv.getText().toString();
+        }
+
+        if (TextUtils.isEmpty(title) || title.equals(" > ")) {
+            NarrowFilter filter = getCurrentMessageList().filter;
+            if (filter == null) {
+                title = getString(R.string.app_name);
+            } else {
+                title = filter.getTitle() + (filter.getSubtitle() != null ? " > " + filter.getSubtitle() : "");
+            }
+        }
+
+        return title;
     }
 
     /**
@@ -1083,7 +1367,10 @@ public class ZulipActivity extends BaseActivity implements
         fab = (FloatingActionButton) findViewById(R.id.fab);
         chatBox = (SwipeRemoveLinearLayout) findViewById(R.id.messageBoxContainer);
         chatBox.registerToSwipeEvents(this);
-        fabHidder = new CountDownTimer(HIDE_FAB_AFTER_SEC * 1000, HIDE_FAB_AFTER_SEC * 1000) {
+        addFileBtn.setColorFilter(getResources().getColorStateList(R.color.colorTextSecondary).getColorForState(addFileBtn.getDrawableState(), 0));
+        sendBtn.setColorFilter(getResources().getColorStateList(R.color.colorTextSecondary).getColorForState(sendBtn.getDrawableState(), 0));
+        togglePrivateStreamBtn.setColorFilter(getResources().getColorStateList(R.color.colorTextSecondary).getColorForState(togglePrivateStreamBtn.getDrawableState(), 0));
+        fabHidder = new CountDownTimer(Constants.HIDE_FAB_AFTER_SEC * 1000, Constants.HIDE_FAB_AFTER_SEC * 1000) {
             public void onTick(long millisUntilFinished) {
             }
 
@@ -1407,7 +1694,7 @@ public class ZulipActivity extends BaseActivity implements
         final String sendingMsg = getResources().getString(R.string.sending_message);
         sendingMessage(true, sendingMsg);
         MessageType messageType = isCurrentModeStream() ? MessageType.STREAM_MESSAGE : MessageType.PRIVATE_MESSAGE;
-        Message msg = new Message(app);
+        final Message msg = new Message(app);
         msg.setSender(app.getYou());
 
         if (messageType == MessageType.STREAM_MESSAGE) {
@@ -1425,6 +1712,10 @@ public class ZulipActivity extends BaseActivity implements
                 Toast.makeText(ZulipActivity.this, R.string.message_sent, Toast.LENGTH_SHORT).show();
                 messageEt.setText("");
                 sendingMessage(false, sendingMsg);
+                if (msg.getType() == MessageType.PRIVATE_MESSAGE) {
+                    //update hash table
+                    updateRecentPMHashMap();
+                }
             }
 
             public void onTaskFailure(String result) {
@@ -1445,7 +1736,7 @@ public class ZulipActivity extends BaseActivity implements
         messageEt.setEnabled(!isSending);
         topicActv.setEnabled(!isSending);
         sendBtn.setEnabled(!isSending);
-        cameraBtn.setEnabled(!isSending);
+        addFileBtn.setEnabled(!isSending);
         togglePrivateStreamBtn.setEnabled(!isSending);
         if (isSending) {
             TextView msg = (TextView) composeStatus.findViewById(R.id.sending_message);
@@ -2138,6 +2429,24 @@ public class ZulipActivity extends BaseActivity implements
         return true;
     }
 
+    private void dispatchPickIntent() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("*/*");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+
+        // For Api level greater than or equal to 18, allow user to select multiple files
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        }
+
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(intent, Constants.REQUEST_PICK_FILE);
+            // activity transition animation
+            ActivityTransitionAnim.transition(ZulipActivity.this);
+        }
+    }
+
     /**
      * Switches the current Day/Night mode to Night/Day mode
      *
@@ -2237,6 +2546,15 @@ public class ZulipActivity extends BaseActivity implements
         if (statusUpdateHandler != null) {
             statusUpdateHandler.removeMessages(0);
             statusUpdateHandler.removeCallbacks(statusUpdateRunnable);
+        }
+        if (mNotificationManager == null) {
+            mNotificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+        }
+        mNotificationManager.cancelAll();
+        if (mCancelHashMap != null) {
+            for (Call call : mCancelHashMap.values()) {
+                call.cancel();
+            }
         }
     }
 

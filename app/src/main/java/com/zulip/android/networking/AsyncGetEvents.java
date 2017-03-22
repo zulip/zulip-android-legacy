@@ -26,8 +26,8 @@ import com.zulip.android.networking.response.events.EventsBranch;
 import com.zulip.android.networking.response.events.GetEventResponse;
 import com.zulip.android.networking.response.events.MessageWrapper;
 import com.zulip.android.networking.response.events.MutedTopicsWrapper;
-import com.zulip.android.networking.response.events.StreamWrapper;
 import com.zulip.android.networking.response.events.StarWrapper;
+import com.zulip.android.networking.response.events.StreamWrapper;
 import com.zulip.android.networking.response.events.SubscriptionWrapper;
 import com.zulip.android.networking.response.events.UpdateMessageWrapper;
 import com.zulip.android.util.MutedTopics;
@@ -221,7 +221,11 @@ public class AsyncGetEvents extends Thread {
                 mActivity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        mActivity.getPeopleAdapter().refresh();
+                        try {
+                            mActivity.refreshPeopleDrawer();
+                        } catch (SQLException e) {
+                            ZLog.logException(e);
+                        }
                         mActivity.onReadyToDisplay(true);
                         mActivity.checkAndSetupStreamsDrawer();
                         if (mActivity.commonProgressDialog != null && mActivity.commonProgressDialog.isShowing()) {

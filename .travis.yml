@@ -11,10 +11,10 @@ android:
     - platform-tools
 
     # The BuildTools version used by your project
-    - build-tools-23.0.2
+    - build-tools-25.0.2
 
     # The SDK version used to compile your project
-    - android-24
+    - android-25
 
     # Additional components
     - extra-google-google_play_services
@@ -40,3 +40,9 @@ android:
 script:
   - ./gradlew lintDebug
   - ./gradlew assembleDebug
+notifications:
+  webhooks:
+    urls:
+      - https://zulip.org/zulipbot/travis
+    on_success: always
+    on_failure: always
