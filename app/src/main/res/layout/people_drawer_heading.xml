@@ -20,6 +20,6 @@
         android:background="@color/listBackground"
         android:paddingLeft="4dp"
         android:paddingRight="4dp"
-        android:text="Active" />
+        android:text="@string/people_drawer_active_label" />
 
 </RelativeLayout>
