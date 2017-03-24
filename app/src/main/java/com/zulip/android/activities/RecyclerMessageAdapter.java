@@ -289,7 +289,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
      */
     public void addNewMessage(Message message) {
         MessageHeaderParent item = null;
-        for (int i = getItemCount(false) - 1; i > 1; i--) {
+        for (int i = getItemCount(false) - 1; i >= 1; i--) {
             //Find the last header and check if it belongs to this message!
             if (items.get(i) instanceof MessageHeaderParent) {
                 item = (MessageHeaderParent) items.get(i);
