@@ -16,9 +16,6 @@ public class UserConfigurationResponse {
     @SerializedName("last_event_id")
     private int lastEventId;
 
-    @SerializedName("realm_domain")
-    private String realmDomain;
-
     @SerializedName("realm_name")
     private String realmName;
 
@@ -114,10 +111,6 @@ public class UserConfigurationResponse {
 
     public int getLastEventId() {
         return lastEventId;
-    }
-
-    public String getRealmDomain() {
-        return realmDomain;
     }
 
     public String getRealmName() {
