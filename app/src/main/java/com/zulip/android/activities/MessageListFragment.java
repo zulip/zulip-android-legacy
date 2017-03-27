@@ -444,6 +444,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
                         //user have scrolled above before switching theme
                         scrollWithZeroOffset(getMessageById(app.getTempNarrowedViewPointer()));
                         app.setTempNarrowedViewPointer(-1);
+                        app.setNarrowedViewHeaderCount(0);
                     } else {
                         selectMessage(getMessageById(anchorId));
                     }
@@ -452,6 +453,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
                         //user have scrolled above before switching theme
                         scrollWithZeroOffset(getMessageById(app.getTempNarrowedViewPointer()));
                         app.setTempNarrowedViewPointer(-1);
+                        app.setNarrowedViewHeaderCount(0);
                     }else {
                         recyclerView.scrollToPosition(adapter.getItemIndex(closestMessage));
                     }
@@ -468,6 +470,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
                 //will be useful when user switch theme from narrowed view and back trace to home
                 if (app.isThemeSwitchedFromHome()) {
                     app.setTempHomeViewPointer(-1);
+                    app.setHomeViewHeaderCount(0);
                 }
             } else {
                 selectMessage(getMessageById(anc));
@@ -868,7 +871,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
     }
 
     private void selectMessage(final Message message) {
-        recyclerView.scrollToPosition(adapter.getItemIndex(message));
+        recyclerView.scrollToPosition(adapter.getItemIndex(message) - ((filter == null) ? app.getHomeViewHeaderCount() : app.getNarrowedViewHeaderCount()));
     }
 
     /**
@@ -878,7 +881,7 @@ public class MessageListFragment extends Fragment implements MessageListener {
      * @see {@link <a href="http://stackoverflow.com/questions/26875061/scroll-recyclerview-to-show-selected-item-on-top"/>}
      */
     private void scrollWithZeroOffset(Message message) {
-        linearLayoutManager.scrollToPositionWithOffset(adapter.getItemIndex(message), 0);
+        linearLayoutManager.scrollToPositionWithOffset(adapter.getItemIndex(message) - ((filter == null) ? app.getHomeViewHeaderCount() : app.getNarrowedViewHeaderCount()), 0);
     }
 
     private Message getMessageById(int id) {
@@ -930,13 +933,23 @@ public class MessageListFragment extends Fragment implements MessageListener {
      * @return messagedId of message which is at top
      */
     public int getTopMessageId() {
-        int position = linearLayoutManager.findFirstCompletelyVisibleItemPosition();
+        int position = linearLayoutManager.findFirstVisibleItemPosition();
+        int headerCount = 0;
         //if there aren't any visible items position = -1
         if (position >= 0) {
             for (int i = position; i < adapter.getItemCount(); i++) {
                 Object topObject = adapter.getItem(i);
                 if (topObject instanceof Message) {
+                    if (filter == null) {
+                        //homeView
+                        app.setHomeViewHeaderCount(headerCount);
+                    } else {
+                        //narrowed view
+                        app.setNarrowedViewHeaderCount(headerCount);
+                    }
                     return ((Message) topObject).getID();
+                } else {
+                    headerCount++;
                 }
             }
         }

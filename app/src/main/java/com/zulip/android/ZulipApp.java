@@ -147,6 +147,11 @@ public class ZulipApp extends Application {
     //on switch theme activity is recreated
     private boolean isThemeSwitchedFromHome = true;
 
+    //account for header
+    //will be helpful when them is switched
+    private int homeViewHeaderCount = 0;
+    private int narrowedViewHeaderCount = 0;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -647,5 +652,21 @@ public class ZulipApp extends Application {
 
     public void setThemeSwitchedFromHome(boolean themeSwitchedFromHome) {
         isThemeSwitchedFromHome = themeSwitchedFromHome;
+    }
+
+    public int getHomeViewHeaderCount() {
+        return homeViewHeaderCount;
+    }
+
+    public void setHomeViewHeaderCount(int homeViewHeaderCount) {
+        this.homeViewHeaderCount = homeViewHeaderCount;
+    }
+
+    public int getNarrowedViewHeaderCount() {
+        return narrowedViewHeaderCount;
+    }
+
+    public void setNarrowedViewHeaderCount(int narrowedViewHeaderCount) {
+        this.narrowedViewHeaderCount = narrowedViewHeaderCount;
     }
 }
