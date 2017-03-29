@@ -30,7 +30,6 @@ import com.zulip.android.database.DatabaseHelper;
 import com.zulip.android.models.Emoji;
 import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageType;
-import com.zulip.android.models.PeopleDrawerList;
 import com.zulip.android.models.Person;
 import com.zulip.android.models.Presence;
 import com.zulip.android.models.Stream;
@@ -90,11 +89,7 @@ public class ZulipApp extends Application {
      * every couple of seconds
      */
     public final Queue<Integer> unreadMessageQueue = new ConcurrentLinkedQueue<>();
-    /**
-     * Map of recent PM person with their email
-     * Updated when new private message is arrived
-     */
-    public final Map<String, PeopleDrawerList> recentPMPersons = new ConcurrentHashMap<>();
+
     // This object's intrinsic lock is used to prevent multiple threads from
     // making conflicting updates to ranges
     public Object updateRangeLock = new Object();
@@ -102,6 +97,7 @@ public class ZulipApp extends Application {
     private Person you;
     private SharedPreferences settings;
     private String api_key;
+
     private int max_message_id;
     private DatabaseHelper databaseHelper;
     private ZulipServices zulipServices;
@@ -433,7 +429,7 @@ public class ZulipApp extends Application {
         ed.apply();
         this.api_key = null;
         setEventQueueId(null);
-        recentPMPersons.clear();
+
         new GoogleAuthHelper().logOutGoogleAuth();
     }
 

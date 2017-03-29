@@ -48,6 +48,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Response;
@@ -287,8 +288,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         serverUri = serverUri.buildUpon().scheme(httpScheme).build();
 
         // display server url with http scheme used
-        serverIn.setText(serverUri.toString().toLowerCase());
-        mServerEditText.setText(serverUri.toString().toLowerCase());
+        serverIn.setText(serverUri.toString().toLowerCase(Locale.US));
+        mServerEditText.setText(serverUri.toString().toLowerCase(Locale.US));
         mServerEditText.setEnabled(false);
 
         // if server url does not end with "api/" or if the path is empty, use "/api" as last segment in the path
@@ -297,7 +298,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
             serverUri = serverUri.buildUpon().appendEncodedPath("api/").build();
         }
 
-        ((ZulipApp) getApplication()).setServerURL(serverUri.toString().toLowerCase());
+        ((ZulipApp) getApplication()).setServerURL(serverUri.toString().toLowerCase(Locale.US));
 
         // create new zulipServices object every time by setting it to null
         getApp().setZulipServices(null);
