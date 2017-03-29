@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.util.Comparator;
+import java.util.Locale;
 
 /**
  * @author Peli
@@ -66,8 +67,8 @@ public class FileUtils {
         @Override
         public int compare(File f1, File f2) {
             // Sort alphabetically by lower case, which is much cleaner
-            return f1.getName().toLowerCase().compareTo(
-                    f2.getName().toLowerCase());
+            return f1.getName().toLowerCase(Locale.US).compareTo(
+                    f2.getName().toLowerCase(Locale.US));
         }
     };
     /**

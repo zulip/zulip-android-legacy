@@ -18,7 +18,7 @@
     <string name="link_image">ImageView of link</string>
     <string name="permission_message">Zulip app needs storage permission.</string>
     <string name="permission_title">Need storage permission</string>
-    <string name="downloading">Downloading...</string>
+    <string name="downloading">Downloading…</string>
     <string name="topic">Topic</string>
     <string name="close">Close</string>
     <string name="refresh">Refresh</string>
@@ -144,7 +144,6 @@
     <string name="today_messages">Today\'s messages</string>
     <string name="messages">Messages</string>
     <string name="starred_messages">Starred Messages</string>
-    <string name="all_private_messages">All private messages</string>
     <plurals name="new_message_mul_sender">
         <item quantity="one">%d new message</item>
         <item quantity="other">%d new messages</item>
@@ -162,9 +161,6 @@
     <string name="copy_message_fetch">Copying message to clipboard</string>
     <string name="copy_failed">Copying to clipboard failed</string>
     <string name="try_again_error_msg">Something went wrong, try again</string>
-    <string name="people_drawer_active_label">Active</string>
-    <string name="people_drawer_recent_pm_label">Recent private messages</string>
-    <string name="people_drawer_others_label">New private message</string>
     <string name="mentions">\@-mentions</string>
     <string name="notif_title">Upload to Zulip</string>
     <string name="init_notif_title">Starting upload</string>
