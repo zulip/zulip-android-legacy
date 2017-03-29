@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_screen3"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:weightSum="1">
+
+        <TextView
+            android:id="@+id/slide3_title"
+            android:layout_width="255dp"
+            android:layout_height="wrap_content"
+            android:text="@string/stream_drawer_title"
+            android:textColor="@android:color/white"
+            android:textSize="30dp" />
+
+        <ImageView
+            android:id="@+id/slide3_image"
+            android:layout_width="260dp"
+            android:layout_height="600dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:src="@drawable/slide3" />
+
+
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/slide3_description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="60dp"
+        android:layout_marginLeft="24dp"
+        android:layout_marginStart="24dp"
+        android:paddingLeft="40dp"
+        android:paddingRight="40dp"
+        android:text="@string/stream_drawer"
+        android:textAlignment="center"
+        android:textColor="@android:color/white"
+        android:textSize="15dp" />
+
+
+</RelativeLayout>

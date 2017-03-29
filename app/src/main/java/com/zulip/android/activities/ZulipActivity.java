@@ -113,6 +113,7 @@ import com.zulip.android.util.Constants;
 import com.zulip.android.util.FileUtils;
 import com.zulip.android.util.ListDialog;
 import com.zulip.android.util.MutedTopics;
+import com.zulip.android.util.PrefManager;
 import com.zulip.android.util.RemoveViewsOnScroll;
 import com.zulip.android.util.SwipeRemoveLinearLayout;
 import com.zulip.android.util.UrlHelper;
@@ -2334,6 +2335,14 @@ public class ZulipActivity extends BaseActivity implements
                         FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 clearSearch();
                 break;
+            case R.id.helpMe:
+                PrefManager prefManager = new PrefManager(getApplicationContext());
+                // making the first time launch TRUE
+                prefManager.setFirstTimeLaunch(true);
+                startActivity(new Intent(ZulipActivity.this, TutorialActivity.class));
+                finish();
+                break;
+
             case R.id.search:
                 // show a pop up dialog only if gingerbread or under
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {

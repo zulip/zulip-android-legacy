@@ -31,6 +31,11 @@
     <item
         android:id="@+id/daynight"
         android:title="@string/switch_theme" />
+
+    <item
+        android:id="@+id/helpMe"
+        android:title="Help" />
+
     <item
         android:id="@+id/isStarred"
         android:title="@string/starred_messages" />
