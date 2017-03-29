@@ -61,6 +61,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.view.WindowManager;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AutoCompleteTextView;
@@ -220,10 +221,10 @@ public class ZulipActivity extends BaseActivity implements
     private EditText etSearchStream;
     private ImageView ivSearchStreamCancel;
     private Toast toast;
+    private boolean expanded_stream = false;
     private RecyclerView peopleDrawer;
     private List<PeopleDrawerList> peopleDrawerList;
     private ImageView addFileBtn;
-    //
     private String streamSearchFilterKeyword = "";
     private RefreshableCursorAdapter peopleAdapter;
     private LinearLayout composeStatus;
@@ -1524,10 +1525,22 @@ public class ZulipActivity extends BaseActivity implements
                 String streamName = ((TextView) view.findViewById(R.id.name)).getText().toString();
                 doNarrowToLastRead(streamName);
                 drawerLayout.openDrawer(GravityCompat.START);
+                ImageView imageView = (ImageView) view.findViewById(R.id.stream_expand_arrow);
+                float deg = (imageView.getRotation() == 180F) ? 0F : 180F;
+                imageView.animate().rotation(deg).setInterpolator(new AccelerateDecelerateInterpolator());
+
                 if (previousClick != -1 && expandableListView.getCount() > previousClick) {
                     expandableListView.collapseGroup(previousClick);
                 }
-                expandableListView.expandGroup(position);
+
+                if ((previousClick == position) && expanded_stream) {
+                    expandableListView.collapseGroup(position);
+                    expanded_stream = false;
+                } else {
+                    expandableListView.expandGroup(position);
+                    expanded_stream = true;
+                }
+
                 previousClick = position;
                 onNarrowFillSendBoxStream(streamName, "", false);
                 return true;

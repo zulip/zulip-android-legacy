@@ -30,7 +30,6 @@ public class StreamSpan extends ClickableSpan {
     @Override
     public void onClick(View widget) {
         Context context = widget.getContext().getApplicationContext();
-
         // get stream name from streamId string
         String streamName = null;
         if (StringUtils.isNumeric(streamId)) {
