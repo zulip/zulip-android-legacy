@@ -26,4 +26,8 @@ public class Constants {
     public static String DATE_FORMAT = "dd/MM/yyyy";
     // row number which is used to differentiate the '@-mentions' in people drawer
     public static int MENTIONS = -2;
+    //end points
+    public static String END_POINT_TERMS_OF_SERVICE = "terms";
+    public static String END_POINT_PRIVACY = "privacy";
+    public static String END_POINT_REGISTER = "register";
 }

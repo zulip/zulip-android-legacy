@@ -8,7 +8,7 @@
     <string name="password">Password</string>
     <string name="server_url">Server URL</string>
     <string name="server_domain">Server domain</string>
-    <string name="legal">Legal information</string>
+    <string name="privacy">Privacy Policy</string>
     <string name="logout">Log out</string>
     <string name="force_logged_out">You\'ve been logged out</string>
     <string name="huddle_text">You</string>
@@ -20,11 +20,9 @@
     <string name="permission_title">Need storage permission</string>
     <string name="downloading">Downloading...</string>
     <string name="topic">Topic</string>
-    <string name="close">Close</string>
     <string name="refresh">Refresh</string>
     <string name="toast_unable_to_load_image">Unable to load image</string>
     <string name="link_copied">Link copied to clipboard</string>
-    <string name="title_activity_legal">Legal</string>
     <string name="streams_open">Open stream sidebar</string>
     <string name="streams_close">Close stream sidebar</string>
     <string name="press_again_to_exit">Press again to exit</string>
@@ -174,4 +172,5 @@
     <string name="pick_dialog">Pick a file</string>
     <string name="to_string">" to "</string>
     <string name="upload_started_str">Upload started</string>
+    <string name="terms">Terms Of Service</string>
 </resources>

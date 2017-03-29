@@ -423,11 +423,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         }
     }
 
-    private void openLegal() {
-        Intent i = new Intent(this, LegalActivity.class);
-        startActivityForResult(i, 0);
-    }
-
     public void openHome() {
         // Cancel before leaving activity to avoid leaking windows
         commonProgressDialog.dismiss();
@@ -553,8 +548,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                         });
 
                 break;
-            case R.id.legal_button:
-                openLegal();
+            case R.id.privacy:
+                openUrl(Constants.END_POINT_PRIVACY);
+                break;
+            case R.id.terms:
+                openUrl(Constants.END_POINT_TERMS_OF_SERVICE);
                 break;
             case R.id.local_server_button:
                 if (!isInputValidForDevAuth()) return;
@@ -574,19 +572,23 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                 asyncDevGetEmails.execute();
                 break;
             case R.id.register:
-                openRegister();
+                openUrl(Constants.END_POINT_REGISTER);
                 break;
             default:
                 break;
         }
     }
 
-    private void openRegister() {
+    /**
+     * Open's url in custom tabs if API >= 15 else in browser
+     * @param endPoint of the url
+     */
+    private void openUrl(String endPoint) {
         Uri uri;
         if (serverIn == null || serverIn.getText().toString().isEmpty() || serverIn.getText().toString().equals("")) {
             return;
         } else {
-            uri = Uri.parse(serverIn.getText().toString() + "register");
+            uri = Uri.parse(serverIn.getText().toString() + endPoint);
         }
         if (Build.VERSION.SDK_INT < 15) {
             Intent intent = new Intent(Intent.ACTION_VIEW, uri);
