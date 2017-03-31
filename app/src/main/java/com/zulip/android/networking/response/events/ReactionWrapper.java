@@ -2,7 +2,7 @@ package com.zulip.android.networking.response.events;
 
 import com.google.gson.annotations.SerializedName;
 import com.zulip.android.models.Reaction;
-import com.zulip.android.models.User;
+import com.zulip.android.models.UserReaction;
 
 /**
  * This class is used to deserialize the reaction type event {@link EventsBranch.BranchType#REACTION}
@@ -18,7 +18,7 @@ public class ReactionWrapper extends EventsBranch {
     private String emoji;
 
     @SerializedName("user")
-    private User user;
+    private UserReaction user;
 
     @SerializedName("message_id")
     private int messageId;
