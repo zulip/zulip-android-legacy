@@ -40,6 +40,7 @@ import com.zulip.android.models.Person;
 import com.zulip.android.models.Reaction;
 import com.zulip.android.models.Stream;
 import com.zulip.android.util.ActivityTransitionAnim;
+import com.zulip.android.util.Constants;
 import com.zulip.android.util.ConvertDpPx;
 import com.zulip.android.util.MutedTopics;
 import com.zulip.android.util.OnItemClickListener;
@@ -439,64 +440,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 setUpGravatar(message, messageHolder);
                 setUpTime(message, messageHolder);
                 setUpStar(message, messageHolder);
-                try {
-                    messageHolder.reactionsTable.removeAllViews();
-                    if (message.getReactions().isEmpty()) {
-                        return;
-                    }
-
-                    // Calculate number of reactions in each row
-                    int messageWidth = messageHolder.messageTile.getContext().getResources().getDisplayMetrics().widthPixels;
-                    int reactionWidth = convertDpToPixel(64);
-                    int numOfReactions = messageWidth / reactionWidth;
-                    TableRow row = new TableRow(messageHolder.messageTile.getContext());
-
-                    // set margin of 6dp between reactions in a table row
-                    TableRow.LayoutParams layoutParams = new TableRow.LayoutParams();
-                    int margin = ConvertDpPx.convertDpToPixel(6);
-                    layoutParams.setMargins(margin, margin, margin, margin);
-
-                    // table row index
-                    int index = 0;
-                    for (Map.Entry<String, Integer> reaction : getDisplayReactions(message.getReactions()).entrySet()) {
-                        if (numOfReactions == 0) {
-                            // current row is full
-                            messageHolder.reactionsTable.addView(row, index++);
-                            row = new TableRow(messageHolder.messageTile.getContext());
-                            numOfReactions = messageWidth / reactionWidth;
-                        }
-
-                        // inflate reaction layout
-                        LinearLayout reactionTile = (LinearLayout) LayoutInflater.from(messageHolder.messageTile.getContext()).inflate(R.layout.reaction_tile, null);
-                        reactionTile.setLayoutParams(layoutParams);
-
-                        // emoji view in reaction
-                        ImageView imageView = (ImageView) reactionTile.findViewById(R.id.reaction_emoji);
-                        // emoji count view
-                        TextView textView = (TextView) reactionTile.findViewById(R.id.reaction_count);
-
-                        // get emoji drawable from assets
-                        String emojiName = reaction.getKey() + ".png";
-                        Drawable drawable = Drawable.createFromStream(zulipApp.getAssets().open("emoji/" + emojiName),
-                                "emoji/" + emojiName);
-
-                        // shrink drawable resource
-                        Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
-                        int size = ConvertDpPx.convertDpToPixel(20);
-                        drawable = new BitmapDrawable(context.getResources(), Bitmap.createScaledBitmap(bitmap, size, size, true));
-
-                        imageView.setImageDrawable(drawable);
-                        textView.setText(String.format(Locale.getDefault(), "%d", reaction.getValue()));
-                        row.addView(reactionTile);
-
-                        numOfReactions--;
-                    }
-                    messageHolder.reactionsTable.addView(row, index);
-                } catch (NullPointerException e) {
-                    Log.e("adapter", "message reactions are null");
-                } catch (IOException e) {
-                    ZLog.logException(e);
-                }
+                setUpReactions(messageHolder, message);
                 break;
         }
     }
@@ -565,6 +509,67 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         } else {
             //Make star's imageView visibility to GONE
             messageHolder.starImage.setVisibility(View.GONE);
+        }
+    }
+
+    private void setUpReactions(MessageHolder messageHolder, Message message) {
+        try {
+            messageHolder.reactionsTable.removeAllViews();
+            if (message.getReactions().isEmpty()) {
+                return;
+            }
+
+            // Calculate number of reactions in each row
+            int messageWidth = messageHolder.messageTile.getContext().getResources().getDisplayMetrics().widthPixels;
+            int reactionWidth = convertDpToPixel(Constants.REACTION_MARGIN);
+            int numOfReactions = messageWidth / reactionWidth;
+            TableRow row = new TableRow(messageHolder.messageTile.getContext());
+
+            // set margin of 6dp between reactions in a table row
+            TableRow.LayoutParams layoutParams = new TableRow.LayoutParams();
+            int margin = ConvertDpPx.convertDpToPixel(6);
+            layoutParams.setMargins(margin, margin, margin, margin);
+
+            // table row index
+            int index = 0;
+            for (Map.Entry<String, Integer> reaction : getDisplayReactions(message.getReactions()).entrySet()) {
+                if (numOfReactions == 0) {
+                    // current row is full
+                    messageHolder.reactionsTable.addView(row, index++);
+                    row = new TableRow(messageHolder.messageTile.getContext());
+                    numOfReactions = messageWidth / reactionWidth;
+                }
+
+                // inflate reaction layout
+                LinearLayout reactionTile = (LinearLayout) LayoutInflater.from(messageHolder.messageTile.getContext()).inflate(R.layout.reaction_tile, null);
+                reactionTile.setLayoutParams(layoutParams);
+
+                // emoji view in reaction
+                ImageView imageView = (ImageView) reactionTile.findViewById(R.id.reaction_emoji);
+                // emoji count view
+                TextView textView = (TextView) reactionTile.findViewById(R.id.reaction_count);
+
+                // get emoji drawable from assets
+                String emojiName = reaction.getKey() + ".png";
+                Drawable drawable = Drawable.createFromStream(zulipApp.getAssets().open("emoji/" + emojiName),
+                        "emoji/" + emojiName);
+
+                // shrink drawable resource
+                Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
+                int size = ConvertDpPx.convertDpToPixel(20);
+                drawable = new BitmapDrawable(context.getResources(), Bitmap.createScaledBitmap(bitmap, size, size, true));
+
+                imageView.setImageDrawable(drawable);
+                textView.setText(String.format(Locale.getDefault(), "%d", reaction.getValue()));
+                row.addView(reactionTile);
+
+                numOfReactions--;
+            }
+            messageHolder.reactionsTable.addView(row, index);
+        } catch (NullPointerException e) {
+            Log.e("adapter", "message reactions are null");
+        } catch (IOException e) {
+            ZLog.logException(e);
         }
     }
 
