@@ -5,7 +5,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
 @DatabaseTable(tableName = "reactions_user")
-public class User {
+public class UserReaction {
     private static final String ID_FIELD = "id";
     private static final String NAME_FIELD = "name";
     private static final String EMAIL_FIELD = "email";
@@ -31,7 +31,7 @@ public class User {
     /**
      * Construct an empty User object.
      */
-    public User() {
+    public UserReaction() {
 
     }
 
@@ -58,8 +58,8 @@ public class User {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof User) {
-            User user = (User) obj;
+        if (obj instanceof UserReaction) {
+            UserReaction user = (UserReaction) obj;
             return this.getId() == user.getId();
         } else {
             return false;

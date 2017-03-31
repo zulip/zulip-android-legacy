@@ -15,7 +15,7 @@ import com.zulip.android.models.MessageRange;
 import com.zulip.android.models.Person;
 import com.zulip.android.models.Reaction;
 import com.zulip.android.models.Stream;
-import com.zulip.android.models.User;
+import com.zulip.android.models.UserReaction;
 import com.zulip.android.util.MD5Util;
 
 import java.sql.SQLException;
@@ -65,7 +65,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
             TableUtils.createTable(connectionSource, MessageRange.class);
             TableUtils.createTable(connectionSource, Emoji.class);
             TableUtils.createTable(connectionSource, Reaction.class);
-            TableUtils.createTable(connectionSource, User.class);
+            TableUtils.createTable(connectionSource, UserReaction.class);
         } catch (SQLException e) {
             Log.e(DatabaseHelper.class.getName(), "Can't create database", e);
             throw new RuntimeException(e);

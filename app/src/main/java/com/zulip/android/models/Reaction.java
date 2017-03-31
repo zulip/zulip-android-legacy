@@ -18,7 +18,7 @@ public class Reaction {
 
     @SerializedName("user")
     @DatabaseField(foreign = true, columnName = USER_FIELD)
-    private User user;
+    private UserReaction user;
 
     @DatabaseField(foreign = true, foreignAutoRefresh = true, columnName = MESSAGE_FIELD)
     private Message message;
@@ -39,11 +39,11 @@ public class Reaction {
         this.emojiName = name;
     }
 
-    public User getUser() {
+    public UserReaction getUser() {
         return this.user;
     }
 
-    public void setUser(User user) {
+    public void setUser(UserReaction user) {
         this.user = user;
     }
 
