@@ -26,4 +26,5 @@ public class Constants {
     public static String DATE_FORMAT = "dd/MM/yyyy";
     // row number which is used to differentiate the '@-mentions' in people drawer
     public static int MENTIONS = -2;
+    public static int REACTION_MARGIN = 64;
 }
