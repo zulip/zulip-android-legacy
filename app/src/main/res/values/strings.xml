@@ -174,4 +174,16 @@
     <string name="pick_dialog">Pick a file</string>
     <string name="to_string">" to "</string>
     <string name="upload_started_str">Upload started</string>
+    <string name="cancel">Cancel</string>
+    <string name="no_message_to_display">Sorry, no messages to display!</string>
+    <string name="crop">CROP</string>
+
+    <!--Placeholder strings-->
+    <string name="placeholder_my_stream">MyStream</string>
+    <string name="placeholder_short_stream">Short Stream</string>
+    <string name="placeholder_topic">Topic</string>
+    <string name="placeholder_message_here">Message here</string>
+    <string name="placeholder_sender_name">Sender name</string>
+    <string name="placeholder_social">Social</string>
+    <!--Placeholder strings-->
 </resources>

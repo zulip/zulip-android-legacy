@@ -28,6 +28,6 @@
         android:layout_alignParentBottom="true"
         android:layout_toLeftOf="@+id/widget_add"
         android:layout_toStartOf="@+id/widget_add"
-        android:text="Cancel" />
+        android:text="@string/cancel" />
 
 </RelativeLayout>
