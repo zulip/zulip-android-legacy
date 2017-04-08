@@ -21,18 +21,19 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="35dp"
                 android:gravity="center|center_horizontal"
                 android:padding="10dp"
                 android:text="@string/login_welcome_blurb"
-                android:textAppearance="?android:attr/textAppearanceLarge" />
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textSize="35dp" />
 
             <ImageView
                 android:id="@+id/logo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center|center_horizontal"
-                android:layout_marginTop="2dp"
+                android:layout_marginTop="40dp"
                 android:src="@drawable/logo"
                 tools:ignore="ContentDescription" />
 
@@ -47,14 +48,17 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp"
                     android:gravity="center|center_horizontal"
-                    android:padding="10dp"
+                    android:padding="30dp"
                     android:text="@string/enter_server"
-                    android:textAppearance="?android:attr/textAppearanceMedium" />
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textSize="30dp" />
 
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:paddingTop="12dp">
 
                     <EditText
                         android:id="@+id/server_url_in"
@@ -64,7 +68,8 @@
                         android:hint="@string/server_url"
                         android:inputType="textUri"
                         android:selectAllOnFocus="true"
-                        android:textCursorDrawable="@null">
+                        android:textCursorDrawable="@null"
+                        android:textSize="40sp">
 
                         <requestFocus />
                     </EditText>
@@ -74,14 +79,16 @@
                 <Button
                     android:id="@+id/server_btn"
                     style="android:buttonStyle"
-                    android:layout_width="176dp"
+                    android:layout_width="300dp"
                     android:layout_height="wrap_content"
-                    android:layout_margin="25dp"
+                    android:layout_margin="60dp"
                     android:layout_marginTop="20dp"
                     android:background="@drawable/login_button"
+                    android:padding="20dp"
                     android:text="Enter"
                     android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
-                    android:textColor="#fff" />
+                    android:textColor="#fff"
+                    android:textSize="25dp" />
 
             </LinearLayout>
 
@@ -130,7 +137,8 @@
                             android:ems="10"
                             android:hint="@string/username"
                             android:inputType="textEmailAddress"
-                            android:selectAllOnFocus="true" />
+                            android:selectAllOnFocus="true"
+                            android:textSize="40sp" />
 
                     </android.support.design.widget.TextInputLayout>
 
@@ -148,7 +156,8 @@
                             android:hint="@string/password"
                             android:imeOptions="actionUnspecified"
                             android:inputType="textPassword"
-                            android:selectAllOnFocus="true" />
+                            android:selectAllOnFocus="true"
+                            android:textSize="40sp" />
 
                     </android.support.design.widget.TextInputLayout>
 
@@ -157,24 +166,28 @@
 
                 <Button
                     android:id="@+id/zulip_login"
-                    android:layout_width="176dp"
+                    android:layout_width="300dp"
                     android:layout_height="wrap_content"
-                    android:layout_margin="25dp"
+                    android:layout_margin="60dp"
+                    android:layout_marginTop="20dp"
                     android:background="@drawable/login_button"
+                    android:padding="20dp"
                     android:text="@string/signin_button"
                     android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
-                    android:textColor="#fff" />
+                    android:textColor="#fff"
+                    android:textSize="25sp" />
 
 
                 <com.google.android.gms.common.SignInButton
 
                     android:id="@+id/google_sign_in_button"
-                    android:layout_width="181dp"
+                    android:layout_width="300dp"
                     android:layout_height="wrap_content"
+                    android:textSize="25sp"
                     android:visibility="gone" />
 
                 <View
-                    android:layout_width="270dp"
+                    android:layout_width="400dp"
                     android:layout_height="2dp"
                     android:layout_gravity="center|center_horizontal"
                     android:layout_marginBottom="20dp"
@@ -189,7 +202,7 @@
 
                     <TextView
                         android:id="@+id/forgot"
-                        style="@style/links"
+                        style="@style/linksLarge"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
@@ -199,7 +212,7 @@
 
                     <TextView
                         android:id="@+id/register"
-                        style="@style/links"
+                        style="@style/linksLarge"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
@@ -217,12 +230,12 @@
 
                 <TextView
                     android:id="@+id/input_another_server"
-                    style="@style/links"
+                    style="@style/linksLarge"
                     android:text="@string/another_server" />
 
                 <TextView
                     android:id="@+id/legal_button"
-                    style="@style/links"
+                    style="@style/linksLarge"
                     android:text="@string/legal" />
             </LinearLayout>
         </LinearLayout>

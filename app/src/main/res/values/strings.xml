@@ -3,7 +3,7 @@
 
     <string name="app_name">Zulip</string>
     <string name="login_welcome_blurb">Welcome to Zulip!</string>
-    <string name="login_button">Log in</string>
+    <string name="signin_button">Sign in</string>
     <string name="username">Email</string>
     <string name="password">Password</string>
     <string name="server_url">Server URL</string>
@@ -28,6 +28,7 @@
     <string name="streams_open">Open stream sidebar</string>
     <string name="streams_close">Close stream sidebar</string>
     <string name="press_again_to_exit">Press again to exit</string>
+    <string name="email_or_password_empty">Email or password field is empty</string>
 
     <!-- Used on the indicator when loading messages -->
     <string name="editing_message">Editing message</string>
@@ -49,8 +50,6 @@
     <string name="signing_in">Signing in…</string>
     <string name="network_error">Network error</string>
     <string name="invalid_server_domain">Invalid server domain</string>
-    <string name="password_required">Password required</string>
-    <string name="username_required">Username required</string>
     <string name="server_domain_required">Server domain required</string>
     <string name="invalid_domain">Invalid domain</string>
     <string name="hint_person">Person</string>
@@ -70,11 +69,9 @@
     <string name="normal_user">Normal users</string>
     <string name="method_null">Method should not be null</string>
     <string name="method_error">Method not supported</string>
-    <string name="tap_message">Tap on a message to compose reply</string>
-    <string name="title_login">Login</string>
+    <string name="tap_message">Tap on a message to compose reply</string>>
     <string name="enter">Enter</string>
     <string name="enter_server">Please enter your server URL</string>
-    <string name="auth_login">Your server allows these authentication options:</string>
     <string name="another_server">Another server</string>
     <string name="no_message">No messages to receive.</string>
     <string name="menu_filter">Filter</string>
