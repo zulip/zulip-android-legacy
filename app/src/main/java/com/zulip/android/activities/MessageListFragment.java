@@ -854,8 +854,17 @@ public class MessageListFragment extends Fragment implements MessageListener {
         }
     }
 
-    public boolean scrolledToLastMessage() {
-        Object object = adapter.getItem(linearLayoutManager.findLastVisibleItemPosition());
+    public boolean isScrolledToLastMessage() {
+        int index = linearLayoutManager.findLastVisibleItemPosition();
+        if (index == -1) return false;
+        Object object = adapter.getItem(index);
+        if (object instanceof Integer) {
+            /**
+             * A Loading Indicator (see here {@link RecyclerMessageAdapter#getItemViewType})
+             * Therefore before this should be a message
+             */
+            object = adapter.getItem(index - 1);
+        }
         return object instanceof Message && (((Message) object).getId() >= app.getMaxMessageId() - 2);
     }
 
