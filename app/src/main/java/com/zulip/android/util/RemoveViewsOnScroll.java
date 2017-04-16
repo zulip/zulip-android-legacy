@@ -17,6 +17,7 @@ import android.view.animation.Interpolator;
 import android.widget.LinearLayout;
 
 import com.zulip.android.R;
+import com.zulip.android.ZulipApp;
 import com.zulip.android.activities.RecyclerMessageAdapter;
 
 /**
@@ -89,6 +90,7 @@ public class RemoveViewsOnScroll extends CoordinatorLayout.Behavior<View> {
         ;
         if (view instanceof AppBarLayout) {
             y = -1 * view.getHeight();
+            ZulipApp.get().getZulipActivity().onHideActionBar();
         } else if (view instanceof LinearLayout) {
             y = 0;
         }
@@ -125,8 +127,13 @@ public class RemoveViewsOnScroll extends CoordinatorLayout.Behavior<View> {
     @SuppressLint("NewApi")
     public void showView(final View view) {
         mIsShowing = true;
+        float translationY = toolbarHeight;
+        if ((view.getId() == R.id.appBarLayout || view instanceof FloatingActionButton)) {
+            ZulipApp.get().getZulipActivity().onShowActionBar();
+            translationY = 0;
+        }
         ViewPropertyAnimator animator = view.animate()
-                .translationY((view.getId() == R.id.appBarLayout || view instanceof FloatingActionButton) ? 0 : toolbarHeight)
+                .translationY(translationY)
                 .setInterpolator(FAST_OUT_SLOW_IN_INTERPOLATOR)
                 .setDuration(200);
 

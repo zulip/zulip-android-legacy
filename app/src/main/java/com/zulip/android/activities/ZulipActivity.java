@@ -53,6 +53,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -225,6 +226,8 @@ public class ZulipActivity extends BaseActivity implements
     private ImageView addFileBtn;
     //
     private String streamSearchFilterKeyword = "";
+    private RecyclerView.ViewHolder viewHolder;
+    private boolean isActionBarShown = true;
 
     private SimpleCursorAdapter.ViewBinder peopleBinder = new SimpleCursorAdapter.ViewBinder() {
         @Override
@@ -1926,6 +1929,35 @@ public class ZulipActivity extends BaseActivity implements
         topSnackBar.setMessagesAdapter(adapter);
     }
 
+    /**
+     * called when action bar hides
+     * due to down scroll in message list
+     */
+    public void onHideActionBar() {
+        isActionBarShown = false;
+        try {
+            CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) viewHolder.itemView.getLayoutParams();
+            layoutParams.setMargins(0, 0, 0, 0);
+            viewHolder.itemView.requestLayout();
+        } catch (NullPointerException ignored) {
+        }
+    }
+
+
+    /**
+     * called when action bar is shown
+     * due to up scroll in message list
+     */
+    public void onShowActionBar() {
+        isActionBarShown = true;
+        try {
+            CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) viewHolder.itemView.getLayoutParams();
+            layoutParams.setMargins(0, mToolbarHeightInPx, 0, 0);
+            viewHolder.itemView.requestLayout();
+        } catch (NullPointerException ignored) {
+        }
+    }
+
     @Override
     public void onBackPressed() {
         //check for drawer
@@ -2636,10 +2668,20 @@ public class ZulipActivity extends BaseActivity implements
         }
     }
 
+    /**
+     * Store floating message header
+     * useful when message list get's scrolled
+     * @param viewHolder floating message header
+     */
+    public void setViewHolder(RecyclerView.ViewHolder viewHolder) {
+        this.viewHolder = viewHolder;
+    }
+
     // Intent Extra constants
     public enum Flag {
         RESET_DATABASE,
     }
+
 
     private boolean isTablet() {
         return isTablet(this);
@@ -2647,6 +2689,16 @@ public class ZulipActivity extends BaseActivity implements
 
     public static boolean isTablet(Context context) {
         return context.getResources().getBoolean(R.bool.isTablet);
+    }
+
+
+    /**
+     * get top margin for floating header
+     *
+     * @return toolbar height if it is visible else 0
+     */
+    public int getFloatingHeaderTopMargin() {
+        return (isActionBarShown) ? mToolbarHeightInPx : 0;
     }
 
 }

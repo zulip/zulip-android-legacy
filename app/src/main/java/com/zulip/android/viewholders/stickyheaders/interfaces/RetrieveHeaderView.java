@@ -4,6 +4,8 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
+import com.zulip.android.ZulipApp;
+
 public interface RetrieveHeaderView {
 
     int DEFAULT_VIEW_TYPE = -1;
@@ -31,7 +33,7 @@ public interface RetrieveHeaderView {
             }
             //set top margin for sticky header to 0 as in message_header.xml it is present which is only required when header is in between of messages
             CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) currentViewHolder.itemView.getLayoutParams();
-            layoutParams.setMargins(0,0,0,0);
+            layoutParams.setMargins(0, ZulipApp.get().getZulipActivity().getFloatingHeaderTopMargin(), 0, 0);
             return currentViewHolder;
         }
     }

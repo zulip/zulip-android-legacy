@@ -4,11 +4,14 @@ package com.zulip.android.viewholders.stickyheaders;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 
-
+import com.zulip.android.ZulipApp;
+import com.zulip.android.util.RemoveViewsOnScroll;
 import com.zulip.android.viewholders.MessageHeaderParent;
 import com.zulip.android.viewholders.stickyheaders.interfaces.RetrieveHeaderView;
 import com.zulip.android.viewholders.stickyheaders.interfaces.StickyHeaderHandler;
@@ -75,8 +78,11 @@ public class StickyLayoutManager extends LinearLayoutManager {
     public int scrollVerticallyBy(int dy, RecyclerView.Recycler recycler, RecyclerView.State state) {
         int scroll = super.scrollVerticallyBy(dy, recycler, state);
         if (Math.abs(scroll) > 0) {
-            positioner.updateHeaderState(
+            RecyclerView.ViewHolder viewHolder = positioner.updateHeaderState(
                     findFirstVisibleItemPosition(), getVisibleHeaders(), viewRetriever);
+            if (viewHolder != null) {
+                ZulipApp.get().getZulipActivity().setViewHolder(viewHolder);
+            }
         }
         return scroll;
     }
