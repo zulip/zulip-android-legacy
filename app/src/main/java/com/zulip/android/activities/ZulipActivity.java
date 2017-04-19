@@ -1447,6 +1447,8 @@ public class ZulipActivity extends BaseActivity implements
                         String subjectName = ((Cursor) streamsDrawer.getExpandableListAdapter().getChild(groupPosition, childPosition)).getString(0);
                         onNarrow(new NarrowFilterStream(streamName, subjectName));
                         onNarrowFillSendBoxStream(streamName, subjectName, false);
+                        hideView(chatBox);
+                        displayFAB(true);
                         break;
                     default:
                         return false;
@@ -1463,6 +1465,8 @@ public class ZulipActivity extends BaseActivity implements
                 String streamName = ((TextView) view.findViewById(R.id.name)).getText().toString();
                 doNarrowToLastRead(streamName);
                 drawerLayout.openDrawer(GravityCompat.START);
+                hideView(chatBox);
+                displayFAB(true);
                 if (previousClick != -1 && expandableListView.getCount() > previousClick) {
                     expandableListView.collapseGroup(previousClick);
                 }
@@ -1480,6 +1484,8 @@ public class ZulipActivity extends BaseActivity implements
                         TextView name = (TextView) view;
                         final String streamName = cursor.getString(columnIndex);
                         name.setText(streamName);
+                        hideView(chatBox);
+                        displayFAB(true);
                         //Change color in the drawer if this stream is inHomeView only.
                         if (!Stream.getByName(app, streamName).getInHomeView()) {
                             name.setTextColor(ContextCompat.getColor(ZulipActivity.this, R.color.colorTextTertiary));
