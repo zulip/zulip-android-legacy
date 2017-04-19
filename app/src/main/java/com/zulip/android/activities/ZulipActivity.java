@@ -25,6 +25,8 @@ import android.database.MergeCursor;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -2309,8 +2311,14 @@ public class ZulipActivity extends BaseActivity implements
                 break;
             case R.id.refresh:
                 Log.w("menu", "Refreshed manually by user. We shouldn't need this.");
-                commonProgressDialog.showWithMessage(getString(R.string.refreshing));
-                onRefresh();
+                if (!isNetworkAvailable()) {
+                    Toast.makeText(ZulipActivity.this, R.string.toast_no_internet_connection, Toast.LENGTH_SHORT).show();
+                    commonProgressDialog.dismiss();
+                } else {
+                    commonProgressDialog.showWithMessage(getString(R.string.refreshing));
+                    commonProgressDialog.setCancelable(false);
+                    onRefresh();
+                }
                 break;
             case R.id.today:
                 //check user selected Today or One Day Before
@@ -2407,6 +2415,7 @@ public class ZulipActivity extends BaseActivity implements
      */
     private void logout() {
         commonProgressDialog.showWithMessage(getString(R.string.logging_out));
+        commonProgressDialog.setCancelable(false);
         this.logged_in = false;
         final String serverUrl = app.getServerHostUri();
 
@@ -2627,5 +2636,12 @@ public class ZulipActivity extends BaseActivity implements
     // Intent Extra constants
     public enum Flag {
         RESET_DATABASE,
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 }
