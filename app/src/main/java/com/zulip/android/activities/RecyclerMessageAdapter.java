@@ -313,13 +313,7 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             }
         }
         if (item == null) {
-            item = new MessageHeaderParent((message.getStream() == null) ? null :
-                    message.getStream().getName(), message.getSubject(), message.getIdForHolder(), message);
-            item.setMessageType(message.getType());
-            item.setDisplayRecipent(message.getDisplayRecipient(zulipApp));
-            if (message.getType() == MessageType.STREAM_MESSAGE)
-                item.setMute(mMutedTopics.isTopicMute(message));
-            item.setColor((message.getStream() == null) ? mDefaultStreamHeaderColor : message.getStream().getParsedColor());
+            item = createMessageHeader(message);
             items.add(getItemCount(true) - 1, item);
             notifyItemInserted(getItemCount(true) - 1);
         }
@@ -327,6 +321,31 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         notifyItemInserted(getItemCount(true) - 1);
     }
 
+    public void addNewHeader(int position, Message message) {
+        MessageHeaderParent item = createMessageHeader(message);
+        items.add(position, item);
+        notifyItemInserted(position);
+
+        if (getItem(position + 2) instanceof Message) {
+            // insert header with old topic for this message
+            Message prevMessage = (Message) getItem(position + 2);
+            MessageHeaderParent prevHeader = createMessageHeader(prevMessage);
+            items.add(position + 2, prevHeader);
+            notifyItemInserted(position + 2);
+        }
+    }
+
+    private MessageHeaderParent createMessageHeader(Message message) {
+        MessageHeaderParent header = new MessageHeaderParent((message.getStream() == null) ? null :
+                message.getStream().getName(), message.getSubject(), message.getIdForHolder(), message);
+        header.setMessageType(message.getType());
+        header.setDisplayRecipent(message.getDisplayRecipient(zulipApp));
+        if (message.getType() == MessageType.STREAM_MESSAGE)
+            header.setMute(mMutedTopics.isTopicMute(message));
+        header.setColor((message.getStream() == null) ? mDefaultStreamHeaderColor : message.getStream().getParsedColor());
+
+        return header;
+    }
 
     public RecyclerView.ViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
         switch (viewType) {
@@ -365,6 +384,11 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
                 if (messageHeaderParent.getMessageType() == MessageType.STREAM_MESSAGE) {
                     messageHeaderHolder.streamTextView.setText(messageHeaderParent.getStream());
+
+                    // update MessageHeaderParent subject when topic is updated
+                    if (!messageHeaderParent.getSubject().equalsIgnoreCase(messageHeaderParent.getMessage().getSubject())) {
+                        messageHeaderParent.setSubject(messageHeaderParent.getMessage().getSubject());
+                    }
                     messageHeaderHolder.topicTextView.setText(messageHeaderParent.getSubject());
 
                     ViewCompat.setBackgroundTintList(messageHeaderHolder.arrowHead, ColorStateList.valueOf(messageHeaderParent.getColor()));

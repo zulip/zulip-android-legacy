@@ -35,6 +35,7 @@ import com.zulip.android.networking.response.events.UpdateMessageWrapper;
 import com.zulip.android.util.MutedTopics;
 import com.zulip.android.util.TypeSwapper;
 import com.zulip.android.util.ZLog;
+import com.zulip.android.viewholders.MessageHeaderParent;
 import com.zulip.android.widget.ZulipWidget;
 
 import org.json.JSONException;
@@ -43,7 +44,10 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 /**
@@ -522,21 +526,21 @@ public class AsyncGetEvents extends Thread {
      * @param updateEvents list of events {@link EventsBranch.BranchType#UPDATE_MESSAGE}
      */
     private void processUpdateMessages(List<EventsBranch> updateEvents) {
-        final List<Integer> messageIds = new ArrayList<>();
+        // map containing sets of message and boolean values for if topic was changed for that message
+        final Map<Message, Boolean> messages = new HashMap<>();
         for (EventsBranch event : updateEvents) {
             UpdateMessageWrapper updateEvent = (UpdateMessageWrapper) event;
-            Message message = updateEvent.getMessage();
-            if (message != null) {
-                message.setFormattedContent(updateEvent.getFormattedContent());
-                message.setHasBeenEdited(true);
-
-                // update the message in database
-                Dao<Message, Integer> messageDao = app.getDao(Message.class);
-                try {
-                    messageDao.update(message);
-                    messageIds.add(message.getId());
-                } catch (SQLException e) {
-                    ZLog.logException(e);
+            for (int id : updateEvent.getMessageIds()) {
+                Message message = updateEvent.getMessage(id);
+                if (message != null) {
+                    // update the message in database
+                    Dao<Message, Integer> messageDao = app.getDao(Message.class);
+                    try {
+                        messageDao.update(message);
+                        messages.put(message, updateEvent.containsSubject());
+                    } catch (SQLException e) {
+                        ZLog.logException(e);
+                    }
                 }
             }
         }
@@ -545,9 +549,18 @@ public class AsyncGetEvents extends Thread {
             @Override
             public void run() {
                 RecyclerMessageAdapter adapter = mActivity.getCurrentMessageList().getAdapter();
-                for (int id : messageIds) {
-                    // notify adapter data item changed
-                    adapter.notifyItemChanged(adapter.getItemIndex(id));
+                for  (Map.Entry<Message, Boolean> message : messages.entrySet()) {
+                    // notify adapter message item changed
+                    adapter.notifyItemChanged(adapter.getItemIndex(message.getKey().getId()));
+                    if (message.getValue()) {
+                        if (adapter.getItem(adapter.getItemIndex(message.getKey().getId()) - 1) instanceof MessageHeaderParent)
+                            // update header
+                            adapter.notifyItemChanged(adapter.getItemIndex(message.getKey().getId()) - 1);
+                        else {
+                            // add new header
+                            adapter.addNewHeader(adapter.getItemIndex(message.getKey().getId()), message.getKey());
+                        }
+                    }
                 }
             }
         });
