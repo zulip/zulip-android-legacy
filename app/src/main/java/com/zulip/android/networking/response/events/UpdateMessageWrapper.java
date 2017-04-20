@@ -46,15 +46,28 @@ public class UpdateMessageWrapper extends EventsBranch {
     @SerializedName("message_id")
     private int messageId;
 
+    @SerializedName("subject")
+    private String subject;
+
     /**
      * Returns old form of edited message.
      *
      * @return {@link Message} message
      */
-    public Message getMessage() {
+    public Message getMessage(int messageId) {
         try {
             Dao<Message, Integer> messageDao = ZulipApp.get().getDao(Message.class);
-            return messageDao.queryBuilder().where().eq(Message.ID_FIELD, this.messageId).queryForFirst();
+            Message message = messageDao.queryBuilder().where().eq(Message.ID_FIELD, messageId).queryForFirst();
+            if (message != null) {
+                if (this.formattedContent != null) {
+                    message.setFormattedContent(this.formattedContent);
+                    message.setHasBeenEdited(true);
+                }
+                if (containsSubject()) {
+                    message.setSubject(this.subject);
+                }
+                return message;
+            }
         } catch (SQLException e) {
             ZLog.logException(e);
         }
@@ -62,15 +75,11 @@ public class UpdateMessageWrapper extends EventsBranch {
         return null;
     }
 
-    public String getFormattedContent() {
-        return this.formattedContent;
+    public List<Integer> getMessageIds() {
+        return this.messageIds;
     }
 
-    public void setFormattedContent(String formattedContent) {
-        this.formattedContent = formattedContent;
-    }
-
-    public String getOrigFormattedContent() {
-        return this.origFormattedContent;
+    public boolean containsSubject() {
+        return this.subject != null;
     }
 }

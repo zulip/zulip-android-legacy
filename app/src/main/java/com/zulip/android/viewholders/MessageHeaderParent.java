@@ -102,6 +102,14 @@ public class MessageHeaderParent {
         return subject;
     }
 
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
+    public Message getMessage() {
+        return this.message;
+    }
+
     public Person[] getRecipients(ZulipApp app) {
         Person[] recipientsCache;
         String[] ids = TextUtils.split(this.getId(), ",");
