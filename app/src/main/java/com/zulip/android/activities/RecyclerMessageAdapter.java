@@ -52,7 +52,7 @@ import com.zulip.android.util.ZLog;
 import com.zulip.android.viewholders.LoadingHolder;
 import com.zulip.android.viewholders.MessageHeaderParent;
 import com.zulip.android.viewholders.MessageHolder;
-import com.zulip.android.viewholders.stickyheaders.interfaces.RetrieveHeaderView;
+import com.zulip.android.viewholders.stickyheaders.RetrieveHeaderView;
 import com.zulip.android.viewholders.stickyheaders.interfaces.StickyHeaderHandler;
 
 import java.io.IOException;

@@ -14,7 +14,6 @@ import android.view.ViewGroup.MarginLayoutParams;
 import android.view.ViewTreeObserver;
 
 
-import com.zulip.android.viewholders.stickyheaders.interfaces.RetrieveHeaderView;
 import com.zulip.android.viewholders.stickyheaders.interfaces.StickyHeaderListener;
 
 import java.util.List;
@@ -58,7 +57,7 @@ final class GetStickyHeaderPosition {
         this.headerPositions = headerPositions;
     }
 
-    RecyclerView.ViewHolder updateHeaderState(int firstVisiblePosition, Map<Integer, View> visibleHeaders,
+    void updateHeaderState(int firstVisiblePosition, Map<Integer, View> visibleHeaders,
                                               RetrieveHeaderView retrieveHeaderView) {
         int headerPositionToShow = getHeaderPositionToShow(
                 firstVisiblePosition, visibleHeaders.get(firstVisiblePosition));
@@ -70,12 +69,11 @@ final class GetStickyHeaderPosition {
                 lastBoundPosition = INVALID_POSITION;
             } else {
                 // We don't want to attach yet if header view is not at edge
-                if (checkMargins && headerAwayFromEdge(headerToCopy)) return null;
+                if (checkMargins && headerAwayFromEdge(headerToCopy)) return;
                 RecyclerView.ViewHolder viewHolder =
                         retrieveHeaderView.getViewHolderForPosition(headerPositionToShow);
                 attachHeader(viewHolder, headerPositionToShow);
                 lastBoundPosition = headerPositionToShow;
-                return viewHolder;
             }
         } else if (checkMargins) {
             /*
@@ -88,7 +86,6 @@ final class GetStickyHeaderPosition {
             }
         }
         checkHeaderPositions(visibleHeaders);
-        return null;
     }
 
     // This checks visible headers and their positions to determine if the sticky header needs

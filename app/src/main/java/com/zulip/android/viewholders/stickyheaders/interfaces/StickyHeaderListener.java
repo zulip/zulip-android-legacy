@@ -1,5 +1,7 @@
 package com.zulip.android.viewholders.stickyheaders.interfaces;
 
+import com.zulip.android.viewholders.stickyheaders.RetrieveHeaderView;
+
 /**
  * A listener that can be set by calling {@link com.zulip.android.viewholders.stickyheaders.StickyLayoutManager#setStickyHeaderListener(StickyHeaderListener)}
  * <p>

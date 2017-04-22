@@ -4,16 +4,13 @@ package com.zulip.android.viewholders.stickyheaders;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 
 import com.zulip.android.ZulipApp;
-import com.zulip.android.util.RemoveViewsOnScroll;
 import com.zulip.android.viewholders.MessageHeaderParent;
-import com.zulip.android.viewholders.stickyheaders.interfaces.RetrieveHeaderView;
 import com.zulip.android.viewholders.stickyheaders.interfaces.StickyHeaderHandler;
 import com.zulip.android.viewholders.stickyheaders.interfaces.StickyHeaderListener;
 
@@ -27,7 +24,7 @@ public class StickyLayoutManager extends LinearLayoutManager {
     private GetStickyHeaderPosition positioner;
     private StickyHeaderHandler headerHandler;
     private List<Integer> headerPositions;
-    private RetrieveHeaderView.RecyclerRetrieveHeaderView viewRetriever;
+    private RetrieveHeaderView viewRetriever;
     private RecyclerView recyclerView;
     @Nullable
     private StickyHeaderListener listener;
@@ -78,11 +75,8 @@ public class StickyLayoutManager extends LinearLayoutManager {
     public int scrollVerticallyBy(int dy, RecyclerView.Recycler recycler, RecyclerView.State state) {
         int scroll = super.scrollVerticallyBy(dy, recycler, state);
         if (Math.abs(scroll) > 0) {
-            RecyclerView.ViewHolder viewHolder = positioner.updateHeaderState(
+            positioner.updateHeaderState(
                     findFirstVisibleItemPosition(), getVisibleHeaders(), viewRetriever);
-            if (viewHolder != null) {
-                ZulipApp.get().getZulipActivity().setViewHolder(viewHolder);
-            }
         }
         return scroll;
     }
@@ -126,7 +120,7 @@ public class StickyLayoutManager extends LinearLayoutManager {
     public void onAttachedToWindow(RecyclerView view) {
         super.onAttachedToWindow(view);
         recyclerView = view;
-        viewRetriever = new RetrieveHeaderView.RecyclerRetrieveHeaderView(recyclerView);
+        viewRetriever = new RetrieveHeaderView(recyclerView);
         positioner = new GetStickyHeaderPosition(recyclerView);
         positioner.setListener(listener);
     }

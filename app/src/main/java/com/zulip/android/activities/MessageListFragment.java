@@ -53,7 +53,7 @@ import com.zulip.android.util.MutedTopics;
 import com.zulip.android.util.ZLog;
 import com.zulip.android.viewholders.HeaderSpaceItemDecoration;
 import com.zulip.android.viewholders.stickyheaders.StickyLayoutManager;
-import com.zulip.android.viewholders.stickyheaders.interfaces.RetrieveHeaderView;
+import com.zulip.android.viewholders.stickyheaders.RetrieveHeaderView;
 import com.zulip.android.viewholders.stickyheaders.interfaces.StickyHeaderListener;
 
 import org.json.JSONObject;
@@ -62,7 +62,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import retrofit2.Call;
