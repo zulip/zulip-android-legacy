@@ -4,6 +4,7 @@
     android:layout_height="wrap_content"
     android:layout_marginTop="12dp"
     android:background="@color/messageHeaderBackground"
+    android:gravity="center_vertical"
     tools:ignore="Overdraw">
 
     <TextView
