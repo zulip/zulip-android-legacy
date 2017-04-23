@@ -20,7 +20,9 @@
         android:textColor="@color/colorTextPrimary"
         android:textStyle="bold"
         tools:background="@color/colorAccent"
-        tools:text="Short Stream" />
+        tools:text="Short Stream"
+        android:maxLines="1"
+        android:ellipsize="end"/>
 
     <TextView
         android:id="@+id/sep"
@@ -39,7 +41,9 @@
         android:background="@color/messageHeaderBackground"
         android:gravity="center_vertical"
         android:padding="4dp"
-        tools:text="This is a very very very long topic that is so long that it wraps" />
+        tools:text="This is a very very very long topic that is so long that it wraps"
+        android:maxLines="1"
+        android:ellipsize="end"/>
 
     <TextView
         android:id="@+id/timestamp"

@@ -475,6 +475,44 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                     }
                     messageHeaderHolder.topicTextView.setText(messageHeaderParent.getSubject());
 
+                    //set on long press
+                    messageHeaderHolder.streamTextView.setOnLongClickListener(new View.OnLongClickListener() {
+                        @Override
+                        public boolean onLongClick(View v) {
+                            messageHeaderHolder.streamTextView.setMaxLines(Integer.MAX_VALUE);
+                            messageHeaderHolder.streamTextView.setEllipsize(null);
+                            ((MessageHeaderParent) getItem(position)).setStreamExpanded(true);
+                            return true;
+                        }
+                    });
+
+                    messageHeaderHolder.topicTextView.setOnLongClickListener(new View.OnLongClickListener() {
+                        @Override
+                        public boolean onLongClick(View v) {
+                            messageHeaderHolder.topicTextView.setMaxLines(Integer.MAX_VALUE);
+                            messageHeaderHolder.topicTextView.setEllipsize(null);
+                            ((MessageHeaderParent) getItem(position)).setTopicExpanded(true);
+                            return true;
+                        }
+                    });
+
+                    //if user have expanded, preserve them
+                    if (messageHeaderParent.isStreamExpanded()) {
+                        messageHeaderHolder.streamTextView.setMaxLines(Integer.MAX_VALUE);
+                        messageHeaderHolder.streamTextView.setEllipsize(null);
+                    } else {
+                        messageHeaderHolder.streamTextView.setMaxLines(1);
+                        messageHeaderHolder.streamTextView.setEllipsize(TextUtils.TruncateAt.END);
+                    }
+
+                    if (messageHeaderParent.isTopicExpanded()) {
+                        messageHeaderHolder.topicTextView.setMaxLines(Integer.MAX_VALUE);
+                        messageHeaderHolder.topicTextView.setEllipsize(null);
+                    } else {
+                        messageHeaderHolder.topicTextView.setMaxLines(1);
+                        messageHeaderHolder.topicTextView.setEllipsize(TextUtils.TruncateAt.END);
+                    }
+
                     ViewCompat.setBackgroundTintList(messageHeaderHolder.arrowHead, ColorStateList.valueOf(messageHeaderParent.getColor()));
                     messageHeaderHolder.streamTextView.setBackgroundColor(messageHeaderParent.getColor());
 

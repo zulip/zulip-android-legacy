@@ -33,6 +33,10 @@ public class MessageHeaderParent {
     //all messages below this header will be of same day as date of this timestamp
     private Date messagesTimestamp;
 
+    //is stream textview max lines is set to 1
+    private boolean isStreamExpanded = false;
+    private boolean isTopicExpanded = false;
+
 
     /**
      * Constructor for the wrapper class.\
@@ -135,6 +139,22 @@ public class MessageHeaderParent {
 
     public Date getMessagesTimestamp() {
         return messagesTimestamp;
+    }
+
+    public boolean isStreamExpanded() {
+        return isStreamExpanded;
+    }
+
+    public void setStreamExpanded(boolean streamExpanded) {
+        isStreamExpanded = streamExpanded;
+    }
+
+    public boolean isTopicExpanded() {
+        return isTopicExpanded;
+    }
+
+    public void setTopicExpanded(boolean topicExpanded) {
+        isTopicExpanded = topicExpanded;
     }
 
     public static class MessageHeaderHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
