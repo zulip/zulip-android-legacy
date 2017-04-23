@@ -358,7 +358,17 @@ public class ZulipActivity extends BaseActivity implements
         notifications.register();
         setContentView(R.layout.main);
         commonProgressDialog = new CommonProgressDialog(this);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String message = String.valueOf(toolbar.getTitle());
+                if (toolbar.getSubtitle() != null) {
+                    message += " \u203a " + toolbar.getSubtitle();
+                }
+                Toast.makeText(ZulipActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
+        });
         setSupportActionBar(toolbar);
         actionBar = getSupportActionBar();
         if (actionBar != null) {
