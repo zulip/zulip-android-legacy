@@ -458,7 +458,8 @@ public class RecyclerMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     }
 
     @Override
-    public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
+    public void onBindViewHolder(final RecyclerView.ViewHolder holder,  int pos) {
+        final int position = pos;
         switch (getItemViewType(position)) {
             case VIEWTYPE_MESSAGE_HEADER:
                 final MessageHeaderParent messageHeaderParent = (MessageHeaderParent) getItem(position);

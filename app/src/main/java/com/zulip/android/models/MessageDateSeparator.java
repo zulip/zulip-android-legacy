@@ -3,6 +3,7 @@ package com.zulip.android.models;
 import com.zulip.android.util.DateMethods;
 
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Data Structure for message date separator
@@ -28,11 +29,11 @@ public class MessageDateSeparator {
 
     public String getLeftText() {
         String date = DateMethods.getStringDate(aboveMessageDate);
-        return date.isEmpty() ? "" : "\u25B2 " + date.toUpperCase();
+        return date.isEmpty() ? "" : "\u25B2 " + date.toUpperCase(Locale.US);
     }
 
     public String getRightText() {
         String date = DateMethods.getStringDate(belowMessageDate);
-        return date.isEmpty() ? "" : "\u25BC " + date.toUpperCase();
+        return date.isEmpty() ? "" : "\u25BC " + date.toUpperCase(Locale.US);
     }
 }
