@@ -54,7 +54,7 @@
         android:paddingEnd="4dp"
         android:paddingRight="4dp"
         android:textStyle="bold"
-        android:textSize="8sp"/>
+        android:textSize="10sp"/>
 
     <ImageView
         android:id="@+id/muteMessageImage"
