@@ -128,8 +128,10 @@ public class RemoveViewsOnScroll extends CoordinatorLayout.Behavior<View> {
     public void showView(final View view) {
         mIsShowing = true;
         float translationY = toolbarHeight;
-        if ((view.getId() == R.id.appBarLayout || view instanceof FloatingActionButton)) {
+        if (view.getId() == R.id.appBarLayout) {
             ZulipApp.get().getZulipActivity().onShowActionBar();
+            translationY = 0;
+        } else if (view instanceof FloatingActionButton) {
             translationY = 0;
         }
         ViewPropertyAnimator animator = view.animate()
