@@ -231,7 +231,7 @@ public class Message {
         ArrayList<String> names = new ArrayList<>();
 
         for (Person person : people) {
-            if (person.id != you.id) {
+            if (person.id != you.id || people.size() == 1) {
                 names.add(person.getEmail());
             }
         }
