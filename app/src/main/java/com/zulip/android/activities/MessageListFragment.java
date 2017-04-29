@@ -395,7 +395,6 @@ public class MessageListFragment extends Fragment implements MessageListener {
 
     private void showEmptyView() {
         Log.d("ErrorRecieving", "No Messages found for current list" + ((filter != null) ? ":" + filter.getTitle() : ""));
-        recyclerView.setVisibility(View.GONE);
         emptyTextView.setVisibility(View.VISIBLE);
     }
 
@@ -769,15 +768,14 @@ public class MessageListFragment extends Fragment implements MessageListener {
         if (messageList.size() == 0)
             showEmptyView();
         else
-            showRecyclerView();
+            hideEmptyView();
     }
 
     /**
      * hides TextView with no message
      * show recyclerView
      */
-    private void showRecyclerView() {
-        recyclerView.setVisibility(View.VISIBLE);
+    private void hideEmptyView() {
         emptyTextView.setVisibility(View.GONE);
     }
 
