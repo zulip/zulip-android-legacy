@@ -87,6 +87,7 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
     private String mBaseUri;
     private boolean isCode;
     private boolean isStreamLink;
+    private static boolean isEmoji;
 
     public CustomHtmlToSpannedConverter(String source,
                                         Html.ImageGetter imageGetter, Html.TagHandler tagHandler,
@@ -174,7 +175,8 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
 
     private static void startImg(SpannableStringBuilder text,
                                  Attributes attributes, Html.ImageGetter img) {
-        String src = attributes.getValue("", "src");
+        String cssClass = attributes.getValue("class");
+        String src = cssClass != null && cssClass.startsWith("emoji") ? attributes.getValue("title") : attributes.getValue("", "src");
         Drawable d = null;
 
         if (img != null) {
@@ -268,6 +270,10 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
         int where = text.getSpanStart(obj);
         text.removeSpan(obj);
         if (where != len) {
+            if (isEmoji) {
+                text.delete(where, len);
+                return;
+            }
             Href h = (Href) obj;
             if (h != null && h.mHref != null) {
                 if (ZulipApp.get().getEmail().equals(h.mHref)) {
@@ -556,7 +562,13 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
         } else if (tag.equalsIgnoreCase("span")
                 && "user-mention".equals(attributes.getValue("class"))) {
             startSpan(mSpannableStringBuilder, attributes);
-        } else if (tag.equalsIgnoreCase("u")) {
+        } else if (tag.equalsIgnoreCase("span")
+                && attributes.getValue("class") != null && attributes.getValue("class").startsWith("emoji")) {
+            isEmoji = true;
+            startImg(mSpannableStringBuilder, attributes, mEmojiGetter);
+            startSpan(mSpannableStringBuilder, attributes);
+        }
+        else if (tag.equalsIgnoreCase("u")) {
             start(mSpannableStringBuilder, new Underline());
         } else if (tag.equalsIgnoreCase("sup")) {
             start(mSpannableStringBuilder, new Super());
@@ -580,6 +592,7 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
             handleP(mSpannableStringBuilder);
             start(mSpannableStringBuilder, new Header(tag.charAt(1) - '1'));
         } else if (tag.equalsIgnoreCase("img")) {
+            // makes emojis backward compatible
             String cssClass = attributes.getValue("", "class");
             if (cssClass != null && cssClass.equals("emoji")) {
                 startImg(mSpannableStringBuilder, attributes, mEmojiGetter);
@@ -639,6 +652,7 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
             }
         } else if (tag.equalsIgnoreCase("span")) {
             endSpan(mSpannableStringBuilder);
+            isEmoji = false;
         } else if (tag.equalsIgnoreCase("u")) {
             end(mSpannableStringBuilder, Underline.class, new UnderlineSpan());
         } else if (tag.equalsIgnoreCase("sup")) {
