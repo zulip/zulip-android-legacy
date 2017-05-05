@@ -50,7 +50,7 @@ public interface ZulipServices {
     @PUT("v1/users/me/pointer")
     Call<ResponseBody> updatePointer(@Field("pointer") String pointer);
 
-    @POST("v1/get_auth_backends")
+    @GET("v1/get_auth_backends")
     Call<ZulipBackendResponse> getAuthBackends();
 
     @FormUrlEncoded
