@@ -83,7 +83,7 @@ dependencies {
     compile 'com.squareup.picasso:picasso:2.5.2'
     //noinspection GradleCompatible
     compile 'com.android.support:customtabs:24.1.1'
-    compile 'com.github.bumptech.glide:glide:3.7.0'
+    compile 'com.github.bumptech.glide:glide:3.8.0'
     compile 'com.android.support:support-v4:24.1.0'
     compile 'com.theartofdev.edmodo:android-image-cropper:2.3.+'
     compile('com.crashlytics.sdk.android:crashlytics:2.6.7@aar') {
