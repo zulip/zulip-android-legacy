@@ -551,7 +551,7 @@ public class ZulipActivity extends BaseActivity implements
                         }
                         return true;
                     case R.id.nameTV:
-                        ((TextView) view).setText(name);
+                        ((TextView) view).setText(name.replace(".png", ""));
                         return true;
                 }
                 if (BuildConfig.DEBUG)
