@@ -176,7 +176,7 @@ public class CustomHtmlToSpannedConverter implements ContentHandler {
     private static void startImg(SpannableStringBuilder text,
                                  Attributes attributes, Html.ImageGetter img) {
         String cssClass = attributes.getValue("class");
-        String src = cssClass != null && cssClass.startsWith("emoji") ? attributes.getValue("title") : attributes.getValue("", "src");
+        String src = cssClass != null &&  attributes.getValue("", "src") == null ? cssClass.substring(cssClass.indexOf("-") + 1) : attributes.getValue("", "src");
         Drawable d = null;
 
         if (img != null) {

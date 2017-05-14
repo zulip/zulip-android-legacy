@@ -340,7 +340,15 @@ public class Message {
         Html.ImageGetter emojiGetter = new Html.ImageGetter() {
             @Override
             public Drawable getDrawable(String source) {
-                    String filename = "emoji/" + source.replace(":", "") + ".png";
+                int imagesIndex;
+                String filename;
+                if (source != null) {
+                    imagesIndex = source.indexOf("images/");
+                    if (imagesIndex != -1) {
+                        filename = source.substring(imagesIndex + "images/".length());
+                    } else {
+                        filename = "emoji/unicode/" + source + ".png";
+                    }
                     try {
                         Drawable drawable = Drawable.createFromStream(context
                                 .getAssets().open(filename), filename);
@@ -361,6 +369,7 @@ public class Message {
                     } catch (IOException e) {
                         Log.e("RecyclerMessageAdapter", e.getMessage());
                     }
+                }
                 return null;
             }
         };

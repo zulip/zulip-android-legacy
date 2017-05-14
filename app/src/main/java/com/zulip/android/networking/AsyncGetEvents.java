@@ -412,7 +412,6 @@ public class AsyncGetEvents extends Thread {
         // In task thread
         int lastMessageId = messages.get(messages.size() - 1).getID();
         MessageRange.updateNewMessagesRange(app, lastMessageId);
-
         if (mActivity != null) {
             mActivity.runOnUiThread(new Runnable() {
                 @Override
