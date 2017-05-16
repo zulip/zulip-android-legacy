@@ -2,12 +2,14 @@ package com.zulip.android.util;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.zulip.android.R;
@@ -40,6 +42,7 @@ public class ListDialog extends DialogFragment {
         }
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -48,7 +51,8 @@ public class ListDialog extends DialogFragment {
 
         // Inflate and set the layout for the dialog
         // Pass null as the parent view because its going in the dialog layout
-        View rootView = inflater.inflate(R.layout.list_dialog, null);
+        final ViewGroup nullParent = null;
+        View rootView = inflater.inflate(R.layout.list_dialog, nullParent);
         View cameraListItem = rootView.findViewById(R.id.picture_dialog);
         View fileListItem = rootView.findViewById(R.id.pick_file_dialog);
         ImageView cameraImage = (ImageView) rootView.findViewById(R.id.camera_share_icon);
