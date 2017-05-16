@@ -15,6 +15,7 @@ import android.widget.ImageView;
 
 import com.zulip.android.activities.ZulipActivity;
 import com.zulip.android.models.Person;
+import com.zulip.android.util.UrlHelper;
 import com.zulip.android.util.ZLog;
 
 import java.io.IOException;
@@ -47,7 +48,7 @@ public class GravatarAsyncFetchTask extends AsyncTask<URL, Void, Bitmap> {
         float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                 dpSize, r.getDisplayMetrics());
         try {
-            return new URL(url + "&s=" + px);
+            return new URL(UrlHelper.addHost(url)  + "&s=" + px);
         } catch (MalformedURLException e) {
             ZLog.logException(e);
             return null;
