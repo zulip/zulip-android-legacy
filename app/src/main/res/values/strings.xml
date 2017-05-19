@@ -171,7 +171,7 @@
     <string name="cancel">Cancel</string>
     <string name="no_message_to_display">Sorry, no messages to display!</string>
     <string name="crop">CROP</string>
-
+    <string name="logout_title">Are you sure you want to logout?</string>
     <!--Placeholder strings-->
     <string name="placeholder_my_stream">MyStream</string>
     <string name="placeholder_short_stream">Short Stream</string>
