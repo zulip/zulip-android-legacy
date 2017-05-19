@@ -2393,7 +2393,20 @@ public class ZulipActivity extends BaseActivity implements
                 datePickerDialog.show();
                 break;
             case R.id.logout:
-                logout();
+                AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+                alertDialog.setTitle(getString(R.string.logout));
+                alertDialog.setMessage(getString(R.string.logout_title));
+                alertDialog.setPositiveButton(getString(android.R.string.yes), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                    logout();
+                    }
+                });
+                alertDialog.setNegativeButton(getString(android.R.string.no), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                    }
+                });
+                alertDialog.show();
                 break;
             case R.id.terms:
                 openUrl(Constants.END_POINT_TERMS_OF_SERVICE);
