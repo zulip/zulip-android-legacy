@@ -10,6 +10,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -29,15 +31,13 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
-import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.zulip.android.R;
 import com.zulip.android.util.ZLog;
-
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -47,6 +47,7 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import uk.co.senab.photoview.PhotoView;
 
 
 public class PhotoViewActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
@@ -55,7 +56,7 @@ public class PhotoViewActivity extends AppCompatActivity implements ActivityComp
     private static final int EXTERNAL_STORAGE_PERMISSION_CONSTANT = 100;
     private static final int REQUEST_PERMISSION_SETTING = 101;
     int id = 1;
-    private ImageView linkImage;
+    private PhotoView linkImage;
     private ProgressBar progressBar;
     private NotificationManager mNotifyManager;
     private NotificationCompat.Builder mBuilder;
@@ -74,31 +75,26 @@ public class PhotoViewActivity extends AppCompatActivity implements ActivityComp
         final Intent intent = getIntent();
         String url = intent.getStringExtra(Intent.EXTRA_TEXT);
         getSupportActionBar().setTitle(url);
-        linkImage = (ImageView) findViewById(R.id.linkImageView);
+        linkImage = (PhotoView) findViewById(R.id.linkImageView);
         progressBar = (ProgressBar) findViewById(R.id.progress);
-        GlideDrawableImageViewTarget imageViewPreview = new GlideDrawableImageViewTarget(linkImage);
-        Glide
-                .with(this)
-                .load(url)
-                .listener(new RequestListener<String, GlideDrawable>() {
-                    @Override
-                    public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-                        progressBar.setVisibility(View.GONE);
-                        if (!isNetworkAvailable()) {
-                            Toast.makeText(getApplicationContext(), R.string.toast_no_internet_connection, Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(getApplicationContext(), R.string.toast_unable_to_load_image, Toast.LENGTH_SHORT).show();
-                        }
-                        return false;
-                    }
+        Glide.with(this).load(url).asBitmap().into(new SimpleTarget<Bitmap>() {
+            @Override
+            public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                progressBar.setVisibility(View.GONE);
+                linkImage.setImageBitmap(resource);
+            }
 
-                    @Override
-                    public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                        progressBar.setVisibility(View.GONE);
-                        return false;
-                    }
-                })
-                .into(imageViewPreview);
+            @Override
+            public void onLoadFailed(Exception e, Drawable errorDrawable) {
+                super.onLoadFailed(e, errorDrawable);
+                progressBar.setVisibility(View.GONE);
+                if (!isNetworkAvailable()) {
+                    Toast.makeText(getApplicationContext(), R.string.toast_no_internet_connection, Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), R.string.toast_unable_to_load_image, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     private boolean isNetworkAvailable() {
