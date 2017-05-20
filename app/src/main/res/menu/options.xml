@@ -10,6 +10,12 @@
         app:showAsAction="ifRoom" />
 
     <item
+        android:id="@+id/private_msg"
+        android:icon="@drawable/ic_action_person"
+        android:title="@string/toolbar_item_private"
+        app:showAsAction="always" />
+
+    <item
         android:id="@+id/refresh"
         android:title="@string/refresh" />
 

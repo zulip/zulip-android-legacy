@@ -2346,6 +2346,9 @@ public class ZulipActivity extends BaseActivity implements
                     builder.show();
                 }
                 break;
+            case R.id.private_msg:
+                drawerLayout.openDrawer(GravityCompat.END);
+                break;
             case R.id.daynight:
                 switch (AppCompatDelegate.getDefaultNightMode()) {
                     case -1:
