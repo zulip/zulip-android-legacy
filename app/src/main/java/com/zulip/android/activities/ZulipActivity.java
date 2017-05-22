@@ -655,11 +655,11 @@ public class ZulipActivity extends BaseActivity implements
                     return;
                 if (narrowedList == null) {
                     calendar = Calendar.getInstance();
-                    menu.getItem(2).getSubMenu().getItem(0).setTitle(R.string.menu_today);
+                    menu.findItem(R.id.filter).getSubMenu().getItem(0).setTitle(R.string.menu_today);
                     switchToStream();
                     checkForChatBoxFocusRequest();
                 } else if (narrowedList.filter instanceof NarrowFilterByDate) {
-                    menu.getItem(2).getSubMenu().getItem(0).setTitle(R.string.menu_one_day_before);
+                    menu.findItem(R.id.filter).getSubMenu().getItem(0).setTitle(R.string.menu_one_day_before);
                 }
             }
         });
