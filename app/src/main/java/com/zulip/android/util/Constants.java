@@ -26,4 +26,5 @@ public class Constants {
     public static String END_POINT_REGISTER = "register";
     //if two continuous messages are from same sender and time difference is less than this then hide it
     public static long HIDE_TIMESTAMP_THRESHOLD = 60 * 1000;// 1 minute
+    public static String ACTION_MESSAGE_PUSH_NOTIFICATION = "ACTION_MESSAGE_PUSH_NOTIFICATION";
 }

@@ -141,6 +141,7 @@ import okhttp3.MultipartBody;
 import retrofit2.Call;
 import retrofit2.Response;
 
+import static com.zulip.android.util.Constants.ACTION_MESSAGE_PUSH_NOTIFICATION;
 import static com.zulip.android.util.Constants.REQUEST_PICK_FILE;
 
 /**
@@ -879,6 +880,9 @@ public class ZulipActivity extends BaseActivity implements
                 // Handle single file being sent
                 handleSentFile((Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM));
             }
+        } else if (ACTION_MESSAGE_PUSH_NOTIFICATION.equals(action)) {
+            // Here, this condition can be used if some data has to be passed from the message push notification
+            return; // We don't want to do with the data right so, do this return and skip the other check
         }
 
         // extract file path of edited image

@@ -18,6 +18,8 @@ import com.zulip.android.util.ZLog;
 import java.io.IOException;
 import java.net.URL;
 
+import static com.zulip.android.util.Constants.ACTION_MESSAGE_PUSH_NOTIFICATION;
+
 /**
  * This {@code IntentService} does the actual handling of the GCM message.
  * {@code GcmBroadcastReceiver} (a {@code WakefulBroadcastReceiver}) holds a
@@ -48,7 +50,7 @@ public class GcmIntentService extends IntentService {
                 .getSystemService(Context.NOTIFICATION_SERVICE);
 
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, ZulipActivity.class).addFlags(0), 0);
+                new Intent(this, ZulipActivity.class).addFlags(0).setAction(ACTION_MESSAGE_PUSH_NOTIFICATION), 0);
 
         String type = msg.getString("recipient_type");
         String tag = "zulip";
