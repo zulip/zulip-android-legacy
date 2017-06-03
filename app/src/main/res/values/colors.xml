@@ -32,4 +32,6 @@
     <color name="top_snackbar_text_color">#ffffff</color>
     <color name="progress_background_color">#444444</color>
     <color name="notif_background">#009688</color>
+    <color name="solid_color">#FFF</color>
+    <color name="stroke_color">#000</color>
 </resources>
