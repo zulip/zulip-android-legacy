@@ -354,6 +354,13 @@ public class ZulipActivity extends BaseActivity implements
             mMutedTopics = MutedTopics.get();
         }
 
+        boolean isCurrentThemeNight = (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES);
+
+        //apply preferred theme
+       if (app.getSettings().getBoolean(Constants.NIGHT_THEME, false) && !isCurrentThemeNight) {
+            setNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        }
+
         this.logged_in = true;
         notifications = new Notifications(this);
         notifications.register();
@@ -386,7 +393,7 @@ public class ZulipActivity extends BaseActivity implements
         sendBtn = (ImageView) findViewById(R.id.send_btn);
         addFileBtn = (ImageView) findViewById(R.id.add_btn);
         appBarLayout = (AppBarLayout) findViewById(R.id.appBarLayout);
-        boolean isCurrentThemeNight = (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES);
+
         etSearchPeople = (EditText) findViewById(R.id.people_drawer_search);
         ivSearchPeopleCancel = (ImageView) findViewById(R.id.iv_people__search_cancel_button);
         onTextChangeOfPeopleSearchEditText();
@@ -2358,12 +2365,11 @@ public class ZulipActivity extends BaseActivity implements
                     case -1:
                     case AppCompatDelegate.MODE_NIGHT_NO:
                         setNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-                        break;
-                    case AppCompatDelegate.MODE_NIGHT_YES:
-                        setNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                        app.makeNightThemeDefault(true);
                         break;
                     default:
                         setNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                        app.makeNightThemeDefault(false);
                         break;
                 }
                 break;
