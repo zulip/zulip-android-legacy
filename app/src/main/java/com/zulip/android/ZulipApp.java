@@ -598,4 +598,15 @@ public class ZulipApp extends Application {
             }
         }
     }
+
+    /**
+     * Update preferred theme
+     * @param b true if night theme is preferred
+     */
+    public void makeNightThemeDefault(boolean nightTheme) {
+        SharedPreferences.Editor editor = getSettings().edit();
+
+        editor.putBoolean(Constants.NIGHT_THEME, nightTheme);
+        editor.apply();
+    }
 }
