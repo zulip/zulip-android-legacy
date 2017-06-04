@@ -357,8 +357,8 @@ public class ZulipActivity extends BaseActivity implements
         boolean isCurrentThemeNight = (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES);
 
         //apply preferred theme
-       if (app.getSettings().getBoolean(Constants.NIGHT_THEME, false) && !isCurrentThemeNight
-               && !app.getSettings().getBoolean(Constants.AUTO_NIGHT_THEME,false)) {
+        if (app.getSettings().getBoolean(Constants.NIGHT_THEME, false) && !isCurrentThemeNight
+                && !app.getSettings().getBoolean(Constants.AUTO_NIGHT_THEME, false)) {
             setNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         }
 
@@ -2260,7 +2260,7 @@ public class ZulipActivity extends BaseActivity implements
             prepareSearchView(menu);
             this.menu = menu;
             menu.findItem(R.id.autoTheme).setChecked(app.getSettings()
-                    .getBoolean(Constants.AUTO_NIGHT_THEME,false));
+                    .getBoolean(Constants.AUTO_NIGHT_THEME, false));
             return true;
         }
 
@@ -2421,12 +2421,12 @@ public class ZulipActivity extends BaseActivity implements
                 alertDialog.setMessage(getString(R.string.logout_title));
                 alertDialog.setPositiveButton(getString(android.R.string.yes), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                    logout();
+                        logout();
                     }
                 });
                 alertDialog.setNegativeButton(getString(android.R.string.no), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                    dialog.cancel();
+                        dialog.cancel();
                     }
                 });
                 alertDialog.show();
@@ -2717,6 +2717,7 @@ public class ZulipActivity extends BaseActivity implements
     /**
      * Store floating message header
      * useful when message list get's scrolled
+     *
      * @param viewHolder floating message header
      */
     public void setViewHolder(RecyclerView.ViewHolder viewHolder) {

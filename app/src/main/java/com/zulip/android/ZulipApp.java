@@ -604,6 +604,7 @@ public class ZulipApp extends Application {
 
     /**
      * Update preferred theme
+     *
      * @param b true if night theme is preferred
      */
     public void makeNightThemeDefault(boolean nightTheme) {
@@ -615,6 +616,7 @@ public class ZulipApp extends Application {
 
     /**
      * update auto night theme preference
+     *
      * @param value preference value
      */
     public void setAutoNightTheme(boolean value) {
