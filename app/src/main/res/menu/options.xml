@@ -38,14 +38,19 @@
         android:id="@+id/theme"
         android:title="@string/theme">
         <menu>
-            <item
-                android:id="@+id/daynight"
-                android:title="@string/switch_theme" />
-            <item
-                android:id="@+id/autoTheme"
-                android:checkable="true"
-                android:title="@string/autoTheme"
-                app:actionViewClass="android.widget.CheckBox" />
+            <group
+                android:id="@+id/group"
+                android:checkableBehavior="single">
+                <item
+                    android:id="@+id/dayTheme"
+                    android:title="@string/dayTheme" />
+                <item
+                    android:id="@+id/nightTheme"
+                    android:title="@string/nightTheme" />
+                <item
+                    android:id="@+id/autoTheme"
+                    android:title="@string/autoTheme" />
+            </group>
         </menu>
     </item>
 

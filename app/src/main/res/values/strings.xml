@@ -84,7 +84,6 @@
     <string name="use_https">Use HTTPS</string>
     <string name="use_http">Use HTTP</string>
     <string name="empty_list">Sorry, no messages here.</string>
-    <string name="switch_theme">Switch day/night theme</string>
     <string name="reply_stream">Reply to stream</string>
     <string name="reply_sender">Reply to sender</string>
     <string name="narrow_stream">Narrow to this stream</string>
@@ -175,7 +174,9 @@
     <string name="logout_title">Are you sure you want to logout?</string>
     <string name="autoTheme">Auto Night Theme</string>
     <string name="theme">Theme</string>
-    <string name="terms">Terms of Service</string>
+    <string name="terms">Terms Of Service</string>
+    <string name="nightTheme">Night Theme</string>
+    <string name="dayTheme">Day Theme</string>
     <!--Placeholder strings-->
     <string name="placeholder_my_stream">MyStream</string>
     <string name="placeholder_short_stream">Short stream</string>
@@ -183,5 +184,4 @@
     <string name="placeholder_message_here">Message here</string>
     <string name="placeholder_sender_name">Sender name</string>
     <string name="placeholder_social">Social</string>
-
 </resources>
