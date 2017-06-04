@@ -182,4 +182,6 @@
     <string name="placeholder_social">Social</string>
     <!--Placeholder strings-->
     <string name="terms">Terms Of Service</string>
+    <string name="autoTheme">Auto Night Theme</string>
+    <string name="theme">Theme</string>
 </resources>

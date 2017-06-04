@@ -357,7 +357,8 @@ public class ZulipActivity extends BaseActivity implements
         boolean isCurrentThemeNight = (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES);
 
         //apply preferred theme
-       if (app.getSettings().getBoolean(Constants.NIGHT_THEME, false) && !isCurrentThemeNight) {
+       if (app.getSettings().getBoolean(Constants.NIGHT_THEME, false) && !isCurrentThemeNight
+               && !app.getSettings().getBoolean(Constants.AUTO_NIGHT_THEME,false)) {
             setNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         }
 
@@ -2258,6 +2259,8 @@ public class ZulipActivity extends BaseActivity implements
             getMenuInflater().inflate(R.menu.options, menu);
             prepareSearchView(menu);
             this.menu = menu;
+            menu.findItem(R.id.autoTheme).setChecked(app.getSettings()
+                    .getBoolean(Constants.AUTO_NIGHT_THEME,false));
             return true;
         }
 
@@ -2371,6 +2374,13 @@ public class ZulipActivity extends BaseActivity implements
                         setNightMode(AppCompatDelegate.MODE_NIGHT_NO);
                         app.makeNightThemeDefault(false);
                         break;
+                }
+                break;
+            case R.id.autoTheme:
+                item.setChecked(!item.isChecked());
+                app.setAutoNightTheme(item.isChecked());
+                if (item.isChecked()) {
+                    setNightMode(AppCompatDelegate.MODE_NIGHT_AUTO);
                 }
                 break;
             case R.id.refresh:
