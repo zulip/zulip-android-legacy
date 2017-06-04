@@ -2259,8 +2259,13 @@ public class ZulipActivity extends BaseActivity implements
             getMenuInflater().inflate(R.menu.options, menu);
             prepareSearchView(menu);
             this.menu = menu;
-            menu.findItem(R.id.autoTheme).setChecked(app.getSettings()
-                    .getBoolean(Constants.AUTO_NIGHT_THEME, false));
+            if (app.getSettings().getBoolean(Constants.AUTO_NIGHT_THEME, false)) {
+                menu.findItem(R.id.autoTheme).setChecked(true);
+            } else if (app.getSettings().getBoolean(Constants.NIGHT_THEME, false)) {
+                menu.findItem(R.id.nightTheme).setChecked(true);
+            } else {
+                menu.findItem(R.id.dayTheme).setChecked(true);
+            }
             return true;
         }
 
@@ -2363,17 +2368,22 @@ public class ZulipActivity extends BaseActivity implements
             case R.id.private_msg:
                 drawerLayout.openDrawer(GravityCompat.END);
                 break;
-            case R.id.daynight:
-                switch (AppCompatDelegate.getDefaultNightMode()) {
-                    case -1:
-                    case AppCompatDelegate.MODE_NIGHT_NO:
-                        setNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-                        app.makeNightThemeDefault(true);
-                        break;
-                    default:
-                        setNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-                        app.makeNightThemeDefault(false);
-                        break;
+            case R.id.dayTheme:
+                item.setChecked(!item.isChecked());
+                if (item.isChecked() &&
+                        AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_NO) {
+                    setNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                    app.makeNightThemeDefault(false);
+                    app.setAutoNightTheme(false);
+                }
+                break;
+            case R.id.nightTheme:
+                item.setChecked(!item.isChecked());
+                if (item.isChecked() &&
+                        AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_YES) {
+                    setNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                    app.makeNightThemeDefault(true);
+                    app.setAutoNightTheme(false);
                 }
                 break;
             case R.id.autoTheme:
