@@ -28,4 +28,5 @@ public class Constants {
     public static long HIDE_TIMESTAMP_THRESHOLD = 60 * 1000;// 1 minute
     public static String ACTION_MESSAGE_PUSH_NOTIFICATION = "ACTION_MESSAGE_PUSH_NOTIFICATION";
     public static String NIGHT_THEME = "NIGHT_THEME";
+    public static String AUTO_NIGHT_THEME = "AUTO_NIGHT_THEME";
 }

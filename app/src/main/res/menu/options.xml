@@ -35,8 +35,20 @@
     </item>
 
     <item
-        android:id="@+id/daynight"
-        android:title="@string/switch_theme" />
+        android:id="@+id/theme"
+        android:title="@string/theme">
+        <menu>
+            <item
+                android:id="@+id/daynight"
+                android:title="@string/switch_theme" />
+            <item
+                android:id="@+id/autoTheme"
+                android:checkable="true"
+                android:title="@string/autoTheme"
+                app:actionViewClass="android.widget.CheckBox" />
+        </menu>
+    </item>
+
     <item
         android:id="@+id/isStarred"
         android:title="@string/starred_messages" />

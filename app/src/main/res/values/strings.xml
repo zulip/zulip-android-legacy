@@ -173,6 +173,9 @@
     <string name="no_message_to_display">Sorry, no messages to display!</string>
     <string name="crop">Crop</string>
     <string name="logout_title">Are you sure you want to logout?</string>
+    <string name="autoTheme">Auto Night Theme</string>
+    <string name="theme">Theme</string>
+    <string name="terms">Terms of Service</string>
     <!--Placeholder strings-->
     <string name="placeholder_my_stream">MyStream</string>
     <string name="placeholder_short_stream">Short stream</string>
@@ -180,6 +183,5 @@
     <string name="placeholder_message_here">Message here</string>
     <string name="placeholder_sender_name">Sender name</string>
     <string name="placeholder_social">Social</string>
-    <!--Placeholder strings-->
-    <string name="terms">Terms of Service</string>
+
 </resources>
