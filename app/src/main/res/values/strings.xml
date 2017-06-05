@@ -175,8 +175,8 @@
     <string name="autoTheme">Auto Night Theme</string>
     <string name="theme">Theme</string>
     <string name="terms">Terms Of Service</string>
-    <string name="nightTheme">Night Theme</string>
     <string name="dayTheme">Day Theme</string>
+    <string name="nightTheme">Night Theme</string>
     <!--Placeholder strings-->
     <string name="placeholder_my_stream">MyStream</string>
     <string name="placeholder_short_stream">Short stream</string>
