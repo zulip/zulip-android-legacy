@@ -354,6 +354,14 @@ public class ZulipActivity extends BaseActivity implements
             mMutedTopics = MutedTopics.get();
         }
 
+        boolean isCurrentThemeNight = (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES);
+
+        //apply preferred theme
+        if (app.getSettings().getBoolean(Constants.NIGHT_THEME, false) && !isCurrentThemeNight
+                && !app.getSettings().getBoolean(Constants.AUTO_NIGHT_THEME, false)) {
+            setNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        }
+
         this.logged_in = true;
         notifications = new Notifications(this);
         notifications.register();
@@ -386,7 +394,7 @@ public class ZulipActivity extends BaseActivity implements
         sendBtn = (ImageView) findViewById(R.id.send_btn);
         addFileBtn = (ImageView) findViewById(R.id.add_btn);
         appBarLayout = (AppBarLayout) findViewById(R.id.appBarLayout);
-        boolean isCurrentThemeNight = (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES);
+
         etSearchPeople = (EditText) findViewById(R.id.people_drawer_search);
         ivSearchPeopleCancel = (ImageView) findViewById(R.id.iv_people__search_cancel_button);
         onTextChangeOfPeopleSearchEditText();
@@ -2251,6 +2259,13 @@ public class ZulipActivity extends BaseActivity implements
             getMenuInflater().inflate(R.menu.options, menu);
             prepareSearchView(menu);
             this.menu = menu;
+            if (app.getSettings().getBoolean(Constants.AUTO_NIGHT_THEME, false)) {
+                menu.findItem(R.id.autoTheme).setChecked(true);
+            } else if (app.getSettings().getBoolean(Constants.NIGHT_THEME, false)) {
+                menu.findItem(R.id.nightTheme).setChecked(true);
+            } else {
+                menu.findItem(R.id.dayTheme).setChecked(true);
+            }
             return true;
         }
 
@@ -2353,18 +2368,29 @@ public class ZulipActivity extends BaseActivity implements
             case R.id.private_msg:
                 drawerLayout.openDrawer(GravityCompat.END);
                 break;
-            case R.id.daynight:
-                switch (AppCompatDelegate.getDefaultNightMode()) {
-                    case -1:
-                    case AppCompatDelegate.MODE_NIGHT_NO:
-                        setNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-                        break;
-                    case AppCompatDelegate.MODE_NIGHT_YES:
-                        setNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-                        break;
-                    default:
-                        setNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-                        break;
+            case R.id.dayTheme:
+                item.setChecked(!item.isChecked());
+                if (item.isChecked() &&
+                        AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_NO) {
+                    setNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                    app.makeNightThemeDefault(false);
+                    app.setAutoNightTheme(false);
+                }
+                break;
+            case R.id.nightTheme:
+                item.setChecked(!item.isChecked());
+                if (item.isChecked() &&
+                        AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_YES) {
+                    setNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                    app.makeNightThemeDefault(true);
+                    app.setAutoNightTheme(false);
+                }
+                break;
+            case R.id.autoTheme:
+                item.setChecked(!item.isChecked());
+                app.setAutoNightTheme(item.isChecked());
+                if (item.isChecked()) {
+                    setNightMode(AppCompatDelegate.MODE_NIGHT_AUTO);
                 }
                 break;
             case R.id.refresh:
@@ -2405,12 +2431,12 @@ public class ZulipActivity extends BaseActivity implements
                 alertDialog.setMessage(getString(R.string.logout_title));
                 alertDialog.setPositiveButton(getString(android.R.string.yes), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                    logout();
+                        logout();
                     }
                 });
                 alertDialog.setNegativeButton(getString(android.R.string.no), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                    dialog.cancel();
+                        dialog.cancel();
                     }
                 });
                 alertDialog.show();
@@ -2701,6 +2727,7 @@ public class ZulipActivity extends BaseActivity implements
     /**
      * Store floating message header
      * useful when message list get's scrolled
+     *
      * @param viewHolder floating message header
      */
     public void setViewHolder(RecyclerView.ViewHolder viewHolder) {

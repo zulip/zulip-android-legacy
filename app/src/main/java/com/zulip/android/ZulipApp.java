@@ -7,6 +7,7 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Handler;
+import android.support.v7.app.AppCompatDelegate;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
@@ -135,11 +136,13 @@ public class ZulipApp extends Application {
         if (!BuildConfig.DEBUG)
             Fabric.with(this, new Crashlytics());
         ZulipApp.setInstance(this);
-
         // This used to be from HumbugActivity.getPreferences, so we keep that
         // file name.
         this.settings = getSharedPreferences("HumbugActivity", Context.MODE_PRIVATE);
-
+        //check for auto theme is enabled or not
+        if (getSettings().getBoolean(Constants.AUTO_NIGHT_THEME, false)) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO);
+        }
         max_message_id = settings.getInt("max_message_id", -1);
         eventQueueId = settings.getString("eventQueueId", null);
         lastEventId = settings.getInt("lastEventId", -1);
@@ -597,5 +600,29 @@ public class ZulipApp extends Application {
                 editor.apply();
             }
         }
+    }
+
+    /**
+     * Update preferred theme
+     *
+     * @param b true if night theme is preferred
+     */
+    public void makeNightThemeDefault(boolean nightTheme) {
+        SharedPreferences.Editor editor = getSettings().edit();
+
+        editor.putBoolean(Constants.NIGHT_THEME, nightTheme);
+        editor.apply();
+    }
+
+    /**
+     * update auto night theme preference
+     *
+     * @param value preference value
+     */
+    public void setAutoNightTheme(boolean value) {
+        SharedPreferences.Editor editor = getSettings().edit();
+
+        editor.putBoolean(Constants.AUTO_NIGHT_THEME, value);
+        editor.apply();
     }
 }
