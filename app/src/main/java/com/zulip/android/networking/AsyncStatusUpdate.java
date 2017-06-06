@@ -25,6 +25,10 @@ public class AsyncStatusUpdate extends ZulipAsyncPushTask {
     private static final String TIMESTAMP = "timestamp";
     private static final String STATUS_UPDATE = "statusUpdate";
     private final Context context;
+    //object in person object
+    //contains info of very latest presence data point
+    private static final String AGGREGATED = "aggregated";
+    private static final String CLIENT = "client";
 
     /**
      * Declares a new HumbugAsyncPushTask, passing the activity as context.
@@ -46,41 +50,44 @@ public class AsyncStatusUpdate extends ZulipAsyncPushTask {
      * Choose presence object. This will return the latest active presence, then
      * the latest away presence available.
      */
-    private JSONObject chooseLatestPresence(JSONObject person)
+    private JSONObject getLatestPresencePlatform(JSONObject person)
             throws JSONException {
         Iterator keys = person.keys();
         JSONObject latestPresence = null;
         while (keys.hasNext()) {
             String key = (String) keys.next();
-            JSONObject presence = person.getJSONObject(key);
-            long timestamp = presence.getLong(TIMESTAMP);
-            String status = presence.getString(STATUS);
-            if (latestPresence == null) {
-                // first presence
-                latestPresence = presence;
-            } else {
-                String latestStatus = latestPresence.getString(STATUS);
-                if (latestStatus == null) {
-                    Log.wtf(STATUS_UPDATE,
-                            "Received presence information with no status");
-                } else if (status == null) {
-                    Log.wtf(STATUS_UPDATE,
-                            "Received presence information with no status");
+            //aggregated is not a platform
+            if (!key.equals(AGGREGATED)) {
+                JSONObject presence = person.getJSONObject(key);
+                long timestamp = presence.getLong(TIMESTAMP);
+                String status = presence.getString(STATUS);
+                if (latestPresence == null) {
+                    // first presence
+                    latestPresence = presence;
                 } else {
-                    if (status.equals(PresenceType.ACTIVE.toString())) {
-                        if (latestStatus.equals(PresenceType.ACTIVE.toString())) {
-                            if (latestPresence.getLong(TIMESTAMP) < timestamp) {
+                    String latestStatus = latestPresence.getString(STATUS);
+                    if (latestStatus == null) {
+                        Log.wtf(STATUS_UPDATE,
+                                "Received presence information with no status");
+                    } else if (status == null) {
+                        Log.wtf(STATUS_UPDATE,
+                                "Received presence information with no status");
+                    } else {
+                        if (status.equals(PresenceType.ACTIVE.toString())) {
+                            if (latestStatus.equals(PresenceType.ACTIVE.toString())) {
+                                if (latestPresence.getLong(TIMESTAMP) < timestamp) {
+                                    latestPresence = presence;
+                                }
+                            } else {
+                                // found an active status which overrides the idle
+                                // status
                                 latestPresence = presence;
                             }
-                        } else {
-                            // found an active status which overrides the idle
-                            // status
+                        } else if (status.equals(PresenceType.IDLE.toString())
+                                && latestStatus.equals(PresenceType.IDLE.toString())
+                                && latestPresence.getLong(TIMESTAMP) < timestamp) {
                             latestPresence = presence;
                         }
-                    } else if (status.equals(PresenceType.IDLE.toString())
-                            && latestStatus.equals(PresenceType.IDLE.toString())
-                            && latestPresence.getLong(TIMESTAMP) < timestamp) {
-                        latestPresence = presence;
                     }
                 }
             }
@@ -107,18 +114,14 @@ public class AsyncStatusUpdate extends ZulipAsyncPushTask {
                         while (emailIterator.hasNext()) {
                             String email = (String) emailIterator.next();
                             JSONObject person = presences.getJSONObject(email);
-
-                            // iterate through the devices providing updates and
-                            // use the status of the latest one
-                            JSONObject latestPresenceObj = chooseLatestPresence(person);
+                            // get the very latest presence from AGGREGATED object
+                            JSONObject latestPresenceObj = person.getJSONObject(AGGREGATED);
                             if (latestPresenceObj != null) {
                                 long age = serverTimestamp
                                         - latestPresenceObj
                                         .getLong(TIMESTAMP);
                                 String status = latestPresenceObj
                                         .getString(STATUS);
-                                String client = latestPresenceObj
-                                        .getString("client");
 
                                 PresenceType statusEnum;
                                 if (status == null) {
@@ -132,6 +135,11 @@ public class AsyncStatusUpdate extends ZulipAsyncPushTask {
                                 } else {
                                     statusEnum = null;
                                 }
+                                //iterate through the devices/platforms providing updates and get client
+                                JSONObject latestPresencePlatform = getLatestPresencePlatform(person);
+                                String client = latestPresencePlatform
+                                        .getString(CLIENT);
+
                                 Presence presence = new Presence(age, client,
                                         statusEnum);
                                 presenceLookup.put(email, presence);
