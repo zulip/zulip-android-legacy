@@ -27,6 +27,7 @@ import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.misc.TransactionManager;
 import com.zulip.android.activities.ZulipActivity;
 import com.zulip.android.database.DatabaseHelper;
+import com.zulip.android.filters.NarrowFilter;
 import com.zulip.android.models.Emoji;
 import com.zulip.android.models.Message;
 import com.zulip.android.models.MessageType;
@@ -128,6 +129,24 @@ public class ZulipApp extends Application {
     public void setZulipActivity(ZulipActivity zulipActivity) {
         this.zulipActivity = zulipActivity;
     }
+
+    //store narrowFilter before switching theme
+    private NarrowFilter narrowFilter = null;
+
+    //set it after restore
+    //for narrowed view
+    private int tempNarrowedViewPointer = -1;
+    //for home view
+    private int tempHomeViewPointer = -1;
+
+    //useful when switch takes place from narrowed view
+    //on switch theme activity is recreated
+    private boolean isThemeSwitchedFromHome = true;
+
+    //account for header
+    //will be helpful when them is switched
+    private int homeViewHeaderCount = 0;
+    private int narrowedViewHeaderCount = 0;
 
     @Override
     public void onCreate() {
@@ -597,5 +616,53 @@ public class ZulipApp extends Application {
                 editor.apply();
             }
         }
+    }
+
+    public NarrowFilter getNarrowFilter() {
+        return narrowFilter;
+    }
+
+    public void setNarrowFilter(NarrowFilter narrowFilter) {
+        this.narrowFilter = narrowFilter;
+    }
+
+    public void setTempNarrowedViewPointer(int mID) {
+        this.tempNarrowedViewPointer = mID;
+    }
+
+    public int getTempNarrowedViewPointer() {
+        return tempNarrowedViewPointer;
+    }
+
+    public int getTempHomeViewPointer() {
+        return tempHomeViewPointer;
+    }
+
+    public void setTempHomeViewPointer(int tempHomeViewPointer) {
+        this.tempHomeViewPointer = tempHomeViewPointer;
+    }
+
+    public boolean isThemeSwitchedFromHome() {
+        return isThemeSwitchedFromHome;
+    }
+
+    public void setThemeSwitchedFromHome(boolean themeSwitchedFromHome) {
+        isThemeSwitchedFromHome = themeSwitchedFromHome;
+    }
+
+    public int getHomeViewHeaderCount() {
+        return homeViewHeaderCount;
+    }
+
+    public void setHomeViewHeaderCount(int homeViewHeaderCount) {
+        this.homeViewHeaderCount = homeViewHeaderCount;
+    }
+
+    public int getNarrowedViewHeaderCount() {
+        return narrowedViewHeaderCount;
+    }
+
+    public void setNarrowedViewHeaderCount(int narrowedViewHeaderCount) {
+        this.narrowedViewHeaderCount = narrowedViewHeaderCount;
     }
 }
