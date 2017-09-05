@@ -35,8 +35,8 @@ or by using Android Studio.
 
 -  `Getting Started`_
 -  `Getting Help`_
--  `Build instructions (Android Studio)`_)
--  `Build instructions (without Android Studio)`_)
+-  `Build instructions (Android Studio)`_
+-  `Build instructions (without Android Studio)`_
 -  `Running server on device`_
 -  `Contributing`_
 -  `Mailing List`_
