@@ -124,7 +124,7 @@
     <string name="marker_content_desp">mark</string>
     <string name="back_btn_content_disp">back</string>
     <string name="edit_content_desp">edit</string>
-    <string name="crop_content_desp">drop</string>
+    <string name="crop_content_desp">crop</string>
     <string name="delete_content_desp">delete</string>
     <string name="cancel_content_desp" tools:ignore="ButtonCase">cancel</string>
     <string name="camera_content_desp">take photo</string>
