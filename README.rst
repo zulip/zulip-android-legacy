@@ -1,24 +1,18 @@
 ﻿
 
-=================
-Zulip for Android
-=================
+==========================
+Zulip for Android (legacy)
+==========================
 
-**Note**: We've decided that our `React Native app`_ is far enough
-along that it makes sense to focus our efforts on making the React
-Native app better on Android and iOS rather than continuing to split
-our effort developing two similar apps in parallel. Hence, for GSoC we
-will be focused on making the React Native app awesome. The plan is in
-this `document`_, which also covers important FAQ for anyone
-interested in doing GSoC on Zulip mobile apps.
+**Note**: This project is deprecated in favor of our `React Native
+app`_, which supports both iOS and Android.
 
 .. _React Native app: https://github.com/zulip/zulip-mobile
-.. _document: https://github.com/zulip/zulip-android/blob/master/android-strategy.md
 
 ---------------
 
-This is the native Android client for `Zulip <http://www.zulip.org>`_.  It is
-available `in the Google Play store
+This is the legacy native Android client for `Zulip
+<http://www.zulip.org>`_.  It is available `in the Google Play store
 <https://play.google.com/store/apps/details?id=com.zulip.android>`_.
 If you have a taste for adventure, you can also `join our beta channel
 <https://play.google.com/apps/testing/com.zulip.android>`_ after which
