@@ -1,0 +1,5 @@
+-dir:node_modules
+-dir:build
+-dir:vendor
+-dir:lib
+-dir:libs
