@@ -24,6 +24,11 @@ import com.zulip.android.util.ZLog;
 
 public class GcmBroadcastReceiver extends BroadcastReceiver {
 
+            // Artificial comment
+            // Artificial comment
+            // Artificial comment
+            // Artificial comment
+
     private static final String TAG = "GCM";
 
     public static String getGCMReceiverAction(Context appContext) {
@@ -34,15 +39,6 @@ public class GcmBroadcastReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         // handle cancel notification action on uploads
         final String action = intent.getAction();
-        if (Constants.CANCEL.equals(action)) {
-            int notifId = intent.getIntExtra("id", 0);
-            try {
-                ZulipApp.get().getZulipActivity().cancelRequest(notifId);
-            } catch (NullPointerException e) {
-                ZLog.log("onReceive: app destroyed but notification visible");
-                return;
-            }
-        }
 
         Bundle extras = intent.getExtras();
         GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(context);
@@ -57,6 +53,9 @@ public class GcmBroadcastReceiver extends BroadcastReceiver {
              * ignore any message types you're not interested in, or that you
              * don't recognize.
              */
+            // Artificial comment
+            // Artificial comment
+            // Artificial comment
             if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR
                     .equals(messageType)) {
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED
