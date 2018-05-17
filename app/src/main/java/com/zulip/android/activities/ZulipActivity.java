@@ -118,6 +118,7 @@ import com.zulip.android.util.FileUtils;
 import com.zulip.android.util.ListDialog;
 import com.zulip.android.util.MutedTopics;
 import com.zulip.android.util.RemoveViewsOnScroll;
+import com.zulip.android.util.ShowAppUpdateDialog;
 import com.zulip.android.util.SwipeRemoveLinearLayout;
 import com.zulip.android.util.UrlHelper;
 import com.zulip.android.util.ZLog;
@@ -349,6 +350,9 @@ public class ZulipActivity extends BaseActivity implements
             openLogin(null);
             return;
         }
+
+        // show app update dialog
+        ShowAppUpdateDialog.showDialog(ZulipActivity.this);
 
         if (mMutedTopics == null) {
             mMutedTopics = MutedTopics.get();

@@ -42,6 +42,7 @@ import com.zulip.android.util.ActivityTransitionAnim;
 import com.zulip.android.util.AnimationHelper;
 import com.zulip.android.util.CommonProgressDialog;
 import com.zulip.android.util.Constants;
+import com.zulip.android.util.ShowAppUpdateDialog;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -81,6 +82,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //show app update dialog
+        ShowAppUpdateDialog.showDialog(LoginActivity.this);
 
         setContentView(R.layout.login);
 
