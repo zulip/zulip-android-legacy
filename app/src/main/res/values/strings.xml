@@ -184,4 +184,5 @@
     <string name="placeholder_message_here">Message here</string>
     <string name="placeholder_sender_name">Sender name</string>
     <string name="placeholder_social">Social</string>
+    <string name="update">Update</string>
 </resources>
