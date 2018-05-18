@@ -13,6 +13,7 @@ public class Constants {
     public final static boolean DEFAULT_EDITING_ALLOWED = true;
     public final static String SERVER_URL = "SERVER_URL";
     public static final String CANCEL = "CANCEL";
+    public static final String DONT_SHOW_APP_UPDATE_DIALOG = "DONT_SHOW_APP_UPDATE_DIALOG";
     public static int MILLISECONDS_IN_A_MINUTE = 1000;
     public static String DATE_FORMAT = "dd/MM/yyyy";
     public static final int REQUEST_PICK_FILE = 3;

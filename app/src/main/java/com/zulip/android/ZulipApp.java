@@ -411,6 +411,12 @@ public class ZulipApp extends Application {
         ed.apply();
     }
 
+    public void setDontShowAppDialog(boolean value) {
+        Editor ed = this.settings.edit();
+        ed.putBoolean(Constants.DONT_SHOW_APP_UPDATE_DIALOG, value);
+        ed.apply();
+    }
+
     public void useDefaultServerURL() {
         setServerURL(DEFAULT_SERVER_URL);
     }
