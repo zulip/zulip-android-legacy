@@ -1,5 +1,5 @@
 {
   "ignoredFiles": [
-    ".*app.*"
+    "/MD5util.java"
   ]
 }
