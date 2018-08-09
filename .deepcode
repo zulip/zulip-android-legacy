@@ -1,5 +1,8 @@
 {
   "ignoredFiles": [
     "/MD5util.java"
+  ],
+  "ignoredRules": [
+    "java/dc/MD5~~SHA-256~~digest:java.security.MessageDigest.getInstance"
   ]
 }
