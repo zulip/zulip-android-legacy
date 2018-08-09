@@ -1,0 +1,68 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="12dp"
+    android:background="@color/messageHeaderBackground"
+    android:gravity="center_vertical"
+    tools:ignore="Overdraw">
+
+    <TextView
+        android:id="@+id/displayRecipient"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="@color/stream_header"
+        android:gravity="center"
+        android:padding="4dp"
+        android:paddingLeft="10dp"
+        android:paddingStart="10dp"
+        android:text="@string/placeholder_short_stream"
+        android:textColor="@color/colorTextPrimary"
+        android:textStyle="bold"
+        tools:background="@color/colorAccent"
+        tools:text="Short Stream"
+        android:maxLines="1"
+        android:ellipsize="end"/>
+
+    <TextView
+        android:id="@+id/sep"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="@drawable/triangle"
+        android:padding="4dp"
+        android:text=" " />
+
+    <TextView
+        android:id="@+id/instance"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="7dp"
+        android:layout_weight="1"
+        android:background="@color/messageHeaderBackground"
+        android:gravity="center_vertical"
+        android:padding="4dp"
+        tools:text="This is a very very very long topic that is so long that it wraps"
+        android:maxLines="1"
+        android:ellipsize="end"/>
+
+    <TextView
+        android:id="@+id/timestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorTextTertiary"
+        tools:text="17:45"
+        android:paddingEnd="4dp"
+        android:paddingRight="4dp"
+        android:textStyle="bold"
+        android:textSize="10sp"/>
+
+    <ImageView
+        android:id="@+id/muteMessageImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/message_muted_content_desp"
+        android:src="@drawable/ic_volume_off_18dp"
+        android:visibility="gone" />
+</LinearLayout>
+
+    

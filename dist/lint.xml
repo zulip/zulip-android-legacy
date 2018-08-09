@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <issue id="GradleDependency" severity="ignore" />
+    <issue id="GradleDynamicVersion" severity="ignore" />
+    <issue id="GradleOverrides" severity="ignore" />
+    <issue id="OldTargetApi" severity="ignore" />
+    <!-- Change the severity of hardcoded strings to "error"
+    when #260 is merged-->
+    <issue id="HardcodedText" severity="ignore" />
+    <issue id="IconDensities" severity="ignore" />
+    <issue id="InvalidPackage" severity="ignore" />
+    <issue id="UnusedResources" severity="error">
+        <ignore path="**/ic_person_24dp.png" />
+        <ignore path="**/ic_search_24dp.png" />
+    </issue>
+    <issue id="UnusedNamespace" severity="error" />
+    <issue id="UnusedAttribute" severity="error" />
+    <issue id="Deprecated" severity="error" />
+    <issue id="Typos" severity="error" />
+    <issue id="SdCardPath" severity="error" />
+    <issue id="NewerVersionAvailable" severity="error" />
+</lint>

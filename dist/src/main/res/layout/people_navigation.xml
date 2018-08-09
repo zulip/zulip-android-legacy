@@ -1,0 +1,71 @@
+<android.support.design.widget.NavigationView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/navigation_view"
+    android:layout_width="@dimen/navigation_drawer_width"
+    android:layout_height="match_parent"
+    android:layout_gravity="end">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/margin_small"
+            android:layout_marginRight="@dimen/margin_small"
+            android:layout_marginTop="@dimen/margin_search_top"
+            android:background="@android:color/white"
+            android:paddingBottom="@dimen/padding_large"
+            android:paddingLeft="@dimen/padding_medium"
+            android:paddingRight="@dimen/padding_medium"
+            android:paddingTop="@dimen/padding_large">
+
+            <EditText
+                android:id="@+id/people_drawer_search"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:background="@android:color/white"
+                android:hint="@string/hint_search_people"
+                android:paddingEnd="@dimen/padding_people_search"
+                android:paddingLeft="@dimen/padding_people_search"
+                android:paddingRight="@dimen/padding_people_search"
+                android:paddingStart="@dimen/padding_people_search" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:contentDescription="@string/content_description_search_icon"
+                android:src="@drawable/ic_search_black_24dp" />
+
+            <ImageView
+                android:id="@+id/iv_people__search_cancel_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:contentDescription="@string/content_description_cancel_icon"
+                android:src="@drawable/ic_cancel_black_24dp"
+                android:visibility="gone" />
+
+        </RelativeLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/divider_height"
+            android:layout_marginBottom="@dimen/margin_small"
+            android:layout_marginTop="@dimen/margin_small"
+            android:background="@android:color/black" />
+
+        <ListView
+            android:id="@+id/people_drawer"
+            android:layout_width="320dp"
+            android:layout_height="match_parent"
+            android:background="@color/listBackground"
+            android:choiceMode="singleChoice" />
+    </LinearLayout>
+
+</android.support.design.widget.NavigationView>
