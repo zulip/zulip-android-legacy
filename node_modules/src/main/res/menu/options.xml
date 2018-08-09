@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/search"
+        android:icon="@android:drawable/ic_menu_search"
+        android:title="@string/search"
+        app:actionViewClass="android.support.v7.widget.SearchView"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/private_msg"
+        android:icon="@drawable/ic_action_person"
+        android:title="@string/toolbar_item_private"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/refresh"
+        android:title="@string/refresh" />
+
+    <item
+        android:id="@+id/filter"
+        android:icon="@drawable/ic_filter_list_24dp"
+        android:title="@string/menu_filter"
+        app:showAsAction="ifRoom">
+        <menu>
+            <item
+                android:id="@+id/today"
+                android:title="@string/menu_today" />
+            <item
+                android:id="@+id/enterDate"
+                android:title="@string/enter_date" />
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/theme"
+        android:title="@string/theme">
+        <menu>
+            <group
+                android:id="@+id/group"
+                android:checkableBehavior="single">
+                <item
+                    android:id="@+id/dayTheme"
+                    android:title="@string/dayTheme" />
+                <item
+                    android:id="@+id/nightTheme"
+                    android:title="@string/nightTheme" />
+                <item
+                    android:id="@+id/autoTheme"
+                    android:title="@string/autoTheme" />
+            </group>
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/isStarred"
+        android:title="@string/starred_messages" />
+    <item
+        android:id="@+id/logout"
+        android:title="@string/logout" />
+    <item
+        android:id="@+id/privacy"
+        android:title="@string/privacy" />
+    <item
+        android:id="@+id/terms"
+        android:title="@string/terms" />
+</menu>

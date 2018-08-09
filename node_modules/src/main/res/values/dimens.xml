@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="reaction_background_w">24dp</dimen>
+    <dimen name="margin_small">2dp</dimen>
+    <dimen name="padding_medium">4dp</dimen>
+    <dimen name="padding_large">12dp</dimen>
+    <dimen name="navigation_drawer_width">320dp</dimen>
+    <dimen name="padding_people_search">32dp</dimen>
+    <dimen name="padding_navigation_search">32dp</dimen>
+    <dimen name="divider_height">1dp</dimen>
+    <dimen name="margin_search_top">2dp</dimen>
+    <dimen name="margin_fab">16dp</dimen>
+</resources>
