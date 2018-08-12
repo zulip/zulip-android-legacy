@@ -44,8 +44,8 @@ public class ShowAppUpdateDialog {
         });
 
         AlertDialog dialog = builder.create();
-        dialog.setMessage("This project is deprecated in favor of React Native app, " +
-                "which supports both iOS and Android. Click update to switch to the new app.");
+        dialog.setMessage("This app is no longer supported and will soon be removed from the Play Store.\n"
+                + "If you have any reason to prefer this to our modern and actively developed app, please get in contact with us!");
 
         dialog.show();
     }
