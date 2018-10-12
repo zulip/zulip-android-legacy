@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+echo 'test' >> test
+git add --all
+git commit -m "test"
+git push
