@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="48dp"
+    android:orientation="horizontal">
+
+    <View
+        android:id="@+id/stream_dot"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_centerVertical="true"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="16dp"
+        android:background="@drawable/dot" />
+
+    <TextView
+        android:id="@+id/unread_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/stream_dot"
+        android:layout_gravity="center_vertical|end"
+        android:layout_marginEnd="30dp"
+        android:layout_marginRight="30dp"
+        android:text="1"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="20dp"
+        android:layout_marginStart="20dp"
+        android:layout_toEndOf="@+id/stream_dot"
+        android:layout_toRightOf="@+id/stream_dot"
+        android:padding="5dp"
+        android:text="@string/placeholder_my_stream"
+        android:textColor="@color/colorTextPrimary"
+        android:textSize="18sp" />
+</RelativeLayout>

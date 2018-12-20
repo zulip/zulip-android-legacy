@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/messageTile"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/stream_background"
+    android:paddingEnd="8dp"
+    android:paddingRight="8dp"
+    tools:ignore="Overdraw">
+
+    <LinearLayout
+        android:id="@+id/contentBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@+id/leftSide"
+        android:layout_toRightOf="@+id/leftSide"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/senderTile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="vertical"
+            android:layout_marginStart="8sp"
+            android:layout_marginLeft="8sp"
+            tools:background="#FFF">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/senderName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@+id/llOtherStuff"
+                    android:layout_toStartOf="@+id/llOtherStuff"
+                    android:paddingTop="10dp"
+                    android:textColor="@color/colorTextPrimary"
+                    android:textStyle="bold"
+                    tools:text="Sender &lt;alice@example.com&gt;" />
+
+                <LinearLayout
+                    android:id="@+id/llOtherStuff"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:paddingTop="12dp"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:id="@+id/star_image"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:contentDescription="@string/star_image"
+                        android:paddingEnd="10dp"
+                        android:paddingRight="10dp"
+                        android:src="@drawable/ic_star" />
+
+                    <TextView
+                        android:id="@+id/message_edit_tag"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="4dp"
+                        android:text="@string/message_edited_tag"
+                        android:textColor="@color/colorTextTertiary"
+                        android:textSize="8sp"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/timestamp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/colorTextTertiary"
+                        tools:text="17:45"
+                        android:textSize="8sp"/>
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/contentView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/senderName"
+                    android:layout_marginTop="4dp"
+                    android:paddingBottom="8dp"
+                    android:paddingEnd="4dp"
+                    android:paddingRight="4dp"
+                    tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam mollis pretium purus, faucibus accumsan enim placerat non. " />
+
+            </RelativeLayout>
+
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/load_image_container"
+            android:layout_width="match_parent"
+            android:layout_height="175dp"
+            android:layout_marginTop="20dp"
+            android:maxHeight="200dp"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <ImageView
+                android:id="@+id/load_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@color/colorAccent"
+                android:contentDescription="@string/image_content_desp"
+                android:scaleType="centerInside"
+                tools:src="@drawable/ic_arrow_back_24dp" />
+
+        </FrameLayout>
+
+        <TableLayout
+            android:id="@+id/reactions_table"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+        </TableLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/leftSide"
+        android:layout_width="55dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/gravatar"
+            android:layout_width="45dp"
+            android:layout_height="37dp"
+            android:contentDescription="@string/avatar_content_desp"
+            android:scaleType="centerInside"
+            android:src="@android:drawable/presence_online"
+            android:paddingTop="10dp"/>
+
+        <LinearLayout
+            android:id="@+id/llLeftOtherStuff"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="6dp"
+            android:gravity="center|center_horizontal">
+
+            <TextView
+                android:id="@+id/left_timestamp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorTextTertiary"
+                android:textSize="8sp"
+                tools:text="17:45" />
+
+            <ImageView
+                android:id="@+id/left_star_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/star_image"
+                android:paddingLeft="4dp"
+                android:paddingStart="4dp"
+                android:src="@drawable/ic_star" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/left_message_edit_tag"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:text="@string/message_edited_tag"
+            android:textColor="@color/colorTextTertiary"
+            android:textSize="8sp"
+            android:visibility="visible" />
+
+    </LinearLayout>
+
+    <!--remove supress with targetApi once #260 is merged-->
+    <View
+        android:id="@+id/leftBar"
+        android:layout_width="8dp"
+        android:layout_height="match_parent"
+        android:layout_alignBottom="@id/contentBox"
+        android:layout_alignParentTop="true"
+        android:background="@android:color/holo_blue_dark"
+        tools:targetApi="ice_cream_sandwich" />
+</RelativeLayout>

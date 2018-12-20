@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_photo_edit"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    tools:context="com.zulip.android.activities.PhotoEditActivity"
+    tools:ignore="Overdraw">
+
+    <FrameLayout
+        android:id="@+id/frame_layout_picture"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/photoImageView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/image_content_desp"
+            android:scaleType="fitCenter" />
+
+        <com.zulip.android.util.DrawCustomView
+            android:id="@+id/draw_custom_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </FrameLayout>
+
+    <ImageView
+        android:id="@+id/back_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="24dp"
+        android:background="?attr/selectableItemBackground"
+        android:contentDescription="@string/back_btn_content_disp"
+        android:src="@drawable/ic_clear_white_24dp" />
+
+
+    <ImageView
+        android:id="@+id/marker_btn"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/marker_tool_circle"
+        android:contentDescription="@string/marker_content_desp"
+        android:scaleType="center"
+        android:src="@drawable/ic_edit_white_24dp" />
+
+    <LinearLayout
+        android:id="@+id/linear_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/marker_btn"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/marker_palette_background"
+        android:orientation="vertical"
+        android:paddingBottom="8dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp">
+
+
+        <ImageView
+            android:id="@+id/red_marker"
+            style="@style/marker_color_style"
+            android:tint="@color/red_marker_tool"
+            tools:ignore="ContentDescription" />
+
+
+        <ImageView
+            android:id="@+id/yellow_marker"
+            style="@style/marker_color_style"
+            android:tint="@color/yellow_marker_tool"
+            tools:ignore="ContentDescription" />
+
+        <ImageView
+            android:id="@+id/green_marker"
+            style="@style/marker_color_style"
+            android:tint="@color/green_marker_tool"
+            tools:ignore="ContentDescription" />
+
+        <ImageView
+            android:id="@+id/white_marker"
+            style="@style/marker_color_style"
+            android:tint="@color/white_marker_tool"
+            tools:ignore="ContentDescription" />
+
+        <ImageView
+            android:id="@+id/blue_marker"
+            style="@style/marker_color_style"
+            android:tint="@color/blue_marker_tool"
+            tools:ignore="ContentDescription" />
+
+        <ImageView
+            android:id="@+id/black_marker"
+            style="@style/marker_color_style"
+            tools:ignore="ContentDescription" />
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/undo_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="24dp"
+        android:layout_marginTop="24dp"
+        android:layout_toLeftOf="@id/marker_btn"
+        android:contentDescription="@string/undo_content_desp"
+        android:src="@drawable/ic_undo_white_24dp" />
+
+    <TextView
+        android:id="@+id/crop_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="24dp"
+        android:layout_marginTop="24dp"
+        android:layout_toLeftOf="@id/undo_btn"
+        android:text="@string/crop"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@android:color/white"
+        android:textStyle="bold" />
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/circle">
+
+        <ImageView
+            android:id="@+id/send_photo"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_gravity="center"
+            android:background="?attr/selectableItemBackground"
+            android:contentDescription="@string/send_content_desp"
+            android:scaleType="center"
+            android:src="@drawable/ic_send_24dp"
+            android:tint="@color/photo_buttons" />
+    </FrameLayout>
+</RelativeLayout>
