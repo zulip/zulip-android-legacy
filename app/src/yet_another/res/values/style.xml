@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<resources>
+
+    <style name="links">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:onClick">onClick</item>
+        <item name="android:padding">8dp</item>
+        <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:textColor">#ff0099cc</item>
+    </style>
+
+    <style name="links.gone" parent="links">
+        <item name="android:visibility">gone</item>
+    </style>
+</resources>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/reply_to_stream"
+        android:title="@string/reply_stream" />
+    <item
+        android:id="@+id/reply_to_sender"
+        android:title="@string/reply_sender" />
+    <item
+        android:id="@+id/narrow_to_stream"
+        android:title="@string/narrow_stream" />
+    <item
+        android:id="@+id/narrow_to_subject"
+        android:title="@string/narrow_topic" />
+    <item
+        android:id="@+id/copy_message"
+        android:title="@string/copy_message" />
+    <item
+        android:id="@+id/edit_message"
+        android:title="@string/edit_message" />
+    <item
+        android:id="@+id/star_message"
+        android:title="@string/star_message" />
+    <item
+        android:id="@+id/un_star_message"
+        android:title="@string/un_star_message" />
+</menu>

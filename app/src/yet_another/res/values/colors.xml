@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#efefef</color>
+    <color name="colorAccent">#899ab4</color>
+    <color name="link_color">#73a7f7</color>
+    <color name="colorPrimaryDark">#747474</color>
+    <color name="dev_auth_admin">#ff4136</color>
+    <color name="dev_auth_user">#428bca</color>
+    <color name="stream_header">#C0C0C0</color>
+    <color name="private_background">#FEFFE0</color>
+    <color name="colorTextPrimary">@android:color/primary_text_light</color>
+    <color name="colorTextSecondary">@android:color/secondary_text_light</color>
+    <color name="colorTextTertiary">@android:color/tertiary_text_light</color>
+    <color name="windowBackground">#eeeeee</color>
+    <color name="listBackground">#FFFFFF</color>
+    <color name="messageHeaderBackground">#e5e5e5</color>
+    <color name="stream_background">#ffff</color>
+    <color name="loadingBackground">#eeeeee</color>
+    <color name="indigo_material_500">#3F51B5</color>
+    <color name="dark_red">#d14444</color>
+    <color name="self_mention_color">#d14444</color>
+    <color name="photo_buttons">#ff33b5e5</color>
+    <color name="marker_palette">#212121</color>
+    <color name="red_marker_tool">#ffff5252</color>
+    <color name="yellow_marker_tool">#ffffeb3b</color>
+    <color name="green_marker_tool">#ff00e676</color>
+    <color name="blue_marker_tool">#ff03a9f4</color>
+    <color name="white_marker_tool">#ffe0e0e0</color>
+    <color name="black_marker_tool">#ff000000</color>
+    <color name="top_snackbar_show_button_text_color">#d26811</color>
+    <color name="top_snackbar_bg_color">#000000</color>
+    <color name="top_snackbar_text_color">#ffffff</color>
+    <color name="progress_background_color">#444444</color>
+    <color name="notif_background">#009688</color>
+    <color name="solid_color">#FFF</color>
+    <color name="stroke_color">#000</color>
+</resources>

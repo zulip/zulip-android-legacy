@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <include
+            android:id="@+id/toolbar"
+            layout="@layout/toolbar" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:background="@drawable/toolbar_shadow" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:gravity="center|center_horizontal"
+            android:padding="10dp"
+            android:text="@string/login_welcome_blurb"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+
+        <LinearLayout
+            android:id="@+id/serverInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center|center_horizontal"
+                android:padding="10dp"
+                android:text="@string/enter_server"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <EditText
+                android:id="@+id/server_url_in"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="@string/server_url"
+                android:inputType="textUri"
+                android:selectAllOnFocus="true" />
+
+            <Button
+                android:id="@+id/server_btn"
+                style="android:buttonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/enter" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/serverFieldLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="@string/auth_login" />
+
+            <EditText
+                android:id="@+id/server_url"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="@string/server_domain"
+                android:inputType="textUri"
+                android:selectAllOnFocus="true" />
+
+
+            <RelativeLayout
+                android:id="@+id/passwordAuthLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingBottom="8dp"
+                android:paddingTop="8dp"
+                android:visibility="gone">
+
+
+                <EditText
+                    android:id="@+id/username"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:hint="@string/username"
+                    android:inputType="textEmailAddress"
+                    android:selectAllOnFocus="true" />
+
+                <EditText
+                    android:id="@+id/password"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/username"
+                    android:ems="10"
+                    android:hint="@string/password"
+                    android:inputType="textPassword"
+                    android:selectAllOnFocus="true" />
+
+                <ImageView
+                    android:id="@+id/showPassword"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_below="@+id/username"
+                    android:layout_marginEnd="11dp"
+                    android:layout_marginRight="11dp"
+                    android:src="@drawable/ic_visibility_black_24dp"
+                    android:tag="visible"
+                    tools:ignore="ContentDescription" />
+
+
+            </RelativeLayout>
+
+            <Button
+                android:id="@+id/zulip_login"
+                style="android:buttonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/login_button" />
+
+
+            <com.google.android.gms.common.SignInButton
+                android:id="@+id/google_sign_in_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/register"
+                style="@style/links"
+                android:text="@string/register_button" />
+
+            <TextView
+                android:id="@+id/local_server_button"
+                style="@style/links.gone"
+                android:text="@string/local_server" />
+
+            <TextView
+                android:id="@+id/input_another_server"
+                style="@style/links"
+                android:text="@string/another_server" />
+
+            <TextView
+                android:id="@+id/terms"
+                style="@style/links"
+                android:text="@string/terms" />
+
+            <TextView
+                android:id="@+id/privacy"
+                style="@style/links"
+                android:text="@string/privacy" />
+
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>
+
+
