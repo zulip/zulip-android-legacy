@@ -1,0 +1,10 @@
+.
+  // Proxy only *.#{conf.tld} requests to hotel
+  // Configuration file can be found in ~/.hotel
+  function FindProxyForURL (url, host) {
+    if (dnsDomainIs(host, '.#{conf.tld}')) {
+      return 'PROXY 127.0.0.1:#{conf.port}';
+    }
+
+    return 'DIRECT';
+  }

@@ -1,0 +1,7 @@
+{
+  "exec": "babel-node",
+  "ignore": [
+    "src/app/**/*",
+    "src/daemon/public/**/*"
+  ]
+}
