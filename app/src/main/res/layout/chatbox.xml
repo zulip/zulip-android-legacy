@@ -12,6 +12,7 @@
             android:layout_height="wrap_content"
             android:dropDownWidth="fill_parent"
             android:hint="@string/stream_txt"
+            android:maxLines="1"
             android:visibility="visible" />
 
 
