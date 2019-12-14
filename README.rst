@@ -254,12 +254,24 @@ Contributing
 .. _commit message style guidelines: https://zulip.readthedocs.io/en/latest/version-control.html#commit-messages
 .. _Zulip coding style: https://zulip.readthedocs.org/en/latest/code-style.html#version-control
 
-Mailing List
+Community
 ------------
 
-There's a mailing list for questions and development discussions
-related to the Zulip Android app:
-https://groups.google.com/forum/#!forum/zulip-android.
+There are several places online where folks discuss about Zulip Android.
+
+* The primary place is the `Zulip development community Zulip server`_.
+
+* There's a mailing list for questions and development discussions
+  related to the Zulip Android app:
+  https://groups.google.com/forum/#!forum/zulip-android. (not very active)
+  
+* You can also post your questions and development discussions in `#android help`_ stream at chat.zulip.org. 
+
+* When you feel like you have completed your work on an issue, post your PR to the `#android`_ stream on chat.zulip.org. This is our lightweight process that gives other developers the opportunity to give you comments and suggestions on your work.
+
+.. _#android help: https://chat.zulip.org/#narrow/stream/android.20help
+.. _Zulip development community Zulip server: http://zulip.readthedocs.io/en/latest/chat-zulip-org.html
+.. _#android: https://chat.zulip.org/#narrow/stream/android
 
 Export
 ------
